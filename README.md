@@ -1,31 +1,7 @@
 # 🌍 Mundo das Palavras
 
-Aplicação interativa de **jogos sérios** desenvolvida com o objetivo de consolidar a alfabetização infantil.  
+Aplicação interativa de **jogos sérios** desenvolvida com o objetivo de consolidar a alfabetização infantil.
 Este projeto combina elementos pedagógicos e tecnológicos para estimular a leitura e escrita de crianças entre os 5 e os 8 anos, utilizando uma abordagem lúdica e acessível.
-
----
-
-## 🏫 Universidade
-
-**Universidade Aberta (UAb)**  
-Licenciatura em Engenharia Informática  
-Unidade Curricular: **Projeto em Engenharia Informática**
-
----
-
-## 👨‍🏫 Orientador
-
-**Professor Doutor Ricardo José Vieira Baptista**
-
----
-
-## 👥 Equipa de Desenvolvimento
-
-| Nome                          | Nº de Aluno | Email                               | GitHub                                      |
-|-------------------------------|-------------|-------------------------------------|---------------------------------------------|
-| Alexandre G. da Silva Soares | 2101521     | alexgsssoares@gmail.com             | [@AlexGSSoares](https://github.com/AlexGSSoares) |
-| Ana L. G. D. Guerreiro        | 2103229     | anagarciaguerreiro@gmail.com        | [@anagguerreiro](https://github.com/anagguerreiro) |
-| Tiago F. B. Bento             | 2000719     | tiagofbbento@hotmail.com            | [@TiagoFBBento](https://github.com/TiagoFBBento) |
 
 ---
 
@@ -84,8 +60,34 @@ flutter run
 
 ---
 
+## 🏫 Universidade 
+
+**Universidade Aberta (UAb)**
+Licenciatura em Engenharia Informática
+Unidade Curricular: **Projeto em Engenharia Informática**
+
+---
+
+## 👨‍🏫 Orientador
+
+**Professor Doutor Ricardo José Vieira Baptista**
+
+---
+
+## 👥 Equipa de Desenvolvimento
+
+| Nome                         | Nº de Aluno | Email                        | GitHub                                          |
+| ---------------------------- | ------------ | ---------------------------- | ----------------------------------------------- |
+| Alexandre G. da Silva Soares | 2101521      | alexgsssoares@gmail.com      | [@AlexGSSoares](https://github.com/AlexGSSoares)   |
+| Ana L. G. D. Guerreiro       | 2103229      | anagarciaguerreiro@gmail.com | [@anagguerreiro](https://github.com/anagguerreiro) |
+| Tiago F. B. Bento            | 2000719      | tiagofbbento@hotmail.com     | [@TiagoFBBento](https://github.com/TiagoFBBento)   |
+
+---
+
+
+
 ## 📄 Licenciamento
 
 Projeto académico desenvolvido exclusivamente para a unidade curricular de **Projeto em Engenharia Informática** da Universidade Aberta, no âmbito da Licenciatura em Engenharia Informática.
 
-Data: **18 de março de 2025**
+Data: **data a definir**
