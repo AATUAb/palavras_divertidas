@@ -15,20 +15,20 @@ Toda a tua programação deve ser feita nesta branch.
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/Mundo-das-Palavras/MundodasPalavras.git
-cd MundodasPalavras
+git clone https://github.com/Mundo-das-Palavras/Mundo-das-Palavras.git
+cd Mundo-das-Palavras
 ```
 
 ### 2. Ir para a tua branch
 
 ```bash
-git checkout dev_Tiago
+git checkout dev_Tiago dev_Tiago
 ```
 
 > ⚠️ Se a branch ainda não existir localmente:
 ```bash
 git fetch origin
-git checkout dev_Tiago
+git checkout dev_Tiago dev_Tiago
 ```
 
 ---
@@ -36,10 +36,10 @@ git checkout dev_Tiago
 ## 🔄 Atualizar o teu código
 
 ```bash
-git checkout mundo_das_palavras
+git checkout dev_Tiago mundo_das_palavras
 git pull origin mundo_das_palavras
 
-git checkout dev_Tiago
+git checkout dev_Tiago dev_Tiago
 git merge mundo_das_palavras
 ```
 
@@ -58,7 +58,7 @@ git push origin dev_Tiago
 ## 🧪 Enviar para teste
 
 ```bash
-git checkout test
+git checkout dev_Tiago test
 git merge dev_Tiago
 git push origin test
 ```
@@ -68,7 +68,7 @@ git push origin test
 ## ✅ Finalizar
 
 ```bash
-git checkout mundo_das_palavras
+git checkout dev_Tiago mundo_das_palavras
 git merge test
 git push origin mundo_das_palavras
 ```
