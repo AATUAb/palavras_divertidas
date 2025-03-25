@@ -1,114 +1,84 @@
-# 👤 Fluxo de Trabalho Git – Ana
+# Fluxo de Trabalho da Ana 🧠
 
-Este guia é **exclusivo** para ti. Aqui encontras todos os passos para trabalhar corretamente no projeto **Mundo das Palavras**.
-
----
-
-## 🧭 Branch pessoal: `dev_Ana`
-
-Toda a tua programação deve ser feita nesta branch.
+Este ficheiro descreve o processo que a **Ana** deve seguir para trabalhar com o repositório do projeto *Mundo das Palavras* de forma organizada, segura e integrada com os restantes devs.
 
 ---
 
-## 🚀 Começar a trabalhar
+## 🔧 Primeira vez a configurar o projeto
 
-### 1. Clonar o repositório
+1. **Abrir terminal no VS Code** ou no sistema.
+2. **Clonar o repositório principal:**
 
 ```bash
-<<<<<<< HEAD
-git clone https://github.com/Mundo-das-Palavras/MundodasPalavras.git
-cd MundodasPalavras
-=======
 git clone https://github.com/Mundo-das-Palavras/Mundo-das-Palavras.git
 cd Mundo-das-Palavras
->>>>>>> mundo_das_palavras
 ```
 
-### 2. Ir para a tua branch
+3. **Trocar para a branch de desenvolvimento da Ana:**
 
 ```bash
-<<<<<<< HEAD
 git checkout dev_Ana
 ```
 
-> ⚠️ Se a branch ainda não existir localmente:
+> ⚠️ Se a branch ainda não existir localmente, este comando vai buscá-la automaticamente do GitHub.
+
+4. **Instalar todas as dependências do Flutter:**
 
 ```bash
-git fetch origin
-git checkout dev_Ana
-=======
-git checkout dev_Ana dev_Ana
+flutter pub get
 ```
 
-> ⚠️ Se a branch ainda não existir localmente:
-```bash
-git fetch origin
-git checkout dev_Ana dev_Ana
->>>>>>> mundo_das_palavras
-```
+5. **Abrir o projeto no VS Code e iniciar o desenvolvimento.**
 
 ---
 
-## 🔄 Atualizar o teu código
+## 💾 Guardar o trabalho feito
 
-```bash
-<<<<<<< HEAD
-git checkout mundo_das_palavras
-git pull origin mundo_das_palavras
-
-git checkout dev_Ana
-=======
-git checkout dev_Ana mundo_das_palavras
-git pull origin mundo_das_palavras
-
-git checkout dev_Ana dev_Ana
->>>>>>> mundo_das_palavras
-git merge mundo_das_palavras
-```
-
----
-
-## ✍️ Guardar alterações
+1. **Adicionar ficheiros alterados:**
 
 ```bash
 git add .
-git commit -m "Ana: descreve aqui o que fizeste"
+```
+
+2. **Fazer commit com mensagem clara:**
+
+```bash
+git commit -m "feat: [descrição clara da tarefa feita]"
+```
+
+3. **Enviar para o GitHub (push):**
+
+```bash
 git push origin dev_Ana
 ```
 
 ---
 
-## 🧪 Enviar para teste
+## 🔄 Manter o projeto atualizado com a branch de testes
+
+Antes de começares um novo dia de trabalho:
 
 ```bash
-<<<<<<< HEAD
-git checkout test
-=======
-git checkout dev_Ana test
->>>>>>> mundo_das_palavras
-git merge dev_Ana
-git push origin test
+git checkout testes
+git pull origin testes
+git checkout dev_Ana
+git merge testes
+```
+
+Resolve qualquer conflito se houver, testa bem e depois:
+
+```bash
+git push origin dev_Ana
 ```
 
 ---
 
-## ✅ Finalizar
+## ✅ Submeter para testes
 
-```bash
-<<<<<<< HEAD
-git checkout mundo_das_palavras
-git merge test
-git push origin mundo_das_palavras
-```
-=======
-git checkout dev_Ana mundo_das_palavras
-git merge test
-git push origin mundo_das_palavras
-```
+Quando quiseres que o teu trabalho vá para a branch de **testes**, pede revisão ou cria um Pull Request no GitHub da `dev_Ana` para `testes`.
 
 ---
 
-## 💡 Dica
+## 👩‍💻 Dúvidas?
 
-Trabalha sempre na tua branch e mantém-te sincronizado com a `mundo_das_palavras`. Dúvidas? Fala com a equipa ou com o GPT 😄
->>>>>>> mundo_das_palavras
+Fala com o responsável de repositório ou com o GPT favorito da equipa 😄
