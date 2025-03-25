@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 
-/// Widget que desenha uma letra tracejada na tela
 class TracingPainter extends StatelessWidget {
   final String character;
+  final double fontSize;
 
-  const TracingPainter(this.character, {super.key});
+  const TracingPainter(this.character, {super.key, required this.fontSize});
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _TracingPainter(character),
-      size: Size(200, 200),
+      painter: _TracingPainter(character, fontSize),
+      size: Size.infinite,
     );
   }
 }
 
-/// Pintor da letra/número com estilo tracejado e centralizado
 class _TracingPainter extends CustomPainter {
   final String character;
+  final double fontSize;
 
-  _TracingPainter(this.character);
+  _TracingPainter(this.character, this.fontSize);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -27,7 +27,7 @@ class _TracingPainter extends CustomPainter {
       text: TextSpan(
         text: character,
         style: TextStyle(
-          fontSize: 150,
+          fontSize: fontSize,
           color: Colors.grey.withOpacity(0.5),
           fontWeight: FontWeight.bold,
         ),
@@ -49,17 +49,17 @@ class _TracingPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-/// Desenha o traçado do utilizador
 class UserDrawingPainter extends CustomPainter {
   final List<Offset> points;
+  final double strokeWidth;
 
-  UserDrawingPainter(this.points);
+  UserDrawingPainter(this.points, this.strokeWidth);
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.blue
-      ..strokeWidth = 8
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
@@ -73,3 +73,4 @@ class UserDrawingPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
+
