@@ -1,1 +1,0 @@
- C:\\Users\\tiago\\Desktop\\Mundo\ das\ Palavras\\mundodaspalavras\\.dart_tool\\flutter_build\\8d7c3b1f2267fbc277e77fd9a2604bd7\\native_assets.json: 
