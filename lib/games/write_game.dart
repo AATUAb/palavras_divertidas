@@ -29,9 +29,9 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
     final screenSize = MediaQuery.of(context).size;
     setState(() {
       letterArea = Rect.fromCenter(
-        center: Offset(screenSize.width * 0.6, screenSize.height * 0.5),
-        width: 220,
-        height: 280,
+        center: Offset(screenSize.width / 2, screenSize.height * 0.4),
+        width: screenSize.width * 0.5,
+        height: screenSize.height * 0.3,
       );
     });
   }
@@ -138,6 +138,13 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final canvasWidth = screenSize.width * 0.7;
+    final canvasHeight = screenSize.height * 0.4;
+    final fontSize = canvasHeight * 1.5;
+    final strokeWidth = fontSize * 0.1; // 10% da altura da letra
+
+
     return Scaffold(
       appBar: AppBar(title: Text("Escreva: ${widget.character}")),
       body: Column(
@@ -151,13 +158,16 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
                 children: [
                   Center(
                     child: SizedBox(
-                      width: 250,
-                      height: 280,
-                      child: TracingPainter(widget.character),
+                      width: canvasWidth,
+                      height: canvasHeight,
+                      child: TracingPainter(
+                        widget.character,
+                        fontSize: fontSize,
+                      ),
                     ),
                   ),
                   CustomPaint(
-                    painter: UserDrawingPainter(_points),
+                    painter: UserDrawingPainter(_points, strokeWidth),
                     size: Size.infinite,
                   ),
                   if (_showValidationMessage)
@@ -194,20 +204,42 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _validateDrawing,
-                  child: Text("Validar"),
-                ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: _resetDrawing,
-                  child: Text("Limpar"),
-                ),
-              ],
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                double buttonWidth = constraints.maxWidth > 500
+                    ? 180
+                    : (constraints.maxWidth - 48) / 2;
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: buttonWidth,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _validateDrawing,
+                        child: Text(
+                          "Validar",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      width: buttonWidth,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _resetDrawing,
+                        child: Text(
+                          "Limpar",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
