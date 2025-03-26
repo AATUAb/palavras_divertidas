@@ -1,5 +1,4 @@
 // Definições personalizadas de cores usadas na aplicação.
-
 import 'package:flutter/material.dart';
 
 class AppColors {

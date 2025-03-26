@@ -1,27 +1,25 @@
-// Widget do jogo "Write_game", jogo 2
-
 import 'package:flutter/material.dart';
 
-///  Widget que desenha uma letra tracejada na tela para o utilizador seguir
 class TracingPainter extends StatelessWidget {
-  final String character; // Letra ou número a ser desenhado
+  final String character;
+  final double fontSize;
 
-  const TracingPainter(this.character, {super.key});
+  const TracingPainter(this.character, {super.key, required this.fontSize});
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _TracingPainter(character), // Usa o pintor personalizado
-      size: Size(200, 200),                // Tamanho fixo da área de pintura
+      painter: _TracingPainter(character, fontSize),
+      size: Size.infinite,
     );
   }
 }
 
-/// Pintor que desenha a letra de fundo de forma tracejada (como guia)
 class _TracingPainter extends CustomPainter {
   final String character;
+  final double fontSize;
 
-  _TracingPainter(this.character);
+  _TracingPainter(this.character, this.fontSize);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -29,38 +27,41 @@ class _TracingPainter extends CustomPainter {
       text: TextSpan(
         text: character,
         style: TextStyle(
-          fontSize: 150,
-          color: Colors.grey.withOpacity(0.5),  // Letra cinza semi-transparente
+          fontSize: fontSize,
+          color:Colors.grey.withOpacity(0.5),
           fontWeight: FontWeight.bold,
-          decoration: TextDecoration.underline, // Sublinhar a letra
         ),
       ),
       textDirection: TextDirection.ltr,
     );
+    textPainter.layout();
 
-    textPainter.layout(); // Calcula o tamanho do texto
-    textPainter.paint(canvas, Offset(25, 25)); // Desenha no canvas
+    final offset = Offset(
+      (size.width - textPainter.width) / 2,
+      (size.height - textPainter.height) / 2,
+    );
+
+    textPainter.paint(canvas, offset);
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false; // Não precisa redesenhar
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-/// Pintor que desenha os traços feitos pelo utilizador com o dedo
 class UserDrawingPainter extends CustomPainter {
-  final List<Offset> points; // Lista de pontos desenhados
+  final List<Offset> points;
+  final double strokeWidth;
 
-  UserDrawingPainter(this.points);
+  UserDrawingPainter(this.points, this.strokeWidth);
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.blue
-      ..strokeWidth = 8
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    // Conecta os pontos com linhas, exceto onde houver separadores (Offset.infinite)
     for (int i = 0; i < points.length - 1; i++) {
       if (points[i] != Offset.infinite && points[i + 1] != Offset.infinite) {
         canvas.drawLine(points[i], points[i + 1], paint);
@@ -69,5 +70,5 @@ class UserDrawingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true; // Redesenha sempre
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }

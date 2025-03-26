@@ -33,13 +33,19 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Ativa assets (se tiveres imagens ou fontes)
-  # assets:
-  #   - assets/images/
-  #   - assets/sounds/
+  assets:
+    - assets/fonts/
 
-  # Exemplo se usares fontes personalizadas:
-  # fonts:
-  #   - family: FredokaOne
-  #     fonts:
-  #       - asset: assets/fonts/FredokaOne-Regular.ttf
+  # Configuração de fontes a usar
+  fonts:
+    - family: ComicNeue      # tipo de letra Comic Sans, para jogos de pré-escolar e interface geral
+      fonts:
+        - asset: assets/fonts/ComicNeue-Regular.ttf
+    - family: Cursive  # tipo de letra manuscrita, para joogos de 1º cilco
+      fonts:
+        - asset: assets/fonts/Cursive-Regular.ttf
+    - family: Slabo       # tipo de letra máquina, para joogos de 1º cilco
+      fonts:
+        - asset: assets/fonts/Slabo-Regular.ttf
+
+

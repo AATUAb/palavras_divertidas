@@ -1,19 +1,16 @@
 // Menu lateral personalizado usado na navegação da aplicação.
 
 import 'package:flutter/material.dart';
-import '../themes/colors.dart';        // Arquivo com as cores do tema
-import '../themes/text_styles.dart';  // Estilos de texto utilizados
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../themes/colors.dart';
 
-// Widget estático que representa um Drawer personalizado
 class CustomDrawer extends StatelessWidget {
-  // Informações recebidas por parâmetro: nome, nível e funções para ações
   final String userName;
   final String userLevel;
-  final VoidCallback onManageUsers;     // Ação ao tocar em "Utilizadores"
-  final VoidCallback onAchievements;    // Ação ao tocar em "Conquistas"
-  final VoidCallback onDashboard;       // Ação ao tocar em "Dashboard"
+  final VoidCallback onManageUsers;
+  final VoidCallback onAchievements;
+  final VoidCallback onDashboard;
 
-  // Construtor com parametros obrigatórios
   const CustomDrawer({
     super.key,
     required this.userName,
@@ -26,74 +23,97 @@ class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: AppColors.lightGrey, // Cor de fundo do Drawer
-      child: Column(
-        children: [
-          // 🔹 Cabeçalho do Drawer (com nome e nível do utilizador)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-            decoration: const BoxDecoration(color: AppColors.green),
+      backgroundColor: AppColors.lightGrey,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.account_circle, // Ícone de perfil
-                  size: 60,
-                  color: AppColors.white,
+                // 🔹 Cabeçalho
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    vertical: 40.h,
+                    horizontal: 16.w,
+                  ),
+                  decoration: const BoxDecoration(color: AppColors.green),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.account_circle,
+                        size: 60.sp,
+                        color: AppColors.white,
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        userName,
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        userLevel,
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  userName, // Nome do utilizador
-                  style: AppTextStyles.title.copyWith(color: AppColors.white),
+                SizedBox(height: 20.h),
+
+                // 🔹 Itens do menu
+                _buildTile(
+                  icon: Icons.group,
+                  label: "Utilizadores",
+                  onTap: onManageUsers,
                 ),
-                Text(
-                  userLevel, // Nível do utilizador (ex: Pré-Escolar)
-                  style: AppTextStyles.body.copyWith(color: AppColors.white),
+                _buildTile(
+                  icon: Icons.emoji_events,
+                  label: "Conquistas",
+                  onTap: onAchievements,
+                ),
+                _buildTile(
+                  icon: Icons.dashboard,
+                  label: "Dashboard",
+                  onTap: onDashboard,
                 ),
               ],
             ),
           ),
-
-          const SizedBox(height: 20), // Espaçamento após o cabeçalho
-
-          // 🔹 Opções do menu
-          _buildTile(
-            icon: Icons.group,
-            label: "Utilizadores",
-            onTap: onManageUsers,
-          ),
-          _buildTile(
-            icon: Icons.emoji_events,
-            label: "Conquistas",
-            onTap: onAchievements,
-          ),
-          _buildTile(
-            icon: Icons.dashboard,
-            label: "Dashboard",
-            onTap: onDashboard,
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  // Função auxiliar para construir os itens do menu
   Widget _buildTile({
-    required IconData icon,         // Ícone do item
-    required String label,          // Texto exibido
-    required VoidCallback onTap,    // Função ao clicar
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.grey), // Ícone lateral
-      title: Text(label, style: AppTextStyles.bodyBold), // Texto do item
-      onTap: onTap, // Função que será executada ao clicar
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20), // Margem interna
-      horizontalTitleGap: 16, // Espaço entre ícone e texto
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12), // Cantos arredondados
+      leading: Icon(icon, color: AppColors.grey, size: 24.sp),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-      hoverColor: AppColors.lightBlue.withOpacity(0.2), // Cor ao passar o rato (Web/Desktop)
+      onTap: onTap,
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
+      horizontalTitleGap: 12.w,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      hoverColor: AppColors.lightBlue.withOpacity(0.2),
     );
   }
 }
