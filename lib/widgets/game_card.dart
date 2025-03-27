@@ -1,10 +1,10 @@
 // Cartão visual para apresentar cada jogo no menu.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../themes/colors.dart';
-import '../themes/text_styles.dart';
 
-/// Widget visual que representa um card de jogo no menu
+/// Widget visual que representa um card de jogo no menu principal.
 class GameCard extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -26,36 +26,41 @@ class GameCard extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(12.w),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Ícone circular
+              // Ícone circular com cor de fundo
               Material(
                 elevation: 4,
-                shape: CircleBorder(),
+                shape: const CircleBorder(),
                 color: backgroundColor ?? AppColors.orange,
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: EdgeInsets.all(12.w),
                   child: Icon(
                     icon,
-                    size: 36,
+                    size: 36.sp,
                     color: iconColor ?? AppColors.white,
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 12.h),
+
               // Título do jogo
               Text(
                 title,
-                style: AppTextStyles.bodyBold.copyWith(fontSize: 14),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkBlue,
+                ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -68,7 +73,7 @@ class GameCard extends StatelessWidget {
   }
 }
 
-// Widget para exibir uma grade de jogos
+/// Widget que exibe uma grelha de jogos com layout adaptável
 class GamesGrid extends StatelessWidget {
   final List<GameCardData> games;
   final int crossAxisCount;
@@ -84,16 +89,16 @@ class GamesGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        crossAxisSpacing: spacing,
-        mainAxisSpacing: spacing,
+        crossAxisSpacing: spacing.w,
+        mainAxisSpacing: spacing.h,
         childAspectRatio: 0.8,
       ),
       itemCount: games.length,
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         final game = games[index];
         return GameCard(
@@ -108,7 +113,7 @@ class GamesGrid extends StatelessWidget {
   }
 }
 
-// Classe para armazenar dados do jogo
+/// Modelo para representar os dados de cada jogo
 class GameCardData {
   final String title;
   final IconData icon;

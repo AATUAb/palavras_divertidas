@@ -1,20 +1,23 @@
 // Estrutura principal do jogo "Detetive de letras e números"
 import 'package:flutter/material.dart';
 import 'dart:math';
-import '../themes/text_styles.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../logic/level_manager.dart';
 
 class IdentifyLettersNumbersGame extends StatefulWidget {
-  const IdentifyLettersNumbersGame({super.key});
+  final String userLevel;
+
+  const IdentifyLettersNumbersGame({super.key, required this.userLevel});
 
   @override
-  _IdentifyLettersNumbersGameState createState() =>
-      _IdentifyLettersNumbersGameState();
+  _IdentifyLettersNumbersGameState createState() => _IdentifyLettersNumbersGameState();
 }
 
-class _IdentifyLettersNumbersGameState
-    extends State<IdentifyLettersNumbersGame> {
+class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> {
+  late LevelManager levelManager;
+  late String userLevel;
+  bool isPrimeiroCiclo = false;
   final List<String> characters = [
     ...'ABCDEFGHIJLMNOPQRSTUVXZ'.split(''),
     ...'abcdefghijlmnopqrstuvxz'.split(''),
@@ -22,16 +25,12 @@ class _IdentifyLettersNumbersGameState
   ];
 
   final Random _random = Random();
-  final double spacing = 10;
-
-  int level = 1;
   int correctCount = 4;
   int wrongCount = 5;
   Duration levelTime = const Duration(seconds: 10);
 
-  int totalRounds = 0;
-  int firstTryCorrect = 0;
   int currentTry = 0;
+  int foundCorrect = 0;
 
   String targetCharacter = '';
   List<_LetterItem> letterItems = [];
@@ -43,6 +42,10 @@ class _IdentifyLettersNumbersGameState
   @override
   void initState() {
     super.initState();
+    isPrimeiroCiclo = widget.userLevel == '1º Ciclo';
+    userLevel = widget.userLevel;
+    levelManager = LevelManager();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       applyLevelSettings();
       generateNewChallenge();
@@ -50,7 +53,7 @@ class _IdentifyLettersNumbersGameState
   }
 
   void applyLevelSettings() {
-    switch (level) {
+    switch (levelManager.level) {
       case 1:
         correctCount = 4;
         wrongCount = 5;
@@ -66,37 +69,25 @@ class _IdentifyLettersNumbersGameState
         wrongCount = 12;
         levelTime = const Duration(seconds: 20);
         break;
-      default:
-        correctCount = 4;
-        wrongCount = 5;
-        levelTime = const Duration(seconds: 10);
     }
   }
 
   void generateNewChallenge() {
     foundCorrect = 0;
-    double collisionRadius = 80.r;
     roundTimer?.cancel();
     progressTimer?.cancel();
     currentTry = 0;
     progressValue = 1.0;
 
     final String rawChar = characters[_random.nextInt(characters.length)];
-    targetCharacter =
-        _isLetter(rawChar)
-            ? (_random.nextBool()
-                ? rawChar.toUpperCase()
-                : rawChar.toLowerCase())
-            : rawChar;
+    targetCharacter = _isLetter(rawChar)
+        ? (_random.nextBool() ? rawChar.toUpperCase() : rawChar.toLowerCase())
+        : rawChar;
 
     Set<String> uniqueOptions = {};
     while (uniqueOptions.length < wrongCount) {
       String c = characters[_random.nextInt(characters.length)];
-      String option =
-          _isLetter(c)
-              ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
-              : c;
-
+      String option = _isLetter(c) ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase()) : c;
       if (option.toLowerCase() != targetCharacter.toLowerCase() &&
           !uniqueOptions.any((e) => e.toLowerCase() == option.toLowerCase())) {
         uniqueOptions.add(option);
@@ -104,9 +95,7 @@ class _IdentifyLettersNumbersGameState
     }
 
     List<String> correctOptions = List.generate(correctCount, (_) {
-      return _random.nextBool()
-          ? targetCharacter.toUpperCase()
-          : targetCharacter.toLowerCase();
+      return _random.nextBool() ? targetCharacter.toUpperCase() : targetCharacter.toLowerCase();
     });
 
     final allOptions = [...uniqueOptions, ...correctOptions]..shuffle();
@@ -130,17 +119,23 @@ class _IdentifyLettersNumbersGameState
         pos = Offset(dx, dy);
         attempts++;
         if (attempts > 100) break;
-      } while (_overlaps(pos, usedPositions, collisionRadius));
+      } while (_overlaps(pos, usedPositions, 80.r));
 
       usedPositions.add(pos);
-      placedItems.add(_LetterItem(character: char, dx: dx, dy: dy));
+      placedItems.add(
+        _LetterItem(
+          character: char,
+          dx: dx,
+          dy: dy,
+          fontFamily: userLevel == '1º Ciclo' ? _chooseRandomFont() : null,
+        ),
+      );
     }
 
     setState(() {
       letterItems = placedItems;
     });
 
-    // Iniciar temporizador visual da barra de progresso
     final int totalMillis = levelTime.inMilliseconds;
     const tick = Duration(milliseconds: 100);
     int elapsed = 0;
@@ -150,24 +145,20 @@ class _IdentifyLettersNumbersGameState
         elapsed += tick.inMilliseconds;
         progressValue = 1.0 - (elapsed / totalMillis);
       });
-
       if (elapsed >= totalMillis) {
         timer.cancel();
       }
     });
 
-    // Timer principal para encerrar a rodada
     roundTimer = Timer(levelTime, () {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             'Tempo esgotado! ⏰',
-            style: AppTextStyles.body.copyWith(
-              fontSize: 16.sp,
-              color: Colors.white,
-            ),
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           backgroundColor: Colors.orange,
+          duration: const Duration(milliseconds: 400),
         ),
       );
       _finishRound(firstTry: false);
@@ -177,25 +168,15 @@ class _IdentifyLettersNumbersGameState
   void _finishRound({required bool firstTry}) {
     roundTimer?.cancel();
     progressTimer?.cancel();
-    totalRounds++;
-    if (firstTry) firstTryCorrect++;
-
-    if (totalRounds >= 4) {
-      double accuracy = firstTryCorrect / totalRounds;
-      if (accuracy >= 0.8 && level < 3) level++;
-      if (accuracy < 0.5 && level > 1) level--;
-      totalRounds = 0;
-      firstTryCorrect = 0;
-      applyLevelSettings();
-    }
-
+    levelManager.registerRound(firstTry: firstTry);
+    applyLevelSettings();
     generateNewChallenge();
   }
 
   bool _overlaps(Offset pos, List<Offset> others, double radius) {
     for (final other in others) {
-      final dx = (pos.dx - other.dx) * MediaQuery.of(context).size.width;
-      final dy = (pos.dy - other.dy) * MediaQuery.of(context).size.height;
+      final dx = (pos.dx - other.dx) * 1.sw;
+      final dy = (pos.dy - other.dy) * 1.sh;
       if (sqrt(dx * dx + dy * dy) < radius) return true;
     }
     return false;
@@ -204,29 +185,27 @@ class _IdentifyLettersNumbersGameState
   bool _isLetter(String char) => RegExp(r'[a-zA-Z]').hasMatch(char);
   bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
 
-  int foundCorrect = 0; // Novo estado para contar os acertos na ronda
+  String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
 
   void checkAnswer(_LetterItem selectedItem) {
     currentTry++;
 
     if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
       foundCorrect++;
-
       setState(() {
-        letterItems.remove(selectedItem); // Remove só aquele!
+        letterItems.remove(selectedItem);
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Correto! 🎉',
-            style: AppTextStyles.body.copyWith(
-              fontSize: 16.sp,
-              color: Colors.white,
-            ),
-          ),
+          content: Text('Correto! 🎉', style: 
+          TextStyle(
+            fontSize: 16.sp, 
+            fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+            fontWeight: FontWeight.bold, 
+            color: Colors.white)),
           backgroundColor: Colors.green,
-          duration: const Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 400),
         ),
       );
 
@@ -236,15 +215,14 @@ class _IdentifyLettersNumbersGameState
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Tenta novamente!',
-            style: AppTextStyles.body.copyWith(
-              fontSize: 16.sp,
-              color: Colors.white,
-            ),
-          ),
+          content: Text('Tenta novamente!', style: 
+          TextStyle(
+            fontSize: 16.sp, 
+            fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+            fontWeight: FontWeight.bold, 
+            color: Colors.white)),
           backgroundColor: Colors.red,
-          duration: const Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 600),
         ),
       );
     }
@@ -259,19 +237,43 @@ class _IdentifyLettersNumbersGameState
 
   @override
   Widget build(BuildContext context) {
-    final String topText =
-        _isNumber(targetCharacter)
-            ? 'Encontra o número $targetCharacter'
-            : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}';
+    final bool isPrimeiroCiclo = userLevel == '1º Ciclo';
+
+    final Widget topTextWidget = isPrimeiroCiclo && _isLetter(targetCharacter)
+        ? Column(
+            children: [
+              Text('Encontra a letra', style: TextStyle(fontSize: 20.sp, fontFamily: 'Slabo', fontWeight: FontWeight.bold)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo')),
+                  SizedBox(width: 8.w),
+                  Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
+                  SizedBox(width: 16.w),
+                  Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo')),
+                  SizedBox(width: 8.w),
+                  Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
+                ],
+              ),
+            ],
+          )
+        : Text(
+            _isNumber(targetCharacter)
+                ? 'Encontra o número $targetCharacter'
+                : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+            style: TextStyle(
+              fontSize: 24.sp,
+              fontWeight: FontWeight.bold,
+              fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+            ),
+            textAlign: TextAlign.center,
+          );
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Detetive de letras e números',
-          style: AppTextStyles.body.copyWith(
-            fontSize: 18.sp,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontSize: 18.sp, color: Colors.white),
         ),
       ),
       body: SafeArea(
@@ -285,11 +287,7 @@ class _IdentifyLettersNumbersGameState
                   children: [
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 10.h),
-                      child: Text(
-                        topText,
-                        style: AppTextStyles.title.copyWith(fontSize: 24.sp),
-                        textAlign: TextAlign.center,
-                      ),
+                      child: topTextWidget,
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -316,7 +314,11 @@ class _IdentifyLettersNumbersGameState
                   ),
                   child: Text(
                     item.character,
-                    style: AppTextStyles.bodyBold.copyWith(fontSize: 30.sp),
+                    style: TextStyle(
+                      fontSize: 30.sp,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: item.fontFamily,
+                    ),
                   ),
                 ),
               );
@@ -332,6 +334,12 @@ class _LetterItem {
   final String character;
   final double dx;
   final double dy;
+  final String? fontFamily;
 
-  _LetterItem({required this.character, required this.dx, required this.dy});
+  _LetterItem({
+    required this.character,
+    required this.dx,
+    required this.dy,
+    this.fontFamily,
+  });
 }

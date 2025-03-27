@@ -1,19 +1,17 @@
-//Estrutura principal do menu dos jogos disponiveis
+// Estrutura principal do menu dos jogos disponíveis
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
 import '../themes/colors.dart';
-import '../themes/text_styles.dart';
 import '../widgets/game_card.dart';
 import '../widgets/custom_drawer.dart' as custom;
 import '../games/write_game.dart';
 import '../games/identify_letters_numbers.dart';
 import 'home_page.dart';
 
-// Tela de menu principal com os jogos disponíveis para o utilizador
 class GameMenu extends StatefulWidget {
-  final UserModel user; // Utilizador atual, com nome, nível e letras aprendidas
+  final UserModel user;
 
   const GameMenu({super.key, required this.user});
 
@@ -24,7 +22,6 @@ class GameMenu extends StatefulWidget {
 class _GameMenuState extends State<GameMenu> {
   @override
   Widget build(BuildContext context) {
-    // Lista de jogos base (comuns a todos os utilizadores)
     final List<GameCardData> jogosBase = [
       GameCardData(
         title: "Detetive de letras e números",
@@ -52,7 +49,6 @@ class _GameMenuState extends State<GameMenu> {
       ),
     ];
 
-    // Jogos adicionais apenas para utilizadores do 1º Ciclo
     final List<GameCardData> jogosExtras = [
       GameCardData(
         title: "Detetive de palavras",
@@ -68,7 +64,6 @@ class _GameMenuState extends State<GameMenu> {
       ),
     ];
 
-    // Filtra os jogos disponíveis conforme o nível do utilizador
     final List<GameCardData> jogosDisponiveis =
         widget.user.level == "1º Ciclo"
             ? [...jogosBase, ...jogosExtras]
@@ -78,27 +73,28 @@ class _GameMenuState extends State<GameMenu> {
       appBar: AppBar(
         title: Text(
           "Olá, ${widget.user.name}!!",
-          style: TextStyle(fontSize: 18.sp),
+          style: TextStyle(
+            fontSize: 18.sp,
+            color: AppColors.white,
+          ),
         ),
         centerTitle: true,
         actions: [
-          // Exibe o nível do utilizador no topo direito
           Padding(
             padding: EdgeInsets.only(right: 16.w),
             child: Center(
               child: Text(
                 widget.user.level,
-                style: AppTextStyles.body.copyWith(
+                style: TextStyle(
                   color: AppColors.white,
                   fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ),
         ],
       ),
-
-      // Menu lateral personalizado
       drawer: custom.CustomDrawer(
         userName: widget.user.name,
         userLevel: widget.user.level,
@@ -107,8 +103,8 @@ class _GameMenuState extends State<GameMenu> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder:
-                  (context) => const MyHomePage(title: 'Mundo das Palavras'),
+              builder: (context) =>
+                  const MyHomePage(title: 'Mundo das Palavras'),
             ),
           );
         },
@@ -119,7 +115,10 @@ class _GameMenuState extends State<GameMenu> {
               SnackBar(
                 content: Text(
                   "Conquistas em breve!",
-                  style: TextStyle(fontSize: 14.sp),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: AppColors.white,
+                  ),
                 ),
                 backgroundColor: AppColors.green,
                 duration: const Duration(seconds: 2),
@@ -135,7 +134,10 @@ class _GameMenuState extends State<GameMenu> {
               SnackBar(
                 content: Text(
                   "Dashboard em breve!",
-                  style: TextStyle(fontSize: 14.sp),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: AppColors.white,
+                  ),
                 ),
                 backgroundColor: AppColors.orange,
                 duration: const Duration(seconds: 2),
@@ -145,11 +147,8 @@ class _GameMenuState extends State<GameMenu> {
           });
         },
       ),
-
-      // Corpo da tela com os jogos exibidos em grid
       body: Stack(
         children: [
-          // Fundo azul claro
           Container(
             decoration: const BoxDecoration(color: AppColors.lightBlue),
           ),
@@ -157,7 +156,6 @@ class _GameMenuState extends State<GameMenu> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // Título da seção
                   Padding(
                     padding: EdgeInsets.fromLTRB(15.w, 10.h, 10.w, 10.h),
                     child: Row(
@@ -166,15 +164,15 @@ class _GameMenuState extends State<GameMenu> {
                         SizedBox(width: 5.w),
                         Text(
                           "Escolhe o teu jogo:",
-                          style: AppTextStyles.subtitle.copyWith(
+                          style: TextStyle(
                             fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.darkBlue,
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                  // Grid de cards de jogos
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: 12.w,
@@ -184,8 +182,8 @@ class _GameMenuState extends State<GameMenu> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount:
-                            MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                        crossAxisCount: 1.sw > 600 ? 3 : 2,
+
                         crossAxisSpacing: 15.w,
                         mainAxisSpacing: 15.h,
                         childAspectRatio: 1.0,
@@ -212,13 +210,15 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
-  // Exibe uma mensagem temporária para jogos ainda não implementados
   void _navigateToGame(String gameName) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           "Jogo '$gameName' em desenvolvimento!",
-          style: TextStyle(fontSize: 14.sp),
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: AppColors.white,
+          ),
         ),
         backgroundColor: AppColors.green,
         duration: const Duration(seconds: 2),
@@ -227,7 +227,6 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
-  // Inicia o jogo de escrever letras (caractere inicial fixo "A")
   void _startWriteGame() {
     Navigator.push(
       context,
@@ -235,11 +234,15 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
-  // Inicia o jogo de identificar letras e números
   void _startIdentifyLettersNumbersGame() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => IdentifyLettersNumbersGame()),
+      MaterialPageRoute(
+          builder: (context) => IdentifyLettersNumbersGame(
+            key: widget.key,
+            userLevel: widget.user.level,
+          ),
+      ),
     );
   }
 }

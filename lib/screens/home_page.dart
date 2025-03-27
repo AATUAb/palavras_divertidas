@@ -1,9 +1,10 @@
+// ecrã inicia da aplicação, onde são apresentados os utilizadores e onde se pode adicionar novos utilizadores
+// é possível editar ou remover utilizadores existentes
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
 import '../services/hive_service.dart';
 import '../themes/colors.dart';
-import '../themes/text_styles.dart';
 import 'add_user_dialog.dart';
 import 'game_menu.dart';
 
@@ -83,7 +84,11 @@ class _MyHomePageState extends State<MyHomePage> {
         automaticallyImplyLeading: false,
         title: Text(
           widget.title,
-          style: AppTextStyles.title.copyWith(color: AppColors.white),
+          style: TextStyle(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.bold,
+            color: AppColors.white,
+          ),
         ),
         centerTitle: true,
       ),
@@ -99,42 +104,42 @@ class _MyHomePageState extends State<MyHomePage> {
                   SizedBox(width: 10.w),
                   Text(
                     "Quem vai jogar hoje?",
-                    style: AppTextStyles.subtitle.copyWith(fontSize: 18.sp),
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.darkBlue,
+                    ),
                   ),
                 ],
               ),
             ),
             Expanded(
               child: Center(
-                child:
-                    users.isEmpty
-                        ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [_buildAddUserButton()],
-                        )
-                        : SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.7,
-                          child: GridView.builder(
-                            shrinkWrap: true,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount:
-                                      MediaQuery.of(context).size.width > 600
-                                          ? 3
-                                          : 2,
-                                  crossAxisSpacing: 10.w,
-                                  mainAxisSpacing: 10.h,
-                                  childAspectRatio: 1.2,
-                                ),
-                            itemCount: users.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index == users.length) {
-                                return _buildAddUserButton();
-                              }
-                              return _buildUserCard(index);
-                            },
+                child: users.isEmpty
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [_buildAddUserButton()],
+                      )
+                    : SizedBox(
+                        width: 1.sw * 0.7,
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 1.sw > 600 ? 3 : 2,
+                            crossAxisSpacing: 10.w,
+                            mainAxisSpacing: 10.h,
+                            childAspectRatio: 1.2,
                           ),
+                          itemCount: users.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == users.length) {
+                              return _buildAddUserButton();
+                            }
+                            return _buildUserCard(index);
+                          },
                         ),
+                      ),
               ),
             ),
           ],
@@ -144,10 +149,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildUserCard(int index) {
-    final Color cardColor =
-        users[index].level == "Pré-Escolar"
-            ? AppColors.green
-            : AppColors.orange;
+    final Color cardColor = users[index].level == "Pré-Escolar"
+        ? AppColors.green
+        : AppColors.orange;
 
     return Card(
       color: cardColor.withOpacity(0.8),
@@ -186,9 +190,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     padding: EdgeInsets.symmetric(horizontal: 8.w),
                     child: Text(
                       users[index].name,
-                      style: AppTextStyles.bodyBold.copyWith(
-                        color: AppColors.white,
+                      style: TextStyle(
                         fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.white,
                       ),
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
@@ -196,9 +201,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   Text(
                     users[index].level,
-                    style: AppTextStyles.small.copyWith(
-                      color: AppColors.white.withOpacity(0.9),
+                    style: TextStyle(
                       fontSize: 12.sp,
+                      color: AppColors.white.withOpacity(0.9),
                     ),
                   ),
                 ],
@@ -223,7 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _buildAddUserButton() {
     return SizedBox(
       width: 250.w,
-      height: 100.h,
+      height: 120.h,
       child: Card(
         color: AppColors.lightGrey,
         shape: RoundedRectangleBorder(
@@ -242,10 +247,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 Icon(Icons.add_circle, size: 60.sp, color: AppColors.green),
                 SizedBox(height: 10.h),
                 Text(
-                  "Adicionar\nUtilizador",
-                  style: AppTextStyles.bodyBold.copyWith(
-                    color: AppColors.green,
+                  "Adiciona Utilizador",
+                  style: TextStyle(
                     fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.green,
                   ),
                   textAlign: TextAlign.center,
                 ),
