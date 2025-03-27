@@ -1,11 +1,9 @@
-//Estrutura principal para o jogo "Escrever". Jogo 2
-
+// Estrutura principal do jogo "Escrita de letras, numeros e palavras"
 import 'package:flutter/material.dart';
 import '../widgets/tracing_painter.dart';
 
-// Tela onde o utilizador deve desenhar (escrever) uma letra ou número
 class WriteGameScreen extends StatefulWidget {
-  final String character; // Letra ou número que deve ser escrito
+  final String character;
 
   const WriteGameScreen({super.key, required this.character});
 
@@ -14,15 +12,12 @@ class WriteGameScreen extends StatefulWidget {
 }
 
 class _WriteGameScreenState extends State<WriteGameScreen> {
-  final List<Offset> _points = []; // Lista de pontos desenhados pelo utilizador
-  bool _isCompleted = false; // Indica se o desenho foi validado com sucesso
-  bool _showValidationMessage = false; // Exibe mensagem após validação
-  final GlobalKey _canvasKey = GlobalKey(); // Referência ao canvas
-
-  // Área onde a letra será considerada válida (zona de validação)
+  final List<Offset> _points = [];
+  bool _isCompleted = false;
+  bool _showValidationMessage = false;
+  final GlobalKey _canvasKey = GlobalKey();
   late Rect letterArea;
 
-  // Inicializa o componente e define a área da letra após renderização inicial
   @override
   void initState() {
     super.initState();
@@ -31,19 +26,17 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
     });
   }
 
-  // Define uma área retangular onde a letra deve ser escrita
   void _setLetterArea() {
     final screenSize = MediaQuery.of(context).size;
     setState(() {
       letterArea = Rect.fromCenter(
-        center: Offset(screenSize.width * 0.6, screenSize.height * 0.5),
-        width: 220,
-        height: 280,
+        center: Offset(screenSize.width / 2, screenSize.height * 0.4),
+        width: screenSize.width * 0.5,
+        height: screenSize.height * 0.3,
       );
     });
   }
 
-  // Captura os pontos desenhados enquanto o utilizador arrasta o dedo
   void _onPanUpdate(DragUpdateDetails details) {
     if (!_isCompleted) {
       final RenderBox box =
@@ -56,43 +49,35 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
     }
   }
 
-  // Marca o fim de um traço desenhado
   void _onPanEnd(DragEndDetails details) {
     setState(() {
-      _points.add(Offset.infinite); // Usado para separar traços
+      _points.add(Offset.infinite);
     });
   }
 
-  // Valida o desenho do utilizador comparando com pontos esperados
   void _validateDrawing() {
     List<Offset> expectedPoints = _generateExpectedPoints(letterArea);
 
-    // Conta quantos pontos desenhados estão próximos dos esperados
-    int validPoints =
-        _points
-            .where((p) => expectedPoints.any((ep) => (p - ep).distance < 15))
-            .length;
+    int validPoints = _points
+        .where((p) => expectedPoints.any((ep) => (p - ep).distance < 15))
+        .length;
 
     double preenchimento = (validPoints / expectedPoints.length) * 100;
 
     if (preenchimento >= 80) {
-      // Se pelo menos 80% da letra for coberta
       setState(() {
         _isCompleted = true;
         _showValidationMessage = true;
       });
-
-      _showSuccessDialog(); // Mostra mensagem de sucesso
+      _showSuccessDialog();
     } else {
       setState(() {
         _showValidationMessage = true;
       });
-
-      _showFailureDialog(); // Mostra mensagem de falha
+      _showFailureDialog();
     }
   }
 
-  // Gera uma grade de pontos dentro da área da letra para validação
   List<Offset> _generateExpectedPoints(Rect area) {
     List<Offset> points = [];
     int stepX = (area.width / 10).round();
@@ -107,18 +92,17 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
     return points;
   }
 
-  // Exibe diálogo quando o utilizador completa a letra corretamente
   void _showSuccessDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text("Parabéns!"),
-        content: Text("Você completou a letra ${widget.character}!"),
+        content: Text("Escreveste uma letra ${widget.character}!"),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _resetDrawing(); // Permite tentar outra letra
+              _resetDrawing();
             },
             child: Text("Tentar outra"),
           ),
@@ -127,13 +111,12 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
     );
   }
 
-  // Exibe diálogo de erro quando a validação falha
   void _showFailureDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text("Ops!"),
-        content: Text("Você não preencheu corretamente a letra. Tente novamente."),
+        content: Text("Não preencheste corretamente a letra. Tente novamente."),
         actions: [
           TextButton(
             onPressed: () {
@@ -146,7 +129,6 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
     );
   }
 
-  // Limpa todos os pontos desenhados e reseta o estado
   void _resetDrawing() {
     setState(() {
       _points.clear();
@@ -155,46 +137,19 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
     });
   }
 
-  // Monta a interface com o botão de validação e área de desenho
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Escreva: ${widget.character}")),
-      body: Row(
-        children: [
-          // Coluna lateral com botões de controle
-          Padding(
-            padding: const EdgeInsets.all(90.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _validateDrawing,
-                  child: Text("Validar"),
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: _resetDrawing,
-                  child: Text("Limpar"),
-                ),
-                if (_showValidationMessage)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Text(
-                      _isCompleted
-                          ? "Letra correta! ✅"
-                          : "Preencha a letra corretamente!",
-                      style: TextStyle(
-                        color: _isCompleted ? Colors.green : Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+    final screenSize = MediaQuery.of(context).size;
+    final canvasWidth = screenSize.width * 0.7;
+    final canvasHeight = screenSize.height * 0.4;
+    final fontSize = canvasHeight * 1.5;
+    final strokeWidth = fontSize * 0.1; // 10% da altura da letra
 
-          // Área de desenho principal
+
+    return Scaffold(
+      appBar: AppBar(title: Text("Escreve: ${widget.character}")),
+      body: Column(
+        children: [
           Expanded(
             child: GestureDetector(
               onPanUpdate: _onPanUpdate,
@@ -202,22 +157,41 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
               child: Stack(
                 key: _canvasKey,
                 children: [
-                  // Exibe o contorno da letra/número como referência
                   Center(
                     child: SizedBox(
-                      width: 250,
-                      height: 280,
-                      child: TracingPainter(widget.character),
+                      width: canvasWidth,
+                      height: canvasHeight,
+                      child: TracingPainter(
+                        widget.character,
+                        fontSize: fontSize,
+                      ),
                     ),
                   ),
-
-                  // Exibe o traço feito pelo utilizador
                   CustomPaint(
-                    painter: UserDrawingPainter(_points),
+                    painter: UserDrawingPainter(_points, strokeWidth),
                     size: Size.infinite,
                   ),
-
-                  // Ícone de sucesso quando a letra for completada corretamente
+                  if (_showValidationMessage)
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          _isCompleted
+                              ? "Letra correta! ✅"
+                              : "Tente novamente!",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                   if (_isCompleted)
                     Center(
                       child: Icon(
@@ -228,6 +202,45 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
                     ),
                 ],
               ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                double buttonWidth = constraints.maxWidth > 500
+                    ? 180
+                    : (constraints.maxWidth - 48) / 2;
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: buttonWidth,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _validateDrawing,
+                        child: Text(
+                          "Validar",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      width: buttonWidth,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _resetDrawing,
+                        child: Text(
+                          "Limpar",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],

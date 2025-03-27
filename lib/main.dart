@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           home: const MyHomePage(title: 'Mundo das Palavras'),
           debugShowCheckedModeBanner: false,
-               );
+         );
       },
     );
   }
