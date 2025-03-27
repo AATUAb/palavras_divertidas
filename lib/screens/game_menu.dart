@@ -9,6 +9,7 @@ import '../widgets/custom_drawer.dart' as custom;
 import '../games/write_game.dart';
 import '../games/identify_letters_numbers.dart';
 import 'home_page.dart';
+import 'dashboard.dart';
 
 class GameMenu extends StatefulWidget {
   final UserModel user;
@@ -73,10 +74,7 @@ class _GameMenuState extends State<GameMenu> {
       appBar: AppBar(
         title: Text(
           "Olá, ${widget.user.name}!!",
-          style: TextStyle(
-            fontSize: 18.sp,
-            color: AppColors.white,
-          ),
+          style: TextStyle(fontSize: 18.sp, color: AppColors.white),
         ),
         centerTitle: true,
         actions: [
@@ -103,8 +101,8 @@ class _GameMenuState extends State<GameMenu> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  const MyHomePage(title: 'Mundo das Palavras'),
+              builder:
+                  (context) => const MyHomePage(title: 'Mundo das Palavras'),
             ),
           );
         },
@@ -115,10 +113,7 @@ class _GameMenuState extends State<GameMenu> {
               SnackBar(
                 content: Text(
                   "Conquistas em breve!",
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: AppColors.white,
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: AppColors.white),
                 ),
                 backgroundColor: AppColors.green,
                 duration: const Duration(seconds: 2),
@@ -129,22 +124,12 @@ class _GameMenuState extends State<GameMenu> {
         },
         onDashboard: () {
           Navigator.pop(context);
-          Future.delayed(const Duration(milliseconds: 100), () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  "Dashboard em breve!",
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: AppColors.white,
-                  ),
-                ),
-                backgroundColor: AppColors.orange,
-                duration: const Duration(seconds: 2),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DashboardScreen(user: widget.user),
+            ),
+          );
         },
       ),
       body: Stack(
@@ -215,10 +200,7 @@ class _GameMenuState extends State<GameMenu> {
       SnackBar(
         content: Text(
           "Jogo '$gameName' em desenvolvimento!",
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: AppColors.white,
-          ),
+          style: TextStyle(fontSize: 14.sp, color: AppColors.white),
         ),
         backgroundColor: AppColors.green,
         duration: const Duration(seconds: 2),
@@ -238,10 +220,11 @@ class _GameMenuState extends State<GameMenu> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => IdentifyLettersNumbersGame(
-            key: widget.key,
-            userLevel: widget.user.level,
-          ),
+        builder:
+            (context) => IdentifyLettersNumbersGame(
+              key: widget.key,
+              userLevel: widget.user.level,
+            ),
       ),
     );
   }
