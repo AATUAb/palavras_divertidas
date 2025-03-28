@@ -12,13 +12,17 @@ dependencies:
 
   # UI e Icons
   cupertino_icons: ^1.0.8
+
+  # Resposividade da aplicação
   flutter_screenutil: ^5.9.0
+
+  # Lotiie para animações pré-renderizadas
+  lottie: ^2.7.0  
 
   # Armazenamento local
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   path_provider: ^2.1.2
-  google_fonts: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -34,18 +38,22 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/fonts/
+#configuração de animações a usar
+    - assets/assets/animations/loading.json
+    - assets/assets/animations/coffeties.json
+    - assets/assets/animations/conquest.json
+    - assets/assets/animations/progression_stars.json
 
-  # Configuração de fontes a usar
+# Configuração de fontes a usar
   fonts:
-    - family: ComicNeue      # tipo de letra Comic Sans, para jogos de pré-escolar e interface geral
+    - family: ComicNeue                     # tipo de letra Comic Sans, para jogos de pré-escolar e interface geral
       fonts:
-        - asset: assets/fonts/ComicNeue-Regular.ttf
-    - family: Cursive  # tipo de letra manuscrita, para joogos de 1º cilco
-      fonts:
-        - asset: assets/fonts/Cursive-Regular.ttf
-    - family: Slabo       # tipo de letra máquina, para joogos de 1º cilco
-      fonts:
-        - asset: assets/fonts/Slabo-Regular.ttf
+        - asset: assets/assets/fonts/ComicNeue-Regular.ttf
 
+    - family: Cursive                         # tipo de letra manuscrita, para joogos de 1º cilco
+      fonts:
+        - asset: assets/assets/fonts/Cursive-Regular.ttf
 
+    - family: Slabo                           # tipo de letra máquina, para joogos de 1º cilco
+      fonts:
+        - asset: assets/assets/fonts/Slabo-Regular.ttf

@@ -1,9 +1,10 @@
-// Estrutura principal do jogo "Detetive de letras e números"
+// Versão atualizada com animação de sucesso
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../logic/level_manager.dart';
+import '../widgets/level_manager.dart';
+import '../widgets/games_animations.dart';
 
 class IdentifyLettersNumbersGame extends StatefulWidget {
   final String userLevel;
@@ -18,6 +19,8 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
   late LevelManager levelManager;
   late String userLevel;
   bool isPrimeiroCiclo = false;
+  bool showSuccessAnimation = false;
+
   final List<String> characters = [
     ...'ABCDEFGHIJLMNOPQRSTUVXZ'.split(''),
     ...'abcdefghijlmnopqrstuvxz'.split(''),
@@ -141,6 +144,8 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
     int elapsed = 0;
 
     progressTimer = Timer.periodic(tick, (timer) {
+      if (showSuccessAnimation) return; // pausa temporizador se animação estiver ativa
+
       setState(() {
         elapsed += tick.inMilliseconds;
         progressValue = 1.0 - (elapsed / totalMillis);
@@ -151,6 +156,8 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
     });
 
     roundTimer = Timer(levelTime, () {
+      if (showSuccessAnimation) return; // ignora se animação estiver ativa
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -161,17 +168,96 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
           duration: const Duration(milliseconds: 400),
         ),
       );
-      _finishRound(firstTry: false);
+      final bool acertouAPrimeira = currentTry == correctCount;
+
+      levelManager.registerRoundWithOptionalFeedback(
+        context: context,
+        firstTry: acertouAPrimeira,
+        applySettings: applyLevelSettings,
+        onFinished: generateNewChallenge,
+    );
     });
   }
 
   void _finishRound({required bool firstTry}) {
-    roundTimer?.cancel();
+     roundTimer?.cancel();
     progressTimer?.cancel();
     levelManager.registerRound(firstTry: firstTry);
     applyLevelSettings();
     generateNewChallenge();
   }
+      /*
+      firstTry: true,
+      onFinished: generateNewChallenge,
+      applySettings: applyLevelSettings,
+    );
+  }*/
+
+void checkAnswer(_LetterItem selectedItem) {
+  currentTry++;
+
+  if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
+    foundCorrect++;
+    setState(() {
+      letterItems.remove(selectedItem);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Correto! 🎉',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+              fontWeight: FontWeight.bold,
+              color: Colors.white)),
+        backgroundColor: Colors.green,
+        duration: const Duration(milliseconds: 400),
+      ),
+    );
+
+    if (foundCorrect >= correctCount) {
+      roundTimer?.cancel();
+      progressTimer?.cancel();
+
+      // Verifica se o utilizador acertou todos à primeira tentativa
+      final bool acertouAPrimeira = currentTry == correctCount;
+      roundTimer?.cancel();
+      progressTimer?.cancel();
+
+      setState(() {
+        showSuccessAnimation = true;
+      });
+
+      Future.delayed(const Duration(seconds: 1), () {
+        setState(() {
+          showSuccessAnimation = false; // Mantém a animação de confetes
+        });
+
+        // Chama registerRoundWithOptionalFeedback para verificar e mostrar o diálogo de nível
+        levelManager.registerRoundWithOptionalFeedback(
+          context: context,
+          firstTry: acertouAPrimeira,
+          applySettings: applyLevelSettings,
+          onFinished: generateNewChallenge,
+        );
+      });
+    }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Tenta novamente!',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+              fontWeight: FontWeight.bold,
+              color: Colors.white)),
+        backgroundColor: Colors.red,
+        duration: const Duration(milliseconds: 600),
+      ),
+    );
+  }
+}
+
 
   bool _overlaps(Offset pos, List<Offset> others, double radius) {
     for (final other in others) {
@@ -187,47 +273,6 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
 
   String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
 
-  void checkAnswer(_LetterItem selectedItem) {
-    currentTry++;
-
-    if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
-      foundCorrect++;
-      setState(() {
-        letterItems.remove(selectedItem);
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Correto! 🎉', style: 
-          TextStyle(
-            fontSize: 16.sp, 
-            fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
-            fontWeight: FontWeight.bold, 
-            color: Colors.white)),
-          backgroundColor: Colors.green,
-          duration: const Duration(milliseconds: 400),
-        ),
-      );
-
-      if (foundCorrect >= correctCount) {
-        _finishRound(firstTry: currentTry == correctCount);
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Tenta novamente!', style: 
-          TextStyle(
-            fontSize: 16.sp, 
-            fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
-            fontWeight: FontWeight.bold, 
-            color: Colors.white)),
-          backgroundColor: Colors.red,
-          duration: const Duration(milliseconds: 600),
-        ),
-      );
-    }
-  }
-
   @override
   void dispose() {
     roundTimer?.cancel();
@@ -237,8 +282,6 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
 
   @override
   Widget build(BuildContext context) {
-    final bool isPrimeiroCiclo = userLevel == '1º Ciclo';
-
     final Widget topTextWidget = isPrimeiroCiclo && _isLetter(targetCharacter)
         ? Column(
             children: [
@@ -323,6 +366,14 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
                 ),
               );
             }).toList(),
+
+            if (showSuccessAnimation)
+              IgnorePointer(
+                ignoring: true,
+                child: Center(
+                  child: GameAnimations.successCoffetiesTimed(),
+                ),
+              ),
           ],
         ),
       ),
