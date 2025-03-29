@@ -4,7 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'models/user_model.dart';
 import 'services/hive_service.dart';
-import 'screens/home_page.dart';
+import 'screens/loading_screen.dart';
 import 'themes/app_theme.dart';
 
 void main() async {
@@ -41,8 +41,8 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Mundo das Palavras',
           theme: AppTheme.lightTheme,
-          home: const MyHomePage(title: 'Mundo das Palavras'),
           debugShowCheckedModeBanner: false,
+          home: const LoadingScreen(),
          );
       },
     );
