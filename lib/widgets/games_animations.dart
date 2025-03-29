@@ -27,8 +27,8 @@ class GameAnimations {
     return _TimedAnimationWidget(
       animationPath: 'assets/animations/progression_stars.json',
       duration: const Duration(seconds: 3),
-      width: width ?? 684.w,
-      height: height ?? 250.h,
+      width: width ?? 350.w, 
+      height: height ?? 200.h, 
       onFinished: onFinished,
     );
   }

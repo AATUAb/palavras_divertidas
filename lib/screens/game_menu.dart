@@ -133,65 +133,66 @@ class _GameMenuState extends State<GameMenu> {
         },
       ),
       body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(color: AppColors.lightBlue),
-          ),
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
+  children: [
+    Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/background_game_menu.png'),
+          fit: BoxFit.cover, 
+           alignment: Alignment.topCenter,
+        ),
+      ),
+    ),
+    SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(15.w, 10.h, 10.w, 10.h),
+              child: Row(
                 children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(15.w, 10.h, 10.w, 10.h),
-                    child: Row(
-                      children: [
-                        Icon(Icons.games, color: AppColors.orange, size: 24.sp),
-                        SizedBox(width: 5.w),
-                        Text(
-                          "Escolhe o teu jogo:",
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.darkBlue,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 8.h,
-                    ),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 1.sw > 600 ? 3 : 2,
-
-                        crossAxisSpacing: 15.w,
-                        mainAxisSpacing: 15.h,
-                        childAspectRatio: 1.0,
-                      ),
-                      itemCount: jogosDisponiveis.length,
-                      itemBuilder: (context, index) {
-                        return GameCard(
-                          title: jogosDisponiveis[index].title,
-                          icon: jogosDisponiveis[index].icon,
-                          onTap: jogosDisponiveis[index].onTap,
-                          backgroundColor:
-                              jogosDisponiveis[index].backgroundColor,
-                          iconColor: jogosDisponiveis[index].iconColor,
-                        );
-                      },
+                  Icon(Icons.games, color: AppColors.orange, size: 24.sp),
+                  SizedBox(width: 5.w),
+                  Text(
+                    "Escolhe o teu jogo:",
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.darkBlue,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 1.sw > 600 ? 3 : 2,
+                  crossAxisSpacing: 15.w,
+                  mainAxisSpacing: 15.h,
+                  childAspectRatio: 1.0,
+                ),
+                itemCount: jogosDisponiveis.length,
+                itemBuilder: (context, index) {
+                  return GameCard(
+                    title: jogosDisponiveis[index].title,
+                    icon: jogosDisponiveis[index].icon,
+                    onTap: jogosDisponiveis[index].onTap,
+                    backgroundColor: jogosDisponiveis[index].backgroundColor,
+                    iconColor: jogosDisponiveis[index].iconColor,
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
+    ),
+  ],
+),
     );
   }
 

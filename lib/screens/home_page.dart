@@ -7,6 +7,7 @@ import '../services/hive_service.dart';
 import '../themes/colors.dart';
 import 'add_user_dialog.dart';
 import 'game_menu.dart';
+import '../widgets/menu_design.dart'; 
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -78,85 +79,75 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(
-          widget.title,
-          style: TextStyle(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.bold,
-            color: AppColors.white,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(color: AppColors.lightBlue),
+Widget build(BuildContext context) {
+  double cardWidth = (1.sw - 16.w * 2 - 10.w * 2) / 3;
+  return Scaffold(
+    body: MenuDesign(
+      child: SingleChildScrollView(
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+              padding: EdgeInsets.only(top: 0.h, bottom: 12.h),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.people, color: AppColors.orange, size: 30.sp),
-                  SizedBox(width: 10.w),
+                  Icon(Icons.people, color: AppColors.orange, size: 35.sp),
+                  SizedBox(width: 8.w),
                   Text(
                     "Quem vai jogar hoje?",
                     style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 38.sp,
+                      fontWeight: FontWeight.bold,
                       color: AppColors.darkBlue,
                     ),
                   ),
                 ],
               ),
             ),
-            Expanded(
-              child: Center(
-                child: users.isEmpty
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [_buildAddUserButton()],
-                      )
-                    : SizedBox(
-                        width: 1.sw * 0.7,
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 1.sw > 600 ? 3 : 2,
-                            crossAxisSpacing: 10.w,
-                            mainAxisSpacing: 10.h,
-                            childAspectRatio: 1.2,
-                          ),
-                          itemCount: users.length + 1,
-                          itemBuilder: (context, index) {
-                            if (index == users.length) {
-                              return _buildAddUserButton();
-                            }
-                            return _buildUserCard(index);
-                          },
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Wrap(
+                spacing: 10.w,
+                runSpacing: 10.h,
+                alignment: WrapAlignment.center,
+                children: [
+                  ...users.asMap().entries.map(
+                        (entry) => SizedBox(
+                          width: cardWidth,
+                          child: _buildUserCard(entry.key),
                         ),
                       ),
+                  SizedBox(
+                    width: cardWidth,
+                    child: _buildAddUserButton(),
+                  ),
+                ],
               ),
             ),
+            SizedBox(height: 30.h), 
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 
   Widget _buildUserCard(int index) {
-    final Color cardColor = users[index].level == "Pré-Escolar"
-        ? AppColors.green
-        : AppColors.orange;
+  final Color cardColor = users[index].level == "Pré-Escolar"
+      ? AppColors.green
+      : AppColors.orange;
 
-    return Card(
+  return ConstrainedBox(
+    constraints: BoxConstraints(
+      maxWidth: 200.w,
+      // maxHeight: 80.h, // Removed fixed height
+    ),
+    child: Card(
       color: cardColor.withOpacity(0.8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-      elevation: 5,
+      elevation: 3,
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -175,23 +166,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircleAvatar(
-                    radius: 40.r,
+                    radius: 30.r,
                     backgroundColor: AppColors.white,
                     child: Icon(
                       users[index].level == "Pré-Escolar"
                           ? Icons.child_care
                           : Icons.school,
-                      size: 50.sp,
+                      size: 40.sp,
                       color: cardColor,
                     ),
                   ),
-                  SizedBox(height: 10.h),
+                  SizedBox(height: 6.h),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w),
+                    padding: EdgeInsets.symmetric(horizontal: 4.w), 
                     child: Text(
                       users[index].name,
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                       ),
@@ -202,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Text(
                     users[index].level,
                     style: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: 11.sp,
                       color: AppColors.white.withOpacity(0.9),
                     ),
                   ),
@@ -214,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> {
               right: 5.w,
               child: IconButton(
                 onPressed: () => _showEditUserDialog(index, users[index]),
-                icon: Icon(Icons.edit, color: AppColors.white, size: 20.sp),
+                icon: Icon(Icons.edit, color: AppColors.white, size: 18.sp),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -222,13 +213,15 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildAddUserButton() {
     return SizedBox(
-      width: 250.w,
-      height: 120.h,
+      width: 160.w,
+      // height: 80.h, // Removed fixed height
       child: Card(
         color: AppColors.lightGrey,
         shape: RoundedRectangleBorder(
@@ -248,7 +241,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 SizedBox(height: 10.h),
                 Text(
                   "Adiciona Utilizador",
-                  style: TextStyle(
+                    style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.green,

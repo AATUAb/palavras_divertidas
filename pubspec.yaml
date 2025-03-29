@@ -44,6 +44,9 @@ flutter:
     - assets/assets/animations/conquest.json
     - assets/assets/animations/progression_stars.json
 
+#configuração de imagens a usar
+    - assets/assets/images/background_game_menu.png
+
 # Configuração de fontes a usar
   fonts:
     - family: ComicNeue                     # tipo de letra Comic Sans, para jogos de pré-escolar e interface geral
