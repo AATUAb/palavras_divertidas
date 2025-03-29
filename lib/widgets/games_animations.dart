@@ -18,6 +18,7 @@ class GameAnimations {
       onFinished: onFinished,
     );
   }
+
   /// Animação de progressão de nível, exibida por 3 segundos
   static Widget successProgressionTimed({
     double? width,
@@ -28,7 +29,7 @@ class GameAnimations {
       animationPath: 'assets/animations/progression_stars.json',
       duration: const Duration(seconds: 3),
       width: width ?? 684.w,
-      height: height ?? 250.h,
+      height: height ?? 150.h,
       onFinished: onFinished,
     );
   }
@@ -47,9 +48,7 @@ class GameAnimations {
       onFinished: onFinished,
     );
   }
-
 }
-
 
 //widget para continar a exibir a todas as animações, por um determinado tempo
 class _TimedAnimationWidget extends StatefulWidget {
@@ -83,7 +82,7 @@ class _TimedAnimationWidgetState extends State<_TimedAnimationWidget> {
         setState(() => _visible = false);
         widget.onFinished?.call();
         // Adiciona esta linha para fechar o diálogo
-        Navigator.pop(context); 
+        Navigator.pop(context);
       }
     });
   }
@@ -92,11 +91,11 @@ class _TimedAnimationWidgetState extends State<_TimedAnimationWidget> {
   Widget build(BuildContext context) {
     return _visible
         ? Lottie.asset(
-            widget.animationPath,
-            width: widget.width,
-            height: widget.height,
-            repeat: false,
-          )
+          widget.animationPath,
+          width: widget.width,
+          height: widget.height,
+          repeat: false,
+        )
         : const SizedBox.shrink();
   }
 }

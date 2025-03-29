@@ -25,5 +25,6 @@ class UserModel extends HiveObject {
     required this.name,
     required this.level,
     List<String>? knownLetters, // Parametro opcional
-  }) : knownLetters = knownLetters ?? []; // Se nao fornecido, inicializa como lista vazia
+  }) : knownLetters =
+           knownLetters ?? []; // Se nao fornecido, inicializa como lista vazia
 }

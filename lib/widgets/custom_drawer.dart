@@ -30,7 +30,7 @@ class CustomDrawer extends StatelessWidget {
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
                   child: Padding(
-                    padding: EdgeInsets.all(16.w),
+                    padding: EdgeInsets.all(10.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -38,8 +38,8 @@ class CustomDrawer extends StatelessWidget {
                         Container(
                           width: double.infinity,
                           padding: EdgeInsets.symmetric(
-                            vertical: 15.h,
-                            horizontal: 15.w,
+                            vertical: 10.h,
+                            horizontal: 10.w,
                           ),
                           decoration: const BoxDecoration(
                             color: AppColors.green,
@@ -93,7 +93,7 @@ class CustomDrawer extends StatelessWidget {
                         ),
 
                         // Padding final opcional
-                        SizedBox(height: 20.h),
+                        SizedBox(height: 10.h),
                       ],
                     ),
                   ),
