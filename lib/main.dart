@@ -34,7 +34,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(960, 540), // Define o tamanho base em landscape, focado em smartphones e tablets Android
+      designSize: const Size(
+        960,
+        540,
+      ), // Define o tamanho base em landscape, focado em smartphones e tablets Android
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
@@ -43,7 +46,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           debugShowCheckedModeBanner: false,
           home: const LoadingScreen(),
-         );
+        );
       },
     );
   }

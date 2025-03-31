@@ -39,24 +39,26 @@ flutter:
 
   assets:
 #configuração de animações a usar
-    - assets/assets/animations/loading.json
-    - assets/assets/animations/coffeties.json
-    - assets/assets/animations/conquest.json
-    - assets/assets/animations/progression_stars.json
+    - assets/animations/loading.json
+    - assets/animations/coffeties.json
+    - assets/animations/conquest.json
+    - assets/animations/progression_stars.json
 
 #configuração de imagens a usar
-    - assets/assets/images/background_game_menu.png
+    - assets/images/background_game_menu.png
+    - assets/images/pencils.png
+    - assets/images/sun_cloud.png
 
 # Configuração de fontes a usar
   fonts:
     - family: ComicNeue                     # tipo de letra Comic Sans, para jogos de pré-escolar e interface geral
       fonts:
-        - asset: assets/assets/fonts/ComicNeue-Regular.ttf
+        - asset: assets/fonts/ComicNeue-Regular.ttf
 
     - family: Cursive                         # tipo de letra manuscrita, para joogos de 1º cilco
       fonts:
-        - asset: assets/assets/fonts/Cursive-Regular.ttf
+        - asset: assets/fonts/Cursive-Regular.ttf
 
     - family: Slabo                           # tipo de letra máquina, para joogos de 1º cilco
       fonts:
-        - asset: assets/assets/fonts/Slabo-Regular.ttf
+        - asset: assets/fonts/Slabo-Regular.ttf
