@@ -1,9 +1,10 @@
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:logger/logger.dart';
 import '../models/user_model.dart';
 
 class HiveService {
   static late Box<UserModel> _userBox;
+  static var logger = Logger(); // Criação de uma instância do Logger
 
   static Future<void> init() async {
     await Hive.initFlutter();
@@ -14,9 +15,11 @@ class HiveService {
 
     try {
       _userBox = await Hive.openBox<UserModel>('users');
-      print("✅ Box 'users' aberta com sucesso");
+      logger.i(
+        "✅ Box 'users' aberta com sucesso",
+      ); // Usando logger em vez de print
     } catch (e) {
-      print("❌ Erro ao abrir a box: $e");
+      logger.e("❌ Erro ao abrir a box: $e"); // Usando logger para erro
       rethrow;
     }
   }
@@ -28,10 +31,12 @@ class HiveService {
       }
 
       final users = _userBox.values.toList();
-      print("🔍 Retrieved ${users.length} users from Hive");
+      logger.i(
+        "🔍 Retrieved ${users.length} users from Hive",
+      ); // Usando logger para log de sucesso
       return users;
     } catch (e) {
-      print("❌ Error getting users: $e");
+      logger.e("❌ Error getting users: $e"); // Usando logger para erro
       return [];
     }
   }
@@ -39,27 +44,33 @@ class HiveService {
   static Future<void> addUser(UserModel user) async {
     try {
       await _userBox.add(user);
-      print("User ${user.name} added successfully");
+      logger.i(
+        "User ${user.name} added successfully",
+      ); // Usando logger para sucesso
     } catch (e) {
-      print("Error adding user: $e");
+      logger.e("Error adding user: $e"); // Usando logger para erro
     }
   }
 
   static Future<void> updateUser(int index, UserModel updatedUser) async {
     try {
       await _userBox.putAt(index, updatedUser);
-      print("User at index $index updated successfully");
+      logger.i(
+        "User at index $index updated successfully",
+      ); // Usando logger para sucesso
     } catch (e) {
-      print("Error updating user: $e");
+      logger.e("Error updating user: $e"); // Usando logger para erro
     }
   }
 
   static Future<void> deleteUser(int index) async {
     try {
       await _userBox.deleteAt(index);
-      print("User at index $index deleted successfully");
+      logger.i(
+        "User at index $index deleted successfully",
+      ); // Usando logger para sucesso
     } catch (e) {
-      print("Error deleting user: $e");
+      logger.e("Error deleting user: $e"); // Usando logger para erro
     }
   }
 }

@@ -10,6 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Dependências do Flutter
+  logger: ^1.2.0
+
   # UI e Icons
   cupertino_icons: ^1.0.8
 

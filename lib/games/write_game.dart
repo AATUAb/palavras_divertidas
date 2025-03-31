@@ -8,10 +8,11 @@ class WriteGameScreen extends StatefulWidget {
   const WriteGameScreen({super.key, required this.character});
 
   @override
-  _WriteGameScreenState createState() => _WriteGameScreenState();
+  WriteGameScreenState createState() => WriteGameScreenState(); // Alterado para classe pública
 }
 
-class _WriteGameScreenState extends State<WriteGameScreen> {
+class WriteGameScreenState extends State<WriteGameScreen> {
+  // Alterado para classe pública
   final List<Offset> _points = [];
   bool _isCompleted = false;
   bool _showValidationMessage = false;
@@ -58,9 +59,10 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
   void _validateDrawing() {
     List<Offset> expectedPoints = _generateExpectedPoints(letterArea);
 
-    int validPoints = _points
-        .where((p) => expectedPoints.any((ep) => (p - ep).distance < 15))
-        .length;
+    int validPoints =
+        _points
+            .where((p) => expectedPoints.any((ep) => (p - ep).distance < 15))
+            .length;
 
     double preenchimento = (validPoints / expectedPoints.length) * 100;
 
@@ -95,37 +97,41 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
   void _showSuccessDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Parabéns!"),
-        content: Text("Escreveste uma letra ${widget.character}!"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _resetDrawing();
-            },
-            child: Text("Tentar outra"),
+      builder:
+          (context) => AlertDialog(
+            title: Text("Parabéns!"),
+            content: Text("Escreveste uma letra ${widget.character}!"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _resetDrawing();
+                },
+                child: Text("Tentar outra"),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showFailureDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Ops!"),
-        content: Text("Não preencheste corretamente a letra. Tente novamente."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text("OK"),
+      builder:
+          (context) => AlertDialog(
+            title: Text("Ops!"),
+            content: Text(
+              "Não preencheste corretamente a letra. Tente novamente.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("OK"),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -143,8 +149,7 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
     final canvasWidth = screenSize.width * 0.7;
     final canvasHeight = screenSize.height * 0.4;
     final fontSize = canvasHeight * 1.5;
-    final strokeWidth = fontSize * 0.1; // 10% da altura da letra
-
+    final strokeWidth = fontSize * 0.1;
 
     return Scaffold(
       appBar: AppBar(title: Text("Escreve: ${widget.character}")),
@@ -175,11 +180,14 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
                     Center(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
+                          color: const Color.fromRGBO(0, 0, 0, 0.6),
                           borderRadius: BorderRadius.circular(12),
                         ),
+
                         child: Text(
                           _isCompleted
                               ? "Letra correta! ✅"
@@ -208,9 +216,10 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                double buttonWidth = constraints.maxWidth > 500
-                    ? 180
-                    : (constraints.maxWidth - 48) / 2;
+                double buttonWidth =
+                    constraints.maxWidth > 500
+                        ? 180
+                        : (constraints.maxWidth - 48) / 2;
 
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -220,10 +229,7 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: _validateDrawing,
-                        child: Text(
-                          "Validar",
-                          style: TextStyle(fontSize: 18),
-                        ),
+                        child: Text("Validar", style: TextStyle(fontSize: 18)),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -232,10 +238,7 @@ class _WriteGameScreenState extends State<WriteGameScreen> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: _resetDrawing,
-                        child: Text(
-                          "Limpar",
-                          style: TextStyle(fontSize: 18),
-                        ),
+                        child: Text("Limpar", style: TextStyle(fontSize: 18)),
                       ),
                     ),
                   ],

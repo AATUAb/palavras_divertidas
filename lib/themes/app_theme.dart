@@ -8,14 +8,13 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true, // Usa o Material 3
-
       // Define o esquema de cores baseado em uma cor "seed"
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.green,
         primary: AppColors.green,
         secondary: AppColors.orange,
         tertiary: AppColors.yellow,
-        background: AppColors.lightBlue,
+        surface: AppColors.lightBlue, // Substituindo 'background' por 'surface'
       ),
 
       scaffoldBackgroundColor: AppColors.lightBlue,
@@ -94,22 +93,15 @@ class AppTheme {
       cardTheme: CardTheme(
         color: AppColors.white,
         elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
 
-      iconTheme: IconThemeData(
-        color: AppColors.orange,
-        size: 24,
-      ),
+      iconTheme: IconThemeData(color: AppColors.orange, size: 24),
 
       dialogTheme: DialogTheme(
         backgroundColor: AppColors.lightBlue,
         elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         titleTextStyle: TextStyle(
           fontFamily: 'ComicNeue',
           fontSize: 18,

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'models/user_model.dart';
 import 'services/hive_service.dart';
 import 'screens/loading_screen.dart';
 import 'themes/app_theme.dart';

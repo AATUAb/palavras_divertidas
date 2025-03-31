@@ -12,11 +12,11 @@ class IdentifyLettersNumbersGame extends StatefulWidget {
   const IdentifyLettersNumbersGame({super.key, required this.user});
 
   @override
-  _IdentifyLettersNumbersGameState createState() =>
-      _IdentifyLettersNumbersGameState();
+  IdentifyLettersNumbersGameState createState() =>
+      IdentifyLettersNumbersGameState();
 }
 
-class _IdentifyLettersNumbersGameState
+class IdentifyLettersNumbersGameState
     extends State<IdentifyLettersNumbersGame> {
   late LevelManager levelManager;
   bool isPrimeiroCiclo = false;
@@ -37,7 +37,7 @@ class _IdentifyLettersNumbersGameState
   int foundCorrect = 0;
 
   String targetCharacter = '';
-  List<_LetterItem> letterItems = [];
+  List<LetterItem> letterItems = [];
 
   Timer? roundTimer;
   Timer? progressTimer;
@@ -116,7 +116,7 @@ class _IdentifyLettersNumbersGameState
     final double minY = 0.35;
     final double maxY = 0.85;
 
-    final List<_LetterItem> placedItems = [];
+    final List<LetterItem> placedItems = [];
     final List<Offset> usedPositions = [];
 
     for (String char in allOptions) {
@@ -134,7 +134,7 @@ class _IdentifyLettersNumbersGameState
 
       usedPositions.add(pos);
       placedItems.add(
-        _LetterItem(
+        LetterItem(
           character: char,
           dx: dx,
           dy: dy,
@@ -191,7 +191,7 @@ class _IdentifyLettersNumbersGameState
     });
   }
 
-  void checkAnswer(_LetterItem selectedItem) {
+  void checkAnswer(LetterItem selectedItem) {
     currentTry++;
 
     if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
@@ -226,6 +226,8 @@ class _IdentifyLettersNumbersGameState
         });
 
         Future.delayed(const Duration(seconds: 1), () {
+          if (!mounted) return;
+
           setState(() {
             showSuccessAnimation = false;
           });
@@ -382,7 +384,8 @@ class _IdentifyLettersNumbersGameState
                   ),
                 ),
               );
-            }).toList(),
+            }),
+
             if (showSuccessAnimation)
               IgnorePointer(
                 ignoring: true,
@@ -395,13 +398,13 @@ class _IdentifyLettersNumbersGameState
   }
 }
 
-class _LetterItem {
+class LetterItem {
   final String character;
   final double dx;
   final double dy;
   final String? fontFamily;
 
-  _LetterItem({
+  LetterItem({
     required this.character,
     required this.dx,
     required this.dy,

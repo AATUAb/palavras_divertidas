@@ -141,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: 200.w),
       child: Card(
-        color: cardColor.withOpacity(0.8),
+        color: cardColor.withAlpha((255 * 0.8).toInt()),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.r),
         ),
@@ -192,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       users[index].level,
                       style: TextStyle(
                         fontSize: 11.sp,
-                        color: AppColors.white.withOpacity(0.9),
+                        color: AppColors.white.withAlpha((255 * 0.9).toInt()),
                       ),
                     ),
                   ],

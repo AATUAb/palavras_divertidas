@@ -108,7 +108,8 @@ class _GameMenuState extends State<GameMenu> {
         },
         onAchievements: () {
           Navigator.pop(context);
-          Future.delayed(const Duration(milliseconds: 100), () {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
