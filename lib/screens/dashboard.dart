@@ -126,6 +126,7 @@ class DashboardScreen extends StatelessWidget {
                     lineBarsData: [
                       LineChartBarData(
                         isCurved: true,
+                        curveSmoothness: 0,
                         color: AppColors.green,
                         dotData: FlDotData(show: true),
                         barWidth: 2,

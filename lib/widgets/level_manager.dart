@@ -1,18 +1,21 @@
-// Estrutura para gestão de níveis e feedback visual no jogo
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../models/user_model.dart';
+import '../services/hive_service.dart';
 import '../widgets/games_animations.dart';
 
 class LevelManager {
   int level;
   int totalRounds = 0;
   int firstTryCorrect = 0;
+  final UserModel user;
 
   final int maxLevel;
   final int minLevel;
   final int roundsToEvaluate;
 
   LevelManager({
+    required this.user,
     this.level = 1,
     this.maxLevel = 3,
     this.minLevel = 1,
@@ -23,15 +26,22 @@ class LevelManager {
     totalRounds++;
     if (firstTry) firstTryCorrect++;
 
-    if (totalRounds >= roundsToEvaluate) {
-      double accuracy = firstTryCorrect / totalRounds;
+    // Calcula a taxa de acerto atual (com qualquer número de rondas)
+    double accuracy = firstTryCorrect / totalRounds;
 
+    // Grava sempre a taxa de acerto no nível atual
+    user.updateAccuracy(level: level, accuracy: accuracy);
+    HiveService.updateUser(user.key as int, user);
+
+    // Só muda de nível se tiver rondas suficientes
+    if (totalRounds >= roundsToEvaluate) {
       if (accuracy >= 0.8 && level < maxLevel) {
         level++;
       } else if (accuracy < 0.5 && level > minLevel) {
         level--;
       }
 
+      // Reinicia a contagem após avaliação
       totalRounds = 0;
       firstTryCorrect = 0;
     }
@@ -63,7 +73,6 @@ class LevelManager {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Altura adaptada dinamicamente
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.25,
                       child: GameAnimations.successProgressionTimed(

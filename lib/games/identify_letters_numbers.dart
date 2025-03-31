@@ -1,15 +1,15 @@
-// Versão atualizada com animação de sucesso
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/level_manager.dart';
 import '../widgets/games_animations.dart';
+import '../models/user_model.dart';
 
 class IdentifyLettersNumbersGame extends StatefulWidget {
-  final String userLevel;
+  final UserModel user;
 
-  const IdentifyLettersNumbersGame({super.key, required this.userLevel});
+  const IdentifyLettersNumbersGame({super.key, required this.user});
 
   @override
   _IdentifyLettersNumbersGameState createState() =>
@@ -19,7 +19,6 @@ class IdentifyLettersNumbersGame extends StatefulWidget {
 class _IdentifyLettersNumbersGameState
     extends State<IdentifyLettersNumbersGame> {
   late LevelManager levelManager;
-  late String userLevel;
   bool isPrimeiroCiclo = false;
   bool showSuccessAnimation = false;
 
@@ -47,9 +46,8 @@ class _IdentifyLettersNumbersGameState
   @override
   void initState() {
     super.initState();
-    isPrimeiroCiclo = widget.userLevel == '1º Ciclo';
-    userLevel = widget.userLevel;
-    levelManager = LevelManager();
+    isPrimeiroCiclo = widget.user.level == '1º Ciclo';
+    levelManager = LevelManager(user: widget.user);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       applyLevelSettings();
@@ -140,7 +138,7 @@ class _IdentifyLettersNumbersGameState
           character: char,
           dx: dx,
           dy: dy,
-          fontFamily: userLevel == '1º Ciclo' ? _chooseRandomFont() : null,
+          fontFamily: isPrimeiroCiclo ? _chooseRandomFont() : null,
         ),
       );
     }
@@ -154,10 +152,7 @@ class _IdentifyLettersNumbersGameState
     int elapsed = 0;
 
     progressTimer = Timer.periodic(tick, (timer) {
-      if (showSuccessAnimation) {
-        return;
-      }
-
+      if (showSuccessAnimation) return;
       setState(() {
         elapsed += tick.inMilliseconds;
         progressValue = 1.0 - (elapsed / totalMillis);
@@ -168,7 +163,7 @@ class _IdentifyLettersNumbersGameState
     });
 
     roundTimer = Timer(levelTime, () {
-      if (showSuccessAnimation) return; // ignora se animação estiver ativa
+      if (showSuccessAnimation) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -184,6 +179,7 @@ class _IdentifyLettersNumbersGameState
           duration: const Duration(milliseconds: 400),
         ),
       );
+
       final bool acertouAPrimeira = currentTry == correctCount;
 
       levelManager.registerRoundWithOptionalFeedback(
@@ -223,11 +219,7 @@ class _IdentifyLettersNumbersGameState
       if (foundCorrect >= correctCount) {
         roundTimer?.cancel();
         progressTimer?.cancel();
-
-        // Verifica se o utilizador acertou todos à primeira tentativa
         final bool acertouAPrimeira = currentTry == correctCount;
-        roundTimer?.cancel();
-        progressTimer?.cancel();
 
         setState(() {
           showSuccessAnimation = true;
@@ -235,10 +227,9 @@ class _IdentifyLettersNumbersGameState
 
         Future.delayed(const Duration(seconds: 1), () {
           setState(() {
-            showSuccessAnimation = false; // Mantém a animação de confetes
+            showSuccessAnimation = false;
           });
 
-          // Chama registerRoundWithOptionalFeedback para verificar e mostrar o diálogo de nível
           levelManager.registerRoundWithOptionalFeedback(
             context: context,
             firstTry: acertouAPrimeira,
@@ -266,7 +257,6 @@ class _IdentifyLettersNumbersGameState
     }
   }
 
-  // Verifica se a posição colide com outras posições
   bool _overlaps(Offset pos, List<Offset> others, double radius) {
     for (final other in others) {
       final dx = (pos.dx - other.dx) * 1.sw;
@@ -278,7 +268,6 @@ class _IdentifyLettersNumbersGameState
 
   bool _isLetter(String char) => RegExp(r'[a-zA-Z]').hasMatch(char);
   bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
-
   String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
 
   @override
@@ -394,7 +383,6 @@ class _IdentifyLettersNumbersGameState
                 ),
               );
             }).toList(),
-
             if (showSuccessAnimation)
               IgnorePointer(
                 ignoring: true,
