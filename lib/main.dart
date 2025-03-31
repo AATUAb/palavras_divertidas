@@ -10,19 +10,12 @@ import 'themes/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Força a orientação para horizontal
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
 
-  // Inicializa o Hive
-  await Hive.initFlutter();
-
-  // Regista o adapter do modelo
-  Hive.registerAdapter(UserModelAdapter());
-
-  // Abre a box e inicializa o serviço
+  // ✅ Inicializa Hive com registo de adapter e abertura da box
   await HiveService.init();
 
   runApp(const MyApp());

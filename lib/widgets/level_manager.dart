@@ -16,7 +16,7 @@ class LevelManager {
     this.level = 1,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 4,
+    this.roundsToEvaluate = 7,
   });
 
   void registerRound({required bool firstTry}) {
@@ -51,41 +51,42 @@ class LevelManager {
       await showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: EdgeInsets.all(16.w),
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Altura adaptada dinamicamente
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.25,
-                  child: GameAnimations.successProgressionTimed(
-                    width: 350.w,
-                    height: MediaQuery.of(context).size.height * 0.25,
-                  ),
+        builder:
+            (_) => Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: EdgeInsets.all(16.w),
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
                 ),
-                SizedBox(height: 20.h),
-                FittedBox(
-                  child: Text(
-                    'Parabéns, subiste de nível!',
-                    style: TextStyle(
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Altura adaptada dinamicamente
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.25,
+                      child: GameAnimations.successProgressionTimed(
+                        width: 350.w,
+                        height: MediaQuery.of(context).size.height * 0.25,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
+                    SizedBox(height: 20.h),
+                    FittedBox(
+                      child: Text(
+                        'Parabéns, subiste de nível!',
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
       );
     }
 

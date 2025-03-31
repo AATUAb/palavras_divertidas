@@ -12,10 +12,12 @@ class IdentifyLettersNumbersGame extends StatefulWidget {
   const IdentifyLettersNumbersGame({super.key, required this.userLevel});
 
   @override
-  _IdentifyLettersNumbersGameState createState() => _IdentifyLettersNumbersGameState();
+  _IdentifyLettersNumbersGameState createState() =>
+      _IdentifyLettersNumbersGameState();
 }
 
-class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> {
+class _IdentifyLettersNumbersGameState
+    extends State<IdentifyLettersNumbersGame> {
   late LevelManager levelManager;
   late String userLevel;
   bool isPrimeiroCiclo = false;
@@ -83,14 +85,20 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
     progressValue = 1.0;
 
     final String rawChar = characters[_random.nextInt(characters.length)];
-    targetCharacter = _isLetter(rawChar)
-        ? (_random.nextBool() ? rawChar.toUpperCase() : rawChar.toLowerCase())
-        : rawChar;
+    targetCharacter =
+        _isLetter(rawChar)
+            ? (_random.nextBool()
+                ? rawChar.toUpperCase()
+                : rawChar.toLowerCase())
+            : rawChar;
 
     Set<String> uniqueOptions = {};
     while (uniqueOptions.length < wrongCount) {
       String c = characters[_random.nextInt(characters.length)];
-      String option = _isLetter(c) ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase()) : c;
+      String option =
+          _isLetter(c)
+              ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
+              : c;
       if (option.toLowerCase() != targetCharacter.toLowerCase() &&
           !uniqueOptions.any((e) => e.toLowerCase() == option.toLowerCase())) {
         uniqueOptions.add(option);
@@ -98,14 +106,16 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
     }
 
     List<String> correctOptions = List.generate(correctCount, (_) {
-      return _random.nextBool() ? targetCharacter.toUpperCase() : targetCharacter.toLowerCase();
+      return _random.nextBool()
+          ? targetCharacter.toUpperCase()
+          : targetCharacter.toLowerCase();
     });
 
     final allOptions = [...uniqueOptions, ...correctOptions]..shuffle();
 
     final double minX = 0.05;
     final double maxX = 0.95;
-    final double minY = 0.20;
+    final double minY = 0.35;
     final double maxY = 0.85;
 
     final List<_LetterItem> placedItems = [];
@@ -144,7 +154,9 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
     int elapsed = 0;
 
     progressTimer = Timer.periodic(tick, (timer) {
-      if (showSuccessAnimation) return; // pausa temporizador se animação estiver ativa
+      if (showSuccessAnimation) {
+        return;
+      }
 
       setState(() {
         elapsed += tick.inMilliseconds;
@@ -162,7 +174,11 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
         SnackBar(
           content: Text(
             'Tempo esgotado! ⏰',
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
           backgroundColor: Colors.orange,
           duration: const Duration(milliseconds: 400),
@@ -175,84 +191,82 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
         firstTry: acertouAPrimeira,
         applySettings: applyLevelSettings,
         onFinished: generateNewChallenge,
-    );
+      );
     });
   }
 
-  void _finishRound({required bool firstTry}) {
-     roundTimer?.cancel();
-    progressTimer?.cancel();
-    levelManager.registerRound(firstTry: firstTry);
-    applyLevelSettings();
-    generateNewChallenge();
-  }
-    
-void checkAnswer(_LetterItem selectedItem) {
-  currentTry++;
+  void checkAnswer(_LetterItem selectedItem) {
+    currentTry++;
 
-  if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
-    foundCorrect++;
-    setState(() {
-      letterItems.remove(selectedItem);
-    });
+    if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
+      foundCorrect++;
+      setState(() {
+        letterItems.remove(selectedItem);
+      });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Correto! 🎉',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Correto! 🎉',
             style: TextStyle(
               fontSize: 16.sp,
               fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
               fontWeight: FontWeight.bold,
-              color: Colors.white)),
-        backgroundColor: Colors.green,
-        duration: const Duration(milliseconds: 400),
-      ),
-    );
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(milliseconds: 400),
+        ),
+      );
 
-    if (foundCorrect >= correctCount) {
-      roundTimer?.cancel();
-      progressTimer?.cancel();
+      if (foundCorrect >= correctCount) {
+        roundTimer?.cancel();
+        progressTimer?.cancel();
 
-      // Verifica se o utilizador acertou todos à primeira tentativa
-      final bool acertouAPrimeira = currentTry == correctCount;
-      roundTimer?.cancel();
-      progressTimer?.cancel();
+        // Verifica se o utilizador acertou todos à primeira tentativa
+        final bool acertouAPrimeira = currentTry == correctCount;
+        roundTimer?.cancel();
+        progressTimer?.cancel();
 
-      setState(() {
-        showSuccessAnimation = true;
-      });
-
-      Future.delayed(const Duration(seconds: 1), () {
         setState(() {
-          showSuccessAnimation = false; // Mantém a animação de confetes
+          showSuccessAnimation = true;
         });
 
-        // Chama registerRoundWithOptionalFeedback para verificar e mostrar o diálogo de nível
-        levelManager.registerRoundWithOptionalFeedback(
-          context: context,
-          firstTry: acertouAPrimeira,
-          applySettings: applyLevelSettings,
-          onFinished: generateNewChallenge,
-        );
-      });
-    }
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Tenta novamente!',
+        Future.delayed(const Duration(seconds: 1), () {
+          setState(() {
+            showSuccessAnimation = false; // Mantém a animação de confetes
+          });
+
+          // Chama registerRoundWithOptionalFeedback para verificar e mostrar o diálogo de nível
+          levelManager.registerRoundWithOptionalFeedback(
+            context: context,
+            firstTry: acertouAPrimeira,
+            applySettings: applyLevelSettings,
+            onFinished: generateNewChallenge,
+          );
+        });
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Tenta novamente!',
             style: TextStyle(
               fontSize: 16.sp,
               fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
               fontWeight: FontWeight.bold,
-              color: Colors.white)),
-        backgroundColor: Colors.red,
-        duration: const Duration(milliseconds: 600),
-      ),
-    );
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(milliseconds: 600),
+        ),
+      );
+    }
   }
-}
 
-
+  // Verifica se a posição colide com outras posições
   bool _overlaps(Offset pos, List<Offset> others, double radius) {
     for (final other in others) {
       final dx = (pos.dx - other.dx) * 1.sw;
@@ -276,35 +290,55 @@ void checkAnswer(_LetterItem selectedItem) {
 
   @override
   Widget build(BuildContext context) {
-    final Widget topTextWidget = isPrimeiroCiclo && _isLetter(targetCharacter)
-        ? Column(
-            children: [
-              Text('Encontra a letra', style: TextStyle(fontSize: 20.sp, fontFamily: 'Slabo', fontWeight: FontWeight.bold)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo')),
-                  SizedBox(width: 8.w),
-                  Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
-                  SizedBox(width: 16.w),
-                  Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo')),
-                  SizedBox(width: 8.w),
-                  Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
-                ],
+    final Widget topTextWidget =
+        isPrimeiroCiclo && _isLetter(targetCharacter)
+            ? Column(
+              children: [
+                Text(
+                  'Encontra a letra',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontFamily: 'Slabo',
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      targetCharacter.toUpperCase(),
+                      style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo'),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      targetCharacter.toUpperCase(),
+                      style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive'),
+                    ),
+                    SizedBox(width: 16.w),
+                    Text(
+                      targetCharacter.toLowerCase(),
+                      style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo'),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      targetCharacter.toLowerCase(),
+                      style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive'),
+                    ),
+                  ],
+                ),
+              ],
+            )
+            : Text(
+              _isNumber(targetCharacter)
+                  ? 'Encontra o número $targetCharacter'
+                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+              style: TextStyle(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.bold,
+                fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
               ),
-            ],
-          )
-        : Text(
-            _isNumber(targetCharacter)
-                ? 'Encontra o número $targetCharacter'
-                : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-            style: TextStyle(
-              fontSize: 24.sp,
-              fontWeight: FontWeight.bold,
-              fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
-            ),
-            textAlign: TextAlign.center,
-          );
+              textAlign: TextAlign.center,
+            );
 
     return Scaffold(
       appBar: AppBar(
@@ -364,9 +398,7 @@ void checkAnswer(_LetterItem selectedItem) {
             if (showSuccessAnimation)
               IgnorePointer(
                 ignoring: true,
-                child: Center(
-                  child: GameAnimations.successCoffetiesTimed(),
-                ),
+                child: Center(child: GameAnimations.successCoffetiesTimed()),
               ),
           ],
         ),

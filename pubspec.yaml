@@ -24,6 +24,10 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.2
 
+  # gráficos
+  fl_chart: ^0.64.0
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
