@@ -186,13 +186,7 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
     applyLevelSettings();
     generateNewChallenge();
   }
-      /*
-      firstTry: true,
-      onFinished: generateNewChallenge,
-      applySettings: applyLevelSettings,
-    );
-  }*/
-
+    
 void checkAnswer(_LetterItem selectedItem) {
   currentTry++;
 
