@@ -7,7 +7,7 @@ import '../widgets/games_animations.dart';
 class LevelManager {
   int level;
   int totalRounds = 0;
-  int firstTryCorrect = 0;
+  int correctAnswers = 0;
   final UserModel user;
 
   final int maxLevel;
@@ -16,48 +16,51 @@ class LevelManager {
 
   LevelManager({
     required this.user,
-    this.level = 1,
+    int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
     this.roundsToEvaluate = 7,
-  });
+  }) : level = level ?? int.tryParse(user.level) ?? 1;
 
-  void registerRound({required bool firstTry}) {
+  int get totalRoundsCount => totalRounds;
+  int get evaluationRounds => roundsToEvaluate;
+
+  void registerRound({required bool correct}) {
     totalRounds++;
-    if (firstTry) firstTryCorrect++;
+    if (correct) correctAnswers++;
 
-    // Calcula a taxa de acerto atual (com qualquer número de rondas)
-    double accuracy = firstTryCorrect / totalRounds;
+    double accuracy = correctAnswers / totalRounds;
 
-    // Grava sempre a taxa de acerto no nível atual
     user.updateAccuracy(level: level, accuracy: accuracy);
     HiveService.updateUser(user.key as int, user);
 
-    // Só muda de nível se tiver rondas suficientes
     if (totalRounds >= roundsToEvaluate) {
       if (accuracy >= 0.8 && level < maxLevel) {
         level++;
+        user.level = level.toString();
+        HiveService.updateUser(user.key as int, user);
       } else if (accuracy < 0.5 && level > minLevel) {
         level--;
+        user.level = level.toString();
+        HiveService.updateUser(user.key as int, user);
       }
 
-      // Reinicia a contagem após avaliação
       totalRounds = 0;
-      firstTryCorrect = 0;
+      correctAnswers = 0;
     }
   }
 
   Future<void> registerRoundWithOptionalFeedback({
     required BuildContext context,
-    required bool firstTry,
+    required bool correct,
     required VoidCallback applySettings,
     required VoidCallback onFinished,
   }) async {
-    final int oldLevel = level;
+    final int previousLevel = level;
 
-    registerRound(firstTry: firstTry);
+    registerRound(correct: correct);
 
-    if (level > oldLevel) {
+    if (level > previousLevel) {
       await showDialog(
         context: context,
         barrierDismissible: false,
@@ -83,7 +86,7 @@ class LevelManager {
                     SizedBox(height: 20.h),
                     FittedBox(
                       child: Text(
-                        'Parabéns, subiste de nível!',
+                        'Congratulations, you leveled up!',
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -97,6 +100,9 @@ class LevelManager {
               ),
             ),
       );
+
+      user.level = level.toString();
+      HiveService.updateUser(user.key as int, user);
     }
 
     applySettings();

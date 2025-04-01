@@ -32,11 +32,11 @@ class HiveService {
 
       final users = _userBox.values.toList();
       logger.i(
-        "🔍 Retrieved ${users.length} users from Hive",
+        "🔍 Recuperado ${users.length} usuários do Hive",
       ); // Usando logger para log de sucesso
       return users;
     } catch (e) {
-      logger.e("❌ Error getting users: $e"); // Usando logger para erro
+      logger.e("❌ Erro ao obter usuários: $e"); // Usando logger para erro
       return [];
     }
   }
@@ -45,10 +45,10 @@ class HiveService {
     try {
       await _userBox.add(user);
       logger.i(
-        "User ${user.name} added successfully",
+        "Usuário ${user.name} adicionado com sucesso",
       ); // Usando logger para sucesso
     } catch (e) {
-      logger.e("Error adding user: $e"); // Usando logger para erro
+      logger.e("Erro ao adicionar usuário: $e"); // Usando logger para erro
     }
   }
 
@@ -56,10 +56,10 @@ class HiveService {
     try {
       await _userBox.putAt(index, updatedUser);
       logger.i(
-        "User at index $index updated successfully",
+        "Usuário no índice $index atualizado com sucesso",
       ); // Usando logger para sucesso
     } catch (e) {
-      logger.e("Error updating user: $e"); // Usando logger para erro
+      logger.e("Erro ao atualizar usuário: $e"); // Usando logger para erro
     }
   }
 
@@ -67,10 +67,10 @@ class HiveService {
     try {
       await _userBox.deleteAt(index);
       logger.i(
-        "User at index $index deleted successfully",
+        "Usuário no índice $index excluído com sucesso",
       ); // Usando logger para sucesso
     } catch (e) {
-      logger.e("Error deleting user: $e"); // Usando logger para erro
+      logger.e("Erro ao excluir usuário: $e"); // Usando logger para erro
     }
   }
 }

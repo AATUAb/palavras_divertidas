@@ -19,7 +19,7 @@ class IdentifyLettersNumbersGame extends StatefulWidget {
 class IdentifyLettersNumbersGameState
     extends State<IdentifyLettersNumbersGame> {
   late LevelManager levelManager;
-  bool isPrimeiroCiclo = false;
+  bool isFirstCycle = false;
   bool showSuccessAnimation = false;
 
   final List<String> characters = [
@@ -46,7 +46,7 @@ class IdentifyLettersNumbersGameState
   @override
   void initState() {
     super.initState();
-    isPrimeiroCiclo = widget.user.level == '1º Ciclo';
+    isFirstCycle = widget.user.level == '1º Ciclo';
     levelManager = LevelManager(user: widget.user);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -138,7 +138,7 @@ class IdentifyLettersNumbersGameState
           character: char,
           dx: dx,
           dy: dy,
-          fontFamily: isPrimeiroCiclo ? _chooseRandomFont() : null,
+          fontFamily: isFirstCycle ? _chooseRandomFont() : null,
         ),
       );
     }
@@ -180,11 +180,11 @@ class IdentifyLettersNumbersGameState
         ),
       );
 
-      final bool acertouAPrimeira = currentTry == correctCount;
+      final bool firstTryCorrect = currentTry == correctCount;
 
       levelManager.registerRoundWithOptionalFeedback(
         context: context,
-        firstTry: acertouAPrimeira,
+        correct: firstTryCorrect,
         applySettings: applyLevelSettings,
         onFinished: generateNewChallenge,
       );
@@ -206,7 +206,7 @@ class IdentifyLettersNumbersGameState
             'Correto! 🎉',
             style: TextStyle(
               fontSize: 16.sp,
-              fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+              fontFamily: isFirstCycle ? 'Slabo' : null,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -219,7 +219,7 @@ class IdentifyLettersNumbersGameState
       if (foundCorrect >= correctCount) {
         roundTimer?.cancel();
         progressTimer?.cancel();
-        final bool acertouAPrimeira = currentTry == correctCount;
+        final bool firstTryCorrect = currentTry == correctCount;
 
         setState(() {
           showSuccessAnimation = true;
@@ -234,7 +234,7 @@ class IdentifyLettersNumbersGameState
 
           levelManager.registerRoundWithOptionalFeedback(
             context: context,
-            firstTry: acertouAPrimeira,
+            correct: firstTryCorrect,
             applySettings: applyLevelSettings,
             onFinished: generateNewChallenge,
           );
@@ -247,7 +247,7 @@ class IdentifyLettersNumbersGameState
             'Tenta novamente!',
             style: TextStyle(
               fontSize: 16.sp,
-              fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+              fontFamily: isFirstCycle ? 'Slabo' : null,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -282,7 +282,7 @@ class IdentifyLettersNumbersGameState
   @override
   Widget build(BuildContext context) {
     final Widget topTextWidget =
-        isPrimeiroCiclo && _isLetter(targetCharacter)
+        isFirstCycle && _isLetter(targetCharacter)
             ? Column(
               children: [
                 Text(
@@ -326,7 +326,7 @@ class IdentifyLettersNumbersGameState
               style: TextStyle(
                 fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
-                fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+                fontFamily: isFirstCycle ? 'Slabo' : null,
               ),
               textAlign: TextAlign.center,
             );
@@ -364,6 +364,32 @@ class IdentifyLettersNumbersGameState
                 ),
               ),
             ),
+            Positioned(
+              top: 20.h,
+              right: 20.w,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Level ${levelManager.level}',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 5.h),
+                  Text(
+                    'Round ${levelManager.totalRoundsCount + 1} of ${levelManager.evaluationRounds}',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             ...letterItems.map((item) {
               return Align(
                 alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
@@ -385,7 +411,6 @@ class IdentifyLettersNumbersGameState
                 ),
               );
             }),
-
             if (showSuccessAnimation)
               IgnorePointer(
                 ignoring: true,
