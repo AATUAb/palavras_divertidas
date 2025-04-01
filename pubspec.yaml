@@ -10,6 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+# Dependências do Flutter
+  logger: ^1.2.0
+
   # UI e Icons
   cupertino_icons: ^1.0.8
 
@@ -24,6 +27,8 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.2
 
+  # gráficos
+  fl_chart: ^0.64.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -42,10 +47,14 @@ flutter:
     - assets/animations/loading.json
     - assets/animations/coffeties.json
     - assets/animations/conquest.json
-    - assets/animations/progression_stars.json
+    - assets/animations/one_star.json
+    - assets/animations/two_star.json
+    - assets/animations/tree_star.json
+
 
 #configuração de imagens a usar
-    - assets/assets/images/background_game_menu.png
+    - assets/images/background_game_menu.png
+    - assets/images/sun_cloud.png
 
 # Configuração de fontes a usar
   fonts:

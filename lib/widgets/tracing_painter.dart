@@ -28,7 +28,7 @@ class _TracingPainter extends CustomPainter {
         text: character,
         style: TextStyle(
           fontSize: fontSize,
-          color:Colors.grey.withOpacity(0.5),
+          color: Colors.grey.withAlpha((255 * 0.5).toInt()),
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -56,11 +56,12 @@ class UserDrawingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.blue
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
+    final paint =
+        Paint()
+          ..color = Colors.blue
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round
+          ..style = PaintingStyle.stroke;
 
     for (int i = 0; i < points.length - 1; i++) {
       if (points[i] != Offset.infinite && points[i + 1] != Offset.infinite) {

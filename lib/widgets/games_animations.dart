@@ -19,20 +19,34 @@ class GameAnimations {
     );
   }
 
-  /// Animação de progressão de nível, exibida por 3 segundos
-  static Widget successProgressionTimed({
-    double? width,
-    double? height,
-    VoidCallback? onFinished,
-  }) {
-    return _TimedAnimationWidget(
-      animationPath: 'assets/animations/progression_stars.json',
-      duration: const Duration(seconds: 3),
-      width: width ?? 684.w,
-      height: height ?? 150.h,
-      onFinished: onFinished,
-    );
+static Widget starByLevel({
+  required int level,
+  double? width,
+  double? height,
+  VoidCallback? onFinished,
+}) {
+  String path;
+  switch (level) {
+    case 1:
+      path = 'assets/animations/one_star.json';
+      break;
+    case 2:
+      path = 'assets/animations/two_star.json';
+      break;
+    case 3:
+    default:
+      path = 'assets/animations/tree_star.json';
   }
+
+  return _TimedAnimationWidget(
+    animationPath: path,
+    duration: const Duration(seconds: 3),
+    width: width ?? 350.w,
+    height: height ?? 200.h,
+    onFinished: onFinished,
+  );
+}
+
 
   /// Animação de conquistas acumuladas, exibida durante 5 segundos
   static Widget successConquestTimed({
@@ -50,7 +64,8 @@ class GameAnimations {
   }
 }
 
-//widget para continar a exibir a todas as animações, por um determinado tempo
+
+// widget para continuar a exibir todas as animações, por um determinado tempo
 class _TimedAnimationWidget extends StatefulWidget {
   final String animationPath;
   final Duration duration;
@@ -81,7 +96,7 @@ class _TimedAnimationWidgetState extends State<_TimedAnimationWidget> {
       if (mounted) {
         setState(() => _visible = false);
         widget.onFinished?.call();
-        // Adiciona esta linha para fechar o diálogo
+        // Fecha o diálogo automaticamente após a animação
         Navigator.pop(context);
       }
     });

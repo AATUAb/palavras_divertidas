@@ -1,30 +1,44 @@
-// Modelo de dados para representar um utilizador da aplicação.
-
 import 'package:hive/hive.dart';
 
-// Indica que este arquivo terá um código gerado pelo Hive
 part 'user_model.g.dart';
 
-// Define a classe que será armazenada na base de dados local Hive
 @HiveType(typeId: 0)
 class UserModel extends HiveObject {
-  // Nome do utilizador
   @HiveField(0)
   final String name;
 
-  // Nível atual do utilizador (pode ser usado para lógica de progressão)
   @HiveField(1)
-  final String level;
+  String level;
 
-  // Lista de letras que o utilizador já aprendeu ou completou
   @HiveField(2)
   List<String> knownLetters;
 
-  // Construtor da classe UserModel
+  /// Taxa de acerto por nível (ex: {1: 0.85, 2: 0.66})
+  @HiveField(3)
+  Map<int, double> accuracyByLevel = {};
+
+  /// Taxa de acerto geral (0.0 a 1.0)
+  @HiveField(4)
+  double? overallAccuracy;
+
   UserModel({
     required this.name,
     required this.level,
-    List<String>? knownLetters, // Parametro opcional
-  }) : knownLetters =
-           knownLetters ?? []; // Se nao fornecido, inicializa como lista vazia
+    List<String>? knownLetters,
+    this.accuracyByLevel = const {},
+    this.overallAccuracy,
+  }) : knownLetters = knownLetters ?? [];
+
+  /// Atualiza a taxa de acerto por nível e a média geral
+  void updateAccuracy({required int level, required double accuracy}) {
+    accuracyByLevel = {...accuracyByLevel, level: accuracy};
+
+    if (accuracyByLevel.isNotEmpty) {
+      overallAccuracy =
+          accuracyByLevel.values.reduce((a, b) => a + b) /
+          accuracyByLevel.length;
+    } else {
+      overallAccuracy = null;
+    }
+  }
 }

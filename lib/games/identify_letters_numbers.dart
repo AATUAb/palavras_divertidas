@@ -1,26 +1,25 @@
-// Versão atualizada com animação de sucesso
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/level_manager.dart';
 import '../widgets/games_animations.dart';
+import '../models/user_model.dart';
 
 class IdentifyLettersNumbersGame extends StatefulWidget {
-  final String userLevel;
+  final UserModel user;
 
-  const IdentifyLettersNumbersGame({super.key, required this.userLevel});
+  const IdentifyLettersNumbersGame({super.key, required this.user});
 
   @override
-  _IdentifyLettersNumbersGameState createState() =>
-      _IdentifyLettersNumbersGameState();
+  IdentifyLettersNumbersGameState createState() =>
+      IdentifyLettersNumbersGameState();
 }
 
-class _IdentifyLettersNumbersGameState
+class IdentifyLettersNumbersGameState
     extends State<IdentifyLettersNumbersGame> {
   late LevelManager levelManager;
-  late String userLevel;
-  bool isPrimeiroCiclo = false;
+  bool isFirstCycle = false;
   bool showSuccessAnimation = false;
 
   final List<String> characters = [
@@ -38,7 +37,7 @@ class _IdentifyLettersNumbersGameState
   int foundCorrect = 0;
 
   String targetCharacter = '';
-  List<_LetterItem> letterItems = [];
+  List<LetterItem> letterItems = [];
 
   Timer? roundTimer;
   Timer? progressTimer;
@@ -47,9 +46,8 @@ class _IdentifyLettersNumbersGameState
   @override
   void initState() {
     super.initState();
-    isPrimeiroCiclo = widget.userLevel == '1º Ciclo';
-    userLevel = widget.userLevel;
-    levelManager = LevelManager();
+    isFirstCycle = widget.user.level == '1º Ciclo';
+    levelManager = LevelManager(user: widget.user);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       applyLevelSettings();
@@ -115,10 +113,10 @@ class _IdentifyLettersNumbersGameState
 
     final double minX = 0.05;
     final double maxX = 0.95;
-    final double minY = 0.20;
+    final double minY = 0.35;
     final double maxY = 0.85;
 
-    final List<_LetterItem> placedItems = [];
+    final List<LetterItem> placedItems = [];
     final List<Offset> usedPositions = [];
 
     for (String char in allOptions) {
@@ -136,11 +134,11 @@ class _IdentifyLettersNumbersGameState
 
       usedPositions.add(pos);
       placedItems.add(
-        _LetterItem(
+        LetterItem(
           character: char,
           dx: dx,
           dy: dy,
-          fontFamily: userLevel == '1º Ciclo' ? _chooseRandomFont() : null,
+          fontFamily: isFirstCycle ? _chooseRandomFont() : null,
         ),
       );
     }
@@ -154,9 +152,7 @@ class _IdentifyLettersNumbersGameState
     int elapsed = 0;
 
     progressTimer = Timer.periodic(tick, (timer) {
-      if (showSuccessAnimation)
-        return; // pausa temporizador se animação estiver ativa
-
+      if (showSuccessAnimation) return;
       setState(() {
         elapsed += tick.inMilliseconds;
         progressValue = 1.0 - (elapsed / totalMillis);
@@ -167,7 +163,7 @@ class _IdentifyLettersNumbersGameState
     });
 
     roundTimer = Timer(levelTime, () {
-      if (showSuccessAnimation) return; // ignora se animação estiver ativa
+      if (showSuccessAnimation) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -183,18 +179,19 @@ class _IdentifyLettersNumbersGameState
           duration: const Duration(milliseconds: 400),
         ),
       );
-      final bool acertouAPrimeira = currentTry == correctCount;
+
+      final bool firstTryCorrect = currentTry == correctCount;
 
       levelManager.registerRoundWithOptionalFeedback(
         context: context,
-        firstTry: acertouAPrimeira,
+        correct: firstTryCorrect,
         applySettings: applyLevelSettings,
         onFinished: generateNewChallenge,
       );
     });
   }
 
-  void checkAnswer(_LetterItem selectedItem) {
+  void checkAnswer(LetterItem selectedItem) {
     currentTry++;
 
     if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
@@ -209,7 +206,7 @@ class _IdentifyLettersNumbersGameState
             'Correto! 🎉',
             style: TextStyle(
               fontSize: 16.sp,
-              fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+              fontFamily: isFirstCycle ? 'Slabo' : null,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -222,25 +219,22 @@ class _IdentifyLettersNumbersGameState
       if (foundCorrect >= correctCount) {
         roundTimer?.cancel();
         progressTimer?.cancel();
-
-        // Verifica se o utilizador acertou todos à primeira tentativa
-        final bool acertouAPrimeira = currentTry == correctCount;
-        roundTimer?.cancel();
-        progressTimer?.cancel();
+        final bool firstTryCorrect = currentTry == correctCount;
 
         setState(() {
           showSuccessAnimation = true;
         });
 
         Future.delayed(const Duration(seconds: 1), () {
+          if (!mounted) return;
+
           setState(() {
-            showSuccessAnimation = false; // Mantém a animação de confetes
+            showSuccessAnimation = false;
           });
 
-          // Chama registerRoundWithOptionalFeedback para verificar e mostrar o diálogo de nível
           levelManager.registerRoundWithOptionalFeedback(
             context: context,
-            firstTry: acertouAPrimeira,
+            correct: firstTryCorrect,
             applySettings: applyLevelSettings,
             onFinished: generateNewChallenge,
           );
@@ -253,7 +247,7 @@ class _IdentifyLettersNumbersGameState
             'Tenta novamente!',
             style: TextStyle(
               fontSize: 16.sp,
-              fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+              fontFamily: isFirstCycle ? 'Slabo' : null,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -276,7 +270,6 @@ class _IdentifyLettersNumbersGameState
 
   bool _isLetter(String char) => RegExp(r'[a-zA-Z]').hasMatch(char);
   bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
-
   String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
 
   @override
@@ -289,7 +282,7 @@ class _IdentifyLettersNumbersGameState
   @override
   Widget build(BuildContext context) {
     final Widget topTextWidget =
-        isPrimeiroCiclo && _isLetter(targetCharacter)
+        isFirstCycle && _isLetter(targetCharacter)
             ? Column(
               children: [
                 Text(
@@ -333,7 +326,7 @@ class _IdentifyLettersNumbersGameState
               style: TextStyle(
                 fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
-                fontFamily: isPrimeiroCiclo ? 'Slabo' : null,
+                fontFamily: isFirstCycle ? 'Slabo' : null,
               ),
               textAlign: TextAlign.center,
             );
@@ -371,6 +364,32 @@ class _IdentifyLettersNumbersGameState
                 ),
               ),
             ),
+            Positioned(
+              top: 20.h,
+              right: 20.w,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Level ${levelManager.level}',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 5.h),
+                  Text(
+                    'Round ${levelManager.totalRoundsCount + 1} of ${levelManager.evaluationRounds}',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             ...letterItems.map((item) {
               return Align(
                 alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
@@ -391,8 +410,7 @@ class _IdentifyLettersNumbersGameState
                   ),
                 ),
               );
-            }).toList(),
-
+            }),
             if (showSuccessAnimation)
               IgnorePointer(
                 ignoring: true,
@@ -405,13 +423,13 @@ class _IdentifyLettersNumbersGameState
   }
 }
 
-class _LetterItem {
+class LetterItem {
   final String character;
   final double dx;
   final double dy;
   final String? fontFamily;
 
-  _LetterItem({
+  LetterItem({
     required this.character,
     required this.dx,
     required this.dy,

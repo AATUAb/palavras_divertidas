@@ -121,7 +121,7 @@ class CustomDrawer extends StatelessWidget {
       contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
       horizontalTitleGap: 12.w,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-      hoverColor: AppColors.lightBlue.withOpacity(0.2),
+      hoverColor: AppColors.lightBlue.withAlpha((255 * 0.2).toInt()),
     );
   }
 }

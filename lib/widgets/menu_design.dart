@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../themes/colors.dart'; // Ensure this file contains the definition of AppColors
 
 class MenuDesign extends StatelessWidget {
   final Widget child;
@@ -28,15 +27,12 @@ class MenuDesign extends StatelessWidget {
 
         Positioned.fill(
           child: Padding(
-          padding: EdgeInsets.only(
-          top: 40.h,
-          bottom: 0.h,
+            padding: EdgeInsets.only(top: 40.h, bottom: 0.h),
+            child: child,
+          ),
         ),
-        child: child,
-      ),
-    ),
-      
-      /*  // Rodapé com lápis (também sobreposto)
+
+        /*  // Rodapé com lápis (também sobreposto)
         Positioned(
           bottom: 0,
           left: 0,
