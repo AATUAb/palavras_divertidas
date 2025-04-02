@@ -22,6 +22,9 @@ dependencies:
   # Lotiie para animações pré-renderizadas
   lottie: ^3.3.1  
 
+  # Efeitos sonores
+  audioplayers: ^5.2.1
+
   # Armazenamento local
   hive: ^2.2.3
   hive_flutter: ^1.1.0
@@ -51,6 +54,12 @@ flutter:
     - assets/animations/two_star.json
     - assets/animations/tree_star.json
 
+#configuração de sons a usar
+    - assets/sounds/conquest.wav
+    - assets/sounds/correct.wav
+    - assets/sounds/intro_music.mp3
+    - assets/sounds/level_up.wav
+    - assets/sounds/wrong.wav
 
 #configuração de imagens a usar
     - assets/images/background_game_menu.png
