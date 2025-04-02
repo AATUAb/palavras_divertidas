@@ -21,7 +21,7 @@ class GameAnimations {
     );
   }
 
-  /// Animação de sucesso, exibida durante 3 segundos
+ /// Animação de coffeties, exibida durante 3 segundos, apenas em jogos com várias rodadas antes do acerto final
   static Widget successCoffetiesTimed({
     double? width,
     double? height,
@@ -64,7 +64,7 @@ class GameAnimations {
     );
   }
 
-  /// Animação de conquistas acumuladas, exibida durante 5 segundos
+  // Animação de conquistas acumuladas, exibida durante 5 segundos
   static Widget successConquestTimed({
     double? width,
     double? height,
@@ -72,7 +72,7 @@ class GameAnimations {
   }) {
     _playSound('conquest.wav');
     return _TimedAnimationWidget(
-      animationPath: 'assets/animations/conquist.json',
+      animationPath: 'assets/animations/conquest.json',
       duration: const Duration(seconds: 5),
       width: width ?? 684.w,
       height: height ?? 250.h,
