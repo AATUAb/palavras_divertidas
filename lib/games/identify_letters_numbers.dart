@@ -12,12 +12,10 @@ class IdentifyLettersNumbersGame extends StatefulWidget {
   const IdentifyLettersNumbersGame({super.key, required this.user});
 
   @override
-  IdentifyLettersNumbersGameState createState() =>
-      IdentifyLettersNumbersGameState();
+  IdentifyLettersNumbersGameState createState() => IdentifyLettersNumbersGameState();
 }
 
-class IdentifyLettersNumbersGameState
-    extends State<IdentifyLettersNumbersGame> {
+class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> {
   late LevelManager levelManager;
   bool isFirstCycle = false;
   bool showSuccessAnimation = false;
@@ -76,6 +74,9 @@ class IdentifyLettersNumbersGameState
   }
 
   void generateNewChallenge() {
+    setState(() {
+      letterItems.clear();
+    });
     foundCorrect = 0;
     roundTimer?.cancel();
     progressTimer?.cancel();
@@ -83,20 +84,16 @@ class IdentifyLettersNumbersGameState
     progressValue = 1.0;
 
     final String rawChar = characters[_random.nextInt(characters.length)];
-    targetCharacter =
-        _isLetter(rawChar)
-            ? (_random.nextBool()
-                ? rawChar.toUpperCase()
-                : rawChar.toLowerCase())
-            : rawChar;
+    targetCharacter = _isLetter(rawChar)
+        ? (_random.nextBool() ? rawChar.toUpperCase() : rawChar.toLowerCase())
+        : rawChar;
 
     Set<String> uniqueOptions = {};
     while (uniqueOptions.length < wrongCount) {
       String c = characters[_random.nextInt(characters.length)];
-      String option =
-          _isLetter(c)
-              ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
-              : c;
+      String option = _isLetter(c)
+          ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
+          : c;
       if (option.toLowerCase() != targetCharacter.toLowerCase() &&
           !uniqueOptions.any((e) => e.toLowerCase() == option.toLowerCase())) {
         uniqueOptions.add(option);
@@ -164,22 +161,7 @@ class IdentifyLettersNumbersGameState
 
     roundTimer = Timer(levelTime, () {
       if (showSuccessAnimation) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Tempo esgotado! ⏰',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          backgroundColor: Colors.orange,
-          duration: const Duration(milliseconds: 400),
-        ),
-      );
-
+      GameAnimations.showTimeoutSnackbar(context);
       final bool firstTryCorrect = currentTry == correctCount;
 
       levelManager.registerRoundWithOptionalFeedback(
@@ -194,58 +176,44 @@ class IdentifyLettersNumbersGameState
   void checkAnswer(LetterItem selectedItem) {
     currentTry++;
 
-      if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
-        foundCorrect++;
+    if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
+      foundCorrect++;
+      setState(() {
+        selectedItem.isCorrect = true;
+        selectedItem.showCheck = true;
+        selectedItem.isTapped = true;
+      });
+
+      GameAnimations.playCorrectSound();
+
+      if (foundCorrect >= correctCount) {
+        roundTimer?.cancel();
+        progressTimer?.cancel();
+        final bool firstTryCorrect = currentTry == correctCount;
+
         setState(() {
-          letterItems.remove(selectedItem);
+          showSuccessAnimation = true;
         });
 
-        // Play correct animation with sound for each hit
-        GameAnimations.successCorrectTimed();
+        GameAnimations.successCoffetiesTimed();
 
-        if (foundCorrect >= correctCount) {
-          roundTimer?.cancel();
-          progressTimer?.cancel();
-          final bool firstTryCorrect = currentTry == correctCount;
+        Future.delayed(const Duration(seconds: 1), () {
+          if (!mounted) return;
 
           setState(() {
-            showSuccessAnimation = true;
+            showSuccessAnimation = false;
           });
 
-          // Show coffeties animation at completion
-          GameAnimations.successCoffetiesTimed();
-
-          Future.delayed(const Duration(seconds: 1), () {
-            if (!mounted) return;
-
-            setState(() {
-              showSuccessAnimation = false;
-            });
-
-            levelManager.registerRoundWithOptionalFeedback(
-              context: context,
-              correct: firstTryCorrect,
-              applySettings: applyLevelSettings,
-              onFinished: generateNewChallenge,
-            );
-          });
-        }
+          levelManager.registerRoundWithOptionalFeedback(
+            context: context,
+            correct: firstTryCorrect,
+            applySettings: applyLevelSettings,
+            onFinished: generateNewChallenge,
+          );
+        });
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Tenta novamente!',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontFamily: isFirstCycle ? 'Slabo' : null,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          backgroundColor: Colors.red,
-          duration: const Duration(milliseconds: 600),
-        ),
-      );
+      GameAnimations.playWrongSound();
     }
   }
 
@@ -271,140 +239,84 @@ class IdentifyLettersNumbersGameState
 
   @override
   Widget build(BuildContext context) {
-    final Widget topTextWidget =
-        isFirstCycle && _isLetter(targetCharacter)
-            ? Column(
-              children: [
-                Text(
-                  'Encontra a letra',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontFamily: 'Slabo',
-                    fontWeight: FontWeight.bold,
-                  ),
+    final Widget topTextWidget = isFirstCycle && _isLetter(targetCharacter)
+        ? Column(
+            children: [
+              Text(
+                'Encontra a letra',
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontFamily: 'Slabo',
+                  fontWeight: FontWeight.bold,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      targetCharacter.toUpperCase(),
-                      style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo'),
-                    ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      targetCharacter.toUpperCase(),
-                      style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive'),
-                    ),
-                    SizedBox(width: 16.w),
-                    Text(
-                      targetCharacter.toLowerCase(),
-                      style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo'),
-                    ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      targetCharacter.toLowerCase(),
-                      style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive'),
-                    ),
-                  ],
-                ),
-              ],
-            )
-            : Text(
-              _isNumber(targetCharacter)
-                  ? 'Encontra o número $targetCharacter'
-                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-              style: TextStyle(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.bold,
-                fontFamily: isFirstCycle ? 'Slabo' : null,
               ),
-              textAlign: TextAlign.center,
-            );
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo')),
+                  SizedBox(width: 8.w),
+                  Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
+                  SizedBox(width: 16.w),
+                  Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo')),
+                  SizedBox(width: 8.w),
+                  Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
+                ],
+              ),
+            ],
+          )
+        : Text(
+            _isNumber(targetCharacter)
+                ? 'Encontra o número $targetCharacter'
+                : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+            style: TextStyle(
+              fontSize: 24.sp,
+              fontWeight: FontWeight.bold,
+              fontFamily: isFirstCycle ? 'Slabo' : null,
+            ),
+            textAlign: TextAlign.center,
+          );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Detetive de letras e números',
-          style: TextStyle(fontSize: 18.sp, color: Colors.white),
-        ),
-      ),
       body: SafeArea(
         child: Stack(
           children: [
             Align(
               alignment: Alignment.topCenter,
-              child: Padding(
-                padding: EdgeInsets.only(top: 10.h),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10.h),
-                      child: topTextWidget,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: LinearProgressIndicator(
-                        value: progressValue,
-                        minHeight: 8.h,
-                        backgroundColor: Colors.grey[300],
-                        color: Colors.orange,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              top: 20.h,
-              right: 20.w,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'Level ${levelManager.level}',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(height: 5.h),
-                  Text(
-                    'Round ${levelManager.totalRoundsCount + 1} of ${levelManager.evaluationRounds}',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
+              child: GameAnimations.buildTopInfo(
+                progressValue: progressValue,
+                level: levelManager.level,
+                currentRound: levelManager.totalRoundsCount + 1,
+                totalRounds: levelManager.evaluationRounds,
+                topTextWidget: topTextWidget,
               ),
             ),
             ...letterItems.map((item) {
               return Align(
                 alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
-                child: TextButton(
-                  onPressed: () => checkAnswer(item),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    item.character,
-                    style: TextStyle(
-                      fontSize: 30.sp,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: item.fontFamily,
-                    ),
-                  ),
-                ),
+                child: item.isTapped
+                    ? GameAnimations.correctAnswerIcon()
+                    : TextButton(
+                        onPressed: () => checkAnswer(item),
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          item.character,
+                          style: TextStyle(
+                            fontSize: 30.sp,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: item.fontFamily,
+                          ),
+                        ),
+                      ),
               );
             }),
             if (showSuccessAnimation)
               IgnorePointer(
                 ignoring: true,
-                child: Center(child: GameAnimations.successCoffetiesTimed()),
+                child: GameAnimations.successCoffetiesTimed(),
               ),
           ],
         ),
@@ -418,11 +330,15 @@ class LetterItem {
   final double dx;
   final double dy;
   final String? fontFamily;
+  bool isCorrect;
+  bool isTapped = false;
+  bool showCheck = false;
 
   LetterItem({
     required this.character,
     required this.dx,
     required this.dy,
     this.fontFamily,
+    this.isCorrect = false,
   });
 }

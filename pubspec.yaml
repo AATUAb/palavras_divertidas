@@ -53,7 +53,7 @@ flutter:
     - assets/animations/one_star.json
     - assets/animations/two_star.json
     - assets/animations/tree_star.json
-    - assets/animations/correct.json
+    - assets/animations/check.json
 
 #configuração de sons a usar
     - assets/sounds/conquest.wav
@@ -63,8 +63,6 @@ flutter:
     - assets/sounds/wrong.wav
 
 #configuração de imagens a usar
-    - assets/images/background_game_menu.png
-    - assets/images/sun_cloud.png
     - assets/images/sun.png
 
 # Configuração de fontes a usar

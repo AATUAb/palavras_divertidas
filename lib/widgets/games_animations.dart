@@ -5,23 +5,105 @@ import 'package:lottie/lottie.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class GameAnimations {
-  /// Animação de sucesso com ícone de correto, exibida durante 3 segundos
-  static Widget successCorrectTimed({
-    double? width,
-    double? height,
-    VoidCallback? onFinished,
+ /// Animação de coffeties, exibida durante 3 segundos, apenas em jogos com várias rodadas antes do acerto final
+  /// Toca o som de resposta correta
+  static Future<void> playCorrectSound() async {
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/correct.wav'));
+  }
+
+  /// Toca o som de resposta errada
+  static Future<void> playWrongSound() async {
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/wrong.wav'));
+  }
+
+  /// Icone de resposta individual correcta 
+  static Widget correctAnswerIcon() {
+  return const Icon(Icons.check, color: Colors.green, size: 30);
+}
+  
+  /// Informação de tempo esgotado, exibida durante 400 milissegundos  
+    static void showTimeoutSnackbar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Tempo esgotado! ⏰',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.orange,
+        duration: const Duration(milliseconds: 400),
+      ),
+    );
+  }
+  
+   /// Mostra a barra de progresso + nível e ronda
+  static Widget buildTopInfo({
+    required double progressValue,
+    required int level,
+    required int currentRound,
+    required int totalRounds,
+    required Widget topTextWidget,
   }) {
-    _playSound('correct.wav');
-    return _TimedAnimationWidget(
-      animationPath: 'assets/animations/correct.json',
-      duration: const Duration(seconds: 3),
-      width: width ?? 640.w,
-      height: height ?? 640.h,
-      onFinished: onFinished,
+    return Stack(
+      children: [
+        Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: EdgeInsets.only(top: 10.h),
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10.h),
+                  child: topTextWidget,
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: LinearProgressIndicator(
+                    value: progressValue,
+                    minHeight: 8.h,
+                    backgroundColor: Colors.grey[300],
+                    color: Colors.orange,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          top: 20.h,
+          right: 20.w,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Nível $level',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 5.h),
+              Text(
+                'Ronda $currentRound de $totalRounds',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
- /// Animação de coffeties, exibida durante 3 segundos, apenas em jogos com várias rodadas antes do acerto final
   static Widget successCoffetiesTimed({
     double? width,
     double? height,
@@ -36,6 +118,7 @@ class GameAnimations {
     );
   }
 
+// Animação de estrelas, para mostrar ajustes de níveis,exibida durante 3 segundos, com som de level up
   static Widget starByLevel({
     required int level,
     double? width,
@@ -72,8 +155,8 @@ class GameAnimations {
   }) {
     _playSound('conquest.wav');
     return _TimedAnimationWidget(
-      animationPath: 'assets/animations/conquest.json',
-      duration: const Duration(seconds: 5),
+      animationPath: 'assets/animations/check.json',
+      duration: const Duration(seconds: 1),
       width: width ?? 684.w,
       height: height ?? 250.h,
       onFinished: onFinished,
@@ -174,13 +257,10 @@ class _AnimatedAnswerItemState extends State<AnimatedAnswerItem>
     if (widget.isCorrect) {
       GameAnimations._playSound('correct.wav');
       setState(() => _showCheckIcon = true);
-      Future.delayed(const Duration(milliseconds: 600), () {
+      Future.delayed(const Duration(milliseconds: 200), () {
         if (widget.onRemoved != null) widget.onRemoved!();
       });
-    } else {
-      GameAnimations._playSound('wrong.wav');
-      _controller.forward();
-    }
+    } 
   }
 
   @override
@@ -199,12 +279,11 @@ class _AnimatedAnswerItemState extends State<AnimatedAnswerItem>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              widget.child,
+              if (!_showCheckIcon) widget.child,
               if (_showCheckIcon)
-                Positioned(
-                  top: -10.h,
-                  right: -10.w,
-                  child: Icon(Icons.check_circle, color: Colors.green, size: 32.sp),
+                Icon(Icons.check_circle, 
+                  color: Colors.green, 
+                  size: 32.sp,
                 ),
             ],
           ),
@@ -212,4 +291,12 @@ class _AnimatedAnswerItemState extends State<AnimatedAnswerItem>
       },
     );
   }
+@override
+void didUpdateWidget(covariant AnimatedAnswerItem oldWidget) {
+  super.didUpdateWidget(oldWidget);
+
+  if (widget.isCorrect && !_showCheckIcon) {
+    setState(() => _showCheckIcon = true);
+  }
+}
 }
