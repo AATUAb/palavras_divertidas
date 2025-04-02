@@ -32,11 +32,19 @@ class HiveService {
 
       final users = _userBox.values.toList();
       logger.i(
+<<<<<<< HEAD
         "🔍 Recuperado ${users.length} usuários do Hive",
       ); // Usando logger para log de sucesso
       return users;
     } catch (e) {
       logger.e("❌ Erro ao obter usuários: $e"); // Usando logger para erro
+=======
+        "🔍 Retrieved ${users.length} users from Hive",
+      ); // Usando logger para log de sucesso
+      return users;
+    } catch (e) {
+      logger.e("❌ Error getting users: $e"); // Usando logger para erro
+>>>>>>> d5d6dd8 (Corrigidos erros de depreciação com 'withOpacity' e atualizações no código)
       return [];
     }
   }
@@ -45,10 +53,17 @@ class HiveService {
     try {
       await _userBox.add(user);
       logger.i(
+<<<<<<< HEAD
         "Usuário ${user.name} adicionado com sucesso",
       ); // Usando logger para sucesso
     } catch (e) {
       logger.e("Erro ao adicionar usuário: $e"); // Usando logger para erro
+=======
+        "User ${user.name} added successfully",
+      ); // Usando logger para sucesso
+    } catch (e) {
+      logger.e("Error adding user: $e"); // Usando logger para erro
+>>>>>>> d5d6dd8 (Corrigidos erros de depreciação com 'withOpacity' e atualizações no código)
     }
   }
 
@@ -56,10 +71,17 @@ class HiveService {
     try {
       await _userBox.putAt(index, updatedUser);
       logger.i(
+<<<<<<< HEAD
         "Usuário no índice $index atualizado com sucesso",
       ); // Usando logger para sucesso
     } catch (e) {
       logger.e("Erro ao atualizar usuário: $e"); // Usando logger para erro
+=======
+        "User at index $index updated successfully",
+      ); // Usando logger para sucesso
+    } catch (e) {
+      logger.e("Error updating user: $e"); // Usando logger para erro
+>>>>>>> d5d6dd8 (Corrigidos erros de depreciação com 'withOpacity' e atualizações no código)
     }
   }
 
@@ -67,10 +89,17 @@ class HiveService {
     try {
       await _userBox.deleteAt(index);
       logger.i(
+<<<<<<< HEAD
         "Usuário no índice $index excluído com sucesso",
       ); // Usando logger para sucesso
     } catch (e) {
       logger.e("Erro ao excluir usuário: $e"); // Usando logger para erro
+=======
+        "User at index $index deleted successfully",
+      ); // Usando logger para sucesso
+    } catch (e) {
+      logger.e("Error deleting user: $e"); // Usando logger para erro
+>>>>>>> d5d6dd8 (Corrigidos erros de depreciação com 'withOpacity' e atualizações no código)
     }
   }
 }
