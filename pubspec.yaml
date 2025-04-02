@@ -10,19 +10,19 @@ dependencies:
   flutter:
     sdk: flutter
 
-# Dependências do Flutter
+  # Logger
   logger: ^1.2.0
 
   # UI e Icons
   cupertino_icons: ^1.0.8
 
-  # Resposividade da aplicação
+  # Responsividade da aplicação
   flutter_screenutil: ^5.9.0
 
-  # Lotiie para animações pré-renderizadas
+  # Lottie para animações pré-renderizadas
   lottie: ^3.3.1  
 
-  # Efeitos sonores
+  # Efeitos sonoros
   audioplayers: ^5.2.1
 
   # Armazenamento local
@@ -30,8 +30,9 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.2
 
-  # gráficos
+  # Gráficos
   fl_chart: ^0.64.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -46,7 +47,7 @@ flutter:
   uses-material-design: true
 
   assets:
-#configuração de animações a usar
+    # Animações
     - assets/animations/loading.json
     - assets/animations/coffeties.json
     - assets/animations/conquest.json
@@ -54,28 +55,31 @@ flutter:
     - assets/animations/two_star.json
     - assets/animations/tree_star.json
 
-#configuração de sons a usar
+    # Sons
     - assets/sounds/conquest.wav
     - assets/sounds/correct.wav
     - assets/sounds/intro_music.mp3
     - assets/sounds/level_up.wav
     - assets/sounds/wrong.wav
 
-#configuração de imagens a usar
+    # Imagens gerais
     - assets/images/background_game_menu.png
     - assets/images/sun_cloud.png
     - assets/images/sun.png
 
-# Configuração de fontes a usar
+    # Imagens dos stickers
+    - assets/stickers/monkey.jpg
+    - assets/stickers/elephant.jpg
+
   fonts:
-    - family: ComicNeue                     # tipo de letra Comic Sans, para jogos de pré-escolar e interface geral
+    - family: ComicNeue
       fonts:
         - asset: assets/fonts/ComicNeue-Regular.ttf
 
-    - family: Cursive                         # tipo de letra manuscrita, para joogos de 1º cilco
+    - family: Cursive
       fonts:
         - asset: assets/fonts/Cursive-Regular.ttf
 
-    - family: Slabo                           # tipo de letra máquina, para joogos de 1º cilco
+    - family: Slabo
       fonts:
         - asset: assets/fonts/Slabo-Regular.ttf

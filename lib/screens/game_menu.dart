@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
@@ -9,6 +8,7 @@ import '../games/write_game.dart';
 import '../games/identify_letters_numbers.dart';
 import 'home_page.dart';
 import 'dashboard.dart';
+import 'sticker_book.dart'; // Importando a tela de Caderneta de Cromos
 
 class GameCardData {
   final String title;
@@ -92,26 +92,21 @@ class _GameMenuState extends State<GameMenu> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const MyHomePage(title: 'Mundo das Palavras'),
+              builder:
+                  (context) => const MyHomePage(title: 'Mundo das Palavras'),
             ),
           );
         },
         onAchievements: () {
           Navigator.pop(context);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  "Conquistas em breve!",
-                  style: TextStyle(fontSize: 14.sp, color: AppColors.white),
-                ),
-                backgroundColor: AppColors.green,
-                duration: const Duration(seconds: 2),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (_) =>
+                      StickerBookScreen(), // Navegando para a Caderneta de Cromos
+            ),
+          );
         },
         onDashboard: () {
           Navigator.pop(context);
@@ -134,7 +129,7 @@ class _GameMenuState extends State<GameMenu> {
                 children: [
                   // Cabeçalho
                   Padding(
-                    padding: EdgeInsets.only(top: 2.h, left: 12.w, right: 12.w), // Ajuste para mais alto
+                    padding: EdgeInsets.only(top: 2.h, left: 12.w, right: 12.w),
                     child: SizedBox(
                       height: 30.h,
                       width: double.infinity,
@@ -143,63 +138,43 @@ class _GameMenuState extends State<GameMenu> {
                           Align(
                             alignment: Alignment.topLeft,
                             child: Row(
-                              mainAxisSize: MainAxisSize.min, 
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                // Botão de Menu (Top-Left)
-Positioned(
-  top: 10.h, // Alinhado com o botão de Fechar
-  left: 10.w, // Posição à esquerda
-  child: Material(
-    type: MaterialType.transparency,
-    child: Container(
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle, // Forma circular
-      ),
-      child: IconButton(
-        icon: Icon(Icons.menu, color: Colors.black, size: 30.sp), // Ícone do menu
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
-        onPressed: () => Scaffold.of(context).openDrawer(), // Ação do menu
-      ),
-    ),
-  ),
-),
-                                // Botão de Home (Top-Left, ao lado do Menu)
-/*Positioned(
-  top: 10.h, // Alinhado com o botão de Fechar
-  left: 40.w, // Posição à direita do Menu
-  child: Material(
-    type: MaterialType.transparency,
-    child: Container(
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle, // Forma circular
-      ),
-      child: IconButton(
-        icon: Icon(Icons.home, color: Colors.black, size: 30.sp), // Ícone de Home
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const MyHomePage(title: 'Mundo das Palavras'),
-            ),
-          );
-        },
-      ),
-    ),
-  ),
-),*/
+                                Positioned(
+                                  top: 10.h,
+                                  left: 10.w,
+                                  child: Material(
+                                    type: MaterialType.transparency,
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: IconButton(
+                                        icon: Icon(
+                                          Icons.menu,
+                                          color: Colors.black,
+                                          size: 30.sp,
+                                        ),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        onPressed:
+                                            () =>
+                                                Scaffold.of(
+                                                  context,
+                                                ).openDrawer(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                      
                         ],
                       ),
                     ),
                   ),
                   // Título
-                  Align( 
+                  Align(
                     alignment: Alignment.center,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -229,7 +204,10 @@ Positioned(
                   // Grelha de jogos com uso total do espaço disponível
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 4.h,
+                      ),
                       child: GridView.builder(
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: jogosDisponiveis.length,
@@ -246,7 +224,11 @@ Positioned(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(jogo.icon, size: 50.sp, color: jogo.backgroundColor),
+                                Icon(
+                                  jogo.icon,
+                                  size: 50.sp,
+                                  color: jogo.backgroundColor,
+                                ),
                                 SizedBox(height: 8.h),
                                 Text(
                                   jogo.title,
@@ -298,7 +280,9 @@ Positioned(
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => IdentifyLettersNumbersGame(key: widget.key, user: widget.user),
+        builder:
+            (context) =>
+                IdentifyLettersNumbersGame(key: widget.key, user: widget.user),
       ),
     );
   }

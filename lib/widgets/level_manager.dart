@@ -22,7 +22,7 @@ class LevelManager {
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 7,
+    this.roundsToEvaluate = 1,
   }) : level = level ?? int.tryParse(user.level) ?? 1;
 
   // Getters para obter informações sobre o nível e o número de rodadas
