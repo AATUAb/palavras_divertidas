@@ -78,59 +78,81 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    double cardWidth = min(180.w, 0.28.sw); // mais estreito e proporcional
+Widget build(BuildContext context) {
+  double cardWidth = min(180.w, 0.28.sw);
 
-    return Scaffold(
-      body: MenuDesign(
-        child: Center(
-          // Centraliza horizontal e vertical
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: 12.h),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.people, color: AppColors.orange, size: 35.sp),
-                      SizedBox(width: 8.w),
-                      Text(
-                        "Quem vai jogar hoje?",
-                        style: TextStyle(
-                          fontSize: 38.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkBlue,
-                        ),
+return Scaffold(
+  body: MenuDesign(
+    child: SingleChildScrollView(
+      child: Transform.translate(
+        offset: Offset(0, -35.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 0.h),
+            Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: SizedBox(
+                width: 280.w,
+                height: 60.h,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.people, color: AppColors.orange, size: 25.sp),
+                          SizedBox(width: 6.w),
+                          Flexible(
+                            child: Text(
+                              'Quem vai jogar hoje?',
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 25.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkBlue,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: Wrap(
-                    spacing: 10.w,
-                    runSpacing: 10.h,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      ...users.asMap().entries.map(
-                        (entry) => SizedBox(
-                          width: cardWidth,
-                          child: _buildUserCard(entry.key),
-                        ),
-                      ),
-                      SizedBox(width: cardWidth, child: _buildAddUserButton()),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            SizedBox(height: 25.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Wrap(
+                spacing: 10.w,
+                runSpacing: 10.h,
+                alignment: WrapAlignment.center,
+                children: [
+                  ...users.asMap().entries.map(
+                    (entry) => SizedBox(
+                      width: cardWidth,
+                      child: _buildUserCard(entry.key),
+                    ),
+                  ),
+                  SizedBox(width: cardWidth, child: _buildAddUserButton()),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 
   Widget _buildUserCard(int index) {
     final Color cardColor =

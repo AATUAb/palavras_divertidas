@@ -6,6 +6,7 @@ import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/game_card.dart';
 import '../widgets/custom_drawer.dart' as custom;
+import '../widgets/menu_design.dart';
 import '../games/write_game.dart';
 import '../games/identify_letters_numbers.dart';
 import 'home_page.dart';
@@ -25,7 +26,7 @@ class _GameMenuState extends State<GameMenu> {
   Widget build(BuildContext context) {
     final List<GameCardData> jogosBase = [
       GameCardData(
-        title: "Detetive de letras e números",
+        title: "Detetive de letras" "e números",
         icon: Icons.search,
         onTap: _startIdentifyLettersNumbersGame,
         backgroundColor: AppColors.green,
@@ -71,28 +72,6 @@ class _GameMenuState extends State<GameMenu> {
             : jogosBase;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Olá, ${widget.user.name}!!",
-          style: TextStyle(fontSize: 18.sp, color: AppColors.white),
-        ),
-        centerTitle: true,
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 16.w),
-            child: Center(
-              child: Text(
-                widget.user.level,
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
       drawer: custom.CustomDrawer(
         userName: widget.user.name,
         userLevel: widget.user.level,
@@ -133,36 +112,49 @@ class _GameMenuState extends State<GameMenu> {
           );
         },
       ),
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/background_game_menu.png'),
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+body: MenuDesign(
+  child: SafeArea(
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final is1Ciclo = widget.user.level == "1º Ciclo";
+        final isSmallHeight = constraints.maxHeight < 650;
+
+        return Column(
+          children: [
+            // Cabeçalho
+            Padding(
+              padding: EdgeInsets.only(top: 4.h, left: 12.w, right: 12.w),
+              child: SizedBox(
+                height: 50.h,
+                width: double.infinity,
+                child: Stack(
                   children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(15.w, 10.h, 10.w, 10.h),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Builder(
+                        builder: (context) => IconButton(
+                          icon: Icon(Icons.menu, color: Colors.black, size: 28.sp),
+                          onPressed: () => Scaffold.of(context).openDrawer(),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.games,
-                            color: AppColors.orange,
-                            size: 24.sp,
-                          ),
-                          SizedBox(width: 5.w),
                           Text(
-                            "Escolhe o teu jogo:",
+                            "Olá, ${widget.user.name}!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.black,
+                            ),
+                          ),
+                          Text(
+                            "Escolhe o teu jogo",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w600,
@@ -172,46 +164,95 @@ class _GameMenuState extends State<GameMenu> {
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 8.h,
-                      ),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: 600.w),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 1.sw > 600 ? 3 : 2,
-                                crossAxisSpacing: 12.w,
-                                mainAxisSpacing: 12.h,
-                                childAspectRatio: 0.9,
-                              ),
-                          itemCount: jogosDisponiveis.length,
-                          itemBuilder: (context, index) {
-                            return GameCard(
-                              title: jogosDisponiveis[index].title,
-                              icon: jogosDisponiveis[index].icon,
-                              onTap: jogosDisponiveis[index].onTap,
-                              backgroundColor:
-                                  jogosDisponiveis[index].backgroundColor,
-                              iconColor: jogosDisponiveis[index].iconColor,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
             ),
+
+            // Grelha de jogos com uso total do espaço disponível
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                child: GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: jogosDisponiveis.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: is1Ciclo ? 3 : 2,
+                    crossAxisSpacing: 8.w,
+                    mainAxisSpacing: 8.h,
+                    childAspectRatio: isSmallHeight ? 2.4 : 2.1,
+                  ),
+                  itemBuilder: (context, index) {
+                    final jogo = jogosDisponiveis[index];
+                    return SizedBox(
+                      width: 160.w,
+                      child: Card(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.r),
+                          side: BorderSide(color: AppColors.orange, width: 2.w),
+                        ),
+                        elevation: 3,
+                        child: InkWell(
+                          onTap: jogo.onTap,
+                          borderRadius: BorderRadius.circular(20.r),
+                          child: Padding(
+                            padding: EdgeInsets.all(8.w),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(jogo.icon, size: 50.sp, color: jogo.backgroundColor),
+                                SizedBox(height: 8.h),
+                                Flexible(
+                                  child: Text(
+                                    jogo.title,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: jogo.backgroundColor,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  ),
+),
+      backgroundColor: AppColors.white,
+      appBar: AppBar(
+        title: const Text("Mundo das Palavras"),
+        centerTitle: true,
+        backgroundColor: AppColors.orange,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MyHomePage(title: 'Mundo das Palavras'),
+                ),
+              );
+            },
           ),
         ],
       ),
     );
   }
+
+
 
   void _navigateToGame(String gameName) {
     ScaffoldMessenger.of(context).showSnackBar(
