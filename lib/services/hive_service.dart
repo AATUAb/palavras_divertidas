@@ -4,7 +4,7 @@ import '../models/user_model.dart';
 
 class HiveService {
   static late Box<UserModel> _userBox;
-  static var logger = Logger(); // Criação de uma instância do Logger
+  static var logger = Logger(); // Logger instance
 
   static Future<void> init() async {
     await Hive.initFlutter();
@@ -15,11 +15,9 @@ class HiveService {
 
     try {
       _userBox = await Hive.openBox<UserModel>('users');
-      logger.i(
-        "✅ Box 'users' aberta com sucesso",
-      ); // Usando logger em vez de print
+      logger.i("✅ Box 'users' opened successfully");
     } catch (e) {
-      logger.e("❌ Erro ao abrir a box: $e"); // Usando logger para erro
+      logger.e("❌ Error opening box: $e");
       rethrow;
     }
   }
@@ -31,20 +29,10 @@ class HiveService {
       }
 
       final users = _userBox.values.toList();
-      logger.i(
-<<<<<<< HEAD
-        "🔍 Recuperado ${users.length} usuários do Hive",
-      ); // Usando logger para log de sucesso
+      logger.i("🔍 Retrieved ${users.length} users from Hive");
       return users;
     } catch (e) {
-      logger.e("❌ Erro ao obter usuários: $e"); // Usando logger para erro
-=======
-        "🔍 Retrieved ${users.length} users from Hive",
-      ); // Usando logger para log de sucesso
-      return users;
-    } catch (e) {
-      logger.e("❌ Error getting users: $e"); // Usando logger para erro
->>>>>>> d5d6dd8 (Corrigidos erros de depreciação com 'withOpacity' e atualizações no código)
+      logger.e("❌ Error retrieving users: $e");
       return [];
     }
   }
@@ -52,54 +40,37 @@ class HiveService {
   static Future<void> addUser(UserModel user) async {
     try {
       await _userBox.add(user);
-      logger.i(
-<<<<<<< HEAD
-        "Usuário ${user.name} adicionado com sucesso",
-      ); // Usando logger para sucesso
+      logger.i("✅ User ${user.name} added successfully");
     } catch (e) {
-      logger.e("Erro ao adicionar usuário: $e"); // Usando logger para erro
-=======
-        "User ${user.name} added successfully",
-      ); // Usando logger para sucesso
-    } catch (e) {
-      logger.e("Error adding user: $e"); // Usando logger para erro
->>>>>>> d5d6dd8 (Corrigidos erros de depreciação com 'withOpacity' e atualizações no código)
+      logger.e("❌ Error adding user: $e");
     }
   }
 
   static Future<void> updateUser(int index, UserModel updatedUser) async {
     try {
       await _userBox.putAt(index, updatedUser);
-      logger.i(
-<<<<<<< HEAD
-        "Usuário no índice $index atualizado com sucesso",
-      ); // Usando logger para sucesso
+      logger.i("🔄 User at index $index updated successfully");
     } catch (e) {
-      logger.e("Erro ao atualizar usuário: $e"); // Usando logger para erro
-=======
-        "User at index $index updated successfully",
-      ); // Usando logger para sucesso
+      logger.e("❌ Error updating user at index: $e");
+    }
+  }
+
+  // ✅ NOVO: Atualizar utilizador de forma segura usando a key do Hive
+  static Future<void> updateUserByKey(int key, UserModel updatedUser) async {
+    try {
+      await _userBox.put(key, updatedUser);
+      logger.i("✅ User with key $key updated successfully");
     } catch (e) {
-      logger.e("Error updating user: $e"); // Usando logger para erro
->>>>>>> d5d6dd8 (Corrigidos erros de depreciação com 'withOpacity' e atualizações no código)
+      logger.e("❌ Error updating user by key: $e");
     }
   }
 
   static Future<void> deleteUser(int index) async {
     try {
       await _userBox.deleteAt(index);
-      logger.i(
-<<<<<<< HEAD
-        "Usuário no índice $index excluído com sucesso",
-      ); // Usando logger para sucesso
+      logger.i("🗑️ User at index $index deleted successfully");
     } catch (e) {
-      logger.e("Erro ao excluir usuário: $e"); // Usando logger para erro
-=======
-        "User at index $index deleted successfully",
-      ); // Usando logger para sucesso
-    } catch (e) {
-      logger.e("Error deleting user: $e"); // Usando logger para erro
->>>>>>> d5d6dd8 (Corrigidos erros de depreciação com 'withOpacity' e atualizações no código)
+      logger.e("❌ Error deleting user: $e");
     }
   }
 }

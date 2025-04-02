@@ -16,29 +16,24 @@ class MenuDesign extends StatelessWidget {
         Container(color: Colors.white),
 
         // Topo com formato "nuvem"
-        const Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: TopWave(),
-        ),
+        const Positioned(top: 0, left: 0, right: 0, child: TopWave()),
 
         // Sol no canto superior esquerdo
         Positioned(
-          top: -70.h,
+          top: -50.h,
           left: 12.w,
           child: Image.asset(
             'assets/images/sun.png',
             width: 300.w,
             height: 300.h,
-              fit: BoxFit.contain,
+            fit: BoxFit.contain,
           ),
         ),
 
         // "Mundo das Palavras" no canto superior direito
         Positioned(
           top: 15.h,
-          right: 20.w,
+          right: 80.w,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -48,9 +43,7 @@ class MenuDesign extends StatelessWidget {
                   fontSize: 40.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.orange,
-                  shadows: const [
-                    Shadow(offset: Offset(1, 1), blurRadius: 1),
-                  ],
+                  shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 1)],
                 ),
               ),
               Text(
@@ -59,9 +52,7 @@ class MenuDesign extends StatelessWidget {
                   fontSize: 40.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.orange,
-                  shadows: const [
-                    Shadow(offset: Offset(1, 1), blurRadius: 1),
-                  ],
+                  shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 1)],
                 ),
               ),
             ],
@@ -70,17 +61,15 @@ class MenuDesign extends StatelessWidget {
 
         // Conteúdo principal (filho)
         Positioned.fill(
-          child: Padding(
-            padding: EdgeInsets.only(top: 40.h),
-            child: child,
-          ),
+          child: Padding(padding: EdgeInsets.only(top: 40.h), child: child),
         ),
 
         // Botão de Fechar (Top-Right)
         Positioned(
           top: 10.h,
           right: 10.w,
-          child: Material( // Added Material for ink splash
+          child: Material(
+            // Added Material for ink splash
             type: MaterialType.transparency,
             child: Container(
               decoration: const BoxDecoration(
@@ -89,9 +78,14 @@ class MenuDesign extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(Icons.close_rounded, color: AppColors.red, size: 20.sp), // White icon, maybe smaller
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: AppColors.red,
+                  size: 20.sp,
+                ), // White icon, maybe smaller
                 padding: EdgeInsets.zero, // Remove default padding
-                constraints: const BoxConstraints(), // Remove default constraints
+                constraints:
+                    const BoxConstraints(), // Remove default constraints
                 tooltip: 'Fechar App', // Optional: Add tooltip
                 onPressed: () {
                   SystemNavigator.pop(); // Fecha a aplicação
@@ -106,7 +100,11 @@ class MenuDesign extends StatelessWidget {
           bottom: 10.h,
           left: 10.w,
           child: IconButton(
-            icon: Icon(Icons.info_outline, color: Colors.black, size: 28.sp), // Use outline for distinction if needed
+            icon: Icon(
+              Icons.info_outline,
+              color: Colors.black,
+              size: 28.sp,
+            ), // Use outline for distinction if needed
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -136,9 +134,7 @@ class TopWave extends StatelessWidget {
     return SizedBox(
       height: 110.h,
       width: double.infinity,
-      child: CustomPaint(
-        painter: CloudPainter(),
-      ),
+      child: CustomPaint(painter: CloudPainter()),
     );
   }
 }
@@ -154,20 +150,28 @@ class CloudPainter extends CustomPainter {
 
     // Ondulações estilo nuvem
     path.quadraticBezierTo(
-      size.width * 0.1, size.height,
-      size.width * 0.25, size.height * 0.7,
+      size.width * 0.1,
+      size.height,
+      size.width * 0.25,
+      size.height * 0.7,
     );
     path.quadraticBezierTo(
-      size.width * 0.4, size.height * 0.4,
-      size.width * 0.5, size.height * 0.7,
+      size.width * 0.4,
+      size.height * 0.4,
+      size.width * 0.5,
+      size.height * 0.7,
     );
     path.quadraticBezierTo(
-      size.width * 0.6, size.height,
-      size.width * 0.75, size.height * 0.6,
+      size.width * 0.6,
+      size.height,
+      size.width * 0.75,
+      size.height * 0.6,
     );
     path.quadraticBezierTo(
-      size.width * 0.9, size.height * 0.3,
-      size.width, size.height * 0.6,
+      size.width * 0.9,
+      size.height * 0.3,
+      size.width,
+      size.height * 0.6,
     );
 
     path.lineTo(size.width, 0);
@@ -175,7 +179,6 @@ class CloudPainter extends CustomPainter {
 
     canvas.drawPath(path, paint);
   }
-
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
