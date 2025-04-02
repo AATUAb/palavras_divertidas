@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import for SystemNavigator
+import 'package:flutter/services.dart'; 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../themes/colors.dart'; // Import for SnackBar colors
+import '../themes/colors.dart'; 
+import '../screens/game_menu.dart';  // Certifique-se de que o caminho está correto
 
-class MenuDesign extends StatelessWidget {
+class GamesDesign extends StatelessWidget {
   final Widget child;
+  final dynamic user; // Aqui, você tem o usuário que foi passado como parâmetro
 
-  const MenuDesign({super.key, required this.child});
+  const GamesDesign({super.key, required this.child, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -23,51 +25,6 @@ class MenuDesign extends StatelessWidget {
           child: TopWave(),
         ),
 
-        // Sol no canto superior esquerdo
-        Positioned(
-          top: -70.h,
-          left: 12.w,
-          child: Image.asset(
-            'assets/images/sun.png',
-            width: 300.w,
-            height: 300.h,
-              fit: BoxFit.contain,
-          ),
-        ),
-
-        // "Mundo das Palavras" no canto superior direito
-        Positioned(
-          top: 15.h,
-          right: 20.w,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'Mundo das',
-                style: TextStyle(
-                  fontSize: 40.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
-                  shadows: const [
-                    Shadow(offset: Offset(1, 1), blurRadius: 1),
-                  ],
-                ),
-              ),
-              Text(
-                'Palavras',
-                style: TextStyle(
-                  fontSize: 40.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
-                  shadows: const [
-                    Shadow(offset: Offset(1, 1), blurRadius: 1),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
         // Conteúdo principal (filho)
         Positioned.fill(
           child: Padding(
@@ -80,21 +37,48 @@ class MenuDesign extends StatelessWidget {
         Positioned(
           top: 10.h,
           right: 10.w,
-          child: Material( // Added Material for ink splash
+          child: Material(
             type: MaterialType.transparency,
             child: Container(
               decoration: const BoxDecoration(
-                //color: Colors.black,
-                border: Border.fromBorderSide(BorderSide(color: Colors.black)),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(Icons.close_rounded, color: AppColors.red, size: 20.sp), // White icon, maybe smaller
+                icon: Icon(Icons.close_rounded, color: AppColors.red, size: 20.sp),
                 padding: EdgeInsets.zero, // Remove default padding
                 constraints: const BoxConstraints(), // Remove default constraints
                 tooltip: 'Fechar App', // Optional: Add tooltip
                 onPressed: () {
                   SystemNavigator.pop(); // Fecha a aplicação
+                },
+              ),
+            ),
+          ),
+        ),
+
+        // Botão de Home, para regressão ao menu de jogos
+        Positioned(
+          top: 10.h,
+          left: 10.w,
+          child: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: Icon(Icons.home, color: AppColors.green, size: 20.sp),
+                padding: EdgeInsets.zero, // Remove default padding
+                constraints: const BoxConstraints(), // Remove default constraints
+                tooltip: 'Voltar ao Menu de Jogos', // Optional: Add tooltip
+                onPressed: () {
+                  // Redireciona para a página principal de jogos (GameMenu)
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GameMenu(user: user),  // Agora usamos 'user' diretamente
+                    ),
+                  );
                 },
               ),
             ),
@@ -111,7 +95,7 @@ class MenuDesign extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    "Tuturial em breve",
+                    "Tutorial em breve",
                     style: TextStyle(fontSize: 14.sp, color: AppColors.white),
                   ),
                   backgroundColor: AppColors.green, // Use theme color
@@ -175,7 +159,6 @@ class CloudPainter extends CustomPainter {
 
     canvas.drawPath(path, paint);
   }
-
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;

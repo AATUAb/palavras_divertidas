@@ -1,16 +1,27 @@
-// Estrutura principal do menu dos jogos disponíveis
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
 import '../themes/colors.dart';
-import '../widgets/game_card.dart';
 import '../widgets/custom_drawer.dart' as custom;
 import '../widgets/menu_design.dart';
 import '../games/write_game.dart';
 import '../games/identify_letters_numbers.dart';
 import 'home_page.dart';
 import 'dashboard.dart';
+
+class GameCardData {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color backgroundColor;
+
+  GameCardData({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+    required this.backgroundColor,
+  });
+}
 
 class GameMenu extends StatefulWidget {
   final UserModel user;
@@ -26,7 +37,7 @@ class _GameMenuState extends State<GameMenu> {
   Widget build(BuildContext context) {
     final List<GameCardData> jogosBase = [
       GameCardData(
-        title: "Detetive de letras" "e números",
+        title: "Detetive de letras e números",
         icon: Icons.search,
         onTap: _startIdentifyLettersNumbersGame,
         backgroundColor: AppColors.green,
@@ -80,8 +91,7 @@ class _GameMenuState extends State<GameMenu> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder:
-                  (context) => const MyHomePage(title: 'Mundo das Palavras'),
+              builder: (context) => const MyHomePage(title: 'Mundo das Palavras'),
             ),
           );
         },
@@ -112,147 +122,155 @@ class _GameMenuState extends State<GameMenu> {
           );
         },
       ),
-body: MenuDesign(
-  child: SafeArea(
-    child: LayoutBuilder(
-      builder: (context, constraints) {
-        final is1Ciclo = widget.user.level == "1º Ciclo";
-        final isSmallHeight = constraints.maxHeight < 650;
+      body: MenuDesign(
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final is1Ciclo = widget.user.level == "1º Ciclo";
+              final isSmallHeight = constraints.maxHeight < 650;
 
-        return Column(
-          children: [
-            // Cabeçalho
-            Padding(
-              padding: EdgeInsets.only(top: 4.h, left: 12.w, right: 12.w),
-              child: SizedBox(
-                height: 50.h,
-                width: double.infinity,
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Builder(
-                        builder: (context) => IconButton(
-                          icon: Icon(Icons.menu, color: Colors.black, size: 28.sp),
-                          onPressed: () => Scaffold.of(context).openDrawer(),
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+              return Column(
+                children: [
+                  // Cabeçalho
+                  Padding(
+                    padding: EdgeInsets.only(top: 2.h, left: 12.w, right: 12.w), // Ajuste para mais alto
+                    child: SizedBox(
+                      height: 30.h,
+                      width: double.infinity,
+                      child: Stack(
                         children: [
-                          Text(
-                            "Olá, ${widget.user.name}!",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 22.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min, 
+                              children: [
+                                // Botão de Menu (Top-Left)
+Positioned(
+  top: 10.h, // Alinhado com o botão de Fechar
+  left: 10.w, // Posição à esquerda
+  child: Material(
+    type: MaterialType.transparency,
+    child: Container(
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle, // Forma circular
+      ),
+      child: IconButton(
+        icon: Icon(Icons.menu, color: Colors.black, size: 30.sp), // Ícone do menu
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+        onPressed: () => Scaffold.of(context).openDrawer(), // Ação do menu
+      ),
+    ),
+  ),
+),
+                                // Botão de Home (Top-Left, ao lado do Menu)
+/*Positioned(
+  top: 10.h, // Alinhado com o botão de Fechar
+  left: 40.w, // Posição à direita do Menu
+  child: Material(
+    type: MaterialType.transparency,
+    child: Container(
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle, // Forma circular
+      ),
+      child: IconButton(
+        icon: Icon(Icons.home, color: Colors.black, size: 30.sp), // Ícone de Home
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+        onPressed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MyHomePage(title: 'Mundo das Palavras'),
+            ),
+          );
+        },
+      ),
+    ),
+  ),
+),*/
+                              ],
                             ),
                           ),
-                          Text(
-                            "Escolhe o teu jogo",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.darkBlue,
-                            ),
-                          ),
+                      
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Grelha de jogos com uso total do espaço disponível
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                child: GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: jogosDisponiveis.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: is1Ciclo ? 3 : 2,
-                    crossAxisSpacing: 8.w,
-                    mainAxisSpacing: 8.h,
-                    childAspectRatio: isSmallHeight ? 2.4 : 2.1,
                   ),
-                  itemBuilder: (context, index) {
-                    final jogo = jogosDisponiveis[index];
-                    return SizedBox(
-                      width: 160.w,
-                      child: Card(
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.r),
-                          side: BorderSide(color: AppColors.orange, width: 2.w),
+                  // Título
+                  Align( 
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(height: 8.h),
+                        Text(
+                          "Olá, ${widget.user.name}!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 25.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.black,
+                          ),
                         ),
-                        elevation: 3,
-                        child: InkWell(
-                          onTap: jogo.onTap,
-                          borderRadius: BorderRadius.circular(20.r),
-                          child: Padding(
-                            padding: EdgeInsets.all(8.w),
+                        Text(
+                          "Escolhe o teu jogo",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 25.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.darkBlue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Grelha de jogos com uso total do espaço disponível
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      child: GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: jogosDisponiveis.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: is1Ciclo ? 3 : 2,
+                          crossAxisSpacing: 8.w,
+                          mainAxisSpacing: 8.h,
+                          childAspectRatio: isSmallHeight ? 2.4 : 2.1,
+                        ),
+                        itemBuilder: (context, index) {
+                          final jogo = jogosDisponiveis[index];
+                          return GestureDetector(
+                            onTap: jogo.onTap,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(jogo.icon, size: 50.sp, color: jogo.backgroundColor),
                                 SizedBox(height: 8.h),
-                                Flexible(
-                                  child: Text(
-                                    jogo.title,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: jogo.backgroundColor,
-                                    ),
+                                Text(
+                                  jogo.title,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: jogo.backgroundColor,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    ),
-  ),
-),
-      backgroundColor: AppColors.white,
-      appBar: AppBar(
-        title: const Text("Mundo das Palavras"),
-        centerTitle: true,
-        backgroundColor: AppColors.orange,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.home),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MyHomePage(title: 'Mundo das Palavras'),
-                ),
+                    ),
+                  ),
+                ],
               );
             },
           ),
-        ],
+        ),
       ),
     );
   }
-
-
 
   void _navigateToGame(String gameName) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -279,9 +297,7 @@ body: MenuDesign(
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder:
-            (context) =>
-                IdentifyLettersNumbersGame(key: widget.key, user: widget.user),
+        builder: (context) => IdentifyLettersNumbersGame(key: widget.key, user: widget.user),
       ),
     );
   }
