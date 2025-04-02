@@ -5,13 +5,28 @@ import 'package:lottie/lottie.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class GameAnimations {
+  /// Animação de sucesso com ícone de correto, exibida durante 3 segundos
+  static Widget successCorrectTimed({
+    double? width,
+    double? height,
+    VoidCallback? onFinished,
+  }) {
+    _playSound('correct.wav');
+    return _TimedAnimationWidget(
+      animationPath: 'assets/animations/correct.json',
+      duration: const Duration(seconds: 3),
+      width: width ?? 640.w,
+      height: height ?? 640.h,
+      onFinished: onFinished,
+    );
+  }
+
   /// Animação de sucesso, exibida durante 3 segundos
   static Widget successCoffetiesTimed({
     double? width,
     double? height,
     VoidCallback? onFinished,
   }) {
-    _playSound('correct.wav');
     return _TimedAnimationWidget(
       animationPath: 'assets/animations/coffeties.json',
       duration: const Duration(seconds: 3),

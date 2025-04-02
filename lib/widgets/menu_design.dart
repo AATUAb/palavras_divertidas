@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import for SystemNavigator
+import 'package:flutter/services.dart'; 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../themes/colors.dart'; // Import for SnackBar colors
+import '../themes/colors.dart'; 
 
 class MenuDesign extends StatelessWidget {
   final Widget child;
@@ -89,7 +89,7 @@ class MenuDesign extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(Icons.close_rounded, color: AppColors.red, size: 20.sp), // White icon, maybe smaller
+                icon: Icon(Icons.close_rounded, color: AppColors.red, size: 20.sp),
                 padding: EdgeInsets.zero, // Remove default padding
                 constraints: const BoxConstraints(), // Remove default constraints
                 tooltip: 'Fechar App', // Optional: Add tooltip

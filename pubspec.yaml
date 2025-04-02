@@ -53,6 +53,7 @@ flutter:
     - assets/animations/one_star.json
     - assets/animations/two_star.json
     - assets/animations/tree_star.json
+    - assets/animations/correct.json
 
 #configuração de sons a usar
     - assets/sounds/conquest.wav

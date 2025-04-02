@@ -194,52 +194,42 @@ class IdentifyLettersNumbersGameState
   void checkAnswer(LetterItem selectedItem) {
     currentTry++;
 
-    if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
-      foundCorrect++;
-      setState(() {
-        letterItems.remove(selectedItem);
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Correto! 🎉',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontFamily: isFirstCycle ? 'Slabo' : null,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          backgroundColor: Colors.green,
-          duration: const Duration(milliseconds: 400),
-        ),
-      );
-
-      if (foundCorrect >= correctCount) {
-        roundTimer?.cancel();
-        progressTimer?.cancel();
-        final bool firstTryCorrect = currentTry == correctCount;
-
+      if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
+        foundCorrect++;
         setState(() {
-          showSuccessAnimation = true;
+          letterItems.remove(selectedItem);
         });
 
-        Future.delayed(const Duration(seconds: 1), () {
-          if (!mounted) return;
+        // Play correct animation with sound for each hit
+        GameAnimations.successCorrectTimed();
+
+        if (foundCorrect >= correctCount) {
+          roundTimer?.cancel();
+          progressTimer?.cancel();
+          final bool firstTryCorrect = currentTry == correctCount;
 
           setState(() {
-            showSuccessAnimation = false;
+            showSuccessAnimation = true;
           });
 
-          levelManager.registerRoundWithOptionalFeedback(
-            context: context,
-            correct: firstTryCorrect,
-            applySettings: applyLevelSettings,
-            onFinished: generateNewChallenge,
-          );
-        });
-      }
+          // Show coffeties animation at completion
+          GameAnimations.successCoffetiesTimed();
+
+          Future.delayed(const Duration(seconds: 1), () {
+            if (!mounted) return;
+
+            setState(() {
+              showSuccessAnimation = false;
+            });
+
+            levelManager.registerRoundWithOptionalFeedback(
+              context: context,
+              correct: firstTryCorrect,
+              applySettings: applyLevelSettings,
+              onFinished: generateNewChallenge,
+            );
+          });
+        }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

@@ -298,7 +298,7 @@ Positioned(
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => IdentifyLettersNumbersGame(key: widget.key, user: widget.user),
+        builder: (context) => IdentifyLettersNumbersGame(user: widget.user),
       ),
     );
   }
