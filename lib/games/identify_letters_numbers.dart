@@ -8,13 +8,12 @@ import '../widgets/level_manager.dart';
 import '../widgets/games_animations.dart';
 import '../widgets/games_design.dart';
 import '../models/user_model.dart';
+import '../widgets/game_item.dart';
 
 // classe para o jogo "Detetive de Letras e Números"
 class IdentifyLettersNumbersGame extends StatefulWidget {
   final UserModel user;
-
   const IdentifyLettersNumbersGame({super.key, required this.user});
-
   @override
   IdentifyLettersNumbersGameState createState() => IdentifyLettersNumbersGameState();
 }
@@ -49,7 +48,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
 
   // variáveis para controlar o tempo do jogo
   String targetCharacter = '';
-  List<LetterItem> letterItems = [];
+  List<GameItem> gamesItems = [];
 
   Timer? roundTimer;
   Timer? progressTimer;
@@ -71,7 +70,6 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     ];
     return colors[_random.nextInt(colors.length)];
   }
-
 
   // inicializa o estado do jogo
   @override
@@ -125,7 +123,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
 // 4. posiciona os itens no ecrã com espaçamento uniforme e sem sobreposição
   void generateNewChallenge() {
     setState(() {
-      letterItems.clear();
+      gamesItems.clear();
     });
     foundCorrect = 0;
     roundTimer?.cancel();
@@ -162,7 +160,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     final spacingX = 1.0 / (cols + 1);
     final spacingY = 0.18;
 
-    List<LetterItem> placedItems = [];
+    List<GameItem> placedItems = [];
 
     // coloca os itens no ecrã, com espaçamento entre eles e evita sobreposição
     for (int i = 0; i < allOptions.length; i++) {
@@ -172,19 +170,21 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
       final dy = 0.45 + spacingY * row;
 
       placedItems.add(
-        LetterItem(
-          character: allOptions[i],
+        GameItem(
+          id: i.toString(),
+          type: GameItemType.character,
+          content: allOptions[i],
           dx: dx,
           dy: dy,
           fontFamily: isFirstCycle ? _chooseRandomFont() : null,
           backgroundColor: _generateStrongColor(),
-        ),
-      );
-    }
+          isCorrect: allOptions[i].toLowerCase() == targetCharacter.toLowerCase(),
+        ));
+      }
 
     // adiciona o item correto à lista de itens colocados
     setState(() {
-      letterItems = placedItems;
+      gamesItems = placedItems;
     });
 
     final int totalMillis = levelTime.inMilliseconds;
@@ -208,7 +208,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
       GameAnimations.showTimeoutSnackbar(context);
       final bool firstTryCorrect = currentTry == correctCount;
 
-      levelManager.registerRoundWithOptionalFeedback(
+        levelManager.registerRoundWithOptionalFeedback(
         context: context,
         correct: firstTryCorrect,
         applySettings: applyLevelSettings,
@@ -218,10 +218,10 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
   }
 
   // verifica se a resposta do jogador está correta, dá os sons e animações correspondentes e atualiza o estado do jogo
-  void checkAnswer(LetterItem selectedItem) {
+  void checkAnswer(GameItem selectedItem) {
     currentTry++;
 
-    if (selectedItem.character.toLowerCase() == targetCharacter.toLowerCase()) {
+    if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
       // se a resposta estiver correta, atualiza o estado, toca o som e mostra ícone de certo
       foundCorrect++;
       setState(() {
@@ -275,42 +275,20 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
               children: [
                 Text(
                   'Encontra a letra',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    decoration: TextDecoration.none,
-                  ),
+                 style: getInstructionFont(isFirstCycle: isFirstCycle),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // se 1º ciclo, mostra a letra em duas fontes diferentes, caso contrário usa a fonte por defeito da app
-                    Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo', decoration: TextDecoration.none)),
-                    SizedBox(width: 8.w),
-                    Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive', decoration: TextDecoration.none)),
-                    SizedBox(width: 16.w),
-                    Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo', decoration: TextDecoration.none)),
-                    SizedBox(width: 8.w),
-                    Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive', decoration: TextDecoration.none)),
-                  ],
-                ),
+                // exibe a letra nas duas fontes diferentes
+                CharacterFontVariants(character: targetCharacter),
               ],
             )
           : Text(
               _isNumber(targetCharacter)
                   ? 'Encontra o número $targetCharacter'
                   : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-              style: TextStyle(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.blue[800],
-                fontFamily: isFirstCycle ? 'Slabo' : null,
-                decoration: TextDecoration.none,
-              ),
-              textAlign: TextAlign.center,
-            ),
-    );
+                  style: getInstructionFont(isFirstCycle: isFirstCycle),
+                  textAlign: TextAlign.center,
+                ),
+              );
 
     // desenha a interface do jogo, com base no widget games_design.dart
     return GamesDesign(
@@ -327,7 +305,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
               topTextWidget: topTextWidget,
             ),
           ),
-          ...letterItems.map((item) {
+          ...gamesItems.map((item) {
             return Align(
               alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
               child: item.isTapped
@@ -350,7 +328,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          item.character,
+                          item.content,
                           style: TextStyle(
                             fontSize: 24.sp,
                             fontWeight: FontWeight.bold,
@@ -374,25 +352,3 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
   }
 }
 
-// classe para representar cada letra e numero no ecrã
-// contém infiormações sobre a posição, estilo, cor de fundo e estado de cada caractere
-class LetterItem {
-  final String character;
-  final double dx;
-  final double dy;
-  final String? fontFamily;
-  final Color backgroundColor;
-  bool isCorrect;
-  bool isTapped = false;
-  bool showCheck = false;
-
-  // construtor da classe LetterItem
-  LetterItem({
-    required this.character,
-    required this.dx,
-    required this.dy,
-    required this.backgroundColor,
-    this.fontFamily,
-    this.isCorrect = false,
-  });
-}
