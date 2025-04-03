@@ -61,7 +61,7 @@ class MenuDesign extends StatelessWidget {
 
         // Conteúdo principal (filho)
         Positioned.fill(
-          child: Padding(padding: EdgeInsets.only(top: 40.h), child: child),
+          child: Padding(padding: EdgeInsets.only(top: 20.h), child: child),
         ),
 
         // Botão de Fechar (Top-Right)

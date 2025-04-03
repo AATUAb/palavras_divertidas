@@ -8,8 +8,9 @@ import '../games/write_game.dart';
 import '../games/identify_letters_numbers.dart';
 import 'home_page.dart';
 import 'dashboard.dart';
-import 'sticker_book.dart'; // Importando a tela de Caderneta de Cromos
+import 'sticker_book.dart';
 
+// classe que define os dados a apresentar sobre cada jogo
 class GameCardData {
   final String title;
   final IconData icon;
@@ -24,6 +25,7 @@ class GameCardData {
   });
 }
 
+// classe que define o menu de jogos
 class GameMenu extends StatefulWidget {
   final UserModel user;
 
@@ -33,9 +35,12 @@ class GameMenu extends StatefulWidget {
   State<GameMenu> createState() => _GameMenuState();
 }
 
+//lista de jogos disponíveis
 class _GameMenuState extends State<GameMenu> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
+    // lista de jogos disponíveis para todos os utilizadores
     final List<GameCardData> jogosBase = [
       GameCardData(
         title: "Detetive de letras e números",
@@ -63,6 +68,7 @@ class _GameMenuState extends State<GameMenu> {
       ),
     ];
 
+    // lista de jogos disponíveis apenas para utilizadores do 1º ciclo
     final List<GameCardData> jogosExtras = [
       GameCardData(
         title: "Detetive de palavras",
@@ -83,31 +89,37 @@ class _GameMenuState extends State<GameMenu> {
             ? [...jogosBase, ...jogosExtras]
             : jogosBase;
 
+    
+    // 
     return Scaffold(
+      key: _scaffoldKey,
       drawer: custom.CustomDrawer(
         userName: widget.user.name,
         userLevel: widget.user.level,
+     
+        // para aceder à gestão de utilizadores
         onManageUsers: () {
           Navigator.pop(context);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder:
-                  (context) => const MyHomePage(title: 'Mundo das Palavras'),
+              builder: (context) => const MyHomePage(title: 'Mundo das Palavras'),
             ),
           );
         },
+
+        // para aceder ao livro de autocolantes
         onAchievements: () {
           Navigator.pop(context);
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder:
-                  (_) =>
-                      StickerBookScreen(), // Navegando para a Caderneta de Cromos
+              builder: (_) => StickerBookScreen(),
             ),
           );
         },
+
+        // para aceder ao dashboard
         onDashboard: () {
           Navigator.pop(context);
           Navigator.push(
@@ -118,143 +130,118 @@ class _GameMenuState extends State<GameMenu> {
           );
         },
       ),
+
+      // define a apresentação dos jogos disponíveis, de acordo com o nível do utilizador
       body: MenuDesign(
         child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final is1Ciclo = widget.user.level == "1º Ciclo";
-              final isSmallHeight = constraints.maxHeight < 650;
-
-              return Column(
-                children: [
-                  // Cabeçalho
-                  Padding(
-                    padding: EdgeInsets.only(top: 2.h, left: 12.w, right: 12.w),
-                    child: SizedBox(
-                      height: 30.h,
-                      width: double.infinity,
-                      child: Stack(
-                        children: [
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: Row(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.menu, color: AppColors.black, size: 24.sp),
+                      onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                  ),  
+                ],
+              ),
+                SizedBox(height: 8.h),
+                Text(
+                  "Olá, ${widget.user.name}!",
+                  style: TextStyle(
+                    fontSize: 25.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  "Escolhe o teu jogo",
+                  style: TextStyle(
+                    fontSize: 25.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.darkBlue,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 4.h),
+                Expanded(
+                  child: Center(
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      // espacamento entre os icones do jogo
+                      spacing: 15.w,
+                      runSpacing: 12.h,
+                      children: jogosDisponiveis.map((jogo) {
+                        return GestureDetector(
+                          onTap: jogo.onTap,
+                          child: SizedBox(
+                            width: 90.w,
+                            child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Positioned(
-                                  top: 10.h,
-                                  left: 10.w,
-                                  child: Material(
-                                    type: MaterialType.transparency,
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.menu,
-                                          color: Colors.black,
-                                          size: 30.sp,
-                                        ),
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(),
-                                        onPressed:
-                                            () =>
-                                                Scaffold.of(
-                                                  context,
-                                                ).openDrawer(),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Título
-                  Align(
-                    alignment: Alignment.center,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(height: 8.h),
-                        Text(
-                          "Olá, ${widget.user.name}!",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 25.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        Text(
-                          "Escolhe o teu jogo",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 25.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.darkBlue,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Grelha de jogos com uso total do espaço disponível
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 4.h,
-                      ),
-                      child: GridView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: jogosDisponiveis.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: is1Ciclo ? 3 : 2,
-                          crossAxisSpacing: 8.w,
-                          mainAxisSpacing: 8.h,
-                          childAspectRatio: isSmallHeight ? 2.4 : 2.1,
-                        ),
-                        itemBuilder: (context, index) {
-                          final jogo = jogosDisponiveis[index];
-                          return GestureDetector(
-                            onTap: jogo.onTap,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  jogo.icon,
-                                  size: 50.sp,
-                                  color: jogo.backgroundColor,
-                                ),
-                                SizedBox(height: 8.h),
-                                Text(
-                                  jogo.title,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w600,
+                                Container(
+                                  // tamanho do circulo que contém os icones
+                                  width: 70.r,
+                                  height: 70.r,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
                                     color: jogo.backgroundColor,
                                   ),
+                                  //tamanho do icone, dentro do circulo
+                                  child: Icon(jogo.icon, size: 30.sp, color: Colors.white),
+                                ),
+                                SizedBox(height: 4.h),
+                                // tamanho da legenda do jogo
+                                Text(
+                                  jogo.title,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ),
-                ],
-              );
-            },
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  // para abrir o jogo 'detetive de letras e números'
+  void _startIdentifyLettersNumbersGame() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => IdentifyLettersNumbersGame(
+          key: widget.key,
+          user: widget.user,
+        ),
+      ),
+    );
+  }
+
+  //para abrir o jogo 'escrever'
+  void _startWriteGame() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WriteGameScreen(character: "A"),
+      ),
+    );
+  }
+
+//jogos em construção
   void _navigateToGame(String gameName) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -265,24 +252,6 @@ class _GameMenuState extends State<GameMenu> {
         backgroundColor: AppColors.green,
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _startWriteGame() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => WriteGameScreen(character: "A")),
-    );
-  }
-
-  void _startIdentifyLettersNumbersGame() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) =>
-                IdentifyLettersNumbersGame(key: widget.key, user: widget.user),
       ),
     );
   }

@@ -7,13 +7,13 @@ import '../screens/game_menu.dart';
 class GamesDesign extends StatelessWidget {
   final Widget child;
   final dynamic user; 
-
   const GamesDesign({super.key, required this.child, required this.user});
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
+    return Scaffold(
+      body: Stack(
+        children: [
         // Fundo branco da página
         Container(color: Colors.white),
 
@@ -58,7 +58,7 @@ class GamesDesign extends StatelessWidget {
 
         // Botão de Home, para regressão ao menu de jogos
         Positioned(
-          top: 15.h,
+          top: 10.h,
           left: 10.w,
           child: Material(
             type: MaterialType.transparency,
@@ -67,7 +67,7 @@ class GamesDesign extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(Icons.home, color: AppColors.white, size: 20.sp),
+                icon: Icon(Icons.home, color: AppColors.black, size: 20.sp),
                 padding: EdgeInsets.zero, // Remove default padding
                 constraints: const BoxConstraints(), // Remove default constraints
                 tooltip: 'Voltar ao Menu de Jogos', // Optional: Add tooltip
@@ -76,7 +76,7 @@ class GamesDesign extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => GameMenu(user: user),  // Agora usamos 'user' diretamente
+                      builder: (context) => GameMenu(user: user), 
                     ),
                   );
                 },
@@ -106,9 +106,10 @@ class GamesDesign extends StatelessWidget {
             },
           ),
         ),
-      ],
-    );
-  }
+         ],
+        ), 
+      );   
+    } 
 
 static Widget buildChallengeHeader({
   required String title,
@@ -138,12 +139,12 @@ static Widget buildChallengeHeader({
             Text(subtitle2, style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
           ],
         ),
-    ],
-  );
-}
+         ],
+    );
+  }
 }
 
-// Widget que desenha a nuvem com CustomPainter
+// desenhar  a nuvem com CustomPainter
 class TopWave extends StatelessWidget {
   const TopWave({super.key});
 
@@ -158,7 +159,6 @@ class TopWave extends StatelessWidget {
     );
   }
 }
-
 // Pintor da nuvem com bolhas arredondadas
 class CloudPainter extends CustomPainter {
   @override
@@ -191,6 +191,7 @@ class CloudPainter extends CustomPainter {
 
     canvas.drawPath(path, paint);
   }
-@override
+
+  @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
