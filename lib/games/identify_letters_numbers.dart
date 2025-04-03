@@ -15,28 +15,30 @@ class IdentifyLettersNumbersGame extends StatefulWidget {
   final UserModel user;
   const IdentifyLettersNumbersGame({super.key, required this.user});
   @override
-  IdentifyLettersNumbersGameState createState() => IdentifyLettersNumbersGameState();
+  IdentifyLettersNumbersGameState createState() =>
+      IdentifyLettersNumbersGameState();
 }
 
 // classse para o estado do jogo "Detetive de Letras e Números"
-class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> {
+class IdentifyLettersNumbersGameState
+    extends State<IdentifyLettersNumbersGame> {
   late LevelManager levelManager;
   bool isFirstCycle = false;
   bool showSuccessAnimation = false;
 
-// lista de caracteres que podem ser usados no jogo
+  // lista de caracteres que podem ser usados no jogo
   final List<String> characters = [
     ...'ABCDEFGHIJLMNOPQRSTUVXZ'.split(''),
     ...'abcdefghijlmnopqrstuvxz'.split(''),
     ...'0123456789'.split(''),
   ];
 
-// verifica se o caractere é uma letra ou um número e escolhe uma fonte aleatória para 1º ciclo
+  // verifica se o caractere é uma letra ou um número e escolhe uma fonte aleatória para 1º ciclo
   bool _isLetter(String char) => RegExp(r'[a-zA-Z]').hasMatch(char);
   bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
   String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
-  
-// aplica aleatoriedade na escolha dos caracteres errados
+
+  // aplica aleatoriedade na escolha dos caracteres errados
   final Random _random = Random();
   int correctCount = 4;
   int wrongCount = 5;
@@ -84,7 +86,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     });
   }
 
-   // limpa os temporizadores quando o widget é removido da árvore de widgets
+  // limpa os temporizadores quando o widget é removido da árvore de widgets
   @override
   void dispose() {
     roundTimer?.cancel();
@@ -92,10 +94,10 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     super.dispose();
   }
 
-// aplica as configurações do nível atual:
-// - O número de caracteres corretos aumenta com o nível para aumentar o desafio
-// - O número de distrações (errados) também sobe para tornar mais difícil
-// - O tempo total é ajustado para dar margem proporcional ao desafio
+  // aplica as configurações do nível atual:
+  // - O número de caracteres corretos aumenta com o nível para aumentar o desafio
+  // - O número de distrações (errados) também sobe para tornar mais difícil
+  // - O tempo total é ajustado para dar margem proporcional ao desafio
   void applyLevelSettings() {
     switch (levelManager.level) {
       case 1:
@@ -116,11 +118,11 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     }
   }
 
-// gera um novo desafio:
-// 1. escolhe aleatoriamente um carácter alvo
-// 2. cria opções erradas, garantindo unicidade e diferença do alvo
-// 3. adiciona o número adequado de opções corretas (maiúsculas/minúsculas)
-// 4. posiciona os itens no ecrã com espaçamento uniforme e sem sobreposição
+  // gera um novo desafio:
+  // 1. escolhe aleatoriamente um carácter alvo
+  // 2. cria opções erradas, garantindo unicidade e diferença do alvo
+  // 3. adiciona o número adequado de opções corretas (maiúsculas/minúsculas)
+  // 4. posiciona os itens no ecrã com espaçamento uniforme e sem sobreposição
   void generateNewChallenge() {
     setState(() {
       gamesItems.clear();
@@ -132,16 +134,20 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     progressValue = 1.0;
 
     final String rawChar = characters[_random.nextInt(characters.length)];
-    targetCharacter = _isLetter(rawChar)
-        ? (_random.nextBool() ? rawChar.toUpperCase() : rawChar.toLowerCase())
-        : rawChar;
+    targetCharacter =
+        _isLetter(rawChar)
+            ? (_random.nextBool()
+                ? rawChar.toUpperCase()
+                : rawChar.toLowerCase())
+            : rawChar;
 
     Set<String> uniqueOptions = {};
     while (uniqueOptions.length < wrongCount) {
       String c = characters[_random.nextInt(characters.length)];
-      String option = _isLetter(c)
-          ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
-          : c;
+      String option =
+          _isLetter(c)
+              ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
+              : c;
       if (option.toLowerCase() != targetCharacter.toLowerCase() &&
           !uniqueOptions.any((e) => e.toLowerCase() == option.toLowerCase())) {
         uniqueOptions.add(option);
@@ -178,9 +184,11 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
           dy: dy,
           fontFamily: isFirstCycle ? _chooseRandomFont() : null,
           backgroundColor: _generateStrongColor(),
-          isCorrect: allOptions[i].toLowerCase() == targetCharacter.toLowerCase(),
-        ));
-      }
+          isCorrect:
+              allOptions[i].toLowerCase() == targetCharacter.toLowerCase(),
+        ),
+      );
+    }
 
     // adiciona o item correto à lista de itens colocados
     setState(() {
@@ -208,7 +216,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
       GameAnimations.showTimeoutSnackbar(context);
       final bool firstTryCorrect = currentTry == correctCount;
 
-        levelManager.registerRoundWithOptionalFeedback(
+      levelManager.registerRoundWithOptionalFeedback(
         context: context,
         correct: firstTryCorrect,
         applySettings: applyLevelSettings,
@@ -270,25 +278,26 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
   Widget build(BuildContext context) {
     final Widget topTextWidget = Padding(
       padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
-      child: isFirstCycle && _isLetter(targetCharacter)
-          ? Column(
-              children: [
-                Text(
-                  'Encontra a letra',
-                 style: getInstructionFont(isFirstCycle: isFirstCycle),
-                ),
-                // exibe a letra nas duas fontes diferentes
-                CharacterFontVariants(character: targetCharacter),
-              ],
-            )
-          : Text(
-              _isNumber(targetCharacter)
-                  ? 'Encontra o número $targetCharacter'
-                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-                  style: getInstructionFont(isFirstCycle: isFirstCycle),
-                  textAlign: TextAlign.center,
-                ),
-              );
+      child:
+          isFirstCycle && _isLetter(targetCharacter)
+              ? Column(
+                children: [
+                  Text(
+                    'Encontra a letra',
+                    style: getInstructionFont(isFirstCycle: isFirstCycle),
+                  ),
+                  // exibe a letra nas duas fontes diferentes
+                  CharacterFontVariants(character: targetCharacter),
+                ],
+              )
+              : Text(
+                _isNumber(targetCharacter)
+                    ? 'Encontra o número $targetCharacter'
+                    : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+                style: getInstructionFont(isFirstCycle: isFirstCycle),
+                textAlign: TextAlign.center,
+              ),
+    );
 
     // desenha a interface do jogo, com base no widget games_design.dart
     return GamesDesign(
@@ -308,39 +317,40 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
           ...gamesItems.map((item) {
             return Align(
               alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
-              child: item.isTapped
-                  ? const Icon(Icons.check, color: Colors.green, size: 30)
-                  : GestureDetector(
-                      onTap: () => checkAnswer(item),
-                      child: Container(
-                        width: 60.r,
-                        height: 60.r,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: item.backgroundColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              offset: Offset(2, 2),
-                              blurRadius: 4.r,
-                            )
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          item.content,
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: item.fontFamily,
-                            decoration: TextDecoration.none,
+              child:
+                  item.isTapped
+                      ? const Icon(Icons.check, color: Colors.green, size: 30)
+                      : GestureDetector(
+                        onTap: () => checkAnswer(item),
+                        child: Container(
+                          width: 60.r,
+                          height: 60.r,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: item.backgroundColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                offset: Offset(2, 2),
+                                blurRadius: 4.r,
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            item.content,
+                            style: TextStyle(
+                              fontSize: 24.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontFamily: item.fontFamily,
+                              decoration: TextDecoration.none,
+                            ),
                           ),
                         ),
                       ),
-                    ),
             );
-          }).toList(),
+          }),
           if (showSuccessAnimation)
             IgnorePointer(
               ignoring: true,
@@ -351,4 +361,3 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     );
   }
 }
-
