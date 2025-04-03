@@ -4,7 +4,7 @@ import '../models/user_model.dart';
 
 class HiveService {
   static late Box<UserModel> _userBox;
-  static var logger = Logger(); // Logger instance
+  static var logger = Logger();
 
   static Future<void> init() async {
     await Hive.initFlutter();
@@ -55,7 +55,6 @@ class HiveService {
     }
   }
 
-  // ✅ NOVO: Atualizar utilizador de forma segura usando a key do Hive
   static Future<void> updateUserByKey(int key, UserModel updatedUser) async {
     try {
       await _userBox.put(key, updatedUser);

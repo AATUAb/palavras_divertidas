@@ -1,5 +1,3 @@
-// Estrutura para o jogo "Detetive de Letras e Números", que desafia os jogadores a identificar letras e números em um conjunto de opções.
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
@@ -10,45 +8,35 @@ import '../widgets/games_design.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
 
-// classe para o jogo "Detetive de Letras e Números"
 class IdentifyLettersNumbersGame extends StatefulWidget {
   final UserModel user;
   const IdentifyLettersNumbersGame({super.key, required this.user});
+
   @override
   IdentifyLettersNumbersGameState createState() =>
       IdentifyLettersNumbersGameState();
 }
 
-// classse para o estado do jogo "Detetive de Letras e Números"
 class IdentifyLettersNumbersGameState
     extends State<IdentifyLettersNumbersGame> {
   late LevelManager levelManager;
   bool isFirstCycle = false;
   bool showSuccessAnimation = false;
 
-  // lista de caracteres que podem ser usados no jogo
   final List<String> characters = [
     ...'ABCDEFGHIJLMNOPQRSTUVXZ'.split(''),
     ...'abcdefghijlmnopqrstuvxz'.split(''),
     ...'0123456789'.split(''),
   ];
 
-  // verifica se o caractere é uma letra ou um número e escolhe uma fonte aleatória para 1º ciclo
-  bool _isLetter(String char) => RegExp(r'[a-zA-Z]').hasMatch(char);
-  bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
-  String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
-
-  // aplica aleatoriedade na escolha dos caracteres errados
   final Random _random = Random();
   int correctCount = 4;
   int wrongCount = 5;
   Duration levelTime = const Duration(seconds: 10);
 
-  /// variáveis para controlar o progresso do jogo
   int currentTry = 0;
   int foundCorrect = 0;
 
-  // variáveis para controlar o tempo do jogo
   String targetCharacter = '';
   List<GameItem> gamesItems = [];
 
@@ -56,7 +44,25 @@ class IdentifyLettersNumbersGameState
   Timer? progressTimer;
   double progressValue = 1.0;
 
-  // cores aleatórias a aplicar nos circulos que incluem as letras
+  @override
+  void initState() {
+    super.initState();
+    isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
+    levelManager = LevelManager(user: widget.user);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      applyLevelSettings();
+      generateNewChallenge();
+    });
+  }
+
+  @override
+  void dispose() {
+    roundTimer?.cancel();
+    progressTimer?.cancel();
+    super.dispose();
+  }
+
   Color _generateStrongColor() {
     final colors = [
       Colors.red,
@@ -73,31 +79,10 @@ class IdentifyLettersNumbersGameState
     return colors[_random.nextInt(colors.length)];
   }
 
-  // inicializa o estado do jogo
-  @override
-  void initState() {
-    super.initState();
-    isFirstCycle = widget.user.level == '1º Ciclo';
-    levelManager = LevelManager(user: widget.user);
+  bool _isLetter(String char) => RegExp(r'[a-zA-Z]').hasMatch(char);
+  bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
+  String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      applyLevelSettings();
-      generateNewChallenge();
-    });
-  }
-
-  // limpa os temporizadores quando o widget é removido da árvore de widgets
-  @override
-  void dispose() {
-    roundTimer?.cancel();
-    progressTimer?.cancel();
-    super.dispose();
-  }
-
-  // aplica as configurações do nível atual:
-  // - O número de caracteres corretos aumenta com o nível para aumentar o desafio
-  // - O número de distrações (errados) também sobe para tornar mais difícil
-  // - O tempo total é ajustado para dar margem proporcional ao desafio
   void applyLevelSettings() {
     switch (levelManager.level) {
       case 1:
@@ -118,11 +103,6 @@ class IdentifyLettersNumbersGameState
     }
   }
 
-  // gera um novo desafio:
-  // 1. escolhe aleatoriamente um carácter alvo
-  // 2. cria opções erradas, garantindo unicidade e diferença do alvo
-  // 3. adiciona o número adequado de opções corretas (maiúsculas/minúsculas)
-  // 4. posiciona os itens no ecrã com espaçamento uniforme e sem sobreposição
   void generateNewChallenge() {
     setState(() {
       gamesItems.clear();
@@ -161,14 +141,12 @@ class IdentifyLettersNumbersGameState
     });
 
     final allOptions = [...uniqueOptions, ...correctOptions]..shuffle();
-
     final cols = (allOptions.length / 3).ceil();
     final spacingX = 1.0 / (cols + 1);
     final spacingY = 0.18;
 
     List<GameItem> placedItems = [];
 
-    // coloca os itens no ecrã, com espaçamento entre eles e evita sobreposição
     for (int i = 0; i < allOptions.length; i++) {
       final col = i % cols;
       final row = i ~/ cols;
@@ -190,7 +168,6 @@ class IdentifyLettersNumbersGameState
       );
     }
 
-    // adiciona o item correto à lista de itens colocados
     setState(() {
       gamesItems = placedItems;
     });
@@ -210,7 +187,6 @@ class IdentifyLettersNumbersGameState
       }
     });
 
-    // inicia o temporizador da rodada
     roundTimer = Timer(levelTime, () {
       if (showSuccessAnimation) return;
       GameAnimations.showTimeoutSnackbar(context);
@@ -225,12 +201,10 @@ class IdentifyLettersNumbersGameState
     });
   }
 
-  // verifica se a resposta do jogador está correta, dá os sons e animações correspondentes e atualiza o estado do jogo
   void checkAnswer(GameItem selectedItem) {
     currentTry++;
 
     if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
-      // se a resposta estiver correta, atualiza o estado, toca o som e mostra ícone de certo
       foundCorrect++;
       setState(() {
         selectedItem.isCorrect = true;
@@ -249,7 +223,6 @@ class IdentifyLettersNumbersGameState
           showSuccessAnimation = true;
         });
 
-        // ao terminar a rodada com sucesso, apresenta uma animação de sucesso
         GameAnimations.successCoffetiesTimed();
 
         Future.delayed(const Duration(seconds: 1), () {
@@ -268,12 +241,10 @@ class IdentifyLettersNumbersGameState
         });
       }
     } else {
-      // se a resposta estiver errada, atualiza o estado, toca o som de errado
       GameAnimations.playWrongSound();
     }
   }
 
-  // constrói a interface do jogo, incluindo o layout e os elementos visuais
   @override
   Widget build(BuildContext context) {
     final Widget topTextWidget = Padding(
@@ -286,7 +257,6 @@ class IdentifyLettersNumbersGameState
                     'Encontra a letra',
                     style: getInstructionFont(isFirstCycle: isFirstCycle),
                   ),
-                  // exibe a letra nas duas fontes diferentes
                   CharacterFontVariants(character: targetCharacter),
                 ],
               )
@@ -299,7 +269,6 @@ class IdentifyLettersNumbersGameState
               ),
     );
 
-    // desenha a interface do jogo, com base no widget games_design.dart
     return GamesDesign(
       user: widget.user,
       child: Stack(

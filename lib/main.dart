@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hive_flutter/hive_flutter.dart'; // NECESSÁRIO para Hive.deleteBoxFromDisk
 import 'services/hive_service.dart';
 import 'screens/loading_screen.dart';
 import 'themes/app_theme.dart';
@@ -13,7 +14,8 @@ void main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
-  // ✅ Inicializa Hive com registo de adapter e abertura da box
+  await Hive.initFlutter();
+
   await HiveService.init();
 
   runApp(const MyApp());
@@ -25,10 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(
-        960,
-        540,
-      ), // Define o tamanho base em landscape, focado em smartphones e tablets Android
+      designSize: const Size(960, 540),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {

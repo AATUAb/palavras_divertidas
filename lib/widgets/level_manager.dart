@@ -4,7 +4,6 @@ import '../models/user_model.dart';
 import '../services/hive_service.dart';
 import '../widgets/games_animations.dart';
 
-// Declaração da classe LevelManager
 class LevelManager {
   int level;
   int totalRounds = 0;
@@ -15,60 +14,46 @@ class LevelManager {
   final int minLevel;
   final int roundsToEvaluate;
 
-  /// Constructor do LevelManager
-  // Se receber informação de nível, usa essa informação, senão usa o nível 1
   LevelManager({
     required this.user,
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 1,
-  }) : level = level ?? int.tryParse(user.level) ?? 1;
+    this.roundsToEvaluate = 1, // ajusta para 4 na release
+  }) : level = level ?? user.gameLevel;
 
-  // Getters para obter informações sobre o nível e o número de rodadas
   int get totalRoundsCount => totalRounds;
   int get evaluationRounds => roundsToEvaluate;
 
-  // Regista se uma rodada foi correta ou não e atualiza o número total de rodadas e respostas corretas no Hive
-  // Se o número total de rodadas for maior ou igual ao número de rodadas para avaliar, verifica a precisão e atualiza o nível do utilizador
-  // Se a precisão for maior ou igual a 0.8 e o nível for menor que o nível máximo, aumenta o nível do utilizador
-  // Se a precisão for menor que 0.5 e o nível for maior que o nível mínimo, diminui o nível do utilizador
-  // Reinicia o número total de rodadas e respostas corretas para 0 e continua a avaliar outras rodadas
   void registerRound({required bool correct}) {
     totalRounds++;
     if (correct) correctAnswers++;
 
     double accuracy = correctAnswers / totalRounds;
-
     final int userKey = user.key as int;
 
     user.updateAccuracy(level: level, accuracy: accuracy);
     HiveService.updateUserByKey(userKey, user);
 
-    // Verifica se deve subir de nível
     if (totalRounds >= roundsToEvaluate * 2 &&
         accuracy >= 0.8 &&
         level < maxLevel) {
       level++;
-      user.level = level.toString();
-      HiveService.updateUser(userKey, user);
+      user.gameLevel = level;
+      HiveService.updateUserByKey(userKey, user);
       totalRounds = 0;
       correctAnswers = 0;
-    }
-    // Verifica se deve descer de nível
-    else if (totalRounds >= roundsToEvaluate &&
+    } else if (totalRounds >= roundsToEvaluate &&
         accuracy < 0.5 &&
         level > minLevel) {
       level--;
-      user.level = level.toString();
-      HiveService.updateUser(userKey, user);
+      user.gameLevel = level;
+      HiveService.updateUserByKey(userKey, user);
       totalRounds = 0;
       correctAnswers = 0;
     }
   }
 
-  // Método para registar uma rodada com feedback visual ao subir ou descer de nível
-  // Mostra animação com 1, 2 ou 3 estrelas, consoante o novo nível
   Future<void> registerRoundWithOptionalFeedback({
     required BuildContext context,
     required bool correct,
@@ -79,7 +64,6 @@ class LevelManager {
 
     registerRound(correct: correct);
 
-    final int userKey = user.key as int;
     final bool subiuNivel = level > previousLevel;
     final bool desceuNivel = level < previousLevel;
 
@@ -127,8 +111,8 @@ class LevelManager {
             ),
       );
 
-      user.level = level.toString();
-      HiveService.updateUser(userKey, user);
+      user.gameLevel = level;
+      HiveService.updateUserByKey(user.key as int, user);
     }
 
     applySettings();

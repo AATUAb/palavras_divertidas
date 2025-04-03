@@ -7,8 +7,9 @@ class UserModel extends HiveObject {
   @HiveField(0)
   final String name;
 
+  /// Nível escolar: "Pré-Escolar", "1º Ciclo", etc.
   @HiveField(1)
-  String level;
+  String schoolLevel;
 
   @HiveField(2)
   List<String> knownLetters;
@@ -21,12 +22,17 @@ class UserModel extends HiveObject {
   @HiveField(4)
   double? overallAccuracy;
 
+  /// Nível de jogo (1, 2, 3...)
+  @HiveField(5)
+  int gameLevel;
+
   UserModel({
     required this.name,
-    required this.level,
+    required this.schoolLevel,
     List<String>? knownLetters,
     this.accuracyByLevel = const {},
     this.overallAccuracy,
+    this.gameLevel = 1,
   }) : knownLetters = knownLetters ?? [];
 
   /// Atualiza a taxa de acerto por nível e a média geral

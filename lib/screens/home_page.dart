@@ -37,11 +37,12 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (context) {
         return AddUserDialog(
-          onUserAdded: (name, level, letters) async {
+          onUserAdded: (name, schoolLevel, letters) async {
             final newUser = UserModel(
               name: name,
-              level: level,
+              schoolLevel: schoolLevel,
               knownLetters: letters,
+              gameLevel: 1,
             );
             await HiveService.addUser(newUser);
             _loadUsers();
@@ -57,13 +58,16 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (context) {
         return AddUserDialog(
           initialName: user.name,
-          initialLevel: user.level,
+          initialSchoolLevel: user.schoolLevel,
           initialLetters: user.knownLetters,
-          onUserAdded: (name, level, letters) async {
+          onUserAdded: (name, schoolLevel, letters) async {
             final updatedUser = UserModel(
               name: name,
-              level: level,
+              schoolLevel: schoolLevel,
               knownLetters: letters,
+              gameLevel: user.gameLevel, // mantém o progresso
+              accuracyByLevel: user.accuracyByLevel,
+              overallAccuracy: user.overallAccuracy,
             );
             await HiveService.updateUser(index, updatedUser);
             _loadUsers();
@@ -78,87 +82,90 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-Widget build(BuildContext context) {
-  double cardWidth = min(180.w, 0.28.sw);
+  Widget build(BuildContext context) {
+    double cardWidth = min(180.w, 0.28.sw);
 
-return Scaffold(
-  body: MenuDesign(
-    child: SingleChildScrollView(
-      child: Transform.translate(
-        offset: Offset(0, -35.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 0.h),
-            Padding(
-              padding: EdgeInsets.only(bottom: 12.h),
-              child: SizedBox(
-                width: 280.w,
-                height: 60.h,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.people, color: AppColors.orange, size: 25.sp),
-                          SizedBox(width: 6.w),
-                          Flexible(
-                            child: Text(
-                              'Quem vai jogar hoje?',
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              style: TextStyle(
-                                fontSize: 25.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.darkBlue,
+    return Scaffold(
+      body: MenuDesign(
+        child: SingleChildScrollView(
+          child: Transform.translate(
+            offset: Offset(0, -35.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 0.h),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 12.h),
+                  child: SizedBox(
+                    width: 280.w,
+                    height: 60.h,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.people,
+                                color: AppColors.orange,
+                                size: 25.sp,
                               ),
-                            ),
+                              SizedBox(width: 6.w),
+                              Flexible(
+                                child: Text(
+                                  'Quem vai jogar hoje?',
+                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    fontSize: 25.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.darkBlue,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 25.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Wrap(
-                spacing: 10.w,
-                runSpacing: 10.h,
-                alignment: WrapAlignment.center,
-                children: [
-                  ...users.asMap().entries.map(
-                    (entry) => SizedBox(
-                      width: cardWidth,
-                      child: _buildUserCard(entry.key),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: cardWidth, child: _buildAddUserButton()),
-                ],
-              ),
+                ),
+                SizedBox(height: 25.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: Wrap(
+                    spacing: 10.w,
+                    runSpacing: 10.h,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      ...users.asMap().entries.map(
+                        (entry) => SizedBox(
+                          width: cardWidth,
+                          child: _buildUserCard(entry.key),
+                        ),
+                      ),
+                      SizedBox(width: cardWidth, child: _buildAddUserButton()),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
-    ),
-  ),
-);
-}
+    );
+  }
 
   Widget _buildUserCard(int index) {
+    final user = users[index];
     final Color cardColor =
-        users[index].level == "Pré-Escolar"
-            ? AppColors.green
-            : AppColors.orange;
+        user.schoolLevel == "Pré-Escolar" ? AppColors.green : AppColors.orange;
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: 200.w),
@@ -172,9 +179,7 @@ return Scaffold(
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => GameMenu(user: users[index]),
-              ),
+              MaterialPageRoute(builder: (context) => GameMenu(user: user)),
             ).then((_) => _loadUsers());
           },
           borderRadius: BorderRadius.circular(20.r),
@@ -189,7 +194,7 @@ return Scaffold(
                       radius: 30.r,
                       backgroundColor: AppColors.white,
                       child: Icon(
-                        users[index].level == "Pré-Escolar"
+                        user.schoolLevel == "Pré-Escolar"
                             ? Icons.child_care
                             : Icons.school,
                         size: 40.sp,
@@ -200,7 +205,7 @@ return Scaffold(
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 4.w),
                       child: Text(
-                        users[index].name,
+                        user.name,
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
@@ -211,7 +216,7 @@ return Scaffold(
                       ),
                     ),
                     Text(
-                      users[index].level,
+                      user.schoolLevel,
                       style: TextStyle(
                         fontSize: 11.sp,
                         color: AppColors.white.withAlpha((255 * 0.9).toInt()),
@@ -224,7 +229,7 @@ return Scaffold(
                 top: 5.h,
                 right: 5.w,
                 child: IconButton(
-                  onPressed: () => _showEditUserDialog(index, users[index]),
+                  onPressed: () => _showEditUserDialog(index, user),
                   icon: Icon(Icons.edit, color: AppColors.white, size: 18.sp),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),

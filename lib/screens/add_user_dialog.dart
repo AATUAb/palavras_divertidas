@@ -1,4 +1,3 @@
-// Menu para a acição e edição de utilizadores do jogo
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../themes/colors.dart';
@@ -6,7 +5,7 @@ import '../themes/colors.dart';
 class AddUserDialog extends StatefulWidget {
   final Function(String, String, List<String>) onUserAdded;
   final String? initialName;
-  final String? initialLevel;
+  final String? initialSchoolLevel;
   final List<String>? initialLetters;
   final Function()? onDelete;
 
@@ -14,7 +13,7 @@ class AddUserDialog extends StatefulWidget {
     super.key,
     required this.onUserAdded,
     this.initialName,
-    this.initialLevel,
+    this.initialSchoolLevel,
     this.initialLetters,
     this.onDelete,
   });
@@ -25,11 +24,35 @@ class AddUserDialog extends StatefulWidget {
 
 class _AddUserDialogState extends State<AddUserDialog> {
   late TextEditingController _nameController;
-  late String _selectedLevel;
+  late String _selectedSchoolLevel;
 
   final List<String> _letters = [
-    "I", "U", "O", "A", "E", "P", "T", "L", "D", "M", "V", "C", "Q", "N", "R", "B",
-    "G", "J", "F", "S", "Z", "H", "X", "CH", "LH", "NH",
+    "I",
+    "U",
+    "O",
+    "A",
+    "E",
+    "P",
+    "T",
+    "L",
+    "D",
+    "M",
+    "V",
+    "C",
+    "Q",
+    "N",
+    "R",
+    "B",
+    "G",
+    "J",
+    "F",
+    "S",
+    "Z",
+    "H",
+    "X",
+    "CH",
+    "LH",
+    "NH",
     "BR, CR, DR, FR, GR, PR, TR, VR",
     "BL, CL, FL, GL, PL, TL",
   ];
@@ -41,7 +64,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName ?? "");
-    _selectedLevel = widget.initialLevel ?? "Pré-Escolar";
+    _selectedSchoolLevel = widget.initialSchoolLevel ?? "Pré-Escolar";
     _lettersSelected = {for (var letter in _letters) letter: false};
 
     if (widget.initialLetters != null) {
@@ -62,7 +85,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 600.w,
-          maxHeight: (_selectedLevel == "1º Ciclo" ? 450.h : 320.h),
+          maxHeight: (_selectedSchoolLevel == "1º Ciclo" ? 450.h : 320.h),
         ),
         child: SingleChildScrollView(
           child: IntrinsicHeight(
@@ -83,16 +106,13 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 60.w),
                   child: Column(
                     children: [
                       TextField(
                         controller: _nameController,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                        ),
+                        style: TextStyle(fontSize: 14.sp),
                         decoration: InputDecoration(
                           hintText: "Nome",
                           filled: true,
@@ -112,7 +132,6 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         ),
                       ),
                       SizedBox(height: 10.h),
-
                       Text(
                         "Nível de escolaridade:",
                         style: TextStyle(
@@ -139,8 +158,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         ],
                       ),
                       SizedBox(height: 10.h),
-
-                      if (_selectedLevel == "1º Ciclo")
+                      if (_selectedSchoolLevel == "1º Ciclo")
                         Column(
                           children: [
                             Text(
@@ -154,9 +172,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                             CheckboxListTile(
                               title: Text(
                                 "Todas",
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                ),
+                                style: TextStyle(fontSize: 12.sp),
                               ),
                               value: _selectAll,
                               onChanged: (bool? value) {
@@ -172,23 +188,25 @@ class _AddUserDialogState extends State<AddUserDialog> {
                               height: 150.h,
                               child: SingleChildScrollView(
                                 child: Column(
-                                  children: _letters.map((letter) {
-                                    return CheckboxListTile(
-                                      title: Text(
-                                        letter,
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                        ),
-                                      ),
-                                      value: _lettersSelected[letter],
-                                      onChanged: (bool? value) {
-                                        setState(() {
-                                          _lettersSelected[letter] = value ?? false;
-                                          _selectAll = _lettersSelected.values.every((e) => e);
-                                        });
-                                      },
-                                    );
-                                  }).toList(),
+                                  children:
+                                      _letters.map((letter) {
+                                        return CheckboxListTile(
+                                          title: Text(
+                                            letter,
+                                            style: TextStyle(fontSize: 12.sp),
+                                          ),
+                                          value: _lettersSelected[letter],
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              _lettersSelected[letter] =
+                                                  value ?? false;
+                                              _selectAll = _lettersSelected
+                                                  .values
+                                                  .every((e) => e);
+                                            });
+                                          },
+                                        );
+                                      }).toList(),
                                 ),
                               ),
                             ),
@@ -197,7 +215,6 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     ],
                   ),
                 ),
-
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.h),
                   child: Row(
@@ -212,39 +229,34 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           icon: Icon(Icons.delete, size: 30.sp),
                           label: Text(
                             "Eliminar",
-                            style: TextStyle(
-                              fontSize: 30.sp,
-                            ),
+                            style: TextStyle(fontSize: 30.sp),
                           ),
                           style: TextButton.styleFrom(
                             foregroundColor: AppColors.red,
                           ),
                         ),
-
                       TextButton.icon(
                         onPressed: () => Navigator.pop(context),
                         icon: Icon(Icons.cancel, size: 30.sp),
                         label: Text(
                           "Cancelar",
-                          style: TextStyle(
-                            fontSize: 30.sp,
-                          ),
+                          style: TextStyle(fontSize: 30.sp),
                         ),
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.grey,
                         ),
                       ),
-
                       TextButton.icon(
                         onPressed: () {
                           if (_nameController.text.isNotEmpty) {
-                            final selected = _lettersSelected.entries
-                                .where((e) => e.value)
-                                .map((e) => e.key)
-                                .toList();
+                            final selected =
+                                _lettersSelected.entries
+                                    .where((e) => e.value)
+                                    .map((e) => e.key)
+                                    .toList();
                             widget.onUserAdded(
-                              _nameController.text,
-                              _selectedLevel,
+                              _nameController.text.trim(),
+                              _selectedSchoolLevel,
                               selected,
                             );
                             Navigator.pop(context);
@@ -253,9 +265,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         icon: Icon(Icons.save, size: 30.sp),
                         label: Text(
                           "Salvar",
-                          style: TextStyle(
-                            fontSize: 30.sp,
-                          ),
+                          style: TextStyle(fontSize: 30.sp),
                         ),
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.green,
@@ -273,10 +283,10 @@ class _AddUserDialogState extends State<AddUserDialog> {
   }
 
   Widget _buildLevelOption(String label, IconData icon, Color color) {
-    final bool selected = _selectedLevel == label;
+    final bool selected = _selectedSchoolLevel == label;
     return Expanded(
       child: InkWell(
-        onTap: () => setState(() => _selectedLevel = label),
+        onTap: () => setState(() => _selectedSchoolLevel = label),
         child: Container(
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
