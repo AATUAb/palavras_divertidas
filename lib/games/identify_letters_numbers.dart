@@ -8,6 +8,7 @@ import '../widgets/games_design.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
 
+// classe para o jogo de Identificar Letras e Números
 class IdentifyLettersNumbersGame extends StatefulWidget {
   final UserModel user;
   const IdentifyLettersNumbersGame({super.key, required this.user});
@@ -17,6 +18,7 @@ class IdentifyLettersNumbersGame extends StatefulWidget {
       IdentifyLettersNumbersGameState();
 }
 
+// classe para o estado do jogo de Identificar Letras e Números
 class IdentifyLettersNumbersGameState
     extends State<IdentifyLettersNumbersGame> {
   late LevelManager levelManager;

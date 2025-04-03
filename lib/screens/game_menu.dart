@@ -11,6 +11,7 @@ import 'home_page.dart';
 import 'dashboard.dart';
 import 'sticker_book.dart';
 
+// classe que define os dados a apresentar sobre cada jogo
 class GameCardData {
   final String title;
   final IconData icon;
@@ -25,6 +26,7 @@ class GameCardData {
   });
 }
 
+// classe que define o menu de jogos
 class GameMenu extends StatefulWidget {
   final UserModel user;
   const GameMenu({super.key, required this.user});
@@ -33,6 +35,7 @@ class GameMenu extends StatefulWidget {
   State<GameMenu> createState() => _GameMenuState();
 }
 
+//para dar música de fundo sempre que se está no ecrã do menu de jogos
 class _GameMenuState extends State<GameMenu> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -54,8 +57,10 @@ class _GameMenuState extends State<GameMenu> {
     super.dispose();
   }
 
+  // builder do menu de jogos
   @override
   Widget build(BuildContext context) {
+    // lista de jogos disponíveis para todos os utilizadores
     final List<GameCardData> jogosBase = [
       GameCardData(
         title: "Detetive de letras e números",
@@ -83,6 +88,7 @@ class _GameMenuState extends State<GameMenu> {
       ),
     ];
 
+    // lista de jogos disponíveis apenas para utilizadores do 1º ciclo
     final List<GameCardData> jogosExtras = [
       GameCardData(
         title: "Detetive de palavras",
@@ -107,7 +113,8 @@ class _GameMenuState extends State<GameMenu> {
       key: _scaffoldKey,
       drawer: custom.CustomDrawer(
         userName: widget.user.name,
-        userLevel: widget.user.schoolLevel, // <- CORRIGIDO
+        userLevel: widget.user.schoolLevel,
+
         onManageUsers: () {
           Navigator.pop(context);
           Navigator.pushReplacement(
@@ -120,14 +127,14 @@ class _GameMenuState extends State<GameMenu> {
         },
         onAchievements: () {
           Navigator.pop(context);
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => StickerBookScreen()),
           );
         },
         onDashboard: () {
           Navigator.pop(context);
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (_) => DashboardScreen(user: widget.user),
@@ -227,7 +234,7 @@ class _GameMenuState extends State<GameMenu> {
   }
 
   void _startIdentifyLettersNumbersGame() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder:
@@ -238,7 +245,7 @@ class _GameMenuState extends State<GameMenu> {
   }
 
   void _startWriteGame() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => WriteGameScreen(character: "A")),
     );
