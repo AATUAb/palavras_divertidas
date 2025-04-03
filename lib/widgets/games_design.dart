@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../themes/colors.dart'; 
-import '../screens/game_menu.dart';  // Certifique-se de que o caminho está correto
+import '../screens/game_menu.dart';
 
 class GamesDesign extends StatelessWidget {
   final Widget child;
-  final dynamic user; // Aqui, você tem o usuário que foi passado como parâmetro
+  final dynamic user; 
 
   const GamesDesign({super.key, required this.child, required this.user});
 
@@ -150,7 +150,7 @@ class TopWave extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 110.h,
+      height: 90.h,
       width: double.infinity,
       child: CustomPaint(
         painter: CloudPainter(),
