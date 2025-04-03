@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/level_manager.dart';
 import '../widgets/games_animations.dart';
+import '../widgets/games_design.dart';
 import '../models/user_model.dart';
 
 class IdentifyLettersNumbersGame extends StatefulWidget {
@@ -110,7 +111,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
 
     final double minX = 0.05;
     final double maxX = 0.95;
-    final double minY = 0.35;
+    final double minY = 0.45;
     final double maxY = 0.85;
 
     final List<LetterItem> placedItems = [];
@@ -136,6 +137,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
           dx: dx,
           dy: dy,
           fontFamily: isFirstCycle ? _chooseRandomFont() : null,
+          backgroundColor: _generateStrongColor(),
         ),
       );
     }
@@ -230,6 +232,22 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
   bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
   String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
 
+  Color _generateStrongColor() {
+    final colors = [
+      Colors.red,
+      Colors.blue,
+      Colors.green,
+      Colors.purple,
+      Colors.orange,
+      Colors.pink,
+      Colors.teal,
+      Colors.indigo,
+      Colors.deepPurple,
+      Colors.cyan,
+    ];
+    return colors[_random.nextInt(colors.length)];
+  }
+
   @override
   void dispose() {
     roundTimer?.cancel();
@@ -239,87 +257,106 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
 
   @override
   Widget build(BuildContext context) {
-    final Widget topTextWidget = isFirstCycle && _isLetter(targetCharacter)
-        ? Column(
-            children: [
-              Text(
-                'Encontra a letra',
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontFamily: 'Slabo',
-                  fontWeight: FontWeight.bold,
+    final Widget topTextWidget = Padding(
+      padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
+      child: isFirstCycle && _isLetter(targetCharacter)
+          ? Column(
+              children: [
+                Text(
+                  'Encontra a letra',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    //fontFamily: 'Slabo',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    decoration: TextDecoration.none,
+                  ),
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo', decoration: TextDecoration.none)),
+                    SizedBox(width: 8.w),
+                    Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive', decoration: TextDecoration.none)),
+                    SizedBox(width: 16.w),
+                    Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo', decoration: TextDecoration.none)),
+                    SizedBox(width: 8.w),
+                    Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive', decoration: TextDecoration.none)),
+                  ],
+                ),
+              ],
+            )
+          : Text(
+              _isNumber(targetCharacter)
+                  ? 'Encontra o número $targetCharacter'
+                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+              style: TextStyle(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.blue[800],
+                //fontFamily: isFirstCycle ? 'Slabo' : null,
+                decoration: TextDecoration.none,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo')),
-                  SizedBox(width: 8.w),
-                  Text(targetCharacter.toUpperCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
-                  SizedBox(width: 16.w),
-                  Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo')),
-                  SizedBox(width: 8.w),
-                  Text(targetCharacter.toLowerCase(), style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
-                ],
-              ),
-            ],
-          )
-        : Text(
-            _isNumber(targetCharacter)
-                ? 'Encontra o número $targetCharacter'
-                : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-            style: TextStyle(
-              fontSize: 24.sp,
-              fontWeight: FontWeight.bold,
-              fontFamily: isFirstCycle ? 'Slabo' : null,
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          );
+    );
 
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: GameAnimations.buildTopInfo(
-                progressValue: progressValue,
-                level: levelManager.level,
-                currentRound: levelManager.totalRoundsCount + 1,
-                totalRounds: levelManager.evaluationRounds,
-                topTextWidget: topTextWidget,
-              ),
+    return GamesDesign(
+      user: widget.user,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: GameAnimations.buildTopInfo(
+              progressValue: progressValue,
+              level: levelManager.level,
+              currentRound: levelManager.totalRoundsCount + 1,
+              totalRounds: levelManager.evaluationRounds,
+              topTextWidget: topTextWidget,
             ),
-            ...letterItems.map((item) {
-              return Align(
-                alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
-                child: item.isTapped
-                    ? GameAnimations.correctAnswerIcon()
-                    : TextButton(
-                        onPressed: () => checkAnswer(item),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          ...letterItems.map((item) {
+            return Align(
+              alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
+              child: item.isTapped
+                  ? const Icon(Icons.check, color: Colors.green, size: 30)
+                  : GestureDetector(
+                      onTap: () => checkAnswer(item),
+                      child: Container(
+                        width: 60.r,
+                        height: 60.r,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: item.backgroundColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              offset: Offset(2, 2),
+                              blurRadius: 4.r,
+                            )
+                          ],
                         ),
+                        alignment: Alignment.center,
                         child: Text(
                           item.character,
                           style: TextStyle(
-                            fontSize: 30.sp,
+                            fontSize: 24.sp,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                             fontFamily: item.fontFamily,
+                            decoration: TextDecoration.none,
                           ),
                         ),
                       ),
-              );
-            }),
-            if (showSuccessAnimation)
-              IgnorePointer(
-                ignoring: true,
-                child: GameAnimations.successCoffetiesTimed(),
-              ),
-          ],
-        ),
+                    ),
+            );
+          }).toList(),
+          if (showSuccessAnimation)
+            IgnorePointer(
+              ignoring: true,
+              child: GameAnimations.successCoffetiesTimed(),
+            ),
+        ],
       ),
     );
   }
@@ -330,6 +367,7 @@ class LetterItem {
   final double dx;
   final double dy;
   final String? fontFamily;
+  final Color backgroundColor;
   bool isCorrect;
   bool isTapped = false;
   bool showCheck = false;
@@ -338,6 +376,7 @@ class LetterItem {
     required this.character,
     required this.dx,
     required this.dy,
+    required this.backgroundColor,
     this.fontFamily,
     this.isCorrect = false,
   });

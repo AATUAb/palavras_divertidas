@@ -28,7 +28,7 @@ class GamesDesign extends StatelessWidget {
         // Conteúdo principal (filho)
         Positioned.fill(
           child: Padding(
-            padding: EdgeInsets.only(top: 40.h),
+            padding: EdgeInsets.only(top: 3.h),
             child: child,
           ),
         ),
@@ -58,7 +58,7 @@ class GamesDesign extends StatelessWidget {
 
         // Botão de Home, para regressão ao menu de jogos
         Positioned(
-          top: 10.h,
+          top: 15.h,
           left: 10.w,
           child: Material(
             type: MaterialType.transparency,
@@ -67,7 +67,7 @@ class GamesDesign extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(Icons.home, color: AppColors.green, size: 20.sp),
+                icon: Icon(Icons.home, color: AppColors.white, size: 20.sp),
                 padding: EdgeInsets.zero, // Remove default padding
                 constraints: const BoxConstraints(), // Remove default constraints
                 tooltip: 'Voltar ao Menu de Jogos', // Optional: Add tooltip
@@ -109,6 +109,38 @@ class GamesDesign extends StatelessWidget {
       ],
     );
   }
+
+static Widget buildChallengeHeader({
+  required String title,
+  String? subtitle1,
+  String? subtitle2,
+}) {
+  return Column(
+    children: [
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 20.sp,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+      ),
+      if (subtitle1 != null && subtitle2 != null)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(subtitle1, style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo')),
+            SizedBox(width: 8.w),
+            Text(subtitle1, style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
+            SizedBox(width: 16.w),
+            Text(subtitle2, style: TextStyle(fontSize: 24.sp, fontFamily: 'Slabo')),
+            SizedBox(width: 8.w),
+            Text(subtitle2, style: TextStyle(fontSize: 24.sp, fontFamily: 'Cursive')),
+          ],
+        ),
+    ],
+  );
+}
 }
 
 // Widget que desenha a nuvem com CustomPainter
@@ -159,7 +191,6 @@ class CloudPainter extends CustomPainter {
 
     canvas.drawPath(path, paint);
   }
-
-  @override
+@override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
