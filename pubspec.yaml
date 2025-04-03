@@ -63,7 +63,6 @@ flutter:
     - assets/sounds/level_up.wav
     - assets/sounds/wrong.wav
 
-# configuração de imagens a usar
     # Imagens gerais
     - assets/images/sun.png
 
@@ -83,3 +82,4 @@ flutter:
     - family: Slabo
       fonts:
         - asset: assets/fonts/Slabo-Regular.ttf
+

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/custom_drawer.dart' as custom;
@@ -26,7 +27,6 @@ class GameCardData {
 
 class GameMenu extends StatefulWidget {
   final UserModel user;
-
   const GameMenu({super.key, required this.user});
 
   @override
@@ -35,6 +35,24 @@ class GameMenu extends StatefulWidget {
 
 class _GameMenuState extends State<GameMenu> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  @override
+  void initState() {
+    super.initState();
+    _playBackgroundMusic();
+  }
+
+  void _playBackgroundMusic() async {
+    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+    await _audioPlayer.play(AssetSource('sounds/intro_music.mp3'));
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.stop();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +107,7 @@ class _GameMenuState extends State<GameMenu> {
       key: _scaffoldKey,
       drawer: custom.CustomDrawer(
         userName: widget.user.name,
-        userLevel: widget.user.schoolLevel,
+        userLevel: widget.user.schoolLevel, // <- CORRIGIDO
         onManageUsers: () {
           Navigator.pop(context);
           Navigator.pushReplacement(
@@ -212,7 +230,9 @@ class _GameMenuState extends State<GameMenu> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => IdentifyLettersNumbersGame(user: widget.user),
+        builder:
+            (context) =>
+                IdentifyLettersNumbersGame(key: widget.key, user: widget.user),
       ),
     );
   }
