@@ -1,114 +1,73 @@
-# 👤 Fluxo de Trabalho Git – Ana
 
-Este guia é **exclusivo** para ti. Aqui encontras todos os passos para trabalhar corretamente no projeto **Mundo das Palavras**.
+# 🧭 Guia de Trabalho com a Branch `testes`
 
----
-
-## 🧭 Branch pessoal: `dev_Ana`
-
-Toda a tua programação deve ser feita nesta branch.
+## 👩‍💻 Exemplo: Developer Ana
 
 ---
 
-## 🚀 Começar a trabalhar
-
-### 1. Clonar o repositório
+### 🔹 1. Confirmar que estás na tua branch pessoal (`dev_Ana`)
 
 ```bash
-<<<<<<< HEAD
-git clone https://github.com/Mundo-das-Palavras/MundodasPalavras.git
-cd MundodasPalavras
-=======
-git clone https://github.com/Mundo-das-Palavras/Mundo-das-Palavras.git
-cd Mundo-das-Palavras
->>>>>>> mundo_das_palavras
-```
-
-### 2. Ir para a tua branch
-
-```bash
-<<<<<<< HEAD
 git checkout dev_Ana
 ```
 
-> ⚠️ Se a branch ainda não existir localmente:
+---
+
+### 🔹 2. Atualizar a tua branch `dev_Ana` com as últimas alterações testadas (branch `testes`)
 
 ```bash
-git fetch origin
-git checkout dev_Ana
-=======
-git checkout dev_Ana dev_Ana
+git merge testes
 ```
 
-> ⚠️ Se a branch ainda não existir localmente:
-```bash
-git fetch origin
-git checkout dev_Ana dev_Ana
->>>>>>> mundo_das_palavras
-```
+> ⚠️ Importante: Se houver conflitos, a versão da `testes` deve prevalecer, pois é a mais recente e estável.
 
 ---
 
-## 🔄 Atualizar o teu código
+### 🔹 3. Trabalhar na tua branch `dev_Ana` com as tuas alterações
 
-```bash
-<<<<<<< HEAD
-git checkout mundo_das_palavras
-git pull origin mundo_das_palavras
-
-git checkout dev_Ana
-=======
-git checkout dev_Ana mundo_das_palavras
-git pull origin mundo_das_palavras
-
-git checkout dev_Ana dev_Ana
->>>>>>> mundo_das_palavras
-git merge mundo_das_palavras
-```
+- Edita o código, testa, e assegura-te que tudo funciona como esperado.
+- Usa boas práticas de desenvolvimento e commits explicativos.
 
 ---
 
-## ✍️ Guardar alterações
+### 🔹 4. Confirmar alterações antes de enviar
 
 ```bash
+git status
 git add .
-git commit -m "Ana: descreve aqui o que fizeste"
+git commit -m "Descrição clara das alterações feitas pela Ana"
+```
+
+---
+
+### 🔹 5. Enviar as alterações da `dev_Ana` para o GitHub
+
+```bash
 git push origin dev_Ana
 ```
 
 ---
 
-## 🧪 Enviar para teste
+### 🔹 6. Quando terminares o teu trabalho, funde a tua branch na `testes`
 
 ```bash
-<<<<<<< HEAD
-git checkout test
-=======
-git checkout dev_Ana test
->>>>>>> mundo_das_palavras
+git checkout testes
 git merge dev_Ana
-git push origin test
 ```
 
 ---
 
-## ✅ Finalizar
+### 🔹 7. Atualizar a branch `testes` no GitHub (para os outros developers)
 
 ```bash
-<<<<<<< HEAD
-git checkout mundo_das_palavras
-git merge test
-git push origin mundo_das_palavras
-```
-=======
-git checkout dev_Ana mundo_das_palavras
-git merge test
-git push origin mundo_das_palavras
+git push origin testes
 ```
 
 ---
 
-## 💡 Dica
+## 📌 Notas Finais
 
-Trabalha sempre na tua branch e mantém-te sincronizado com a `mundo_das_palavras`. Dúvidas? Fala com a equipa ou com o GPT 😄
->>>>>>> mundo_das_palavras
+- ✅ Trabalha sempre na tua própria branch (`dev_Nome`).
+- 🔁 Atualiza regularmente com a branch `testes` para não ficares desatualizado.
+- 🔐 A branch `testes` representa a base testada e estável da aplicação.
+- ☁️ A `testes` deve estar sempre sincronizada com o GitHub para que todos possam aceder à versão mais recente e validada.
