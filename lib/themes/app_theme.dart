@@ -1,109 +1,119 @@
 // Tema visual geral da aplicação (cores, fontes, etc).
-
-
 import 'package:flutter/material.dart';
-import 'colors.dart';            // Arquivo com as cores definidas para o app
-import 'text_styles.dart';      // Arquivo com os estilos de texto do app
+import 'colors.dart'; // Arquivo com as cores definidas para o app
 
 // Classe estática que define o tema da aplicação
 class AppTheme {
   // Getter para retornar o tema claro (light theme)
   static ThemeData get lightTheme {
     return ThemeData(
-      useMaterial3: true, // Usa o Material 3 (nova versão de design do Flutter)
-
+      useMaterial3: true, // Usa o Material 3
       // Define o esquema de cores baseado em uma cor "seed"
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.green,       // Cor base para gerar o esquema
-        primary: AppColors.green,         // Cor primária
-        secondary: AppColors.orange,      // Cor secundária
-        tertiary: AppColors.yellow,       // Cor terciária
-        background: AppColors.lightBlue,  // Cor de fundo
+        seedColor: AppColors.green,
+        primary: AppColors.green,
+        secondary: AppColors.orange,
+        tertiary: AppColors.yellow,
+        surface: AppColors.lightBlue, // Substituindo 'background' por 'surface'
       ),
 
-      // Cor de fundo padrão dos scaffolds (telas)
       scaffoldBackgroundColor: AppColors.lightBlue,
+      fontFamily: 'ComicNeue', // Fonte padrão da app
 
-      // Define a fonte padrão para o app
-      fontFamily: AppTextStyles.fontFamily,
-
-      // Estilo padrão para AppBars (barra superior das telas)
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.green, // Cor de fundo
-        foregroundColor: AppColors.white, // Cor dos ícones/texto
-        centerTitle: true,                // Centraliza o título
-        titleTextStyle: AppTextStyles.title.copyWith(color: AppColors.white),
-        elevation: 0,                     // Sem sombra
+        backgroundColor: AppColors.green,
+        foregroundColor: AppColors.white,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontFamily: 'ComicNeue',
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: AppColors.white,
+        ),
+        elevation: 0,
       ),
 
-      // Estilo padrão para ElevatedButtons (botões elevados)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.orange,         // Cor de fundo
-          foregroundColor: AppColors.white,          // Cor do texto
-          textStyle: AppTextStyles.button,           // Estilo do texto
-          padding: const EdgeInsets.symmetric(
-              horizontal: 20, vertical: 12),          // Espaçamento interno
+          backgroundColor: AppColors.orange,
+          foregroundColor: AppColors.white,
+          textStyle: TextStyle(
+            fontFamily: 'ComicNeue',
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12), // Cantos arredondados
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
 
-      // Estilo padrão para TextButtons (botões de texto)
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.darkBlue,       // Cor do texto
-          textStyle: AppTextStyles.button,           // Estilo do texto
-          padding: const EdgeInsets.symmetric(
-              horizontal: 16, vertical: 8),           // Espaçamento
+          foregroundColor: AppColors.darkBlue,
+          textStyle: TextStyle(
+            fontFamily: 'ComicNeue',
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
       ),
 
-      // Estilo padrão para InputFields (campos de texto)
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.white,                  // Cor de fundo do campo
+        fillColor: AppColors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.grey), // Borda padrão
+          borderSide: BorderSide(color: AppColors.grey),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.green), // Quando habilitado
+          borderSide: BorderSide(color: AppColors.green),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.orange, width: 2), // Quando focado
+          borderSide: BorderSide(color: AppColors.orange, width: 2),
         ),
-        labelStyle: AppTextStyles.label,              // Estilo da label
-        hintStyle: AppTextStyles.label.copyWith(color: AppColors.grey), // Estilo do placeholder
+        labelStyle: TextStyle(
+          fontFamily: 'ComicNeue',
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: AppColors.darkBlue,
+        ),
+        hintStyle: TextStyle(
+          fontFamily: 'ComicNeue',
+          fontSize: 14,
+          fontWeight: FontWeight.w300,
+          color: AppColors.grey,
+        ),
       ),
 
-      // Estilo padrão para Cards
       cardTheme: CardTheme(
-        color: AppColors.white,                       // Cor de fundo do card
-        elevation: 3,                                 // Sombra
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),    // Cantos arredondados
-        ),
+        color: AppColors.white,
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
 
-      // Estilo padrão para ícones
-      iconTheme: IconThemeData(
-        color: AppColors.orange, // Cor padrão dos ícones
-        size: 24,                // Tamanho padrão
-      ),
+      iconTheme: IconThemeData(color: AppColors.orange, size: 24),
 
-      // Estilo padrão para diálogos (popups)
       dialogTheme: DialogTheme(
-        backgroundColor: AppColors.lightBlue, // Cor de fundo
-        elevation: 5,                         // Sombra
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16), // Cantos arredondados
+        backgroundColor: AppColors.lightBlue,
+        elevation: 5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        titleTextStyle: TextStyle(
+          fontFamily: 'ComicNeue',
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: AppColors.darkBlue,
         ),
-        titleTextStyle: AppTextStyles.subtitle, // Estilo do título
-        contentTextStyle: AppTextStyles.body,   // Estilo do conteúdo
+        contentTextStyle: TextStyle(
+          fontFamily: 'ComicNeue',
+          fontSize: 14,
+          fontWeight: FontWeight.normal,
+          color: AppColors.darkBlue,
+        ),
       ),
     );
   }

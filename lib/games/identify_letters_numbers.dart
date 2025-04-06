@@ -1,64 +1,100 @@
-//Estrutura principal do jogo "Detetive de letras e números". Jogo 1
-
 import 'package:flutter/material.dart';
 import 'dart:math';
-import '../themes/text_styles.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../widgets/level_manager.dart';
+import '../widgets/games_animations.dart';
+import '../widgets/games_design.dart';
+import '../models/user_model.dart';
+import '../widgets/game_item.dart';
 
-// Widget principal com estado que representa o jogo
+// classe para o jogo de Identificar Letras e Números
 class IdentifyLettersNumbersGame extends StatefulWidget {
-  const IdentifyLettersNumbersGame({super.key});
+  final UserModel user;
+  const IdentifyLettersNumbersGame({super.key, required this.user});
 
   @override
-  _IdentifyLettersNumbersGameState createState() => _IdentifyLettersNumbersGameState();
+  IdentifyLettersNumbersGameState createState() =>
+      IdentifyLettersNumbersGameState();
 }
 
-class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> {
-  // Lista de letras e números usados no jogo
+// classe para o estado do jogo de Identificar Letras e Números
+class IdentifyLettersNumbersGameState
+    extends State<IdentifyLettersNumbersGame> {
+  late LevelManager levelManager;
+  bool isFirstCycle = false;
+  bool showSuccessAnimation = false;
+
   final List<String> characters = [
     ...'ABCDEFGHIJLMNOPQRSTUVXZ'.split(''),
     ...'abcdefghijlmnopqrstuvxz'.split(''),
     ...'0123456789'.split(''),
   ];
 
-  final Random _random = Random(); // Gerador de números aleatórios
-  final double spacing = 10; // Espaçamento mínimo entre caracteres na tela
+  final Random _random = Random();
+  int correctCount = 4;
+  int wrongCount = 5;
+  Duration levelTime = const Duration(seconds: 10);
 
-  int level = 1; // Nível atual do jogo
-  int correctCount = 4; // Quantidade de caracteres corretos a exibir
-  int wrongCount = 5; // Quantidade de caracteres errados a exibir
-  Duration levelTime = const Duration(seconds: 10); // Tempo por rodada
+  int currentTry = 0;
+  int foundCorrect = 0;
 
-  int totalRounds = 0; // Rodadas jogadas
-  int firstTryCorrect = 0; // Acertos na primeira tentativaS
-  int currentTry = 0; // Tentativas na rodada atual
+  String targetCharacter = '';
+  List<GameItem> gamesItems = [];
 
-  String targetCharacter = ''; // Caractere que o jogador deve encontrar
-  List<_LetterItem> letterItems = []; // Lista de itens posicionados na tela
-  Timer? roundTimer; // Timer da rodada
+  Timer? roundTimer;
+  Timer? progressTimer;
+  double progressValue = 1.0;
 
-  // Inicializa o jogo após o build da interface
   @override
   void initState() {
     super.initState();
+    isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
+    levelManager = LevelManager(user: widget.user);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      applyLevelSettings(); // Aplica as configurações do nível
-      generateNewChallenge(); // Gera o primeiro desafio
+      applyLevelSettings();
+      generateNewChallenge();
     });
   }
 
-  // Define os parâmetros do jogo conforme o nível atual
+  @override
+  void dispose() {
+    roundTimer?.cancel();
+    progressTimer?.cancel();
+    super.dispose();
+  }
+
+  Color _generateStrongColor() {
+    final colors = [
+      Colors.red,
+      Colors.blue,
+      Colors.green,
+      Colors.purple,
+      Colors.orange,
+      Colors.pink,
+      Colors.teal,
+      Colors.indigo,
+      Colors.deepPurple,
+      Colors.cyan,
+    ];
+    return colors[_random.nextInt(colors.length)];
+  }
+
+  bool _isLetter(String char) => RegExp(r'[a-zA-Z]').hasMatch(char);
+  bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
+  String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
+
   void applyLevelSettings() {
-    switch (level) {
+    switch (levelManager.level) {
       case 1:
         correctCount = 4;
-        wrongCount = 5;
+        wrongCount = 8;
         levelTime = const Duration(seconds: 10);
         break;
       case 2:
         correctCount = 5;
-        wrongCount = 8;
+        wrongCount = 10;
         levelTime = const Duration(seconds: 15);
         break;
       case 3:
@@ -66,221 +102,233 @@ class _IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame>
         wrongCount = 12;
         levelTime = const Duration(seconds: 20);
         break;
-      default:
-        correctCount = 4;
-        wrongCount = 5;
-        levelTime = const Duration(seconds: 10);
     }
   }
 
-  // Gera um novo desafio com novos caracteres e posições
   void generateNewChallenge() {
-    double collisionRadius = 80.r; // Raio mínimo de exclusão (em pixels)
-    roundTimer?.cancel(); // Cancela o timer anterior
+    setState(() {
+      gamesItems.clear();
+    });
+    foundCorrect = 0;
+    roundTimer?.cancel();
+    progressTimer?.cancel();
     currentTry = 0;
+    progressValue = 1.0;
 
-    // Escolhe um caractere aleatório e define se será maiúsculo ou minúsculo
     final String rawChar = characters[_random.nextInt(characters.length)];
-    targetCharacter = _isLetter(rawChar)
-        ? (_random.nextBool() ? rawChar.toUpperCase() : rawChar.toLowerCase())
-        : rawChar;
+    targetCharacter =
+        _isLetter(rawChar)
+            ? (_random.nextBool()
+                ? rawChar.toUpperCase()
+                : rawChar.toLowerCase())
+            : rawChar;
 
-    // Gera opções incorretas únicas que não são iguais ao alvo
     Set<String> uniqueOptions = {};
     while (uniqueOptions.length < wrongCount) {
       String c = characters[_random.nextInt(characters.length)];
-      String option = _isLetter(c)
-          ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
-          : c;
-
+      String option =
+          _isLetter(c)
+              ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
+              : c;
       if (option.toLowerCase() != targetCharacter.toLowerCase() &&
           !uniqueOptions.any((e) => e.toLowerCase() == option.toLowerCase())) {
         uniqueOptions.add(option);
       }
     }
 
-    // Cria uma lista com as opções corretas e mistura com as erradas
-    List<String> correctOptions = List.generate(correctCount, (_) => targetCharacter);
+    List<String> correctOptions = List.generate(correctCount, (_) {
+      return _random.nextBool()
+          ? targetCharacter.toUpperCase()
+          : targetCharacter.toLowerCase();
+    });
+
     final allOptions = [...uniqueOptions, ...correctOptions]..shuffle();
+    final cols = (allOptions.length / 3).ceil();
+    final spacingX = 1.0 / (cols + 1);
+    final spacingY = 0.18;
 
-    // Define limites de posicionamento na tela
-    final double minX = 0.05;
-    final double maxX = 0.95;
-    final double minY = 0.20;
-    final double maxY = 0.85;
+    List<GameItem> placedItems = [];
 
-    // Posiciona cada caractere na tela garantindo que não se sobreponham
-    final List<_LetterItem> placedItems = [];
-    final List<Offset> usedPositions = [];
+    for (int i = 0; i < allOptions.length; i++) {
+      final col = i % cols;
+      final row = i ~/ cols;
+      final dx = spacingX * (col + 1);
+      final dy = 0.45 + spacingY * row;
 
-    for (String char in allOptions) {
-      double dx, dy;
-      Offset pos;
-      int attempts = 0;
-
-      do {
-        dx = _random.nextDouble() * (maxX - minX) + minX;
-        dy = _random.nextDouble() * (maxY - minY) + minY;
-        pos = Offset(dx, dy);
-        attempts++;
-        if (attempts > 100) break;
-      } while (_overlaps(pos, usedPositions, collisionRadius));
-
-
-      usedPositions.add(pos);
-      placedItems.add(_LetterItem(character: char, dx: dx, dy: dy));
+      placedItems.add(
+        GameItem(
+          id: i.toString(),
+          type: GameItemType.character,
+          content: allOptions[i],
+          dx: dx,
+          dy: dy,
+          fontFamily: isFirstCycle ? _chooseRandomFont() : null,
+          backgroundColor: _generateStrongColor(),
+          isCorrect:
+              allOptions[i].toLowerCase() == targetCharacter.toLowerCase(),
+        ),
+      );
     }
 
-    // Atualiza o estado com os novos itens
     setState(() {
-      letterItems = placedItems;
+      gamesItems = placedItems;
     });
 
-    // Inicia o timer da rodada
+    final int totalMillis = levelTime.inMilliseconds;
+    const tick = Duration(milliseconds: 100);
+    int elapsed = 0;
+
+    progressTimer = Timer.periodic(tick, (timer) {
+      if (showSuccessAnimation) return;
+      setState(() {
+        elapsed += tick.inMilliseconds;
+        progressValue = 1.0 - (elapsed / totalMillis);
+      });
+      if (elapsed >= totalMillis) {
+        timer.cancel();
+      }
+    });
+
     roundTimer = Timer(levelTime, () {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Tempo esgotado! ⏰',
-            style: AppTextStyles.body.copyWith(fontSize: 16.sp, color: Colors.white),
-          ),
-          backgroundColor: Colors.orange,
-        ),
+      if (showSuccessAnimation) return;
+      GameAnimations.showTimeoutSnackbar(context);
+      final bool firstTryCorrect = currentTry == correctCount;
+
+      levelManager.registerRoundWithOptionalFeedback(
+        context: context,
+        correct: firstTryCorrect,
+        applySettings: applyLevelSettings,
+        onFinished: generateNewChallenge,
       );
-      _finishRound(firstTry: false);
     });
   }
 
-  // Finaliza a rodada, atualiza estatísticas e define o novo nível, se necessário
-  void _finishRound({required bool firstTry}) {
-    roundTimer?.cancel();
-    totalRounds++;
-    if (firstTry) firstTryCorrect++;
-
-    // Avalia o desempenho e ajusta o nível
-    if (totalRounds >= 4) {
-      double accuracy = firstTryCorrect / totalRounds;
-      if (accuracy >= 0.8 && level < 3) level++;
-      if (accuracy < 0.5 && level > 1) level--;
-      totalRounds = 0;
-      firstTryCorrect = 0;
-      applyLevelSettings();
-    }
-
-    generateNewChallenge(); // Gera novo desafio
-  }
-
-  // Verifica se duas posições estão muito próximas
-  bool _overlaps(Offset pos, List<Offset> others, double radius) {
-  for (final other in others) {
-    final dx = (pos.dx - other.dx) * MediaQuery.of(context).size.width;
-    final dy = (pos.dy - other.dy) * MediaQuery.of(context).size.height;
-    if (sqrt(dx * dx + dy * dy) < radius) return true;
-  }
-  return false;
-  }
-
-
-  // Verifica se o caractere é uma letra
-  bool _isLetter(String char) => RegExp(r'[a-zA-Z]').hasMatch(char);
-
-  // Verifica se o caractere é um número
-  bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
-
-  // Função chamada ao clicar em um caractere, verifica se é o correto
-  void checkAnswer(String selected) {
-    roundTimer?.cancel();
+  void checkAnswer(GameItem selectedItem) {
     currentTry++;
-    if (selected == targetCharacter) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Correto! 🎉',
-            style: AppTextStyles.body.copyWith(fontSize: 16.sp, color: Colors.white),
-          ),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 1),
-        ),
-      );
-      _finishRound(firstTry: currentTry == 1);
+
+    if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
+      foundCorrect++;
+      setState(() {
+        selectedItem.isCorrect = true;
+        selectedItem.showCheck = true;
+        selectedItem.isTapped = true;
+      });
+
+      GameAnimations.playCorrectSound();
+
+      if (foundCorrect >= correctCount) {
+        roundTimer?.cancel();
+        progressTimer?.cancel();
+        final bool firstTryCorrect = currentTry == correctCount;
+
+        setState(() {
+          showSuccessAnimation = true;
+        });
+
+        GameAnimations.successCoffetiesTimed();
+
+        Future.delayed(const Duration(seconds: 1), () {
+          if (!mounted) return;
+
+          setState(() {
+            showSuccessAnimation = false;
+          });
+
+          levelManager.registerRoundWithOptionalFeedback(
+            context: context,
+            correct: firstTryCorrect,
+            applySettings: applyLevelSettings,
+            onFinished: generateNewChallenge,
+          );
+        });
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Tenta novamente! ❌',
-            style: AppTextStyles.body.copyWith(fontSize: 16.sp, color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 1),
-        ),
-      );
+      GameAnimations.playWrongSound();
     }
   }
 
-  // Cancela o timer ao destruir o widget
-  @override
-  void dispose() {
-    roundTimer?.cancel();
-    super.dispose();
-  }
-
-// Monta a interface do jogo com os caracteres espalhados na tela
   @override
   Widget build(BuildContext context) {
-    final String topText = _isNumber(targetCharacter)
-        ? 'Encontra o número $targetCharacter'
-        : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}';
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Detetive de letras e números',
-          style: AppTextStyles.body.copyWith(fontSize: 18.sp, color: Colors.white),
-        ),
-      ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 24.h),
-                child: Text(
-                  topText,
-                  style: AppTextStyles.title.copyWith(fontSize: 26.sp),
-                ),
+    final Widget topTextWidget = Padding(
+      padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
+      child:
+          isFirstCycle && _isLetter(targetCharacter)
+              ? Column(
+                children: [
+                  Text(
+                    'Encontra a letra',
+                    style: getInstructionFont(isFirstCycle: isFirstCycle),
+                  ),
+                  CharacterFontVariants(character: targetCharacter),
+                ],
+              )
+              : Text(
+                _isNumber(targetCharacter)
+                    ? 'Encontra o número $targetCharacter'
+                    : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+                style: getInstructionFont(isFirstCycle: isFirstCycle),
+                textAlign: TextAlign.center,
               ),
+    );
+
+    return GamesDesign(
+      user: widget.user,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: GameAnimations.buildTopInfo(
+              progressValue: progressValue,
+              level: levelManager.level,
+              currentRound: levelManager.totalRoundsCount + 1,
+              totalRounds: levelManager.evaluationRounds,
+              topTextWidget: topTextWidget,
             ),
-            // Exibe os botões dos caracteres em posições aleatórias
-            ...letterItems.map((item) {
-              return Align(
-                alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
-                child: TextButton(
-                  onPressed: () => checkAnswer(item.character),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    item.character,
-                    style: AppTextStyles.bodyBold.copyWith(fontSize: 30.sp),
-                  ),
-                ),
-              );
-            }).toList(),
-          ],
-        ),
+          ),
+          ...gamesItems.map((item) {
+            return Align(
+              alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
+              child:
+                  item.isTapped
+                      ? const Icon(Icons.check, color: Colors.green, size: 30)
+                      : GestureDetector(
+                        onTap: () => checkAnswer(item),
+                        child: Container(
+                          width: 60.r,
+                          height: 60.r,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: item.backgroundColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                offset: Offset(2, 2),
+                                blurRadius: 4.r,
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            item.content,
+                            style: TextStyle(
+                              fontSize: 24.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontFamily: item.fontFamily,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ),
+                      ),
+            );
+          }),
+          if (showSuccessAnimation)
+            IgnorePointer(
+              ignoring: true,
+              child: GameAnimations.successCoffetiesTimed(),
+            ),
+        ],
       ),
     );
   }
-}
-
-// Classe auxiliar que representa um caractere com posição na tela
-class _LetterItem {
-  final String character;
-  final double dx;
-  final double dy;
-
-  _LetterItem({required this.character, required this.dx, required this.dy});
 }

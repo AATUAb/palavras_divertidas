@@ -1,243 +1,250 @@
-//Estrutura principal para a página inicial da APP. 
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../models/user_model.dart';             // Modelo do utilizador
-import '../services/hive_service.dart';         // Serviço de armazenamento com Hive
-import '../themes/colors.dart';                 // Arquivo de cores do tema
-import '../themes/text_styles.dart';            // Estilos de texto do tema
-import 'add_user_dialog.dart';                 // Diálogo para adicionar/editar utilizador
-import 'game_menu.dart';                        // Tela de menu do jogo
+import '../models/user_model.dart';
+import '../services/hive_service.dart';
+import '../themes/colors.dart';
+import 'add_user_dialog.dart';
+import 'game_menu.dart';
+import '../widgets/menu_design.dart';
+import 'dart:math';
 
-// Classe principal que representa a página inicial do app
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  final String title; // Título da tela
+  final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-// Estado da página (com lógica e dados dinamicos)
 class _MyHomePageState extends State<MyHomePage> {
-  List<UserModel> users = []; // Lista de utilizadores carregados do Hive
+  List<UserModel> users = [];
 
   @override
   void initState() {
     super.initState();
-    _loadUsers(); // Carrega os utilizadores ao iniciar a tela
+    _loadUsers();
   }
 
-  // Função para carregar os utilizadores do Hive e atualizar a interface
   void _loadUsers() {
     setState(() {
       users = HiveService.getUsers();
     });
   }
 
-  // Função para exibir o diálogo de adicionar utilizador
   void _showAddUserDialog() {
     showDialog(
       context: context,
       builder: (context) {
         return AddUserDialog(
-          onUserAdded: (name, level, letters) async {
+          onUserAdded: (name, schoolLevel, letters) async {
             final newUser = UserModel(
               name: name,
-              level: level,
+              schoolLevel: schoolLevel,
               knownLetters: letters,
+              gameLevel: 1,
             );
-            await HiveService.addUser(newUser); // Salva o utilizador no Hive
-            _loadUsers(); // Atualiza a lista após adicionar
+            await HiveService.addUser(newUser);
+            _loadUsers();
           },
         );
       },
     );
   }
 
-  // Função para exibir o diálogo de edição de um utilizador existente
   void _showEditUserDialog(int index, UserModel user) {
     showDialog(
       context: context,
       builder: (context) {
         return AddUserDialog(
           initialName: user.name,
-          initialLevel: user.level,
+          initialSchoolLevel: user.schoolLevel,
           initialLetters: user.knownLetters,
-          onUserAdded: (name, level, letters) async {
+          onUserAdded: (name, schoolLevel, letters) async {
             final updatedUser = UserModel(
               name: name,
-              level: level,
+              schoolLevel: schoolLevel,
               knownLetters: letters,
+              gameLevel: user.gameLevel, // mantém o progresso
+              accuracyByLevel: user.accuracyByLevel,
+              overallAccuracy: user.overallAccuracy,
             );
-            await HiveService.updateUser(index, updatedUser); // Atualiza no Hive
-            _loadUsers(); // Atualiza a interface
+            await HiveService.updateUser(index, updatedUser);
+            _loadUsers();
           },
           onDelete: () async {
-            await HiveService.deleteUser(index); // apaga o utilizador
-            _loadUsers(); // Atualiza a interface
+            await HiveService.deleteUser(index);
+            _loadUsers();
           },
         );
       },
     );
   }
 
-  // Método que constrói a interface da página
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(
-          widget.title,
-          style: AppTextStyles.title.copyWith(color: AppColors.white),
-        ),
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: BoxDecoration(color: AppColors.lightBlue),
-        child: Column(
-          children: [
-            // Cabeçalho com ícone e pergunta
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-              child: Row(
-                children: [
-                  Icon(Icons.people, color: AppColors.orange, size: 30.sp),
-                  SizedBox(width: 10.w),
-                  Text(
-                    "Quem vai jogar hoje?",
-                    style: AppTextStyles.subtitle.copyWith(fontSize: 18.sp),
-                  ),
-                ],
-              ),
-            ),
+    double cardWidth = min(180.w, 0.28.sw);
 
-            // Corpo principal que exibe os utilizadors ou botão de adicionar
-            Expanded(
-              child: Center(
-                child: users.isEmpty
-                    ? SizedBox.expand(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [_buildAddUserButton()], // Apenas botão se lista vazia
-                        ),
-                      )
-                    : SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.7,
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                            crossAxisSpacing: 10.w,
-                            mainAxisSpacing: 10.h,
-                            childAspectRatio: 1.2,
+    return Scaffold(
+      body: MenuDesign(
+        child: SingleChildScrollView(
+          child: Transform.translate(
+            offset: Offset(0, -35.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 0.h),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 12.h),
+                  child: SizedBox(
+                    width: 280.w,
+                    height: 60.h,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.people,
+                                color: AppColors.orange,
+                                size: 25.sp,
+                              ),
+                              SizedBox(width: 6.w),
+                              Flexible(
+                                child: Text(
+                                  'Quem vai jogar hoje?',
+                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    fontSize: 25.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.darkBlue,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          itemCount: users.length + 1, // Adiciona botão no fim
-                          itemBuilder: (context, index) {
-                            if (index == users.length) {
-                              return _buildAddUserButton(); // Último item é botão de adicionar
-                            }
-                            return _buildUserCard(index); // Cartão do utilizador
-                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 25.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: Wrap(
+                    spacing: 10.w,
+                    runSpacing: 10.h,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      ...users.asMap().entries.map(
+                        (entry) => SizedBox(
+                          width: cardWidth,
+                          child: _buildUserCard(entry.key),
                         ),
                       ),
-              ),
+                      SizedBox(width: cardWidth, child: _buildAddUserButton()),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  // Função que cria o cartão visual de cada utilizador
   Widget _buildUserCard(int index) {
+    final user = users[index];
     final Color cardColor =
-        users[index].level == "Pré-Escolar" ? AppColors.green : AppColors.orange;
+        user.schoolLevel == "Pré-Escolar" ? AppColors.green : AppColors.orange;
 
-    return Card(
-      color: cardColor.withOpacity(0.8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-      elevation: 5,
-      child: InkWell(
-        onTap: () {
-          // Abre a tela de menu do jogo com o utilizador selecionado
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => GameMenu(user: users[index]),
-            ),
-          ).then((_) => _loadUsers()); // Atualiza após retornar
-        },
-        borderRadius: BorderRadius.circular(20.r),
-        child: Stack(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(8.w),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Avatar com ícone dependendo do nível
-                  CircleAvatar(
-                    radius: 40.r,
-                    backgroundColor: AppColors.white,
-                    child: Icon(
-                      users[index].level == "Pré-Escolar"
-                          ? Icons.child_care
-                          : Icons.school,
-                      size: 50.sp,
-                      color: cardColor,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 200.w),
+      child: Card(
+        color: cardColor.withAlpha((255 * 0.8).toInt()),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        elevation: 3,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => GameMenu(user: user)),
+            ).then((_) => _loadUsers());
+          },
+          borderRadius: BorderRadius.circular(20.r),
+          child: Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(8.w),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 30.r,
+                      backgroundColor: AppColors.white,
+                      child: Icon(
+                        user.schoolLevel == "Pré-Escolar"
+                            ? Icons.child_care
+                            : Icons.school,
+                        size: 40.sp,
+                        color: cardColor,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 10.h),
-
-                  // Nome do utilizador
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w),
-                    child: Text(
-                      users[index].name,
-                      style: AppTextStyles.bodyBold.copyWith(
-                          color: AppColors.white, fontSize: 14.sp),
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
+                    SizedBox(height: 6.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.w),
+                      child: Text(
+                        user.name,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-
-                  // Nível do utilizador
-                  Text(
-                    users[index].level,
-                    style: AppTextStyles.small.copyWith(
-                      color: AppColors.white.withOpacity(0.9),
-                      fontSize: 12.sp,
+                    Text(
+                      user.schoolLevel,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppColors.white.withAlpha((255 * 0.9).toInt()),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-
-            // Botão de edição no canto superior direito
-            Positioned(
-              top: 5.h,
-              right: 5.w,
-              child: IconButton(
-                onPressed: () => _showEditUserDialog(index, users[index]),
-                icon: Icon(Icons.edit, color: AppColors.white, size: 20.sp),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+              Positioned(
+                top: 5.h,
+                right: 5.w,
+                child: IconButton(
+                  onPressed: () => _showEditUserDialog(index, user),
+                  icon: Icon(Icons.edit, color: AppColors.white, size: 18.sp),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Função que cria o botão de "Adicionar Utilizador"
   Widget _buildAddUserButton() {
     return SizedBox(
-      width: 200.w,
-      height: 200.h,
+      width: 160.w,
       child: Card(
         color: AppColors.lightGrey,
         shape: RoundedRectangleBorder(
@@ -256,10 +263,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 Icon(Icons.add_circle, size: 60.sp, color: AppColors.green),
                 SizedBox(height: 10.h),
                 Text(
-                  "Adicionar\nUtilizador",
-                  style: AppTextStyles.bodyBold.copyWith(
-                    color: AppColors.green,
+                  "Adiciona Utilizador",
+                  style: TextStyle(
                     fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.green,
                   ),
                   textAlign: TextAlign.center,
                 ),

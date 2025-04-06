@@ -1,4 +1,4 @@
-// Código gerado automaticamente pelo Hive para o modelo do utilizador. Não o fazer á mão!!!
+// GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'user_model.dart';
 
@@ -6,44 +6,47 @@ part of 'user_model.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-// Adaptador usado pelo Hive para ler e escrever objetos do tipo UserModel
 class UserModelAdapter extends TypeAdapter<UserModel> {
   @override
-  final int typeId = 0; // ID único usado pelo Hive para identificar este tipo
+  final int typeId = 0;
 
-  // Método para converter dados binários em um objeto UserModel
   @override
   UserModel read(BinaryReader reader) {
-    final numOfFields = reader.readByte(); // Número de campos serializados
+    final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-
     return UserModel(
       name: fields[0] as String,
-      level: fields[1] as String,
+      schoolLevel: fields[1] as String,
       knownLetters: (fields[2] as List?)?.cast<String>(),
+      accuracyByLevel: (fields[3] as Map).cast<int, double>(),
+      overallAccuracy: fields[4] as double?,
+      gameLevel: fields[5] as int,
     );
   }
 
-  // Método para converter um objeto UserModel em dados binários para armazenamento
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(3)         // Número de campos
-      ..writeByte(0)         // Campo 0: name
+      ..writeByte(6)
+      ..writeByte(0)
       ..write(obj.name)
-      ..writeByte(1)         // Campo 1: level
-      ..write(obj.level)
-      ..writeByte(2)         // Campo 2: knownLetters
-      ..write(obj.knownLetters);
+      ..writeByte(1)
+      ..write(obj.schoolLevel)
+      ..writeByte(2)
+      ..write(obj.knownLetters)
+      ..writeByte(3)
+      ..write(obj.accuracyByLevel)
+      ..writeByte(4)
+      ..write(obj.overallAccuracy)
+      ..writeByte(5)
+      ..write(obj.gameLevel);
   }
 
-  // Necessário para garantir consistência na identificação do adaptador
   @override
   int get hashCode => typeId.hashCode;
 
-  // Verificação de igualdade com outro adaptador
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
