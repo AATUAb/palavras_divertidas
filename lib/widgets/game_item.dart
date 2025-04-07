@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:math';
 
 // tipos de item de jogo
 enum GameItemType {
@@ -12,12 +13,27 @@ enum GameItemType {
   character, // letras ou numeros isolados
 }
 
-// tipos de fonte possiveis para os itens de jogo
+// tipos de fonte possíveis para os itens de jogo
 enum FontStrategy {
   none, // usa a fonte por defeito da app
   slabo, // força a fonte Slabo
   cursive, // força a fonte Cursive
   random, // aleatoriamente entre Slabo e Cursive
+}
+
+// função utilitária para obter o nome da fonte com base na estratégia
+String? getFontFamily(FontStrategy strategy) {
+  final _random = Random();
+  switch (strategy) {
+    case FontStrategy.none:
+      return null;
+    case FontStrategy.slabo:
+      return 'Slabo';
+    case FontStrategy.cursive:
+      return 'Cursive';
+    case FontStrategy.random:
+      return _random.nextBool() ? 'Slabo' : 'Cursive';
+  }
 }
 
 // classe para representar um item de jogo
@@ -30,7 +46,7 @@ class GameItem {
   final String? fontFamily;
   final Color backgroundColor;
   bool isCorrect;
-  bool isTapped = false;
+  bool isTapped;
   bool showCheck = false;
 
   GameItem({
@@ -44,24 +60,57 @@ class GameItem {
     this.isCorrect = false,
     this.isTapped = false,
   });
+
+  // métodos para desenhar um tipo de item e permitir a sua visualização no ecrã
+  Widget buildWidget() {
+    switch (type) {
+      case GameItemType.character:
+      case GameItemType.text:
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            content,
+            style: TextStyle(
+              fontSize: 28.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: fontFamily,
+              decoration: TextDecoration.none,
+            ),
+          ),
+        );
+      case GameItemType.image:
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: backgroundColor,
+          ),
+          padding: const EdgeInsets.all(8),
+          child: Image.asset(
+            content,
+            height: 80,
+            width: 80,
+            fit: BoxFit.contain,
+          ),
+        );
+      case GameItemType.audio:
+        return Container(
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: const Icon(Icons.volume_up, color: Colors.white, size: 36),
+        );
+    }
+  }
 }
 
-/* /// apresenta a fonte Slabo ou Cursive, com 50% de probabilidade de cada uma
-  final Random _random = Random();
-  String? getFontFamily(FontStrategy strategy) {
-    switch (strategy) {
-      case FontStrategy.none:
-        return null;
-      case FontStrategy.slabo:
-        return 'Slabo';
-      case FontStrategy.cursive:
-        return 'Cursive';
-      case FontStrategy.random:
-        return _random.nextBool() ? 'Slabo' : 'Cursive';
-    }
-  }*/
-
-/// Para situações em que usa sempre usa sempre a fonte Slabo no 1º ciclo, e null no pré-escolar, como as intsruções
+// estilo das instruções do topo adaptado ao nível de escolaridade
 TextStyle getInstructionFont({required bool isFirstCycle}) {
   return TextStyle(
     fontSize: 20.sp,
@@ -72,7 +121,7 @@ TextStyle getInstructionFont({required bool isFirstCycle}) {
   );
 }
 
-// classe para permitir fontes aleatórias entre Slabo e Cursive para o 1º ciclo
+// classe para apresentar variantes de fonte para letras no 1º ciclo
 class CharacterFontVariants extends StatelessWidget {
   final String character;
 

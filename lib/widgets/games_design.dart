@@ -41,10 +41,14 @@ class GamesDesign extends StatelessWidget {
             type: MaterialType.transparency,
             child: Container(
               decoration: const BoxDecoration(
+                border: Border.fromBorderSide(BorderSide(color: Colors.black)),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(Icons.close_rounded, color: AppColors.red, size: 20.sp),
+                icon: Icon(Icons.close_rounded, 
+                color: AppColors.red, 
+                size: 20.sp
+              ),
                 padding: EdgeInsets.zero, // Remove default padding
                 constraints: const BoxConstraints(), // Remove default constraints
                 tooltip: 'Fechar App', // Optional: Add tooltip
@@ -64,10 +68,11 @@ class GamesDesign extends StatelessWidget {
             type: MaterialType.transparency,
             child: Container(
               decoration: const BoxDecoration(
+                border: Border.fromBorderSide(BorderSide(color: Colors.black)),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(Icons.home, color: AppColors.black, size: 20.sp),
+                icon: Icon(Icons.home, color: AppColors.black, size: 30.sp),
                 padding: EdgeInsets.zero, // Remove default padding
                 constraints: const BoxConstraints(), // Remove default constraints
                 tooltip: 'Voltar ao Menu de Jogos', // Optional: Add tooltip
@@ -85,17 +90,22 @@ class GamesDesign extends StatelessWidget {
           ),
         ),
 
-        // Botão de Informação (Bottom-Left)
+// Botão de Informação (Bottom-Left)
         Positioned(
           bottom: 10.h,
           left: 10.w,
           child: IconButton(
-            icon: Icon(Icons.info_outline, color: Colors.black, size: 28.sp), // Use outline for distinction if needed
+            icon: Icon(
+              Icons.info_outline,
+              color: Colors.black,
+              size: 28.sp,
+            ), 
+            tooltip: 'Tuturial',
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    "Tutorial em breve",
+                    "Tuturial em breve",
                     style: TextStyle(fontSize: 14.sp, color: AppColors.white),
                   ),
                   backgroundColor: AppColors.green, // Use theme color
@@ -106,10 +116,11 @@ class GamesDesign extends StatelessWidget {
             },
           ),
         ),
-         ],
-        ), 
-      );   
-    } 
+            ],
+          ),
+    );
+  }
+
 
 static Widget buildChallengeHeader({
   required String title,

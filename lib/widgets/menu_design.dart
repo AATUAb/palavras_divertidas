@@ -95,7 +95,7 @@ class MenuDesign extends StatelessWidget {
           ),
         ),
 
-        // Botão de Informação (Bottom-Left)
+// Botão de Informação (Bottom-Left)
         Positioned(
           bottom: 10.h,
           left: 10.w,
@@ -104,7 +104,8 @@ class MenuDesign extends StatelessWidget {
               Icons.info_outline,
               color: Colors.black,
               size: 28.sp,
-            ), // Use outline for distinction if needed
+            ), 
+            tooltip: 'Tuturial',
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

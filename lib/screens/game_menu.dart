@@ -36,28 +36,29 @@ class GameMenu extends StatefulWidget {
 }
 
 //para dar música de fundo sempre que se está no ecrã do menu de jogos
+   @override
 class _GameMenuState extends State<GameMenu> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final AudioPlayer _audioPlayer = AudioPlayer();
 
-  @override
-  void initState() {
-    super.initState();
-    _playBackgroundMusic();
-  }
+   @override
+    void initState() {
+      super.initState();
+      _playBackgroundMusic();
+    }
 
-  void _playBackgroundMusic() async {
-    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-    await _audioPlayer.play(AssetSource('sounds/intro_music.mp3'));
-  }
+    void _playBackgroundMusic() async {
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await _audioPlayer.play(AssetSource('assets/sounds/intro_music.mp3'));
+    }
 
-  @override
-  void dispose() {
-    _audioPlayer.stop();
-    super.dispose();
-  }
+    @override
+    void dispose() {
+      _audioPlayer.stop();
+      super.dispose();
+    }
 
-  // builder do menu de jogos
+ // builder do menu de jogos
   @override
   Widget build(BuildContext context) {
     // lista de jogos disponíveis para todos os utilizadores

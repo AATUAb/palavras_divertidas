@@ -12,15 +12,20 @@ class GameAnimations {
     await player.play(AssetSource('sounds/correct.wav'));
   }
 
+    /// Icone de resposta individual correcta 
+  static Widget correctAnswerIcon() {
+  return const Icon(Icons.check, color: Colors.green, size: 30);
+}
+
   /// Toca o som de resposta errada
   static Future<void> playWrongSound() async {
     final player = AudioPlayer();
     await player.play(AssetSource('sounds/wrong.wav'));
   }
 
-  /// Icone de resposta individual correcta 
-  static Widget correctAnswerIcon() {
-  return const Icon(Icons.check, color: Colors.green, size: 30);
+  /// Icone de resposta individual errada 
+  static Widget wrongAnswerIcon() {
+  return const Icon(Icons.close, color: Colors.red, size: 30);
 }
   
   /// Informação de tempo esgotado, exibida durante 400 milissegundos  
