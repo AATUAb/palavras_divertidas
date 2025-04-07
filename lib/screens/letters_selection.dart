@@ -40,45 +40,86 @@ Future<void> showLettersDialog({
                   color: AppColors.darkBlue,
                 ),
               ),
-              CheckboxListTile(
-                title: Text("Todas", style: TextStyle(fontSize: 13.sp)),
-                value: selectAll,
-                onChanged: (value) {
-                  selectAll = value ?? false;
-                  selectedMap.updateAll((key, _) => selectAll);
-                  (context as Element).markNeedsBuild();
-                },
+              SizedBox(height: 12.h),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () {
+                        selectAll = !selectAll;
+                        selectedMap.updateAll((key, _) => selectAll);
+                        (context as Element).markNeedsBuild();
+                      },
+                      icon: Icon(
+                        selectAll ? Icons.check_box : Icons.check_box_outline_blank,
+                        size: 16.sp,
+                        color: AppColors.green,
+                      ),
+                      label: Text(
+                        "Selecionar todas",
+                        style: TextStyle(fontSize: 12.sp, color: AppColors.green),
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        selectedMap.updateAll((key, _) => false);
+                        selectAll = false;
+                        (context as Element).markNeedsBuild();
+                      },
+                      icon: Icon(Icons.clear, size: 16.sp, color: AppColors.red),
+                      label: Text(
+                        "Limpar seleção",
+                        style: TextStyle(fontSize: 12.sp, color: AppColors.red),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: 8.h),
               Expanded(
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  thickness: 4.w,
-                  radius: Radius.circular(8.r),
-                  child: ListView.builder(
-                    itemCount: letters.length,
-                    itemBuilder: (context, index) {
-                      final letter = letters[index];
-                      return CheckboxListTile(
-                        title: Text(letter, style: TextStyle(fontSize: 13.sp)),
-                        value: selectedMap[letter],
-                        onChanged: (value) {
-                          selectedMap[letter] = value ?? false;
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 8.w,
+                    runSpacing: 8.h,
+                    children: letters.map((letter) {
+                      final isSelected = selectedMap[letter] ?? false;
+                      return GestureDetector(
+                        onTap: () {
+                          selectedMap[letter] = !isSelected;
                           selectAll = selectedMap.values.every((v) => v);
                           (context as Element).markNeedsBuild();
                         },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.green : AppColors.lightGrey,
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(color: isSelected ? AppColors.green : AppColors.grey),
+                          ),
+                          child: Text(
+                            letter,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
                       );
-                    },
+                    }).toList(),
                   ),
                 ),
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 16.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton(
+                  TextButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    child: Text("Cancelar", style: TextStyle(color: AppColors.grey)),
+                    icon: Icon(Icons.cancel, size: 16.sp, color: AppColors.grey),
+                    label: Text("Cancelar", style: TextStyle(color: AppColors.grey)),
                   ),
                   ElevatedButton.icon(
                     icon: Icon(Icons.save, size: 16.sp),
