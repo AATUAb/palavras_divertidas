@@ -6,7 +6,6 @@ class AddUserDialog extends StatefulWidget {
   final Function(String, String, List<String>) onUserAdded;
   final String? initialName;
   final String? initialSchoolLevel;
-  final List<String>? initialLetters;
   final Function()? onDelete;
 
   const AddUserDialog({
@@ -14,7 +13,6 @@ class AddUserDialog extends StatefulWidget {
     required this.onUserAdded,
     this.initialName,
     this.initialSchoolLevel,
-    this.initialLetters,
     this.onDelete,
   });
 
@@ -26,56 +24,11 @@ class _AddUserDialogState extends State<AddUserDialog> {
   late TextEditingController _nameController;
   late String _selectedSchoolLevel;
 
-  final List<String> _letters = [
-    "I",
-    "U",
-    "O",
-    "A",
-    "E",
-    "P",
-    "T",
-    "L",
-    "D",
-    "M",
-    "V",
-    "C",
-    "Q",
-    "N",
-    "R",
-    "B",
-    "G",
-    "J",
-    "F",
-    "S",
-    "Z",
-    "H",
-    "X",
-    "CH",
-    "LH",
-    "NH",
-    "BR, CR, DR, FR, GR, PR, TR, VR",
-    "BL, CL, FL, GL, PL, TL",
-  ];
-
-  late Map<String, bool> _lettersSelected;
-  bool _selectAll = false;
-
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName ?? "");
     _selectedSchoolLevel = widget.initialSchoolLevel ?? "Pré-Escolar";
-    _lettersSelected = {for (var letter in _letters) letter: false};
-
-    if (widget.initialLetters != null) {
-      for (var letter in widget.initialLetters!) {
-        if (_lettersSelected.containsKey(letter)) {
-          _lettersSelected[letter] = true;
-        }
-      }
-    }
-
-    _selectAll = _lettersSelected.values.every((e) => e);
   }
 
   @override
@@ -85,7 +38,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 600.w,
-          maxHeight: (_selectedSchoolLevel == "1º Ciclo" ? 450.h : 320.h),
+          maxHeight: 320.h,
         ),
         child: SingleChildScrollView(
           child: IntrinsicHeight(
@@ -136,7 +89,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         "Nível de escolaridade:",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14.sp,
+                          fontSize: 16.sp,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -157,64 +110,10 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 10.h),
-                      if (_selectedSchoolLevel == "1º Ciclo")
-                        Column(
-                          children: [
-                            Text(
-                              "Quais as letras que já aprendeste?",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14.sp,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            CheckboxListTile(
-                              title: Text(
-                                "Todas",
-                                style: TextStyle(fontSize: 12.sp),
-                              ),
-                              value: _selectAll,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  _selectAll = value ?? false;
-                                  _lettersSelected.updateAll(
-                                    (key, _) => _selectAll,
-                                  );
-                                });
-                              },
-                            ),
-                            SizedBox(
-                              height: 150.h,
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children:
-                                      _letters.map((letter) {
-                                        return CheckboxListTile(
-                                          title: Text(
-                                            letter,
-                                            style: TextStyle(fontSize: 12.sp),
-                                          ),
-                                          value: _lettersSelected[letter],
-                                          onChanged: (bool? value) {
-                                            setState(() {
-                                              _lettersSelected[letter] =
-                                                  value ?? false;
-                                              _selectAll = _lettersSelected
-                                                  .values
-                                                  .every((e) => e);
-                                            });
-                                          },
-                                        );
-                                      }).toList(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                     ],
                   ),
                 ),
+                const Spacer(),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.h),
                   child: Row(
@@ -226,22 +125,16 @@ class _AddUserDialogState extends State<AddUserDialog> {
                             widget.onDelete!();
                             Navigator.pop(context);
                           },
-                          icon: Icon(Icons.delete, size: 30.sp),
-                          label: Text(
-                            "Eliminar",
-                            style: TextStyle(fontSize: 30.sp),
-                          ),
+                          icon: Icon(Icons.delete, size: 16.sp),
+                          label: Text("Eliminar", style: TextStyle(fontSize: 16.sp)),
                           style: TextButton.styleFrom(
                             foregroundColor: AppColors.red,
                           ),
                         ),
                       TextButton.icon(
                         onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.cancel, size: 30.sp),
-                        label: Text(
-                          "Cancelar",
-                          style: TextStyle(fontSize: 30.sp),
-                        ),
+                        icon: Icon(Icons.cancel, size: 16.sp),
+                        label: Text("Cancelar", style: TextStyle(fontSize: 16.sp)),
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.grey,
                         ),
@@ -249,24 +142,16 @@ class _AddUserDialogState extends State<AddUserDialog> {
                       TextButton.icon(
                         onPressed: () {
                           if (_nameController.text.isNotEmpty) {
-                            final selected =
-                                _lettersSelected.entries
-                                    .where((e) => e.value)
-                                    .map((e) => e.key)
-                                    .toList();
                             widget.onUserAdded(
                               _nameController.text.trim(),
                               _selectedSchoolLevel,
-                              selected,
+                              [], // Letras vazias por agora
                             );
                             Navigator.pop(context);
                           }
                         },
-                        icon: Icon(Icons.save, size: 30.sp),
-                        label: Text(
-                          "Salvar",
-                          style: TextStyle(fontSize: 30.sp),
-                        ),
+                        icon: Icon(Icons.save, size: 16.sp),
+                        label: Text("Salvar", style: TextStyle(fontSize: 16.sp)),
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.green,
                         ),

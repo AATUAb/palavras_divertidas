@@ -1,5 +1,4 @@
 // Estrutura para o jogo "Detetive de Letras e Números", que desafia os jogadores a identificar letras e números em um conjunto de opções.
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
@@ -218,32 +217,39 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     });
   }
 
-  // verifica se a resposta do jogador está correta, dá os sons e animações correspondentes e atualiza o estado do jogo
+  // verifica se a resposta do jogador está correta, dá os sons e animações correspondentes
+  // atualiza o estado visual do item tocado e gere o progresso da ronda e do nível
   void checkAnswer(GameItem selectedItem) {
   currentTry++;
 
+  // Verifica se o conteúdo do item selecionado corresponde ao carácter alvo
   if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
-    foundCorrect++;
-    GameAnimations.playCorrectSound();
+    foundCorrect++;  // no caso de respostas correcata, incrementa o contador de acertos
+    GameAnimations.playCorrectSound(); // Toca o som de resposta correta
 
+     // Marca o item como 'tocado' e correto para apresentar o ícone no ecrã
     setState(() {
       selectedItem.isTapped = true;
       selectedItem.isCorrect = true;
     });
 
+    // Se o número de acertos já for suficiente para concluir a ronda:
     if (foundCorrect >= correctCount) {
       roundTimer?.cancel();
       progressTimer?.cancel();
-      final bool firstTryCorrect = currentTry == correctCount;
+      final bool firstTryCorrect = currentTry == correctCount;     // Verifica se o jogador acertou tudo à primeira tentativa
 
+      // Ativa o estado de animação de sucesso (confetis)
       setState(() {
         showSuccessAnimation = true;
       });
 
-      GameAnimations.successCoffetiesTimed();
+      GameAnimations.successCoffetiesTimed();   // Mostra a animação de sucesso temporariamente
 
+      // Espera 1 segundo para terminar a animação antes de avançar para a próxima ronda
       Future.delayed(const Duration(seconds: 1), () {
         if (!mounted) return;
+         // Esconde a animação de sucesso e avança para a próxima ronda
         setState(() => showSuccessAnimation = false);
         levelManager.registerRoundWithOptionalFeedback(
           context: context,
@@ -254,6 +260,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
       });
     }
   } else {
+    // Caso a resposta esteja errada, toca o som de erro e marca o item como 'tocado' e incorreto, para mostrar ícone
     GameAnimations.playWrongSound();
     setState(() {
       selectedItem.isTapped = true;
@@ -261,8 +268,6 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     });
   }
 }
-
-
 
   // constrói a interface do jogo, incluindo o layout e os elementos visuais
  @override

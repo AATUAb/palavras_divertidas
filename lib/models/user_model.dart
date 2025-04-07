@@ -5,7 +5,7 @@ part 'user_model.g.dart';
 @HiveType(typeId: 0)
 class UserModel extends HiveObject {
   @HiveField(0)
-  final String name;
+  String name;
 
   /// Nível escolar: "Pré-Escolar", "1º Ciclo", etc.
   @HiveField(1)
@@ -47,4 +47,22 @@ class UserModel extends HiveObject {
       overallAccuracy = null;
     }
   }
+
+  UserModel copyWith({
+  String? name,
+  String? schoolLevel,
+  List<String>? knownLetters,
+  int? gameLevel,
+  Map<int, double>? accuracyByLevel,
+  double? overallAccuracy,
+}) {
+  return UserModel(
+    name: name ?? this.name,
+    schoolLevel: schoolLevel ?? this.schoolLevel,
+    knownLetters: knownLetters ?? this.knownLetters,
+    gameLevel: gameLevel ?? this.gameLevel,
+    accuracyByLevel: accuracyByLevel ?? this.accuracyByLevel,
+    overallAccuracy: overallAccuracy ?? this.overallAccuracy,
+  );
+}
 }

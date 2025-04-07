@@ -6,6 +6,7 @@ import '../themes/colors.dart';
 import 'add_user_dialog.dart';
 import 'game_menu.dart';
 import '../widgets/menu_design.dart';
+import 'letters_selection.dart';
 import 'dart:math';
 
 class MyHomePage extends StatefulWidget {
@@ -59,13 +60,12 @@ class _MyHomePageState extends State<MyHomePage> {
         return AddUserDialog(
           initialName: user.name,
           initialSchoolLevel: user.schoolLevel,
-          initialLetters: user.knownLetters,
           onUserAdded: (name, schoolLevel, letters) async {
             final updatedUser = UserModel(
               name: name,
               schoolLevel: schoolLevel,
               knownLetters: letters,
-              gameLevel: user.gameLevel, // mantém o progresso
+              gameLevel: user.gameLevel,
               accuracyByLevel: user.accuracyByLevel,
               overallAccuracy: user.overallAccuracy,
             );
@@ -190,16 +190,50 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: 30.r,
-                      backgroundColor: AppColors.white,
-                      child: Icon(
-                        user.schoolLevel == "Pré-Escolar"
-                            ? Icons.child_care
-                            : Icons.school,
-                        size: 40.sp,
-                        color: cardColor,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                          radius: 30.r,
+                          backgroundColor: AppColors.white,
+                          child: Icon(
+                            user.schoolLevel == "Pré-Escolar"
+                                ? Icons.child_care
+                                : Icons.school,
+                            size: 40.sp,
+                            color: cardColor,
+                          ),
+                        ),
+                        if (user.schoolLevel == "1º Ciclo")
+                          Padding(
+                            padding: EdgeInsets.only(left: 6.w),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                showLettersDialog(
+                                  context: context,
+                                  initialSelection: user.knownLetters,
+                                  onSaved: (selectedLetters) {
+                                    final updatedUser = user.copyWith(
+                                      knownLetters: selectedLetters,
+                                    );
+                                    HiveService.updateUser(index, updatedUser);
+                                    _loadUsers();
+                                  },
+                                );
+                              },
+                              child: Text("Letras?", style: TextStyle(fontSize: 12.sp)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.green,
+                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                minimumSize: Size.zero,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     SizedBox(height: 6.h),
                     Padding(
