@@ -8,7 +8,7 @@ Future<void> showLettersDialog({
   required void Function(List<String> selectedLetters) onSaved,
 }) async {
   final List<String> letters = [
-    "Vogais: A, E,I, O, U", "P", "T", "L", "D", "M", "V",
+    "Vogais: A,E, I, O, U", "P", "T", "L", "D", "M", "V",
     "C", "Q", "N", "R", "B", "G", "J", "F", "S", "Z", "H", "X",
     "CH", "LH", "NH",
     "BR, CR, DR, FR, GR, PR, TR, VR",

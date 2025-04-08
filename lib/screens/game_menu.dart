@@ -11,6 +11,8 @@ import 'home_page.dart';
 import 'dashboard.dart';
 import 'sticker_book.dart';
 
+import '../games/test.dart';
+
 // classe que define os dados a apresentar sobre cada jogo
 class GameCardData {
   final String title;
@@ -78,7 +80,8 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Contar sílabas",
         icon: Icons.format_list_numbered,
-        onTap: () => _navigateToGame("Contar sílabas"),
+        //onTap: () => _navigateToGame("Contar sílabas"),
+        onTap: _startTestGame,
         backgroundColor: AppColors.yellow,
       ),
       GameCardData(
@@ -249,6 +252,17 @@ class _GameMenuState extends State<GameMenu> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => WriteGameScreen(character: "A")),
+    );
+  }
+
+  void _startTestGame() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) =>
+                TestGame(key: widget.key, user: widget.user),
+      ),
     );
   }
 
