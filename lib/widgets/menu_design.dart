@@ -1,24 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../themes/colors.dart'; 
+import 'package:audioplayers/audioplayers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../themes/colors.dart';
 
-class MenuDesign extends StatelessWidget {
+class MenuDesign extends StatefulWidget {
   final Widget child;
 
   const MenuDesign({super.key, required this.child});
 
   @override
+  State<MenuDesign> createState() => _MenuDesignState();
+}
+
+class _MenuDesignState extends State<MenuDesign> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _muted = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadMuteStatus();
+    });
+  }
+
+  Future<void> _loadMuteStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final isMuted = prefs.getBool('isMuted') ?? false;
+
+      setState(() {
+        _muted = isMuted;
+      });
+
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      if (!_muted) {
+        await _audioPlayer.play(AssetSource('sounds/intro_music.mp3'));
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar estado de mute: $e');
+    }
+  }
+
+  Future<void> _toggleMute() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _muted = !_muted;
+    });
+    await prefs.setBool('isMuted', _muted);
+
+    if (_muted) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.resume();
+    }
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.stop();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Fundo branco da página
+        // Fundo branco
         Container(color: Colors.white),
 
-        // Topo com formato "nuvem"
+        // Nuvem verde no topo
         const Positioned(top: 0, left: 0, right: 0, child: TopWave()),
 
-        // Sol no canto superior esquerdo
+        // Sol
         Positioned(
           top: -50.h,
           left: 12.w,
@@ -30,7 +87,7 @@ class MenuDesign extends StatelessWidget {
           ),
         ),
 
-        // "Mundo das Palavras" no canto superior direito
+        // Texto "Mundo das Palavras"
         Positioned(
           top: 15.h,
           right: 80.w,
@@ -59,21 +116,22 @@ class MenuDesign extends StatelessWidget {
           ),
         ),
 
-        // Conteúdo principal (filho)
+        // Conteúdo principal
         Positioned.fill(
-          child: Padding(padding: EdgeInsets.only(top: 20.h), child: child),
+          child: Padding(
+            padding: EdgeInsets.only(top: 20.h),
+            child: widget.child,
+          ),
         ),
 
-        // Botão de Fechar (Top-Right)
+        // Botão de Fechar App
         Positioned(
           top: 10.h,
           right: 10.w,
           child: Material(
-            // Added Material for ink splash
             type: MaterialType.transparency,
             child: Container(
               decoration: const BoxDecoration(
-                //color: Colors.black,
                 border: Border.fromBorderSide(BorderSide(color: Colors.black)),
                 shape: BoxShape.circle,
               ),
@@ -82,38 +140,33 @@ class MenuDesign extends StatelessWidget {
                   Icons.close_rounded,
                   color: AppColors.red,
                   size: 20.sp,
-                ), // White icon, maybe smaller
-                padding: EdgeInsets.zero, // Remove default padding
-                constraints:
-                    const BoxConstraints(), // Remove default constraints
-                tooltip: 'Fechar App', // Optional: Add tooltip
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                tooltip: 'Fechar App',
                 onPressed: () {
-                  SystemNavigator.pop(); // Fecha a aplicação
+                  SystemNavigator.pop();
                 },
               ),
             ),
           ),
         ),
 
-// Botão de Informação (Bottom-Left)
+        // Botão de Informação
         Positioned(
           bottom: 10.h,
           left: 10.w,
           child: IconButton(
-            icon: Icon(
-              Icons.info_outline,
-              color: Colors.black,
-              size: 28.sp,
-            ), 
-            tooltip: 'Tuturial',
+            icon: Icon(Icons.info_outline, color: Colors.black, size: 28.sp),
+            tooltip: 'Tutorial',
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    "Tuturial em breve",
+                    "Tutorial em breve",
                     style: TextStyle(fontSize: 14.sp, color: AppColors.white),
                   ),
-                  backgroundColor: AppColors.green, // Use theme color
+                  backgroundColor: AppColors.green,
                   duration: const Duration(seconds: 2),
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -121,12 +174,26 @@ class MenuDesign extends StatelessWidget {
             },
           ),
         ),
+
+        // Botão de Mute
+        Positioned(
+          bottom: 10.h,
+          right: 10.w,
+          child: IconButton(
+            icon: Icon(
+              _muted ? Icons.volume_off : Icons.volume_up,
+              color: Colors.black,
+              size: 28.sp,
+            ),
+            tooltip: _muted ? 'Ativar som' : 'Silenciar',
+            onPressed: _toggleMute,
+          ),
+        ),
       ],
     );
   }
 }
 
-// Widget que desenha a nuvem com CustomPainter
 class TopWave extends StatelessWidget {
   const TopWave({super.key});
 
@@ -140,7 +207,6 @@ class TopWave extends StatelessWidget {
   }
 }
 
-// Pintor da nuvem com bolhas arredondadas
 class CloudPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -149,7 +215,6 @@ class CloudPainter extends CustomPainter {
     final path = Path();
     path.lineTo(0, size.height * 0.6);
 
-    // Ondulações estilo nuvem
     path.quadraticBezierTo(
       size.width * 0.1,
       size.height,

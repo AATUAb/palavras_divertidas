@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
 import 'level_manager.dart';
 import 'games_design.dart';
@@ -13,7 +12,12 @@ class GamesSuperWidget extends StatelessWidget {
   final int Function(LevelManager) currentRound;
   final int Function(LevelManager) totalRounds;
   final Widget Function() topTextContent;
-  final Widget Function(BuildContext context, LevelManager levelManager, UserModel user) builder;
+  final Widget Function(
+    BuildContext context,
+    LevelManager levelManager,
+    UserModel user,
+  )
+  builder;
 
   const GamesSuperWidget({
     super.key,
@@ -54,8 +58,8 @@ class GamesSuperWidget extends StatelessWidget {
 Widget buildSuccessAnimation(bool showSuccessAnimation) {
   return showSuccessAnimation
       ? IgnorePointer(
-          ignoring: true,
-          child: GameAnimations.successCoffetiesTimed(),
-        )
+        ignoring: true,
+        child: GameAnimations.successCoffetiesTimed(),
+      )
       : const SizedBox.shrink();
 }

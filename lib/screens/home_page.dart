@@ -7,11 +7,9 @@ import 'add_user_dialog.dart';
 import 'game_menu.dart';
 import '../widgets/menu_design.dart';
 import 'letters_selection.dart';
-import 'dart:math';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
   final String title;
 
   @override
@@ -19,7 +17,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final ScrollController _scrollController = ScrollController();
   List<UserModel> users = [];
 
   @override
@@ -62,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
           initialName: user.name,
           initialSchoolLevel: user.schoolLevel,
           onUserAdded: (name, schoolLevel, letters) async {
-            final updatedUser = UserModel(
+            final updatedUser = user.copyWith(
               name: name,
               schoolLevel: schoolLevel,
               knownLetters: letters,
@@ -84,8 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    double cardWidth = min(160.w, 0.26.sw);
-
     return Scaffold(
       body: MenuDesign(
         child: Column(
@@ -99,13 +94,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 30.h,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.people,
-                      color: AppColors.orange,
-                      size: 20.sp,
-                    ),
+                    Icon(Icons.people, color: AppColors.orange, size: 20.sp),
                     SizedBox(width: 6.w),
                     Flexible(
                       child: Text(
@@ -125,41 +115,50 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             SizedBox(height: 6.h),
-            SizedBox(
-              height: 90.h,
-              child: ScrollConfiguration(
-                behavior: ScrollConfiguration.of(context).copyWith(scrollbars: true),
-                child: Scrollbar(
-                  controller: _scrollController,
-                  thumbVisibility: true,
-                  thickness: 10.w,
-                  radius: Radius.circular(8.r),
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.only(left: 16.w, right: 8.w, bottom: 10.h),
-                    itemCount: users.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return Padding(
-                          padding: EdgeInsets.only(right: 10.w),
-                          child: SizedBox(width: cardWidth, child: _buildAddUserButton()),
-                        );
-                      } else {
-                        return Padding(
-                          padding: EdgeInsets.only(right: 10.w),
-                          child: SizedBox(
-                            width: cardWidth,
-                            child: _buildUserCard(index - 1),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child:
+                    users.length <= 3
+                        ? Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildAddUserButton(),
+                              ...List.generate(
+                                users.length,
+                                (i) => Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8.w,
+                                  ),
+                                  child: _buildUserCard(i),
+                                ),
+                              ),
+                            ],
                           ),
-                        );
-                      }
-                    },
-                  ),
-                ),
+                        )
+                        : Scrollbar(
+                          thumbVisibility: true,
+                          thickness: 8,
+                          radius: Radius.circular(10),
+                          child: GridView.builder(
+                            padding: EdgeInsets.only(bottom: 16.h),
+                            itemCount: users.length + 1,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: 15.w,
+                                  mainAxisSpacing: 15.h,
+                                  childAspectRatio: 1.9,
+                                ),
+                            itemBuilder: (context, index) {
+                              if (index == 0) return _buildAddUserButton();
+                              return _buildUserCard(index - 1);
+                            },
+                          ),
+                        ),
               ),
             ),
-            SizedBox(height: 8.h),
           ],
         ),
       ),
@@ -171,8 +170,9 @@ class _MyHomePageState extends State<MyHomePage> {
     final Color cardColor =
         user.schoolLevel == "Pré-Escolar" ? AppColors.green : AppColors.orange;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: 200.w),
+    return SizedBox(
+      width: 200.w,
+      height: 120.h,
       child: Card(
         color: cardColor.withAlpha((255 * 0.8).toInt()),
         shape: RoundedRectangleBorder(
@@ -183,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => GameMenu(user: user)),
+              MaterialPageRoute(builder: (_) => GameMenu(user: user)),
             ).then((_) => _loadUsers());
           },
           borderRadius: BorderRadius.circular(20.r),
@@ -198,13 +198,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CircleAvatar(
-                          radius: 20.r,
+                          radius: 30.r,
                           backgroundColor: AppColors.white,
                           child: Icon(
                             user.schoolLevel == "Pré-Escolar"
                                 ? Icons.child_care
                                 : Icons.school,
-                            size: 26.sp,
+                            size: 30.sp,
                             color: cardColor,
                           ),
                         ),
@@ -222,27 +222,39 @@ class _MyHomePageState extends State<MyHomePage> {
                                       final updatedUser = user.copyWith(
                                         knownLetters: selectedLetters,
                                       );
-                                      HiveService.updateUser(index, updatedUser);
+                                      HiveService.updateUser(
+                                        index,
+                                        updatedUser,
+                                      );
                                       _loadUsers();
                                     },
                                   );
                                 },
-                                child: Text("Letras?", style: TextStyle(fontSize: 9.sp)),
+                                child: Text(
+                                  "Letras Novas?",
+                                  style: TextStyle(fontSize: 15.sp),
+                                ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.green,
-                                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 6.w,
+                                    vertical: 2.h,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                   minimumSize: Size.zero,
                                 ),
                               ),
                             Text(
                               user.schoolLevel,
                               style: TextStyle(
-                                fontSize: 9.sp,
-                                color: AppColors.white.withAlpha((255 * 0.9).toInt()),
+                                fontSize: 20.sp,
+                                color: AppColors.white.withAlpha(
+                                  (255 * 0.9).toInt(),
+                                ),
                               ),
                             ),
                           ],
@@ -253,7 +265,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     Text(
                       user.name,
                       style: TextStyle(
-                        fontSize: 11.sp,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                       ),
@@ -264,11 +276,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               Positioned(
-                top: 5.h,
+                top: -5.h,
                 right: 5.w,
                 child: IconButton(
                   onPressed: () => _showEditUserDialog(index, user),
-                  icon: Icon(Icons.edit, color: AppColors.white, size: 16.sp),
+                  icon: Icon(Icons.edit, color: AppColors.white, size: 20.sp),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
@@ -282,7 +294,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildAddUserButton() {
     return SizedBox(
-      width: 160.w,
+      width: 200.w,
+      height: 120.h,
       child: Card(
         color: AppColors.lightGrey.withAlpha((255 * 0.8).toInt()),
         shape: RoundedRectangleBorder(
@@ -297,12 +310,12 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add_circle, size: 32.sp, color: AppColors.green),
+                Icon(Icons.add_circle, size: 60.sp, color: AppColors.green),
                 SizedBox(height: 6.h),
                 Text(
                   "Adiciona Utilizador",
                   style: TextStyle(
-                    fontSize: 11.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.green,
                   ),

@@ -33,6 +33,9 @@ dependencies:
   # Gráficos
   fl_chart: ^0.64.0
 
+  # Estado persistente para configurações (ex: mute)
+  shared_preferences: ^2.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -82,4 +85,3 @@ flutter:
     - family: Slabo
       fonts:
         - asset: assets/fonts/Slabo-Regular.ttf
-

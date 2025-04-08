@@ -6,7 +6,7 @@ import '../widgets/level_manager.dart';
 import '../widgets/games_animations.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
-import '../widgets/games_superWidget.dart';
+import '../widgets/games_super_widget.dart';
 
 class TestGame extends StatefulWidget {
   final UserModel user;
@@ -48,9 +48,16 @@ class TestGameState extends State<TestGame> {
 
   Color _generateStrongColor() {
     final colors = [
-      Colors.red, Colors.blue, Colors.green, Colors.purple,
-      Colors.orange, Colors.pink, Colors.teal, Colors.indigo,
-      Colors.deepPurple, Colors.cyan,
+      Colors.red,
+      Colors.blue,
+      Colors.green,
+      Colors.purple,
+      Colors.orange,
+      Colors.pink,
+      Colors.teal,
+      Colors.indigo,
+      Colors.deepPurple,
+      Colors.cyan,
     ];
     return colors[_random.nextInt(colors.length)];
   }
@@ -98,26 +105,32 @@ class TestGameState extends State<TestGame> {
     progressValue = 1.0;
 
     final rawChar = characters[_random.nextInt(characters.length)];
-    targetCharacter = _isLetter(rawChar)
-        ? (_random.nextBool() ? rawChar.toUpperCase() : rawChar.toLowerCase())
-        : rawChar;
+    targetCharacter =
+        _isLetter(rawChar)
+            ? (_random.nextBool()
+                ? rawChar.toUpperCase()
+                : rawChar.toLowerCase())
+            : rawChar;
 
     Set<String> uniqueOptions = {};
     while (uniqueOptions.length < wrongCount) {
       String c = characters[_random.nextInt(characters.length)];
-      String option = _isLetter(c)
-          ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
-          : c;
+      String option =
+          _isLetter(c)
+              ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
+              : c;
       if (option.toLowerCase() != targetCharacter.toLowerCase() &&
           !uniqueOptions.any((e) => e.toLowerCase() == option.toLowerCase())) {
         uniqueOptions.add(option);
       }
     }
 
-    List<String> correctOptions = List.generate(correctCount, (_) =>
-      _random.nextBool()
-        ? targetCharacter.toUpperCase()
-        : targetCharacter.toLowerCase()
+    List<String> correctOptions = List.generate(
+      correctCount,
+      (_) =>
+          _random.nextBool()
+              ? targetCharacter.toUpperCase()
+              : targetCharacter.toLowerCase(),
     );
 
     final allOptions = [...uniqueOptions, ...correctOptions]..shuffle();
@@ -132,16 +145,19 @@ class TestGameState extends State<TestGame> {
       final dx = spacingX * (col + 1);
       final dy = 0.45 + spacingY * row;
 
-      placedItems.add(GameItem(
-        id: i.toString(),
-        type: GameItemType.character,
-        content: allOptions[i],
-        dx: dx,
-        dy: dy,
-        fontFamily: isFirstCycle ? _chooseRandomFont() : null,
-        backgroundColor: _generateStrongColor(),
-        isCorrect: allOptions[i].toLowerCase() == targetCharacter.toLowerCase(),
-      ));
+      placedItems.add(
+        GameItem(
+          id: i.toString(),
+          type: GameItemType.character,
+          content: allOptions[i],
+          dx: dx,
+          dy: dy,
+          fontFamily: isFirstCycle ? _chooseRandomFont() : null,
+          backgroundColor: _generateStrongColor(),
+          isCorrect:
+              allOptions[i].toLowerCase() == targetCharacter.toLowerCase(),
+        ),
+      );
     }
 
     setState(() => gamesItems = placedItems);
@@ -228,22 +244,23 @@ class TestGameState extends State<TestGame> {
             ],
           ),
           alignment: Alignment.center,
-          child: item.isTapped
-              ? Icon(
-                  item.isCorrect ? Icons.check : Icons.close,
-                  color: item.isCorrect ? Colors.green : Colors.red,
-                  size: 32.sp,
-                )
-              : Text(
-                  item.content,
-                  style: TextStyle(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontFamily: item.fontFamily,
-                    decoration: TextDecoration.none,
+          child:
+              item.isTapped
+                  ? Icon(
+                    item.isCorrect ? Icons.check : Icons.close,
+                    color: item.isCorrect ? Colors.green : Colors.red,
+                    size: 32.sp,
+                  )
+                  : Text(
+                    item.content,
+                    style: TextStyle(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: item.fontFamily,
+                      decoration: TextDecoration.none,
+                    ),
                   ),
-                ),
         ),
       ),
     );
@@ -262,24 +279,28 @@ class TestGameState extends State<TestGame> {
       level: (_) => levelManager.level,
       currentRound: (_) => levelManager.totalRoundsCount + 1,
       totalRounds: (_) => levelManager.evaluationRounds,
-      topTextContent: () => Padding(
-        padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
-        child: isFirstCycle && _isLetter(targetCharacter)
-            ? Column(
-                children: [
-                  Text('Encontra a letra',
-                      style: getInstructionFont(isFirstCycle: isFirstCycle)),
-                  CharacterFontVariants(character: targetCharacter),
-                ],
-              )
-            : Text(
-                _isNumber(targetCharacter)
-                    ? 'Encontra o número $targetCharacter'
-                    : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-                style: getInstructionFont(isFirstCycle: isFirstCycle),
-                textAlign: TextAlign.center,
-              ),
-      ),
+      topTextContent:
+          () => Padding(
+            padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
+            child:
+                isFirstCycle && _isLetter(targetCharacter)
+                    ? Column(
+                      children: [
+                        Text(
+                          'Encontra a letra',
+                          style: getInstructionFont(isFirstCycle: isFirstCycle),
+                        ),
+                        CharacterFontVariants(character: targetCharacter),
+                      ],
+                    )
+                    : Text(
+                      _isNumber(targetCharacter)
+                          ? 'Encontra o número $targetCharacter'
+                          : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+                      style: getInstructionFont(isFirstCycle: isFirstCycle),
+                      textAlign: TextAlign.center,
+                    ),
+          ),
       builder: (context, _, __) {
         return Stack(
           children: [

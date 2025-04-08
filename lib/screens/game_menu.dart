@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/custom_drawer.dart' as custom;
@@ -10,10 +9,8 @@ import '../games/identify_letters_numbers.dart';
 import 'home_page.dart';
 import 'dashboard.dart';
 import 'sticker_book.dart';
-
 import '../games/test.dart';
 
-// classe que define os dados a apresentar sobre cada jogo
 class GameCardData {
   final String title;
   final IconData icon;
@@ -28,7 +25,6 @@ class GameCardData {
   });
 }
 
-// classe que define o menu de jogos
 class GameMenu extends StatefulWidget {
   final UserModel user;
   const GameMenu({super.key, required this.user});
@@ -37,33 +33,11 @@ class GameMenu extends StatefulWidget {
   State<GameMenu> createState() => _GameMenuState();
 }
 
-//para dar música de fundo sempre que se está no ecrã do menu de jogos
-   @override
 class _GameMenuState extends State<GameMenu> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final AudioPlayer _audioPlayer = AudioPlayer();
 
-   @override
-    void initState() {
-      super.initState();
-      _playBackgroundMusic();
-    }
-
-    void _playBackgroundMusic() async {
-      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.play(AssetSource('assets/sounds/intro_music.mp3'));
-    }
-
-    @override
-    void dispose() {
-      _audioPlayer.stop();
-      super.dispose();
-    }
-
- // builder do menu de jogos
   @override
   Widget build(BuildContext context) {
-    // lista de jogos disponíveis para todos os utilizadores
     final List<GameCardData> jogosBase = [
       GameCardData(
         title: "Detetive de letras e números",
@@ -80,7 +54,6 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Contar sílabas",
         icon: Icons.format_list_numbered,
-        //onTap: () => _navigateToGame("Contar sílabas"),
         onTap: _startTestGame,
         backgroundColor: AppColors.yellow,
       ),
@@ -92,7 +65,6 @@ class _GameMenuState extends State<GameMenu> {
       ),
     ];
 
-    // lista de jogos disponíveis apenas para utilizadores do 1º ciclo
     final List<GameCardData> jogosExtras = [
       GameCardData(
         title: "Detetive de palavras",
@@ -118,7 +90,6 @@ class _GameMenuState extends State<GameMenu> {
       drawer: custom.CustomDrawer(
         userName: widget.user.name,
         userLevel: widget.user.schoolLevel,
-
         onManageUsers: () {
           Navigator.pop(context);
           Navigator.pushReplacement(
@@ -259,9 +230,7 @@ class _GameMenuState extends State<GameMenu> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder:
-            (context) =>
-                TestGame(key: widget.key, user: widget.user),
+        builder: (context) => TestGame(key: widget.key, user: widget.user),
       ),
     );
   }

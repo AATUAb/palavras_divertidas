@@ -15,7 +15,6 @@ void main() async {
   ]);
 
   await Hive.initFlutter();
-
   await HiveService.init();
 
   runApp(const MyApp());
