@@ -8,8 +8,14 @@ import '../themes/colors.dart';
 class MenuDesign extends StatefulWidget {
   final Widget child;
   final String? headerText;
+  final Widget? topLeftWidget;
 
-  const MenuDesign({super.key, required this.child, this.headerText});
+  const MenuDesign({
+    super.key,
+    required this.child,
+    this.headerText,
+    this.topLeftWidget,
+  });
 
   @override
   State<MenuDesign> createState() => _MenuDesignState();
@@ -18,7 +24,6 @@ class MenuDesign extends StatefulWidget {
 class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
   static final AudioPlayer _audioPlayer = AudioPlayer();
   static bool _soundStarted = false;
-
   bool _muted = false;
 
   @override
@@ -32,10 +37,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
     final prefs = await SharedPreferences.getInstance();
     final isMuted = prefs.getBool('isMuted') ?? false;
 
-    setState(() {
-      _muted = isMuted;
-    });
-
+    setState(() => _muted = isMuted);
     await _audioPlayer.setReleaseMode(ReleaseMode.loop);
 
     if (!_muted && !_soundStarted) {
@@ -49,11 +51,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
     setState(() => _muted = !_muted);
     await prefs.setBool('isMuted', _muted);
 
-    if (_muted) {
-      await _audioPlayer.pause();
-    } else {
-      await _audioPlayer.resume();
-    }
+    _muted ? await _audioPlayer.pause() : await _audioPlayer.resume();
   }
 
   @override
@@ -73,25 +71,18 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    // Sincronizar estado de mute
     SharedPreferences.getInstance().then((prefs) {
       final isMuted = prefs.getBool('isMuted') ?? false;
       if (isMuted != _muted) {
-        setState(() {
-          _muted = isMuted;
-        });
+        setState(() => _muted = isMuted);
       }
     });
 
     return Stack(
       children: [
-        // Fundo branco
         Container(color: Colors.white),
-
-        // Nuvem verde no topo
         const Positioned(top: 0, left: 0, right: 0, child: TopWave()),
 
-        // Sol
         Positioned(
           top: -50.h,
           left: 12.w,
@@ -103,7 +94,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           ),
         ),
 
-        // Título e frase personalizada
+        // Título e header
         Positioned(
           top: 8.h,
           left: 0,
@@ -139,7 +130,10 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           ),
         ),
 
-        // Conteúdo principal
+        // Novo: ícones superiores (ex: só usados no GameMenu)
+        if (widget.topLeftWidget != null)
+          Positioned(top: 10.h, left: 10.w, child: widget.topLeftWidget!),
+
         Positioned.fill(
           child: Padding(
             padding: EdgeInsets.only(top: 20.h),
@@ -147,7 +141,6 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           ),
         ),
 
-        // Botão de Fechar App
         Positioned(
           top: 10.h,
           right: 10.w,
@@ -177,12 +170,11 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           ),
         ),
 
-        // Botão de Informação
         Positioned(
           bottom: 10.h,
           left: 10.w,
           child: IconButton(
-            icon: Icon(Icons.info_outline, color: Colors.black, size: 25.sp),
+            icon: Icon(Icons.info_outline, size: 25.sp),
             tooltip: 'Tutorial',
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -200,14 +192,12 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           ),
         ),
 
-        // Botão de Mute
         Positioned(
           bottom: 10.h,
           right: 10.w,
           child: IconButton(
             icon: Icon(
               _muted ? Icons.volume_off : Icons.volume_up,
-              color: Colors.black,
               size: 30.sp,
             ),
             tooltip: _muted ? 'Ativar som' : 'Silenciar',
@@ -236,10 +226,9 @@ class CloudPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.green;
-
     final path = Path();
-    path.lineTo(0, size.height * 0.6);
 
+    path.lineTo(0, size.height * 0.6);
     path.quadraticBezierTo(
       size.width * 0.1,
       size.height,
@@ -264,7 +253,6 @@ class CloudPainter extends CustomPainter {
       size.width,
       size.height * 0.6,
     );
-
     path.lineTo(size.width, 0);
     path.close();
 

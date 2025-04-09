@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
 import '../themes/colors.dart';
-import '../widgets/custom_drawer.dart' as custom;
 import '../widgets/menu_design.dart';
 import '../games/write_game.dart';
 import '../games/identify_letters_numbers.dart';
-import 'home_page.dart';
-import 'dashboard.dart';
-import 'sticker_book.dart';
 import '../games/test.dart';
+import 'home_page.dart';
+import 'sticker_book.dart';
+import 'dashboard.dart';
 
 class GameCardData {
   final String title;
@@ -34,8 +33,6 @@ class GameMenu extends StatefulWidget {
 }
 
 class _GameMenuState extends State<GameMenu> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   @override
   Widget build(BuildContext context) {
     final List<GameCardData> jogosBase = [
@@ -86,57 +83,60 @@ class _GameMenuState extends State<GameMenu> {
             : jogosBase;
 
     return Scaffold(
-      key: _scaffoldKey,
-      drawer: custom.CustomDrawer(
-        userName: widget.user.name,
-        userLevel: widget.user.schoolLevel,
-        onManageUsers: () {
-          Navigator.pop(context);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) => const MyHomePage(title: 'Mundo das Palavras'),
-            ),
-          );
-        },
-        onAchievements: () {
-          Navigator.pop(context);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => StickerBookScreen()),
-          );
-        },
-        onDashboard: () {
-          Navigator.pop(context);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => DashboardScreen(user: widget.user),
-            ),
-          );
-        },
-      ),
       body: MenuDesign(
         headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
+        topLeftWidget: Padding(
+          padding: EdgeInsets.only(top: 150.h, left: 0.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.home),
+                tooltip: 'Menu Principal',
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (_) => const MyHomePage(title: 'Mundo das Palavras'),
+                    ),
+                  );
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.emoji_events),
+                tooltip: 'Conquistas',
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const StickerBookScreen(),
+                    ),
+                  );
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.bar_chart),
+                tooltip: 'Dashboard',
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DashboardScreen(user: widget.user),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.w),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.menu,
-                        color: AppColors.black,
-                        size: 24.sp,
-                      ),
-                      onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 100.h),
                 Expanded(
                   child: Center(
                     child: Wrap(
@@ -148,7 +148,7 @@ class _GameMenuState extends State<GameMenu> {
                             return GestureDetector(
                               onTap: jogo.onTap,
                               child: SizedBox(
-                                width: 90.w,
+                                width: 100.w,
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -195,7 +195,7 @@ class _GameMenuState extends State<GameMenu> {
       context,
       MaterialPageRoute(
         builder:
-            (context) =>
+            (_) =>
                 IdentifyLettersNumbersGame(key: widget.key, user: widget.user),
       ),
     );
@@ -204,7 +204,7 @@ class _GameMenuState extends State<GameMenu> {
   void _startWriteGame() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => WriteGameScreen(character: "A")),
+      MaterialPageRoute(builder: (_) => WriteGameScreen(character: "A")),
     );
   }
 
@@ -212,7 +212,7 @@ class _GameMenuState extends State<GameMenu> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => TestGame(key: widget.key, user: widget.user),
+        builder: (_) => TestGame(key: widget.key, user: widget.user),
       ),
     );
   }
