@@ -7,49 +7,46 @@ import '../themes/colors.dart';
 
 class MenuDesign extends StatefulWidget {
   final Widget child;
+  final String? headerText;
 
-  const MenuDesign({super.key, required this.child});
+  const MenuDesign({super.key, required this.child, this.headerText});
 
   @override
   State<MenuDesign> createState() => _MenuDesignState();
 }
 
-class _MenuDesignState extends State<MenuDesign> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
+class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
+  static final AudioPlayer _audioPlayer = AudioPlayer();
+  static bool _soundStarted = false;
+
   bool _muted = false;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadMuteStatus();
-    });
+    WidgetsBinding.instance.addObserver(this);
+    _initAudio();
   }
 
-  Future<void> _loadMuteStatus() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final isMuted = prefs.getBool('isMuted') ?? false;
+  Future<void> _initAudio() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isMuted = prefs.getBool('isMuted') ?? false;
 
-      setState(() {
-        _muted = isMuted;
-      });
+    setState(() {
+      _muted = isMuted;
+    });
 
-      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      if (!_muted) {
-        await _audioPlayer.play(AssetSource('sounds/intro_music.mp3'));
-      }
-    } catch (e) {
-      debugPrint('Erro ao carregar estado de mute: $e');
+    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+
+    if (!_muted && !_soundStarted) {
+      await _audioPlayer.play(AssetSource('sounds/intro_music.mp3'));
+      _soundStarted = true;
     }
   }
 
   Future<void> _toggleMute() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _muted = !_muted;
-    });
+    setState(() => _muted = !_muted);
     await prefs.setBool('isMuted', _muted);
 
     if (_muted) {
@@ -61,12 +58,31 @@ class _MenuDesignState extends State<MenuDesign> {
 
   @override
   void dispose() {
-    _audioPlayer.stop();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _audioPlayer.pause();
+    } else if (state == AppLifecycleState.resumed && !_muted) {
+      _audioPlayer.resume();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Sincronizar estado de mute
+    SharedPreferences.getInstance().then((prefs) {
+      final isMuted = prefs.getBool('isMuted') ?? false;
+      if (isMuted != _muted) {
+        setState(() {
+          _muted = isMuted;
+        });
+      }
+    });
+
     return Stack(
       children: [
         // Fundo branco
@@ -87,15 +103,16 @@ class _MenuDesignState extends State<MenuDesign> {
           ),
         ),
 
-        // Texto "Mundo das Palavras"
+        // Título e frase personalizada
         Positioned(
-          top: 15.h,
-          right: 80.w,
+          top: 8.h,
+          left: 0,
+          right: 0,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'Mundo das',
+                'Mundo das Palavras',
                 style: TextStyle(
                   fontSize: 40.sp,
                   fontWeight: FontWeight.bold,
@@ -103,15 +120,21 @@ class _MenuDesignState extends State<MenuDesign> {
                   shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 1)],
                 ),
               ),
-              Text(
-                'Palavras',
-                style: TextStyle(
-                  fontSize: 40.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
-                  shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 1)],
+              if (widget.headerText != null) ...[
+                SizedBox(height: 45.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: Text(
+                    widget.headerText!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blue.shade900,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
@@ -131,9 +154,11 @@ class _MenuDesignState extends State<MenuDesign> {
           child: Material(
             type: MaterialType.transparency,
             child: Container(
-              decoration: const BoxDecoration(
-                border: Border.fromBorderSide(BorderSide(color: Colors.black)),
+              width: 30.sp,
+              height: 30.sp,
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                border: Border.all(color: Colors.black),
               ),
               child: IconButton(
                 icon: Icon(
@@ -157,7 +182,7 @@ class _MenuDesignState extends State<MenuDesign> {
           bottom: 10.h,
           left: 10.w,
           child: IconButton(
-            icon: Icon(Icons.info_outline, color: Colors.black, size: 28.sp),
+            icon: Icon(Icons.info_outline, color: Colors.black, size: 25.sp),
             tooltip: 'Tutorial',
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -183,7 +208,7 @@ class _MenuDesignState extends State<MenuDesign> {
             icon: Icon(
               _muted ? Icons.volume_off : Icons.volume_up,
               color: Colors.black,
-              size: 28.sp,
+              size: 30.sp,
             ),
             tooltip: _muted ? 'Ativar som' : 'Silenciar',
             onPressed: _toggleMute,

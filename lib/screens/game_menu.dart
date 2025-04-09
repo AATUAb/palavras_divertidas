@@ -118,6 +118,7 @@ class _GameMenuState extends State<GameMenu> {
         },
       ),
       body: MenuDesign(
+        headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.w),
@@ -134,25 +135,6 @@ class _GameMenuState extends State<GameMenu> {
                       onPressed: () => _scaffoldKey.currentState?.openDrawer(),
                     ),
                   ],
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  "Olá, ${widget.user.name}!",
-                  style: TextStyle(
-                    fontSize: 25.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.black,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                Text(
-                  "Escolhe o teu jogo",
-                  style: TextStyle(
-                    fontSize: 25.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.darkBlue,
-                  ),
-                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 4.h),
                 Expanded(

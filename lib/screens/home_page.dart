@@ -83,38 +83,12 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: MenuDesign(
+        headerText: "Quem vai jogar hoje?",
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 6.h),
-            Padding(
-              padding: EdgeInsets.only(bottom: 4.h),
-              child: SizedBox(
-                width: 280.w,
-                height: 30.h,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.people, color: AppColors.orange, size: 20.sp),
-                    SizedBox(width: 6.w),
-                    Flexible(
-                      child: Text(
-                        'Quem vai jogar hoje?',
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontSize: 25.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkBlue,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 6.h),
+            SizedBox(height: 50.h),
+            SizedBox(height: 50.h),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -124,7 +98,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _buildAddUserButton(),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                                child: _buildAddUserButton(),
+                              ),
                               ...List.generate(
                                 users.length,
                                 (i) => Padding(
@@ -230,10 +207,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                     },
                                   );
                                 },
-                                child: Text(
-                                  "Letras Novas?",
-                                  style: TextStyle(fontSize: 15.sp),
-                                ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.green,
                                   padding: EdgeInsets.symmetric(
@@ -246,6 +219,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
                                   minimumSize: Size.zero,
+                                ),
+                                child: Text(
+                                  "Letras Novas?",
+                                  style: TextStyle(fontSize: 15.sp),
                                 ),
                               ),
                             Text(
