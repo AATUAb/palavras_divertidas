@@ -8,6 +8,52 @@ import '../widgets/games_animations.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/games_design.dart';
+import 'package:audioplayers/audioplayers.dart';
+
+// Helper function to get the instruction font style
+TextStyle getInstructionFont({required bool isFirstCycle}) {
+  return TextStyle(
+    fontSize: 22.sp,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+    fontFamily: isFirstCycle ? 'ComicNeue' : null,
+  );
+}
+
+// Widget to display character variants (uppercase and lowercase)
+class CharacterFontVariants extends StatelessWidget {
+  final String character;
+  
+  const CharacterFontVariants({Key? key, required this.character}) : super(key: key);
+  
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          character.toUpperCase(),
+          style: TextStyle(fontSize: 32.sp, fontFamily: 'Slabo'),
+        ),
+        SizedBox(width: 8.w),
+        Text(
+          character.toUpperCase(),
+          style: TextStyle(fontSize: 32.sp, fontFamily: 'Cursive'),
+        ),
+        SizedBox(width: 16.w),
+        Text(
+          character.toLowerCase(),
+          style: TextStyle(fontSize: 32.sp, fontFamily: 'Slabo'),
+        ),
+        SizedBox(width: 8.w),
+        Text(
+          character.toLowerCase(),
+          style: TextStyle(fontSize: 32.sp, fontFamily: 'Cursive'),
+        ),
+      ],
+    );
+  }
+}
 
 
 // classe para o jogo "Detetive de Letras e Números"
@@ -71,6 +117,9 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     return colors[_random.nextInt(colors.length)];
   }
 
+  // AudioPlayer to control music
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   // inicializa o estado do jogo
   @override
   void initState() {
@@ -78,7 +127,12 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
     isFirstCycle = widget.user.schoolLevel  == '1º Ciclo';
     levelManager = LevelManager(user: widget.user);
 
+    // Pause any background music when entering the game
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Stop any playing music
+      _audioPlayer.stop();
+      
+      // Initialize the game
       applyLevelSettings();
       generateNewChallenge();
     });

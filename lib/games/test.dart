@@ -6,11 +6,55 @@ import '../widgets/level_manager.dart';
 import '../widgets/games_animations.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
-import '../widgets/games_super_widget.dart';
-// ConquestBook import is removed as the logic is now handled here
-import '../services/hive_service.dart';
+import 'game_super_widget.dart';
+import '../widgets/menu_design.dart';
 import 'package:logger/logger.dart';
-import 'package:lottie/lottie.dart'; // Import Lottie
+import 'package:audioplayers/audioplayers.dart';
+
+// Helper function to get the instruction font style
+TextStyle getInstructionFont({required bool isFirstCycle}) {
+  return TextStyle(
+    fontSize: 22.sp,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+    fontFamily: isFirstCycle ? 'ComicNeue' : null,
+  );
+}
+
+// Widget to display character variants (uppercase and lowercase)
+class CharacterFontVariants extends StatelessWidget {
+  final String character;
+  
+  const CharacterFontVariants({Key? key, required this.character}) : super(key: key);
+  
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          character.toUpperCase(),
+          style: TextStyle(fontSize: 32.sp, fontFamily: 'Slabo'),
+        ),
+        SizedBox(width: 8.w),
+        Text(
+          character.toUpperCase(),
+          style: TextStyle(fontSize: 32.sp, fontFamily: 'Cursive'),
+        ),
+        SizedBox(width: 16.w),
+        Text(
+          character.toLowerCase(),
+          style: TextStyle(fontSize: 32.sp, fontFamily: 'Slabo'),
+        ),
+        SizedBox(width: 8.w),
+        Text(
+          character.toLowerCase(),
+          style: TextStyle(fontSize: 32.sp, fontFamily: 'Cursive'),
+        ),
+      ],
+    );
+  }
+}
 
 class TestGame extends StatefulWidget {
   final UserModel user;
@@ -24,8 +68,6 @@ class TestGameState extends State<TestGame> {
   bool isFirstCycle = false;
   bool showSuccessAnimation = false;
   late LevelManager levelManager;
-  bool showConquestAnimation = false;
-  bool _conquestAchievedThisRound = false; // Flag for conquest in the current round
 
   final logger = Logger(); // Logger instance
 
@@ -70,11 +112,19 @@ class TestGameState extends State<TestGame> {
     return colors[_random.nextInt(colors.length)];
   }
 
+  // AudioPlayer to control music
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   @override
   void initState() {
     super.initState();
     isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
     levelManager = LevelManager(user: widget.user);
+    
+    // Pause any background music when entering the game
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _audioPlayer.stop();
+    });
   }
 
   @override
@@ -196,9 +246,12 @@ class TestGameState extends State<TestGame> {
     });
 }
 
-Future<void> checkAnswer(GameItem selectedItem, LevelManager levelManager) async {
+Future<void> checkAnswer(
+  GameItem selectedItem,
+  LevelManager levelManager,
+  ConquestFeedbackCallback triggerConquestFeedback,
+) async {
   currentTry++;
-  _conquestAchievedThisRound = false; // Reset flag at the start of check
 
   if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
     foundCorrect++;
@@ -212,61 +265,24 @@ Future<void> checkAnswer(GameItem selectedItem, LevelManager levelManager) async
       roundTimer?.cancel();
       progressTimer?.cancel();
       final firstTryCorrect = currentTry == correctCount;
-      setState(() => showSuccessAnimation = true);
-      GameAnimations.coffetiesTimed(); // Success animation
 
-      // Short delay for success animation visibility
+      // Animação de sucesso
+      setState(() => showSuccessAnimation = true);
       await Future.delayed(const Duration(seconds: 1));
       setState(() => showSuccessAnimation = false);
 
-      // --- Conquest Logic ---
-      final userKey = HiveService.getUserKey(widget.user.key);
-      if (userKey != -1) { // Check if user key is valid
-        if (firstTryCorrect) {
-          await HiveService.incrementFirstTrySuccesses(userKey);
-          final updatedUser = HiveService.getUser(userKey);
-          if (updatedUser != null && updatedUser.firstTrySuccesses >= 5) {
-            logger.i("Conquest achieved (first try)! User: $userKey");
-            _conquestAchievedThisRound = true;
-            await HiveService.incrementConquests(userKey);
-            await HiveService.resetFirstTrySuccesses(userKey);
-          }
-        } else {
-          await HiveService.incrementOtherSuccesses(userKey);
-          final updatedUser = HiveService.getUser(userKey);
-          if (updatedUser != null && updatedUser.otherSuccesses >= 10) {
-            logger.i("Conquest achieved (other try)! User: $userKey");
-            _conquestAchievedThisRound = true;
-            await HiveService.incrementConquests(userKey);
-            await HiveService.resetOtherSuccesses(userKey);
-          }
-        }
-      } else {
-         logger.e("Could not find user key for conquest logic. User ID: ${widget.user.key}");
-      }
-      // --- End Conquest Logic ---
-
-
-      // Register level progression
-      levelManager.registerRoundForLevel(
+      // Primeiro regista o progresso do nível
+      await levelManager.registerRoundForLevel(
         context: context,
         correct: firstTryCorrect,
         applySettings: () => applyLevelSettings(levelManager),
-        onFinished: () { // Changed to synchronous if no async ops needed before check
-          if (_conquestAchievedThisRound) {
-            logger.i("Showing conquest animation for user $userKey");
-            setState(() => showConquestAnimation = true);
-            GameAnimations.playConquestSound(); // Play conquest sound
-
-            // Delay for animation, then generate next challenge
-            Future.delayed(const Duration(seconds: 3), () { // Increased delay for visibility
-              setState(() => showConquestAnimation = false);
-              generateNewChallenge(levelManager);
-            });
-          } else {
-            // No conquest, generate next challenge immediately
-            generateNewChallenge(levelManager);
-          }
+        onFinished: () async {
+          // Só depois avalia se houve conquista
+          await triggerConquestFeedback(
+            firstTry: firstTryCorrect,
+            applySettings: () => applyLevelSettings(levelManager),
+            onFinished: () => generateNewChallenge(levelManager),
+          );
         },
       );
     }
@@ -279,27 +295,26 @@ Future<void> checkAnswer(GameItem selectedItem, LevelManager levelManager) async
   }
 }
 
-
-
-
-  Widget buildGameItem(GameItem item) {
+  Widget buildGameItem(GameItem item, ConquestFeedbackCallback triggerConquestFeedback) {
   return Align(
     alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
     child: GestureDetector(
-      onTap: () => checkAnswer(item, levelManager),
+      onTap: () => checkAnswer(item, levelManager, triggerConquestFeedback),
       child: Container(
         width: 60.r,
         height: 60.r,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: item.isTapped ? Colors.transparent : item.backgroundColor, // Torna o item invisível
-          boxShadow: item.isTapped ? [] : [ // Remove a sombra quando desaparece
-            BoxShadow(
-              color: Colors.black26,
-              offset: Offset(2, 2),
-              blurRadius: 4.r,
-            ),
-          ],
+          color: item.isTapped ? Colors.transparent : item.backgroundColor,
+          boxShadow: item.isTapped
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black26,
+                    offset: Offset(2, 2),
+                    blurRadius: 4.r,
+                  ),
+                ],
         ),
         alignment: Alignment.center,
         child: item.isTapped
@@ -323,6 +338,14 @@ Future<void> checkAnswer(GameItem selectedItem, LevelManager levelManager) async
   );
 }
 
+  Widget buildSuccessAnimation(bool showAnimation) {
+    return showAnimation
+        ? IgnorePointer(
+            ignoring: true,
+            child: GameAnimations.coffetiesTimed(),
+          )
+        : const SizedBox.shrink();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -331,53 +354,41 @@ Future<void> checkAnswer(GameItem selectedItem, LevelManager levelManager) async
       generateNewChallenge(levelManager);
     }
 
-    return GamesSuperWidget(
-      user: widget.user,
-      progressValue: progressValue,
-      level: (_) => levelManager.level,
-      currentRound: (_) => levelManager.totalRoundsCount + 1,
-      totalRounds: (_) => levelManager.evaluationRounds,
-      topTextContent:
-          () => Padding(
-            padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
-            child:
-                isFirstCycle && _isLetter(targetCharacter)
-                    ? Column(
-                      children: [
-                        Text(
-                          'Encontra a letra',
-                          style: getInstructionFont(isFirstCycle: isFirstCycle),
-                        ),
-                        CharacterFontVariants(character: targetCharacter),
-                      ],
-                    )
-                    : Text(
-                      _isNumber(targetCharacter)
-                          ? 'Encontra o número $targetCharacter'
-                          : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-                      style: getInstructionFont(isFirstCycle: isFirstCycle),
-                      textAlign: TextAlign.center,
-                    ),
-          ),
-      builder: (context, _, __) {
-        return Stack(
-          children: [
-            ...gamesItems.map(buildGameItem),
-            // Conditionally display success animation
-            if (showSuccessAnimation) buildSuccessAnimation(true),
-            // Conditionally display conquest animation
-            if (showConquestAnimation)
-              Center(
-                child: Lottie.asset(
-                  'assets/animations/conquest.json', // Path to your conquest animation
-                  width: 200.r,
-                  height: 200.r,
-                  fit: BoxFit.contain,
+  return GamesSuperWidget(
+    user: widget.user,
+    progressValue: progressValue,
+    level: (_) => levelManager.level,
+    currentRound: (_) => levelManager.totalRoundsCount + 1,
+    totalRounds: (_) => levelManager.evaluationRounds,
+    topTextContent: () => Padding(
+      padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
+      child: isFirstCycle && _isLetter(targetCharacter)
+          ? Column(
+              children: [
+                Text(
+                  'Encontra a letra',
+                  style: getInstructionFont(isFirstCycle: isFirstCycle),
                 ),
-              ),
-          ],
-        );
-      },
-    );
-  }
+                CharacterFontVariants(character: targetCharacter),
+              ],
+            )
+          : Text(
+              _isNumber(targetCharacter)
+                  ? 'Encontra o número $targetCharacter'
+                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+              style: getInstructionFont(isFirstCycle: isFirstCycle),
+              textAlign: TextAlign.center,
+            ),
+    ),
+    builder: (context, levelManager, user, triggerConquestFeedback) {
+      return Stack(
+        children: [
+          ...gamesItems.map((item) => buildGameItem(item, triggerConquestFeedback)),
+          if (showSuccessAnimation) buildSuccessAnimation(true),
+        ],
+      );
+    },
+  );
 }
+  
+  }

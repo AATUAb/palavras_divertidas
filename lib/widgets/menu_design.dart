@@ -24,7 +24,27 @@ class MenuDesign extends StatefulWidget {
 class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
   static final AudioPlayer _audioPlayer = AudioPlayer();
   static bool _soundStarted = false;
+  static bool _isPaused = false;
   bool _muted = false;
+
+  // Static method to pause the music when entering games
+  static Future<void> pauseMusic() async {
+    if (!_isPaused) {
+      await _audioPlayer.pause();
+      _isPaused = true;
+    }
+  }
+
+  // Static method to resume the music when returning to menus
+  static Future<void> resumeMusic() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isMuted = prefs.getBool('isMuted') ?? false;
+    
+    if (!isMuted && _isPaused) {
+      await _audioPlayer.resume();
+      _isPaused = false;
+    }
+  }
 
   @override
   void initState() {
@@ -43,6 +63,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
     if (!_muted && !_soundStarted) {
       await _audioPlayer.play(AssetSource('sounds/intro_music.mp3'));
       _soundStarted = true;
+      _isPaused = false;
     }
   }
 
@@ -51,7 +72,13 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
     setState(() => _muted = !_muted);
     await prefs.setBool('isMuted', _muted);
 
-    _muted ? await _audioPlayer.pause() : await _audioPlayer.resume();
+    if (_muted) {
+      await _audioPlayer.pause();
+      _isPaused = true;
+    } else {
+      await _audioPlayer.resume();
+      _isPaused = false;
+    }
   }
 
   @override

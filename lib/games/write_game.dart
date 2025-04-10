@@ -1,6 +1,7 @@
 // Estrutura principal do jogo "Escrita de letras, numeros e palavras"
 import 'package:flutter/material.dart';
 import '../widgets/tracing_painter.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class WriteGameScreen extends StatefulWidget {
   final String character;
@@ -19,10 +20,17 @@ class WriteGameScreenState extends State<WriteGameScreen> {
   final GlobalKey _canvasKey = GlobalKey();
   late Rect letterArea;
 
+  // AudioPlayer to control music
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Stop any playing music
+      _audioPlayer.stop();
+      
+      // Initialize the game
       _setLetterArea();
     });
   }
