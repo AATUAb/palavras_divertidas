@@ -72,4 +72,30 @@ class HiveService {
       logger.e("❌ Error deleting user: $e");
     }
   }
+
+// Função para incrementar a quantidade de conquistas de um usuário.
+static Future<void> incrementConquests(int userKey) async {
+  try {
+    final user = _userBox.get(userKey);
+    if (user != null) {
+      user.incrementConquest(); // Incrementa as conquistas
+      await _userBox.put(userKey, user); // Atualiza o usuário no Hive
+      logger.i("✅ User's conquest updated successfully");
+    }
+  } catch (e) {
+    logger.e("❌ Error updating user's conquest: $e");
+  }
+}
+
+  // Função para obter a chave do usuário
+static int getUserKey() {
+  try {
+    // A chave pode ser uma chave numérica ou única que é usada ao acessar o usuário
+    final userKey = _userBox.keyAt(0); // Pega a chave do primeiro usuário (ou modifique conforme necessário)
+    return userKey as int;
+  } catch (e) {
+    logger.e("❌ Error retrieving user key: $e");
+    return -1;  // Retorna um valor inválido se não conseguir pegar a chave
+  }
+}
 }

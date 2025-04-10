@@ -19,7 +19,7 @@ class LevelManager {
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 1, // ajusta para 4 na release
+    this.roundsToEvaluate = 1, // ajustar para 4 na release
   }) : level = level ?? user.gameLevel;
 
   int get totalRoundsCount => totalRounds;
@@ -54,7 +54,7 @@ class LevelManager {
     }
   }
 
-  Future<void> registerRoundWithOptionalFeedback({
+  Future<void> registerRoundForLevel({
     required BuildContext context,
     required bool correct,
     required VoidCallback applySettings,

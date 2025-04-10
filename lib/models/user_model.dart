@@ -1,5 +1,4 @@
 import 'package:hive/hive.dart';
-
 part 'user_model.g.dart';
 
 @HiveType(typeId: 0)
@@ -26,6 +25,10 @@ class UserModel extends HiveObject {
   @HiveField(5)
   int gameLevel;
 
+   /// Contagem de conquistas (autocolantes)
+  @HiveField(6)
+  int conquest;
+
   UserModel({
     required this.name,
     required this.schoolLevel,
@@ -33,6 +36,7 @@ class UserModel extends HiveObject {
     this.accuracyByLevel = const {},
     this.overallAccuracy,
     this.gameLevel = 1,
+    this.conquest = 0,
   }) : knownLetters = knownLetters ?? [];
 
   /// Atualiza a taxa de acerto por nível e a média geral
@@ -48,6 +52,12 @@ class UserModel extends HiveObject {
     }
   }
 
+  /// Incrementa o número de conquistas
+  void incrementConquest() {
+    conquest++;
+  }
+
+  /// Método de cópia para atualização do modelo
   UserModel copyWith({
   String? name,
   String? schoolLevel,
@@ -55,6 +65,7 @@ class UserModel extends HiveObject {
   int? gameLevel,
   Map<int, double>? accuracyByLevel,
   double? overallAccuracy,
+  int? conquest,
 }) {
   return UserModel(
     name: name ?? this.name,
@@ -63,6 +74,7 @@ class UserModel extends HiveObject {
     gameLevel: gameLevel ?? this.gameLevel,
     accuracyByLevel: accuracyByLevel ?? this.accuracyByLevel,
     overallAccuracy: overallAccuracy ?? this.overallAccuracy,
+    conquest: conquest ?? this.conquest,
   );
 }
 }

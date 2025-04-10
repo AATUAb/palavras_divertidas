@@ -59,7 +59,17 @@ Widget buildSuccessAnimation(bool showSuccessAnimation) {
   return showSuccessAnimation
       ? IgnorePointer(
         ignoring: true,
-        child: GameAnimations.successCoffetiesTimed(),
+        child: GameAnimations.coffetiesTimed(),
+      )
+      : const SizedBox.shrink();
+}
+
+/// Mostra animação de conquista, se aplicável
+Widget buildConquestAnimation(bool showConquestAnimation) {
+  return showConquestAnimation
+      ? IgnorePointer(
+        ignoring: true,
+        child: GameAnimations.conquestTimed(),
       )
       : const SizedBox.shrink();
 }

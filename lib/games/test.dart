@@ -7,6 +7,8 @@ import '../widgets/games_animations.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/games_super_widget.dart';
+import '../widgets/conquest_book.dart';
+import '../services/hive_service.dart';
 
 class TestGame extends StatefulWidget {
   final UserModel user;
@@ -20,6 +22,7 @@ class TestGameState extends State<TestGame> {
   bool isFirstCycle = false;
   bool showSuccessAnimation = false;
   late LevelManager levelManager;
+  bool showConquestAnimation = false; 
 
   final List<String> characters = [
     ...'ABCDEFGHIJLMNOPQRSTUVXZ'.split(''),
@@ -81,17 +84,17 @@ class TestGameState extends State<TestGame> {
       case 1:
         correctCount = 4;
         wrongCount = 8;
-        levelTime = const Duration(seconds: 10);
+        levelTime = const Duration(seconds: 15);
         break;
       case 2:
         correctCount = 5;
         wrongCount = 10;
-        levelTime = const Duration(seconds: 15);
+        levelTime = const Duration(seconds: 20);
         break;
       case 3:
         correctCount = 6;
         wrongCount = 12;
-        levelTime = const Duration(seconds: 20);
+        levelTime = const Duration(seconds: 25);
         break;
     }
   }
@@ -179,7 +182,7 @@ class TestGameState extends State<TestGame> {
       if (showSuccessAnimation) return;
       GameAnimations.showTimeoutSnackbar(context);
       final firstTryCorrect = currentTry == correctCount;
-      levelManager.registerRoundWithOptionalFeedback(
+      levelManager.registerRoundForLevel(
         context: context,
         correct: firstTryCorrect,
         applySettings: () => applyLevelSettings(levelManager),
@@ -188,83 +191,115 @@ class TestGameState extends State<TestGame> {
     });
   }
 
-  void checkAnswer(GameItem selectedItem, LevelManager levelManager) {
-    currentTry++;
-    if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
-      foundCorrect++;
-      GameAnimations.playCorrectSound();
-      setState(() {
-        selectedItem.isTapped = true;
-        selectedItem.isCorrect = true;
-      });
+  Future<void> checkAnswer(GameItem selectedItem, LevelManager levelManager) async {
+  currentTry++;
+  if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
+    foundCorrect++;
+    GameAnimations.playCorrectSound();
+    setState(() {
+      selectedItem.isTapped = true;
+      selectedItem.isCorrect = true;
+    });
 
-      if (foundCorrect >= correctCount) {
-        roundTimer?.cancel();
-        progressTimer?.cancel();
-        final firstTryCorrect = currentTry == correctCount;
-        setState(() => showSuccessAnimation = true);
-        GameAnimations.successCoffetiesTimed();
-        Future.delayed(const Duration(seconds: 1), () {
-          if (!mounted) return;
-          setState(() => showSuccessAnimation = false);
-          levelManager.registerRoundWithOptionalFeedback(
-            context: context,
-            correct: firstTryCorrect,
-            applySettings: () => applyLevelSettings(levelManager),
-            onFinished: () => generateNewChallenge(levelManager),
-          );
-        });
-      }
-    } else {
-      GameAnimations.playWrongSound();
-      setState(() {
-        selectedItem.isTapped = true;
-        selectedItem.isCorrect = false;
-      });
+    if (foundCorrect >= correctCount) {
+      roundTimer?.cancel();
+      progressTimer?.cancel();
+      final firstTryCorrect = currentTry == correctCount;
+      setState(() => showSuccessAnimation = true);
+      GameAnimations.coffetiesTimed();
+
+      // Aguardar 1 segundo para mostrar a animação de sucesso (se houver)
+      await Future.delayed(const Duration(seconds: 1));
+
+      setState(() => showSuccessAnimation = false);
+
+      // Registrar a rodada
+      levelManager.registerRoundForLevel(
+        context: context,
+        correct: firstTryCorrect,
+        applySettings: () => applyLevelSettings(levelManager),
+        onFinished: () {
+          // Verificar se houve uma conquista
+          final oldConquest = widget.user.conquest;
+
+          // Verifica se houve uma conquista
+          if (widget.user.conquest > oldConquest) {
+            setState(() {
+              showConquestAnimation = true; // Exibe animação de conquista
+            });
+
+            // Atualiza o número de conquistas no Hive
+            final userKey = HiveService.getUserKey();
+            HiveService.incrementConquests(userKey);  // Atualiza as conquistas no Hive
+
+            // Ocultar animação de conquista após 1 segundo
+            Future.delayed(const Duration(seconds: 1), () {
+              setState(() {
+                showConquestAnimation = false; // Ocultar animação de conquista
+              });
+
+              // Gera uma nova rodada após a animação de conquista
+              generateNewChallenge(levelManager);
+            });
+          } else {
+            // Se não houver conquista, apenas gera uma nova rodada
+            generateNewChallenge(levelManager);
+          }
+        },
+      );
     }
+  } else {
+    GameAnimations.playWrongSound();
+    setState(() {
+      selectedItem.isTapped = true;
+      selectedItem.isCorrect = false;
+    });
   }
+}
+
+
 
   Widget buildGameItem(GameItem item) {
-    return Align(
-      alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
-      child: GestureDetector(
-        onTap: () => checkAnswer(item, levelManager),
-        child: Container(
-          width: 60.r,
-          height: 60.r,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: item.backgroundColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                offset: Offset(2, 2),
-                blurRadius: 4.r,
-              ),
-            ],
-          ),
-          alignment: Alignment.center,
-          child:
-              item.isTapped
-                  ? Icon(
-                    item.isCorrect ? Icons.check : Icons.close,
-                    color: item.isCorrect ? Colors.green : Colors.red,
-                    size: 32.sp,
-                  )
-                  : Text(
-                    item.content,
-                    style: TextStyle(
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontFamily: item.fontFamily,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
+  return Align(
+    alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
+    child: GestureDetector(
+      onTap: () => checkAnswer(item, levelManager),
+      child: Container(
+        width: 60.r,
+        height: 60.r,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: item.isTapped ? Colors.transparent : item.backgroundColor, // Torna o item invisível
+          boxShadow: item.isTapped ? [] : [ // Remove a sombra quando desaparece
+            BoxShadow(
+              color: Colors.black26,
+              offset: Offset(2, 2),
+              blurRadius: 4.r,
+            ),
+          ],
         ),
+        alignment: Alignment.center,
+        child: item.isTapped
+            ? Icon(
+                item.isCorrect ? Icons.check : Icons.close,
+                color: item.isCorrect ? Colors.green : Colors.red,
+                size: 32.sp,
+              )
+            : Text(
+                item.content,
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: item.fontFamily,
+                  decoration: TextDecoration.none,
+                ),
+              ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {

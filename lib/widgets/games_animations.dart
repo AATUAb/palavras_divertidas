@@ -109,7 +109,7 @@ class GameAnimations {
     );
   }
 
-  static Widget successCoffetiesTimed({
+  static Widget coffetiesTimed({
     double? width,
     double? height,
     VoidCallback? onFinished,
@@ -152,16 +152,16 @@ class GameAnimations {
     );
   }
 
-  // Animação de conquistas acumuladas, exibida durante 5 segundos
-  static Widget successConquestTimed({
+  // Animação de conquistas acumuladas, exibida durante 3 segundos
+  static Widget conquestTimed({
     double? width,
     double? height,
     VoidCallback? onFinished,
   }) {
     _playSound('conquest.wav');
     return _TimedAnimationWidget(
-      animationPath: 'assets/animations/check.json',
-      duration: const Duration(seconds: 1),
+      animationPath: 'assets/animations/conquest.json',
+      duration: const Duration(seconds: 3),
       width: width ?? 684.w,
       height: height ?? 250.h,
       onFinished: onFinished,

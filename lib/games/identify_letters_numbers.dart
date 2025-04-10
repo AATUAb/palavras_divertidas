@@ -208,7 +208,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
       GameAnimations.showTimeoutSnackbar(context);
       final bool firstTryCorrect = currentTry == correctCount;
 
-        levelManager.registerRoundWithOptionalFeedback(
+        levelManager.registerRoundForLevel(
         context: context,
         correct: firstTryCorrect,
         applySettings: applyLevelSettings,
@@ -244,14 +244,14 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
         showSuccessAnimation = true;
       });
 
-      GameAnimations.successCoffetiesTimed();   // Mostra a animação de sucesso temporariamente
+      GameAnimations.coffetiesTimed();   // Mostra a animação de sucesso temporariamente
 
       // Espera 1 segundo para terminar a animação antes de avançar para a próxima ronda
       Future.delayed(const Duration(seconds: 1), () {
         if (!mounted) return;
          // Esconde a animação de sucesso e avança para a próxima ronda
         setState(() => showSuccessAnimation = false);
-        levelManager.registerRoundWithOptionalFeedback(
+        levelManager.registerRoundForLevel(
           context: context,
           correct: firstTryCorrect,
           applySettings: applyLevelSettings,
@@ -350,7 +350,7 @@ Widget build(BuildContext context) {
         if (showSuccessAnimation)
           IgnorePointer(
             ignoring: true,
-            child: GameAnimations.successCoffetiesTimed(),
+            child: GameAnimations.coffetiesTimed(),
           ),
       ],
     ),
