@@ -196,10 +196,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           bottom: 10.h,
           right: 10.w,
           child: IconButton(
-            icon: Icon(
-              _muted ? Icons.volume_off : Icons.volume_up,
-              size: 30.sp,
-            ),
+            icon: Icon(_muted ? Icons.volume_off : Icons.volume_up, size: 30.sp),
             tooltip: _muted ? 'Ativar som' : 'Silenciar',
             onPressed: _toggleMute,
           ),

@@ -16,8 +16,7 @@ class GamesSuperWidget extends StatelessWidget {
     BuildContext context,
     LevelManager levelManager,
     UserModel user,
-  )
-  builder;
+  ) builder;
 
   const GamesSuperWidget({
     super.key,
@@ -59,7 +58,7 @@ Widget buildSuccessAnimation(bool showSuccessAnimation) {
   return showSuccessAnimation
       ? IgnorePointer(
         ignoring: true,
-        child: GameAnimations.coffetiesTimed(),
+        child: GameAnimations.coffetiesTimed(),  // Exibe animação de sucesso (confetes)
       )
       : const SizedBox.shrink();
 }
@@ -69,7 +68,7 @@ Widget buildConquestAnimation(bool showConquestAnimation) {
   return showConquestAnimation
       ? IgnorePointer(
         ignoring: true,
-        child: GameAnimations.conquestTimed(),
+        child: GameAnimations.conquestTimed(),  // Exibe animação de conquista
       )
       : const SizedBox.shrink();
 }

@@ -91,7 +91,7 @@ class _GameMenuState extends State<GameMenu> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: Icon(Icons.home),
+                icon: Icon(Icons.home, size: 25.sp),
                 tooltip: 'Menu Principal',
                 onPressed: () {
                   Navigator.pushReplacement(
@@ -104,7 +104,7 @@ class _GameMenuState extends State<GameMenu> {
                 },
               ),
               IconButton(
-                icon: Icon(Icons.emoji_events),
+                icon: Icon(Icons.emoji_events, size: 25.sp),
                 tooltip: 'Conquistas',
                 onPressed: () {
                   Navigator.pushReplacement(
@@ -115,10 +115,13 @@ class _GameMenuState extends State<GameMenu> {
                   );
                 },
               ),
-              IconButton(
-                icon: Icon(Icons.bar_chart),
-                tooltip: 'Dashboard',
-                onPressed: () {
+              Positioned(
+                top: 10.h,
+                left: 10.w,
+                child: IconButton(
+                  icon: Icon(Icons.bar_chart, size: 25.sp),
+                  tooltip: 'Estastísticas',
+                  onPressed: () {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -127,9 +130,12 @@ class _GameMenuState extends State<GameMenu> {
                   );
                 },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
+
+
 
         child: SafeArea(
           child: Padding(

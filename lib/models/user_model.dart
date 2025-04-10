@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:logger/logger.dart';
 part 'user_model.g.dart';
 
 @HiveType(typeId: 0)
@@ -29,6 +30,14 @@ class UserModel extends HiveObject {
   @HiveField(6)
   int conquest;
 
+  /// Contagem de acertos na primeira tentativa para a próxima conquista
+  @HiveField(7)
+  int firstTrySuccesses;
+
+  /// Contagem de acertos (não na primeira tentativa) para a próxima conquista
+  @HiveField(8)
+  int otherSuccesses;
+
   UserModel({
     required this.name,
     required this.schoolLevel,
@@ -37,6 +46,8 @@ class UserModel extends HiveObject {
     this.overallAccuracy,
     this.gameLevel = 1,
     this.conquest = 0,
+    this.firstTrySuccesses = 0, // Initialize new field
+    this.otherSuccesses = 0,    // Initialize new field
   }) : knownLetters = knownLetters ?? [];
 
   /// Atualiza a taxa de acerto por nível e a média geral
@@ -52,10 +63,14 @@ class UserModel extends HiveObject {
     }
   }
 
-  /// Incrementa o número de conquistas
-  void incrementConquest() {
-    conquest++;
-  }
+/// Incrementa o número de conquistas
+final Logger logger = Logger();
+
+void incrementConquest() {
+  logger.i("Incrementing conquest. Current value: $conquest");
+  conquest++;
+  logger.i("New conquest value: $conquest");
+}
 
   /// Método de cópia para atualização do modelo
   UserModel copyWith({
@@ -66,6 +81,8 @@ class UserModel extends HiveObject {
   Map<int, double>? accuracyByLevel,
   double? overallAccuracy,
   int? conquest,
+  int? firstTrySuccesses,
+  int? otherSuccesses,
 }) {
   return UserModel(
     name: name ?? this.name,
@@ -75,6 +92,13 @@ class UserModel extends HiveObject {
     accuracyByLevel: accuracyByLevel ?? this.accuracyByLevel,
     overallAccuracy: overallAccuracy ?? this.overallAccuracy,
     conquest: conquest ?? this.conquest,
+    firstTrySuccesses: firstTrySuccesses ?? this.firstTrySuccesses,
+    otherSuccesses: otherSuccesses ?? this.otherSuccesses,
   );
 }
+
+// Salva o UserModel no Hive
+  Future<void> save() async {
+    await this.save();
+  }
 }

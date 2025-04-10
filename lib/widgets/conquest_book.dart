@@ -1,7 +1,6 @@
 // Estrutura para gestão da caderneta de conquistas e feedback visual no decurso dos jogos
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../models/user_model.dart';
 import '../widgets/games_animations.dart';
 import '../services/hive_service.dart';
 
@@ -37,47 +36,49 @@ class Conquest {
     }
   }
 
-Future<void> registerRoundForConquest({
-  required BuildContext context,
-  required bool firstTry,
-  required VoidCallback applySettings,
-  required VoidCallback onFinished,
-}) async {
-  final int oldConquest = conquest;
+  Future<void> registerRoundForConquest({
+    required BuildContext context,
+    required bool firstTry,
+    required VoidCallback applySettings,
+    required VoidCallback onFinished,
+    required int userKey, // Passa o userKey aqui
+  }) async {
+    final int oldConquest = conquest;
 
-  registerRound(firstTry: firstTry);
+    registerRound(firstTry: firstTry);
 
-  if (conquest > oldConquest) {
-  // Exibe animação de conquista
-  await showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.zero,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GameAnimations.conquestTimed(),
-          SizedBox(height: 30.h),
-          Text(
-            'Uau! Ganhaste um autocolante para a caderneta',
-            style: TextStyle(
-              fontSize: 24.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.red,
-            ),
-            textAlign: TextAlign.center,
+    if (conquest > oldConquest) {
+      // Exibe animação de conquista
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GameAnimations.conquestTimed(),
+              SizedBox(height: 30.h),
+              Text(
+                'Uau! Ganhaste um autocolante para a caderneta',
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 
-  // Atualiza o número de conquistas no modelo do usuário
-  final userKey = HiveService.getUserKey(); // Obtém a chave do usuário
-  HiveService.incrementConquests(userKey); // Atualiza o número de conquistas no Hive
-}
-}
+      // Atualiza o número de conquistas no modelo do usuário
+      HiveService.incrementConquests(userKey); // Agora passando userKey corretamente
+    }
+
+    onFinished();
+  }
 }

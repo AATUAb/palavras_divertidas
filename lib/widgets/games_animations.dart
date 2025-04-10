@@ -27,6 +27,11 @@ class GameAnimations {
   static Widget wrongAnswerIcon() {
   return const Icon(Icons.close, color: Colors.red, size: 30);
 }
+
+  /// Toca o som de conquista
+  static Future<void> playConquestSound() async {
+    await _playSound('conquest.wav');
+  }
   
   /// Informação de tempo esgotado, exibida durante 400 milissegundos  
     static void showTimeoutSnackbar(BuildContext context) {
@@ -108,7 +113,8 @@ class GameAnimations {
       ],
     );
   }
-
+  // Animação de coffeties, exibida durante 3 segundos, apenas em jogos com vários itens para selecionar
+  // aprenta a animação ao selecinar todos os itens corretos da jogada
   static Widget coffetiesTimed({
     double? width,
     double? height,

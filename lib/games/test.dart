@@ -7,8 +7,10 @@ import '../widgets/games_animations.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/games_super_widget.dart';
-import '../widgets/conquest_book.dart';
+// ConquestBook import is removed as the logic is now handled here
 import '../services/hive_service.dart';
+import 'package:logger/logger.dart';
+import 'package:lottie/lottie.dart'; // Import Lottie
 
 class TestGame extends StatefulWidget {
   final UserModel user;
@@ -22,7 +24,10 @@ class TestGameState extends State<TestGame> {
   bool isFirstCycle = false;
   bool showSuccessAnimation = false;
   late LevelManager levelManager;
-  bool showConquestAnimation = false; 
+  bool showConquestAnimation = false;
+  bool _conquestAchievedThisRound = false; // Flag for conquest in the current round
+
+  final logger = Logger(); // Logger instance
 
   final List<String> characters = [
     ...'ABCDEFGHIJLMNOPQRSTUVXZ'.split(''),
@@ -189,10 +194,12 @@ class TestGameState extends State<TestGame> {
         onFinished: () => generateNewChallenge(levelManager),
       );
     });
-  }
+}
 
-  Future<void> checkAnswer(GameItem selectedItem, LevelManager levelManager) async {
+Future<void> checkAnswer(GameItem selectedItem, LevelManager levelManager) async {
   currentTry++;
+  _conquestAchievedThisRound = false; // Reset flag at the start of check
+
   if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
     foundCorrect++;
     GameAnimations.playCorrectSound();
@@ -206,43 +213,58 @@ class TestGameState extends State<TestGame> {
       progressTimer?.cancel();
       final firstTryCorrect = currentTry == correctCount;
       setState(() => showSuccessAnimation = true);
-      GameAnimations.coffetiesTimed();
+      GameAnimations.coffetiesTimed(); // Success animation
 
-      // Aguardar 1 segundo para mostrar a animação de sucesso (se houver)
+      // Short delay for success animation visibility
       await Future.delayed(const Duration(seconds: 1));
-
       setState(() => showSuccessAnimation = false);
 
-      // Registrar a rodada
+      // --- Conquest Logic ---
+      final userKey = HiveService.getUserKey(widget.user.key);
+      if (userKey != -1) { // Check if user key is valid
+        if (firstTryCorrect) {
+          await HiveService.incrementFirstTrySuccesses(userKey);
+          final updatedUser = HiveService.getUser(userKey);
+          if (updatedUser != null && updatedUser.firstTrySuccesses >= 5) {
+            logger.i("Conquest achieved (first try)! User: $userKey");
+            _conquestAchievedThisRound = true;
+            await HiveService.incrementConquests(userKey);
+            await HiveService.resetFirstTrySuccesses(userKey);
+          }
+        } else {
+          await HiveService.incrementOtherSuccesses(userKey);
+          final updatedUser = HiveService.getUser(userKey);
+          if (updatedUser != null && updatedUser.otherSuccesses >= 10) {
+            logger.i("Conquest achieved (other try)! User: $userKey");
+            _conquestAchievedThisRound = true;
+            await HiveService.incrementConquests(userKey);
+            await HiveService.resetOtherSuccesses(userKey);
+          }
+        }
+      } else {
+         logger.e("Could not find user key for conquest logic. User ID: ${widget.user.key}");
+      }
+      // --- End Conquest Logic ---
+
+
+      // Register level progression
       levelManager.registerRoundForLevel(
         context: context,
         correct: firstTryCorrect,
         applySettings: () => applyLevelSettings(levelManager),
-        onFinished: () {
-          // Verificar se houve uma conquista
-          final oldConquest = widget.user.conquest;
+        onFinished: () { // Changed to synchronous if no async ops needed before check
+          if (_conquestAchievedThisRound) {
+            logger.i("Showing conquest animation for user $userKey");
+            setState(() => showConquestAnimation = true);
+            GameAnimations.playConquestSound(); // Play conquest sound
 
-          // Verifica se houve uma conquista
-          if (widget.user.conquest > oldConquest) {
-            setState(() {
-              showConquestAnimation = true; // Exibe animação de conquista
-            });
-
-            // Atualiza o número de conquistas no Hive
-            final userKey = HiveService.getUserKey();
-            HiveService.incrementConquests(userKey);  // Atualiza as conquistas no Hive
-
-            // Ocultar animação de conquista após 1 segundo
-            Future.delayed(const Duration(seconds: 1), () {
-              setState(() {
-                showConquestAnimation = false; // Ocultar animação de conquista
-              });
-
-              // Gera uma nova rodada após a animação de conquista
+            // Delay for animation, then generate next challenge
+            Future.delayed(const Duration(seconds: 3), () { // Increased delay for visibility
+              setState(() => showConquestAnimation = false);
               generateNewChallenge(levelManager);
             });
           } else {
-            // Se não houver conquista, apenas gera uma nova rodada
+            // No conquest, generate next challenge immediately
             generateNewChallenge(levelManager);
           }
         },
@@ -256,6 +278,7 @@ class TestGameState extends State<TestGame> {
     });
   }
 }
+
 
 
 
@@ -340,7 +363,18 @@ class TestGameState extends State<TestGame> {
         return Stack(
           children: [
             ...gamesItems.map(buildGameItem),
-            buildSuccessAnimation(showSuccessAnimation),
+            // Conditionally display success animation
+            if (showSuccessAnimation) buildSuccessAnimation(true),
+            // Conditionally display conquest animation
+            if (showConquestAnimation)
+              Center(
+                child: Lottie.asset(
+                  'assets/animations/conquest.json', // Path to your conquest animation
+                  width: 200.r,
+                  height: 200.r,
+                  fit: BoxFit.contain,
+                ),
+              ),
           ],
         );
       },

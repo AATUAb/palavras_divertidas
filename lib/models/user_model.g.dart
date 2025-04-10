@@ -23,13 +23,16 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       accuracyByLevel: (fields[3] as Map).cast<int, double>(),
       overallAccuracy: fields[4] as double?,
       gameLevel: fields[5] as int,
+      conquest: fields[6] as int,
+      firstTrySuccesses: fields[7] as int,
+      otherSuccesses: fields[8] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -41,7 +44,13 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(4)
       ..write(obj.overallAccuracy)
       ..writeByte(5)
-      ..write(obj.gameLevel);
+      ..write(obj.gameLevel)
+      ..writeByte(6)
+      ..write(obj.conquest)
+      ..writeByte(7)
+      ..write(obj.firstTrySuccesses)
+      ..writeByte(8)
+      ..write(obj.otherSuccesses);
   }
 
   @override
