@@ -16,16 +16,17 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
+
     return UserModel(
       name: fields[0] as String,
       schoolLevel: fields[1] as String,
-      knownLetters: (fields[2] as List?)?.cast<String>(),
-      accuracyByLevel: (fields[3] as Map).cast<int, double>(),
+      knownLetters: (fields[2] as List?)?.cast<String>() ?? [],
+      accuracyByLevel: (fields[3] as Map?)?.cast<int, double>() ?? {},
       overallAccuracy: fields[4] as double?,
-      gameLevel: fields[5] as int,
-      conquest: fields[6] as int,
-      firstTrySuccesses: fields[7] as int,
-      otherSuccesses: fields[8] as int,
+      gameLevel: fields[5] as int? ?? 1,
+      conquest: fields[6] as int? ?? 0,
+      firstTrySuccesses: fields[7] as int? ?? 0,
+      otherSuccesses: fields[8] as int? ?? 0,
     );
   }
 

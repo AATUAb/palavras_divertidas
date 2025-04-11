@@ -2,17 +2,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../widgets/level_manager.dart';
-import '../widgets/game_design.dart';
+import '../widgets/games_design.dart';
 import '../widgets/game_animations.dart';
-import '../widgets/conquest_manager.dart'; 
+import '../widgets/conquest_manager.dart';
 import '../services/hive_service.dart';
 
 /// Callback function type for triggering conquest feedback.
-typedef ConquestFeedbackCallback = Future<void> Function({
-  required bool firstTry,
-  required VoidCallback applySettings,
-  required VoidCallback onFinished,
-});
+typedef ConquestFeedbackCallback =
+    Future<void> Function({
+      required bool firstTry,
+      required VoidCallback applySettings,
+      required VoidCallback onFinished,
+    });
 
 /// Widget base para todos os jogos
 class GamesSuperWidget extends StatefulWidget {
@@ -28,7 +29,8 @@ class GamesSuperWidget extends StatefulWidget {
     LevelManager levelManager,
     UserModel user,
     ConquestFeedbackCallback triggerConquestFeedback,
-  ) builder;
+  )
+  builder;
 
   const GamesSuperWidget({
     Key? key,

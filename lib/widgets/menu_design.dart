@@ -2,8 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../themes/colors.dart';
+
+/// 🔊 Estado global do player de música dos menus
+final AudioPlayer globalMenuPlayer = AudioPlayer();
+bool globalSoundStarted = false;
+bool globalSoundPaused = false;
+bool isMenuMuted = false;
+
+/// ⏸️ Pausar música
+Future<void> pauseMenuMusic() async {
+  if (!globalSoundPaused) {
+    await globalMenuPlayer.pause();
+    globalSoundPaused = true;
+  }
+}
+
+/// ▶️ Retomar música
+Future<void> resumeMenuMusic() async {
+  if (!isMenuMuted && globalSoundPaused) {
+    await globalMenuPlayer.resume();
+    globalSoundPaused = false;
+  }
+}
 
 class MenuDesign extends StatefulWidget {
   final Widget child;
@@ -22,30 +43,6 @@ class MenuDesign extends StatefulWidget {
 }
 
 class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
-  static final AudioPlayer _audioPlayer = AudioPlayer();
-  static bool _soundStarted = false;
-  static bool _isPaused = false;
-  bool _muted = false;
-
-  // Static method to pause the music when entering games
-  static Future<void> pauseMusic() async {
-    if (!_isPaused) {
-      await _audioPlayer.pause();
-      _isPaused = true;
-    }
-  }
-
-  // Static method to resume the music when returning to menus
-  static Future<void> resumeMusic() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isMuted = prefs.getBool('isMuted') ?? false;
-    
-    if (!isMuted && _isPaused) {
-      await _audioPlayer.resume();
-      _isPaused = false;
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -54,30 +51,26 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
   }
 
   Future<void> _initAudio() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isMuted = prefs.getBool('isMuted') ?? false;
+    await globalMenuPlayer.setReleaseMode(ReleaseMode.loop);
 
-    setState(() => _muted = isMuted);
-    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-
-    if (!_muted && !_soundStarted) {
-      await _audioPlayer.play(AssetSource('sounds/intro_music.mp3'));
-      _soundStarted = true;
-      _isPaused = false;
+    if (!isMenuMuted && !globalSoundStarted) {
+      await globalMenuPlayer.play(AssetSource('sounds/intro_music.mp3'));
+      globalSoundStarted = true;
+      globalSoundPaused = false;
     }
   }
 
   Future<void> _toggleMute() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() => _muted = !_muted);
-    await prefs.setBool('isMuted', _muted);
+    setState(() {
+      isMenuMuted = !isMenuMuted;
+    });
 
-    if (_muted) {
-      await _audioPlayer.pause();
-      _isPaused = true;
+    if (isMenuMuted) {
+      await globalMenuPlayer.pause();
+      globalSoundPaused = true;
     } else {
-      await _audioPlayer.resume();
-      _isPaused = false;
+      await globalMenuPlayer.resume();
+      globalSoundPaused = false;
     }
   }
 
@@ -90,24 +83,18 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      _audioPlayer.pause();
-    } else if (state == AppLifecycleState.resumed && !_muted) {
-      _audioPlayer.resume();
+      globalMenuPlayer.pause();
+    } else if (state == AppLifecycleState.resumed && !isMenuMuted) {
+      globalMenuPlayer.resume();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    SharedPreferences.getInstance().then((prefs) {
-      final isMuted = prefs.getBool('isMuted') ?? false;
-      if (isMuted != _muted) {
-        setState(() => _muted = isMuted);
-      }
-    });
-
     return Stack(
       children: [
         Container(color: Colors.white),
+
         const Positioned(top: 0, left: 0, right: 0, child: TopWave()),
 
         Positioned(
@@ -121,7 +108,6 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           ),
         ),
 
-        // Título e header
         Positioned(
           top: 8.h,
           left: 0,
@@ -157,7 +143,6 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           ),
         ),
 
-        // Novo: ícones superiores (ex: só usados no GameMenu)
         if (widget.topLeftWidget != null)
           Positioned(top: 10.h, left: 10.w, child: widget.topLeftWidget!),
 
@@ -223,8 +208,11 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           bottom: 10.h,
           right: 10.w,
           child: IconButton(
-            icon: Icon(_muted ? Icons.volume_off : Icons.volume_up, size: 30.sp),
-            tooltip: _muted ? 'Ativar som' : 'Silenciar',
+            icon: Icon(
+              isMenuMuted ? Icons.volume_off : Icons.volume_up,
+              size: 30.sp,
+            ),
+            tooltip: isMenuMuted ? 'Ativar som' : 'Silenciar',
             onPressed: _toggleMute,
           ),
         ),

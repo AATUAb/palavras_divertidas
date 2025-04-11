@@ -34,6 +34,12 @@ class GameMenu extends StatefulWidget {
 
 class _GameMenuState extends State<GameMenu> {
   @override
+  void initState() {
+    super.initState();
+    resumeMenuMusic(); // <- Isto garante que a música toca ao voltar ao menu
+  }
+
+  @override
   Widget build(BuildContext context) {
     final List<GameCardData> jogosBase = [
       GameCardData(
@@ -115,13 +121,10 @@ class _GameMenuState extends State<GameMenu> {
                   );
                 },
               ),
-              Positioned(
-                top: 10.h,
-                left: 10.w,
-                child: IconButton(
-                  icon: Icon(Icons.bar_chart, size: 25.sp),
-                  tooltip: 'Estastísticas',
-                  onPressed: () {
+              IconButton(
+                icon: Icon(Icons.bar_chart, size: 25.sp),
+                tooltip: 'Estatísticas',
+                onPressed: () {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -130,13 +133,9 @@ class _GameMenuState extends State<GameMenu> {
                   );
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-
-
-
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.w),
@@ -210,7 +209,9 @@ class _GameMenuState extends State<GameMenu> {
   void _startWriteGame() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => WriteGameScreen(character: "A")),
+      MaterialPageRoute(
+        builder: (_) => WriteGameScreen(character: "A", user: widget.user),
+      ),
     );
   }
 
