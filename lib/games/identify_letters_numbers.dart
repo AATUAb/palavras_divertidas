@@ -149,14 +149,14 @@ class IdentifyLettersNumbersGameState
     // Novo cálculo para centralizar os balões
     final cols = (allOptions.length / 3).ceil();
     final spacingX = 1.0 / (cols + 1);
-    final spacingY = 0.2; // Ajuste do espaçamento vertical
+    final spacingY = 0.3; // Ajuste do espaçamento vertical
 
     final placedItems = <GameItem>[];
     for (int i = 0; i < allOptions.length; i++) {
       final col = i % cols;
       final row = i ~/ cols;
       final dx = spacingX * (col + 1);
-      final dy = 0.3 + spacingY * row; // Ajuste para melhorar a centralização
+      final dy = 0.10 + spacingY * row; // Ajuste para melhorar a centralização
 
       placedItems.add(
         GameItem(
@@ -245,10 +245,11 @@ class IdentifyLettersNumbersGameState
       padding: EdgeInsets.only(bottom: 6.h),
       child:
           isFirstCycle && _isLetter(targetCharacter)
-              ? Column(
+              ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Encontra a letra',
+                    'Encontra a letra: ',
                     style: getInstructionFont(isFirstCycle: isFirstCycle),
                   ),
                   CharacterFontVariants(character: targetCharacter),
@@ -256,8 +257,8 @@ class IdentifyLettersNumbersGameState
               )
               : Text(
                 _isNumber(targetCharacter)
-                    ? 'Encontra o número $targetCharacter'
-                    : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+                    ? 'Encontra o número: $targetCharacter'
+                    : 'Encontra a letra: ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
                 style: getInstructionFont(isFirstCycle: isFirstCycle),
                 textAlign: TextAlign.center,
               ),
@@ -265,7 +266,7 @@ class IdentifyLettersNumbersGameState
 
     return GamesDesign(
       user: widget.user,
-      topTextWidget: topTextWidget, // Passa a frase por aqui
+      topTextWidget: topTextWidget,
       child: Stack(
         children: [
           Align(
@@ -275,7 +276,6 @@ class IdentifyLettersNumbersGameState
               level: levelManager.level,
               currentRound: levelManager.totalRoundsCount + 1,
               totalRounds: levelManager.evaluationRounds,
-              topTextWidget: topTextWidget,
             ),
           ),
           ...gamesItems.map((item) {

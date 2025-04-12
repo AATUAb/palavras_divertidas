@@ -4,13 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../themes/colors.dart';
 
-/// 🔊 Estado global do player de música dos menus
 final AudioPlayer globalMenuPlayer = AudioPlayer();
 bool globalSoundStarted = false;
 bool globalSoundPaused = false;
 bool isMenuMuted = false;
 
-/// ⏸️ Pausar música
 Future<void> pauseMenuMusic() async {
   if (!globalSoundPaused) {
     await globalMenuPlayer.pause();
@@ -18,7 +16,6 @@ Future<void> pauseMenuMusic() async {
   }
 }
 
-/// ▶️ Retomar música
 Future<void> resumeMenuMusic() async {
   if (!isMenuMuted && globalSoundPaused) {
     await globalMenuPlayer.resume();
@@ -30,12 +27,18 @@ class MenuDesign extends StatefulWidget {
   final Widget child;
   final String? headerText;
   final Widget? topLeftWidget;
+  final bool showHomeButton;
+  final VoidCallback? onHomePressed;
+  final bool hideSun; // NOVO
 
   const MenuDesign({
     super.key,
     required this.child,
     this.headerText,
     this.topLeftWidget,
+    this.showHomeButton = false,
+    this.onHomePressed,
+    this.hideSun = false, // por padrão o sol aparece
   });
 
   @override
@@ -52,7 +55,6 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
 
   Future<void> _initAudio() async {
     await globalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-
     if (!isMenuMuted && !globalSoundStarted) {
       await globalMenuPlayer.play(AssetSource('sounds/intro_music.mp3'));
       globalSoundStarted = true;
@@ -64,7 +66,6 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
     setState(() {
       isMenuMuted = !isMenuMuted;
     });
-
     if (isMenuMuted) {
       await globalMenuPlayer.pause();
       globalSoundPaused = true;
@@ -94,19 +95,19 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
     return Stack(
       children: [
         Container(color: Colors.white),
-
         const Positioned(top: 0, left: 0, right: 0, child: TopWave()),
 
-        Positioned(
-          top: -50.h,
-          left: 12.w,
-          child: Image.asset(
-            'assets/images/sun.png',
-            width: 300.w,
-            height: 300.h,
-            fit: BoxFit.contain,
+        if (!widget.hideSun)
+          Positioned(
+            top: -50.h,
+            left: 12.w,
+            child: Image.asset(
+              'assets/images/sun.png',
+              width: 300.w,
+              height: 300.h,
+              fit: BoxFit.contain,
+            ),
           ),
-        ),
 
         Positioned(
           top: 8.h,
@@ -146,6 +147,30 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
         if (widget.topLeftWidget != null)
           Positioned(top: 10.h, left: 10.w, child: widget.topLeftWidget!),
 
+        if (widget.showHomeButton)
+          Positioned(
+            top: 10.h,
+            left: 10.w,
+            child: Material(
+              type: MaterialType.transparency,
+              child: Container(
+                decoration: const BoxDecoration(
+                  border: Border.fromBorderSide(
+                    BorderSide(color: Colors.black),
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.home, color: AppColors.black, size: 30.sp),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  tooltip: 'Voltar ao Menu de Jogos',
+                  onPressed: widget.onHomePressed,
+                ),
+              ),
+            ),
+          ),
+
         Positioned.fill(
           child: Padding(
             padding: EdgeInsets.only(top: 20.h),
@@ -174,9 +199,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 tooltip: 'Fechar App',
-                onPressed: () {
-                  SystemNavigator.pop();
-                },
+                onPressed: () => SystemNavigator.pop(),
               ),
             ),
           ),

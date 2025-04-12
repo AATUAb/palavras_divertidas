@@ -15,6 +15,10 @@ void main() async {
   ]);
 
   await Hive.initFlutter();
+
+  // ⚠️ Apenas durante desenvolvimento: limpa a box "users"
+  //await Hive.deleteBoxFromDisk('users');
+
   await HiveService.init();
 
   runApp(const MyApp());

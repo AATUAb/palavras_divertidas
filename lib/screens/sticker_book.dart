@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../themes/colors.dart';
+import '../widgets/menu_design.dart';
+import 'game_menu.dart'; // Certifica-te de que o caminho está correto
 
 class Sticker {
   final String name;
@@ -11,7 +13,9 @@ class Sticker {
 }
 
 class StickerBookScreen extends StatefulWidget {
-  const StickerBookScreen({super.key});
+  final dynamic user; // Usa UserModel se tiveres o tipo definido
+
+  const StickerBookScreen({super.key, required this.user});
 
   @override
   State<StickerBookScreen> createState() => _StickerBookScreenState();
@@ -34,32 +38,6 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Caderneta de Cromos',
-          style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: AppColors.green,
-        centerTitle: true,
-        leading: const BackButton(color: Colors.white),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: GridView.builder(
-          itemCount: stickers.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12.w,
-            mainAxisSpacing: 12.h,
-            childAspectRatio: 0.9,
-          ),
-          itemBuilder: (context, index) => _buildStickerCard(stickers[index]),
-        ),
-      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.green,
         child: const Icon(Icons.lock_open),
@@ -70,6 +48,31 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             }
           });
         },
+      ),
+      body: MenuDesign(
+        headerText: 'Caderneta de Cromos',
+        showHomeButton: true,
+        onHomePressed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GameMenu(user: widget.user),
+            ),
+          );
+        },
+        child: Padding(
+          padding: EdgeInsets.only(top: 140.h, left: 16.w, right: 16.w),
+          child: GridView.builder(
+            itemCount: stickers.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12.w,
+              mainAxisSpacing: 12.h,
+              childAspectRatio: 0.9,
+            ),
+            itemBuilder: (context, index) => _buildStickerCard(stickers[index]),
+          ),
+        ),
       ),
     );
   }

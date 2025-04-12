@@ -116,7 +116,7 @@ class _GameMenuState extends State<GameMenu> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const StickerBookScreen(),
+                      builder: (_) => StickerBookScreen(user: widget.user),
                     ),
                   );
                 },

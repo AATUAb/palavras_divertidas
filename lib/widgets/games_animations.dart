@@ -5,17 +5,17 @@ import 'package:lottie/lottie.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class GameAnimations {
- /// Animação de coffeties, exibida durante 3 segundos, apenas em jogos com várias rodadas antes do acerto final
+  /// Animação de coffeties, exibida durante 3 segundos, apenas em jogos com várias rodadas antes do acerto final
   /// Toca o som de resposta correta
   static Future<void> playCorrectSound() async {
     final player = AudioPlayer();
     await player.play(AssetSource('sounds/correct.wav'));
   }
 
-    /// Icone de resposta individual correcta 
+  /// Icone de resposta individual correcta
   static Widget correctAnswerIcon() {
-  return const Icon(Icons.check, color: Colors.green, size: 30);
-}
+    return const Icon(Icons.check, color: Colors.green, size: 30);
+  }
 
   /// Toca o som de resposta errada
   static Future<void> playWrongSound() async {
@@ -23,18 +23,18 @@ class GameAnimations {
     await player.play(AssetSource('sounds/wrong.wav'));
   }
 
-  /// Icone de resposta individual errada 
+  /// Icone de resposta individual errada
   static Widget wrongAnswerIcon() {
-  return const Icon(Icons.close, color: Colors.red, size: 30);
-}
+    return const Icon(Icons.close, color: Colors.red, size: 30);
+  }
 
   /// Toca o som de conquista
   static Future<void> playConquestSound() async {
     await _playSound('conquest.wav');
   }
-  
-  /// Informação de tempo esgotado, exibida durante 400 milissegundos  
-    static void showTimeoutSnackbar(BuildContext context) {
+
+  /// Informação de tempo esgotado, exibida durante 400 milissegundos
+  static void showTimeoutSnackbar(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -50,32 +50,32 @@ class GameAnimations {
       ),
     );
   }
-  
-   /// Mostra a barra de progresso + nível e ronda
+
+  /// Mostra a barra de progresso + nível e ronda
   static Widget buildTopInfo({
     required double progressValue,
     required int level,
     required int currentRound,
     required int totalRounds,
-    required Widget topTextWidget,
   }) {
     return Stack(
       children: [
         Align(
           alignment: Alignment.topCenter,
           child: Padding(
-            padding: EdgeInsets.only(top: 10.h),
+            padding: EdgeInsets.only(top: 0.h),
             child: Column(
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10.h),
-                  child: topTextWidget,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  // posição da barra de tempo
+                  padding: EdgeInsets.only(
+                    top: 275.w,
+                    right: 15.w,
+                    left: 750.w,
+                  ),
                   child: LinearProgressIndicator(
                     value: progressValue,
-                    minHeight: 8.h,
+                    minHeight: 5.h,
                     backgroundColor: Colors.grey[300],
                     color: Colors.orange,
                   ),
@@ -84,35 +84,10 @@ class GameAnimations {
             ),
           ),
         ),
-        Positioned(
-          top: 20.h,
-          right: 20.w,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'Nível $level',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 5.h),
-              Text(
-                'Ronda $currentRound de $totalRounds',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
+
   // Animação de coffeties, exibida durante 3 segundos, apenas em jogos com vários itens para selecionar
   // aprenta a animação ao selecinar todos os itens corretos da jogada
   static Widget coffetiesTimed({
@@ -129,7 +104,7 @@ class GameAnimations {
     );
   }
 
-// Animação de estrelas, para mostrar ajustes de níveis,exibida durante 3 segundos, com som de level up
+  // Animação de estrelas, para mostrar ajustes de níveis,exibida durante 3 segundos, com som de level up
   static Widget starByLevel({
     required int level,
     double? width,
@@ -218,11 +193,11 @@ class _TimedAnimationWidgetState extends State<_TimedAnimationWidget> {
   Widget build(BuildContext context) {
     return _visible
         ? Lottie.asset(
-            widget.animationPath,
-            width: widget.width,
-            height: widget.height,
-            repeat: false,
-          )
+          widget.animationPath,
+          width: widget.width,
+          height: widget.height,
+          repeat: false,
+        )
         : const SizedBox.shrink();
   }
 }
@@ -271,7 +246,7 @@ class _AnimatedAnswerItemState extends State<AnimatedAnswerItem>
       Future.delayed(const Duration(milliseconds: 200), () {
         if (widget.onRemoved != null) widget.onRemoved!();
       });
-    } 
+    }
   }
 
   @override
@@ -292,22 +267,20 @@ class _AnimatedAnswerItemState extends State<AnimatedAnswerItem>
             children: [
               if (!_showCheckIcon) widget.child,
               if (_showCheckIcon)
-                Icon(Icons.check_circle, 
-                  color: Colors.green, 
-                  size: 32.sp,
-                ),
+                Icon(Icons.check_circle, color: Colors.green, size: 32.sp),
             ],
           ),
         );
       },
     );
   }
-@override
-void didUpdateWidget(covariant AnimatedAnswerItem oldWidget) {
-  super.didUpdateWidget(oldWidget);
 
-  if (widget.isCorrect && !_showCheckIcon) {
-    setState(() => _showCheckIcon = true);
+  @override
+  void didUpdateWidget(covariant AnimatedAnswerItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.isCorrect && !_showCheckIcon) {
+      setState(() => _showCheckIcon = true);
+    }
   }
-}
 }
