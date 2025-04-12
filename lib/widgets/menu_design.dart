@@ -29,7 +29,7 @@ class MenuDesign extends StatefulWidget {
   final Widget? topLeftWidget;
   final bool showHomeButton;
   final VoidCallback? onHomePressed;
-  final bool hideSun; // NOVO
+  final bool hideSun;
 
   const MenuDesign({
     super.key,
@@ -38,7 +38,7 @@ class MenuDesign extends StatefulWidget {
     this.topLeftWidget,
     this.showHomeButton = false,
     this.onHomePressed,
-    this.hideSun = false, // por padrão o sol aparece
+    this.hideSun = false,
   });
 
   @override
@@ -118,10 +118,10 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
             children: [
               Text(
                 'Mundo das Palavras',
-                style: TextStyle(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontSize: 40.sp,
-                  fontWeight: FontWeight.bold,
                   color: Colors.orange,
+                  fontWeight: FontWeight.bold,
                   shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 1)],
                 ),
               ),
@@ -132,7 +132,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
                   child: Text(
                     widget.headerText!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.blue.shade900,

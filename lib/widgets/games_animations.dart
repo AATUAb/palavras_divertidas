@@ -70,8 +70,8 @@ class GameAnimations {
                   // posição da barra de tempo
                   padding: EdgeInsets.only(
                     top: 275.w,
-                    right: 15.w,
-                    left: 750.w,
+                    right: 20.w,
+                    left: 850.w,
                   ),
                   child: LinearProgressIndicator(
                     value: progressValue,

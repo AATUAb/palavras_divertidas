@@ -50,7 +50,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
         },
       ),
       body: MenuDesign(
-        headerText: 'Caderneta de Cromos',
+        headerText: 'Conquistas',
         showHomeButton: true,
         onHomePressed: () {
           Navigator.pushReplacement(
@@ -61,14 +61,14 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
           );
         },
         child: Padding(
-          padding: EdgeInsets.only(top: 140.h, left: 16.w, right: 16.w),
+          padding: EdgeInsets.only(top: 100.h, left: 250.w, right: 250.w),
           child: GridView.builder(
             itemCount: stickers.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 12.w,
-              mainAxisSpacing: 12.h,
-              childAspectRatio: 0.9,
+              crossAxisSpacing: 15.w,
+              mainAxisSpacing: 15.h,
+              childAspectRatio: 1.0,
             ),
             itemBuilder: (context, index) => _buildStickerCard(stickers[index]),
           ),
