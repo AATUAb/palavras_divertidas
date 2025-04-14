@@ -5,10 +5,12 @@ import '../services/hive_service.dart';
 import '../widgets/games_animations.dart';
 
 class LevelManager {
+  final UserModel user;
+  final String gameName; // ⚠️ Obrigatório e consistente com o dashboard
+
   int level;
   int totalRounds = 0;
   int correctAnswers = 0;
-  final UserModel user;
 
   final int maxLevel;
   final int minLevel;
@@ -16,10 +18,11 @@ class LevelManager {
 
   LevelManager({
     required this.user,
+    required this.gameName,
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 1, // ajustar para 4 na release
+    this.roundsToEvaluate = 1, // aumentar para 4 na release
   }) : level = level ?? user.gameLevel;
 
   int get totalRoundsCount => totalRounds;
@@ -29,12 +32,13 @@ class LevelManager {
     totalRounds++;
     if (correct) correctAnswers++;
 
-    double accuracy = correctAnswers / totalRounds;
+    final double accuracy = correctAnswers / totalRounds;
     final int userKey = user.key as int;
 
     user.updateAccuracy(level: level, accuracy: accuracy);
     HiveService.updateUserByKey(userKey, user);
 
+    // Ajuste automático do nível
     if (totalRounds >= roundsToEvaluate * 2 &&
         accuracy >= 0.8 &&
         level < maxLevel) {
@@ -61,13 +65,36 @@ class LevelManager {
     required VoidCallback onFinished,
   }) async {
     final int previousLevel = level;
+    final int userKey = user.key as int;
 
     registerRound(correct: correct);
 
-    final bool subiuNivel = level > previousLevel;
-    final bool desceuNivel = level < previousLevel;
+    // ✅ Atualiza a taxa de acerto sem modificar Map imutável
+    if (totalRounds == roundsToEvaluate) {
+      final double accuracy = correctAnswers / totalRounds;
 
-    if (subiuNivel || desceuNivel) {
+      final original = user.gamesAccuracy[gameName];
+      final List<double> updated =
+          original != null ? List<double>.from(original) : [0.0, 0.0, 0.0];
+
+      if (level >= 1 && level <= updated.length) {
+        updated[level - 1] = accuracy;
+      }
+
+      // 🧠 Atualiza o Map completo de forma segura (cópia do Map)
+      final newMap = Map<String, List<double>>.from(user.gamesAccuracy)
+        ..[gameName] = updated;
+
+      user.gamesAccuracy = newMap;
+
+      await HiveService.updateUserByKey(userKey, user);
+    }
+
+    // 🎯 Animação de mudança de nível
+    final bool leveledUp = level > previousLevel;
+    final bool leveledDown = level < previousLevel;
+
+    if (leveledUp || leveledDown) {
       await showDialog(
         context: context,
         barrierDismissible: false,
@@ -94,13 +121,13 @@ class LevelManager {
                     SizedBox(height: 20.h),
                     FittedBox(
                       child: Text(
-                        subiuNivel
+                        leveledUp
                             ? 'Parabéns! Subiste para o nível $level!'
                             : 'Vamos treinar melhor o nível $level!',
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
-                          color: subiuNivel ? Colors.orange : Colors.redAccent,
+                          color: leveledUp ? Colors.orange : Colors.redAccent,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -112,7 +139,7 @@ class LevelManager {
       );
 
       user.gameLevel = level;
-      HiveService.updateUserByKey(user.key as int, user);
+      HiveService.updateUserByKey(userKey, user);
     }
 
     applySettings();

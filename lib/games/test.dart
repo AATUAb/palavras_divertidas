@@ -7,7 +7,6 @@ import '../widgets/games_animations.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
 import 'game_super_widget.dart';
-import '../widgets/menu_design.dart';
 import 'package:logger/logger.dart';
 import 'package:audioplayers/audioplayers.dart';
 
@@ -24,9 +23,10 @@ TextStyle getInstructionFont({required bool isFirstCycle}) {
 // Widget to display character variants (uppercase and lowercase)
 class CharacterFontVariants extends StatelessWidget {
   final String character;
-  
-  const CharacterFontVariants({Key? key, required this.character}) : super(key: key);
-  
+
+  const CharacterFontVariants({Key? key, required this.character})
+    : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -119,8 +119,8 @@ class TestGameState extends State<TestGame> {
   void initState() {
     super.initState();
     isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
-    levelManager = LevelManager(user: widget.user);
-    
+    levelManager = LevelManager(user: widget.user, gameName: 'Detetive');
+
     // Pause any background music when entering the game
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _audioPlayer.stop();
@@ -244,106 +244,108 @@ class TestGameState extends State<TestGame> {
         onFinished: () => generateNewChallenge(levelManager),
       );
     });
-}
-
-Future<void> checkAnswer(
-  GameItem selectedItem,
-  LevelManager levelManager,
-  ConquestFeedbackCallback triggerConquestFeedback,
-) async {
-  currentTry++;
-
-  if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
-    foundCorrect++;
-    GameAnimations.playCorrectSound();
-    setState(() {
-      selectedItem.isTapped = true;
-      selectedItem.isCorrect = true;
-    });
-
-    if (foundCorrect >= correctCount) {
-      roundTimer?.cancel();
-      progressTimer?.cancel();
-      final firstTryCorrect = currentTry == correctCount;
-
-      // Animação de sucesso
-      setState(() => showSuccessAnimation = true);
-      await Future.delayed(const Duration(seconds: 1));
-      setState(() => showSuccessAnimation = false);
-
-      // Primeiro regista o progresso do nível
-      await levelManager.registerRoundForLevel(
-        context: context,
-        correct: firstTryCorrect,
-        applySettings: () => applyLevelSettings(levelManager),
-        onFinished: () async {
-          // Só depois avalia se houve conquista
-          await triggerConquestFeedback(
-            firstTry: firstTryCorrect,
-            applySettings: () => applyLevelSettings(levelManager),
-            onFinished: () => generateNewChallenge(levelManager),
-          );
-        },
-      );
-    }
-  } else {
-    GameAnimations.playWrongSound();
-    setState(() {
-      selectedItem.isTapped = true;
-      selectedItem.isCorrect = false;
-    });
   }
-}
 
-  Widget buildGameItem(GameItem item, ConquestFeedbackCallback triggerConquestFeedback) {
-  return Align(
-    alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
-    child: GestureDetector(
-      onTap: () => checkAnswer(item, levelManager, triggerConquestFeedback),
-      child: Container(
-        width: 60.r,
-        height: 60.r,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: item.isTapped ? Colors.transparent : item.backgroundColor,
-          boxShadow: item.isTapped
-              ? []
-              : [
-                  BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(2, 2),
-                    blurRadius: 4.r,
+  Future<void> checkAnswer(
+    GameItem selectedItem,
+    LevelManager levelManager,
+    ConquestFeedbackCallback triggerConquestFeedback,
+  ) async {
+    currentTry++;
+
+    if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
+      foundCorrect++;
+      GameAnimations.playCorrectSound();
+      setState(() {
+        selectedItem.isTapped = true;
+        selectedItem.isCorrect = true;
+      });
+
+      if (foundCorrect >= correctCount) {
+        roundTimer?.cancel();
+        progressTimer?.cancel();
+        final firstTryCorrect = currentTry == correctCount;
+
+        // Animação de sucesso
+        setState(() => showSuccessAnimation = true);
+        await Future.delayed(const Duration(seconds: 1));
+        setState(() => showSuccessAnimation = false);
+
+        // Primeiro regista o progresso do nível
+        await levelManager.registerRoundForLevel(
+          context: context,
+          correct: firstTryCorrect,
+          applySettings: () => applyLevelSettings(levelManager),
+          onFinished: () async {
+            // Só depois avalia se houve conquista
+            await triggerConquestFeedback(
+              firstTry: firstTryCorrect,
+              applySettings: () => applyLevelSettings(levelManager),
+              onFinished: () => generateNewChallenge(levelManager),
+            );
+          },
+        );
+      }
+    } else {
+      GameAnimations.playWrongSound();
+      setState(() {
+        selectedItem.isTapped = true;
+        selectedItem.isCorrect = false;
+      });
+    }
+  }
+
+  Widget buildGameItem(
+    GameItem item,
+    ConquestFeedbackCallback triggerConquestFeedback,
+  ) {
+    return Align(
+      alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
+      child: GestureDetector(
+        onTap: () => checkAnswer(item, levelManager, triggerConquestFeedback),
+        child: Container(
+          width: 60.r,
+          height: 60.r,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: item.isTapped ? Colors.transparent : item.backgroundColor,
+            boxShadow:
+                item.isTapped
+                    ? []
+                    : [
+                      BoxShadow(
+                        color: Colors.black26,
+                        offset: Offset(2, 2),
+                        blurRadius: 4.r,
+                      ),
+                    ],
+          ),
+          alignment: Alignment.center,
+          child:
+              item.isTapped
+                  ? Icon(
+                    item.isCorrect ? Icons.check : Icons.close,
+                    color: item.isCorrect ? Colors.green : Colors.red,
+                    size: 32.sp,
+                  )
+                  : Text(
+                    item.content,
+                    style: TextStyle(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: item.fontFamily,
+                      decoration: TextDecoration.none,
+                    ),
                   ),
-                ],
         ),
-        alignment: Alignment.center,
-        child: item.isTapped
-            ? Icon(
-                item.isCorrect ? Icons.check : Icons.close,
-                color: item.isCorrect ? Colors.green : Colors.red,
-                size: 32.sp,
-              )
-            : Text(
-                item.content,
-                style: TextStyle(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: item.fontFamily,
-                  decoration: TextDecoration.none,
-                ),
-              ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget buildSuccessAnimation(bool showAnimation) {
     return showAnimation
-        ? IgnorePointer(
-            ignoring: true,
-            child: GameAnimations.coffetiesTimed(),
-          )
+        ? IgnorePointer(ignoring: true, child: GameAnimations.coffetiesTimed())
         : const SizedBox.shrink();
   }
 
@@ -354,41 +356,45 @@ Future<void> checkAnswer(
       generateNewChallenge(levelManager);
     }
 
-  return GamesSuperWidget(
-    user: widget.user,
-    progressValue: progressValue,
-    level: (_) => levelManager.level,
-    currentRound: (_) => levelManager.totalRoundsCount + 1,
-    totalRounds: (_) => levelManager.evaluationRounds,
-    topTextContent: () => Padding(
-      padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
-      child: isFirstCycle && _isLetter(targetCharacter)
-          ? Column(
-              children: [
-                Text(
-                  'Encontra a letra',
-                  style: getInstructionFont(isFirstCycle: isFirstCycle),
-                ),
-                CharacterFontVariants(character: targetCharacter),
-              ],
-            )
-          : Text(
-              _isNumber(targetCharacter)
-                  ? 'Encontra o número $targetCharacter'
-                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-              style: getInstructionFont(isFirstCycle: isFirstCycle),
-              textAlign: TextAlign.center,
+    return GamesSuperWidget(
+      user: widget.user,
+      gameName: 'Detetive', // 👈 Nome do jogo correspondente ao dashboard
+      progressValue: progressValue,
+      level: (_) => levelManager.level,
+      currentRound: (_) => levelManager.totalRoundsCount + 1,
+      totalRounds: (_) => levelManager.evaluationRounds,
+      topTextContent:
+          () => Padding(
+            padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
+            child:
+                isFirstCycle && _isLetter(targetCharacter)
+                    ? Column(
+                      children: [
+                        Text(
+                          'Encontra a letra',
+                          style: getInstructionFont(isFirstCycle: isFirstCycle),
+                        ),
+                        CharacterFontVariants(character: targetCharacter),
+                      ],
+                    )
+                    : Text(
+                      _isNumber(targetCharacter)
+                          ? 'Encontra o número $targetCharacter'
+                          : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+                      style: getInstructionFont(isFirstCycle: isFirstCycle),
+                      textAlign: TextAlign.center,
+                    ),
+          ),
+      builder: (context, levelManager, user, triggerConquestFeedback) {
+        return Stack(
+          children: [
+            ...gamesItems.map(
+              (item) => buildGameItem(item, triggerConquestFeedback),
             ),
-    ),
-    builder: (context, levelManager, user, triggerConquestFeedback) {
-      return Stack(
-        children: [
-          ...gamesItems.map((item) => buildGameItem(item, triggerConquestFeedback)),
-          if (showSuccessAnimation) buildSuccessAnimation(true),
-        ],
-      );
-    },
-  );
-}
-  
+            if (showSuccessAnimation) buildSuccessAnimation(true),
+          ],
+        );
+      },
+    );
   }
+}

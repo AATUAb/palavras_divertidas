@@ -91,24 +91,20 @@ class _GameMenuState extends State<GameMenu> {
     return Scaffold(
       body: MenuDesign(
         headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
+        showHomeButton: true,
+        onHomePressed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const MyHomePage(title: 'Mundo das Palavras'),
+            ),
+          );
+        },
         topLeftWidget: Padding(
-          padding: EdgeInsets.only(top: 150.h, left: 0.w),
+          padding: EdgeInsets.only(top: 170.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                icon: Icon(Icons.home, size: 25.sp),
-                tooltip: 'Menu Principal',
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => const MyHomePage(title: 'Mundo das Palavras'),
-                    ),
-                  );
-                },
-              ),
               IconButton(
                 icon: Icon(Icons.emoji_events, size: 25.sp),
                 tooltip: 'Conquistas',

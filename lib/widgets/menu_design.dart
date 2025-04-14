@@ -147,33 +147,23 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
         if (widget.topLeftWidget != null)
           Positioned(top: 10.h, left: 10.w, child: widget.topLeftWidget!),
 
+        // botão Home
         if (widget.showHomeButton)
           Positioned(
             top: 10.h,
             left: 10.w,
-            child: Material(
-              type: MaterialType.transparency,
-              child: Container(
-                decoration: const BoxDecoration(
-                  border: Border.fromBorderSide(
-                    BorderSide(color: Colors.black),
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: IconButton(
-                  icon: Icon(Icons.home, color: AppColors.black, size: 30.sp),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  tooltip: 'Voltar ao Menu de Jogos',
-                  onPressed: widget.onHomePressed,
-                ),
-              ),
+            child: IconButton(
+              icon: Icon(Icons.home, size: 30.sp),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              tooltip: 'Voltar ao Menu de Jogos',
+              onPressed: widget.onHomePressed,
             ),
           ),
 
         Positioned.fill(
           child: Padding(
-            padding: EdgeInsets.only(top: 20.h),
+            padding: EdgeInsets.only(top: 40.h),
             child: widget.child,
           ),
         ),
@@ -181,27 +171,12 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
         Positioned(
           top: 10.h,
           right: 10.w,
-          child: Material(
-            type: MaterialType.transparency,
-            child: Container(
-              width: 30.sp,
-              height: 30.sp,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.black),
-              ),
-              child: IconButton(
-                icon: Icon(
-                  Icons.close_rounded,
-                  color: AppColors.red,
-                  size: 20.sp,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                tooltip: 'Fechar App',
-                onPressed: () => SystemNavigator.pop(),
-              ),
-            ),
+          child: IconButton(
+            icon: Icon(Icons.close_rounded, color: AppColors.red, size: 30.sp),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            tooltip: 'Fechar App',
+            onPressed: () => SystemNavigator.pop(),
           ),
         ),
 

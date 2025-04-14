@@ -70,7 +70,10 @@ class IdentifyLettersNumbersGameState
   void initState() {
     super.initState();
     isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
-    levelManager = LevelManager(user: widget.user);
+    levelManager = LevelManager(
+      user: widget.user,
+      gameName: 'Detetive de letras e números',
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _audioPlayer.stop();

@@ -18,6 +18,8 @@ typedef ConquestFeedbackCallback =
 /// Widget base para todos os jogos
 class GamesSuperWidget extends StatefulWidget {
   final UserModel user;
+  final String gameName; // ✅ NOVO campo obrigatório
+
   final double progressValue;
   final int Function(LevelManager) level;
   final int Function(LevelManager) currentRound;
@@ -35,6 +37,7 @@ class GamesSuperWidget extends StatefulWidget {
   const GamesSuperWidget({
     Key? key,
     required this.user,
+    required this.gameName, // ✅ NOVO argumento obrigatório
     required this.progressValue,
     required this.level,
     required this.currentRound,
@@ -79,7 +82,10 @@ class _GamesSuperWidgetState extends State<GamesSuperWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final levelManager = LevelManager(user: widget.user);
+    final levelManager = LevelManager(
+      user: widget.user,
+      gameName: widget.gameName, // ✅ passa corretamente o nome do jogo
+    );
 
     return GamesDesign(
       user: widget.user,

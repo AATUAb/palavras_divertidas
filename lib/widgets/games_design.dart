@@ -60,31 +60,19 @@ class _GamesDesignState extends State<GamesDesign> {
             ),
           ),
 
-          // Fechar app
           Positioned(
             top: 10.h,
             right: 10.w,
-            child: Material(
-              type: MaterialType.transparency,
-              child: Container(
-                decoration: const BoxDecoration(
-                  border: Border.fromBorderSide(
-                    BorderSide(color: Colors.black),
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.close_rounded,
-                    color: AppColors.red,
-                    size: 20.sp,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  tooltip: 'Fechar App',
-                  onPressed: () => SystemNavigator.pop(),
-                ),
+            child: IconButton(
+              icon: Icon(
+                Icons.close_rounded,
+                color: AppColors.red,
+                size: 30.sp,
               ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              tooltip: 'Fechar App',
+              onPressed: () => SystemNavigator.pop(),
             ),
           ),
 
@@ -92,30 +80,19 @@ class _GamesDesignState extends State<GamesDesign> {
           Positioned(
             top: 10.h,
             left: 10.w,
-            child: Material(
-              type: MaterialType.transparency,
-              child: Container(
-                decoration: const BoxDecoration(
-                  border: Border.fromBorderSide(
-                    BorderSide(color: Colors.black),
+            child: IconButton(
+              icon: Icon(Icons.home, size: 30.sp),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              tooltip: 'Voltar ao Menu de Jogos',
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GameMenu(user: widget.user),
                   ),
-                  shape: BoxShape.circle,
-                ),
-                child: IconButton(
-                  icon: Icon(Icons.home, color: AppColors.black, size: 30.sp),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  tooltip: 'Voltar ao Menu de Jogos',
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GameMenu(user: widget.user),
-                      ),
-                    );
-                  },
-                ),
-              ),
+                );
+              },
             ),
           ),
 
@@ -124,7 +101,7 @@ class _GamesDesignState extends State<GamesDesign> {
             bottom: 10.h,
             left: 10.w,
             child: IconButton(
-              icon: Icon(Icons.info_outline, color: Colors.black, size: 28.sp),
+              icon: Icon(Icons.info_outline),
               tooltip: 'Tutorial',
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
