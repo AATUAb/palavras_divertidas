@@ -98,13 +98,12 @@ class HiveService {
     }
   }
 
-  // --- Conquistas ---
+  // Conquistas 
   //funcão para incrementar as conquistas do utilizador
 static Future<void> incrementConquests(int userKey) async {
   try {
     final user = _userBox.get(userKey);
     if (user != null) {
-      logger.i("Before increment: ${user.conquest}");
       user.incrementConquest(); // Incrementa as conquistas
       await updateUserByKey(userKey, user); // Atualiza o usuário no Hive
       logger.i("After increment: ${user.conquest}");
@@ -144,7 +143,7 @@ static Future<void> incrementTryStats({
   }
 }
 
-  // --- Taxa de acerto por jogo ---
+  //Taxa de acerto por jogo 
   static Future<void> updateGameAccuracy({
     required int userKey,
     required String gameName,
@@ -158,65 +157,5 @@ static Future<void> incrementTryStats({
     } else {
       logger.w("⚠️ User not found with key $userKey for resetting otherSuccesses");
     }
- /* } catch (e) {
-    logger.e("❌ Error resetting otherSuccesses for user $userKey: $e");
-  }*/
 }
 }
-
-
-/*static Future<void> incrementFirstTrySuccesses(int userKey) async {
-  try {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      user.firstTrySuccesses++;
-      await updateUserByKey(userKey, user);
-      logger.i("✅ Incremented firstTrySuccesses for user $userKey. New count: ${user.firstTrySuccesses}");
-    } else {
-      logger.w("⚠️ User not found with key $userKey for incrementing firstTrySuccesses");
-    }
-  } catch (e) {
-    logger.e("❌ Error incrementing firstTrySuccesses for user $userKey: $e");
-  }
-}
-
-static Future<void> incrementOtherSuccesses(int userKey) async {
-  try {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      user.otherSuccesses++;
-      await updateUserByKey(userKey, user);
-      logger.i("✅ Incremented otherSuccesses for user $userKey. New count: ${user.otherSuccesses}");
-    } else {
-      logger.w("⚠️ User not found with key $userKey for incrementing otherSuccesses");
-    }
-  } catch (e) {
-    logger.e("❌ Error incrementing otherSuccesses for user $userKey: $e");
-  }
-}
-
-
-static Future<void> resetFirstTrySuccesses(int userKey) async {
-  try {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      user.firstTrySuccesses = 0;
-      await updateUserByKey(userKey, user);
-      logger.i("✅ Reset firstTrySuccesses for user $userKey.");
-    } else {
-      logger.w("⚠️ User not found with key $userKey for resetting firstTrySuccesses");
-    }
-  } catch (e) {
-    logger.e("❌ Error resetting firstTrySuccesses for user $userKey: $e");
-  }
-}
-
-static Future<void> resetOtherSuccesses(int userKey) async {
-  try {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      user.otherSuccesses = 0;
-      await updateUserByKey(userKey, user);
-      logger.i("✅ Reset otherSuccesses for user $userKey.");
-    }
-  }*/

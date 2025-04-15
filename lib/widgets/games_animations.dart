@@ -64,41 +64,41 @@ class GameAnimations {
     );
   }
 
-  static Future<void> showConquestDialog(
-    BuildContext context, {
-    VoidCallback? onFinished,
-  }) async {
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _TimedAnimationWidget(
-              animationPath: 'assets/animations/conquest.json',
-              duration: const Duration(seconds: 3),
-              width: 684.w,
-              height: 250.h,
-              sound: 'conquest.wav',
-              onFinished: onFinished,
+static Future<void> showConquestDialog(
+  BuildContext context, {
+  VoidCallback? onFinished,
+}) async {
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => Dialog(
+      backgroundColor: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _TimedAnimationWidget(
+            animationPath: 'assets/animations/conquest.json',
+            duration: const Duration(seconds: 3),
+            width: 250.w,
+            height: 250.h,
+            sound: 'conquest.wav', // Som de conquista
+            onFinished: onFinished,
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'Uau! Ganhaste uma conquista para a caderneta!',
+            style: TextStyle(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange,
             ),
-            SizedBox(height: 16.h),
-            Text(
-              'Uau! Ganhaste uma conquista para a caderneta!',
-              style: TextStyle(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.orange,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   static void showTimeoutSnackbar(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(

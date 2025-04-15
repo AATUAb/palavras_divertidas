@@ -6,6 +6,7 @@ import '../widgets/menu_design.dart';
 import '../games/write_game.dart';
 import '../games/identify_letters_numbers.dart';
 import '../games/test.dart';
+import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
 import 'dashboard.dart';
@@ -33,11 +34,17 @@ class GameMenu extends StatefulWidget {
 }
 
 class _GameMenuState extends State<GameMenu> {
+  late ConquestManager conquestManager;
+
   @override
   void initState() {
     super.initState();
-    resumeMenuMusic(); // <- Isto garante que a música toca ao voltar ao menu
+    conquestManager = ConquestManager();
+    //checkForNewConquests();
+    resumeMenuMusic(); // Garante que a música toca ao voltar ao menu
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +52,6 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Detetive de letras e números",
         icon: Icons.search,
-        //onTap: _startIdentifyLettersNumbersGame,
         onTap: () => _navigateToGame("Ouvir e procurar"),
         backgroundColor: AppColors.green,
       ),
@@ -191,17 +197,6 @@ class _GameMenuState extends State<GameMenu> {
       ),
     );
   }
-
-  /*void _startIdentifyLettersNumbersGame() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder:
-            (_) =>
-                IdentifyLettersNumbersGame(key: widget.key, user: widget.user),
-      ),
-    );
-  }*/
 
   void _startWriteGame() {
     Navigator.pushReplacement(

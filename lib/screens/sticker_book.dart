@@ -8,6 +8,7 @@ class Sticker {
   final String name;
   final String imagePath;
   bool unlocked;
+  
 
   Sticker({required this.name, required this.imagePath, this.unlocked = false});
 }

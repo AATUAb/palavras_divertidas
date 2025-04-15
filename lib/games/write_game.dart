@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 👈 AQUI
 import '../widgets/tracing_painter.dart';
-import '../widgets/games_design.dart';
+import '../widgets/game_design.dart';
 import '../models/user_model.dart';
 
 class WriteGameScreen extends StatefulWidget {
@@ -147,7 +147,7 @@ class WriteGameScreenState extends State<WriteGameScreen> {
     final fontSize = canvasHeight * 1.5;
     final strokeWidth = fontSize * 0.1;
 
-    return GamesDesign(
+    return GameDesign(
       user: widget.user,
       child: Column(
         children: [

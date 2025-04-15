@@ -4,8 +4,7 @@ import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
-import '../widgets/conquest_manager.dart';
-import 'game_super_widget.dart';
+import 'game_super_widget.dart';  // Importação correta
 
 class TestGame extends StatefulWidget {
   final UserModel user;
@@ -18,7 +17,6 @@ class TestGame extends StatefulWidget {
 class _TestGameState extends State<TestGame> {
   final GlobalKey<GamesSuperWidgetState> _gamesSuperKey = GlobalKey();
 
-  late ConquestManager conquestManager;
   final Random _random = Random();
   final List<String> characters = [
     ...'ABCDEFGHIJLMNOPQRSTUVXZ'.split(''),
@@ -50,7 +48,6 @@ class _TestGameState extends State<TestGame> {
   @override
   void initState() {
     super.initState();
-    conquestManager = ConquestManager();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await applyLevelSettings();
       generateNewChallenge();
@@ -182,43 +179,43 @@ class _TestGameState extends State<TestGame> {
   }
 
   void handleTap(GameItem item) {
-    if (item.isTapped) return;
+  if (item.isTapped) return;
 
-    final superState = _gamesSuperKey.currentState;
-    print("🔍 superState: $superState");
-    if (superState == null) return;
+  final superState = _gamesSuperKey.currentState;
+  print("🔍 superState: $superState");
+  if (superState == null) return;
 
-    print("🖱 Toque registado em: ${item.content}");
+  print("🖱 Toque registado em: ${item.content}");
 
-    setState(() {
-      currentTry++;
-      item.isTapped = true;
-    });
+  setState(() {
+    currentTry++;
+    item.isTapped = true;
+  });
 
-    print("📤 A chamar checkAnswer do superState...");
+  print("📤 A chamar checkAnswer do superState...");
 
-    superState.checkAnswer(
-      selectedItem: item,
-      target: targetCharacter,
-      correctCount: correctCount,
-      currentTry: currentTry,
-      foundCorrect: foundCorrect,
-      applySettings: () async {
-        await applyLevelSettings();
-      },
-      generateNewChallenge: () {
-        if (!mounted) return;
-        generateNewChallenge();
-      },
-      conquestManager: conquestManager,
-      updateFoundCorrect: (int value) {
-        if (!mounted) return;
-        print("✅ Atualizar foundCorrect: $value");
-        setState(() => foundCorrect = value);
-      },
-      cancelTimers: cancelTimers,
-    );
-  }
+  superState.checkAnswer(
+    selectedItem: item,
+    target: targetCharacter,
+    correctCount: correctCount,
+    currentTry: currentTry,
+    foundCorrect: foundCorrect,
+    applySettings: () async {
+      await applyLevelSettings();
+    },
+    generateNewChallenge: () {
+      if (!mounted) return;
+      generateNewChallenge();
+    },
+    updateFoundCorrect: (int value) {
+      setState(() {
+        foundCorrect = value; // Atualiza o número de respostas corretas
+      });
+      print("✅ Atualizar foundCorrect: $value");
+    },
+    cancelTimers: cancelTimers, // Chama a função para cancelar os temporizadores
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -229,12 +226,13 @@ class _TestGameState extends State<TestGame> {
       level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
       currentRound: (_) => 1,
       totalRounds: (_) => 3,
+      isFirstCycle: isFirstCycle,
       topTextContent: () => Padding(
         padding: EdgeInsets.only(top: 16.h, bottom: 6.h),
         child: isFirstCycle && _isLetter(targetCharacter)
             ? Column(
                 children: [
-                  Text('Encontra a letra', style: getInstructionFont(isFirstCycle: isFirstCycle)),
+                  const Text('Encontra a letra'),
                   CharacterFontVariants(character: targetCharacter),
                 ],
               )
@@ -242,7 +240,6 @@ class _TestGameState extends State<TestGame> {
                 _isNumber(targetCharacter)
                     ? "Encontra o número $targetCharacter"
                     : "Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}",
-                style: getInstructionFont(isFirstCycle: isFirstCycle),
                 textAlign: TextAlign.center,
               ),
       ),

@@ -1,27 +1,24 @@
-// estrutura de um item do jogo, pode ser um caractér, palavra, imagem ou som
-// pode ser aplicado em todos os jogos, ainda que o conteúdo dos jogos seja diferente
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:math';
 
-// tipos de item de jogo
+// Tipos de item de jogo
 enum GameItemType {
-  text, // letras, palavras, frases
-  image, // imagem
-  audio, // som
-  character, // letras ou numeros isolados
+  text,        // letras, palavras ou frases
+  image,       // imagens
+  audio,       // sons
+  character,   // letras ou números isolados
 }
 
-// tipos de fonte possíveis para os itens de jogo
+// Estratégias de fonte a aplicar ao conteúdo textual
 enum FontStrategy {
-  none, // usa a fonte por defeito da app
-  slabo, // força a fonte Slabo
-  cursive, // força a fonte Cursive
-  random, // aleatoriamente entre Slabo e Cursive
+  none,     // fonte padrão da app
+  slabo,    // força fonte Slabo
+  cursive,  // força fonte Cursive
+  random,   // aleatória entre Slabo e Cursive
 }
 
-// função utilitária para obter o nome da fonte com base na estratégia
+// Devolve o nome da fonte com base na estratégia definida
 String? getFontFamily(FontStrategy strategy) {
   final _random = Random();
   switch (strategy) {
@@ -36,7 +33,7 @@ String? getFontFamily(FontStrategy strategy) {
   }
 }
 
-// classe para representar um item de jogo
+// Estrutura de um item do jogo (letra, imagem, som, etc.)
 class GameItem {
   final String id;
   final GameItemType type;
@@ -45,6 +42,7 @@ class GameItem {
   final double dy;
   final String? fontFamily;
   final Color backgroundColor;
+
   bool isCorrect;
   bool isTapped;
   bool showCheck = false;
@@ -61,7 +59,7 @@ class GameItem {
     this.isTapped = false,
   });
 
-  // métodos para desenhar um tipo de item e permitir a sua visualização no ecrã
+  // Constrói o widget visual do item com base no seu tipo
   Widget buildWidget() {
     switch (type) {
       case GameItemType.character:
@@ -83,6 +81,7 @@ class GameItem {
             ),
           ),
         );
+
       case GameItemType.image:
         return Container(
           decoration: BoxDecoration(
@@ -97,6 +96,7 @@ class GameItem {
             fit: BoxFit.contain,
           ),
         );
+
       case GameItemType.audio:
         return Container(
           decoration: BoxDecoration(
@@ -110,18 +110,7 @@ class GameItem {
   }
 }
 
-// estilo das instruções do topo adaptado ao nível de escolaridade
-TextStyle getInstructionFont({required bool isFirstCycle}) {
-  return TextStyle(
-    fontSize: 20.sp,
-    fontWeight: FontWeight.bold,
-    color: Colors.black,
-    decoration: TextDecoration.none,
-    fontFamily: isFirstCycle ? 'Slabo' : null,
-  );
-}
-
-// classe para apresentar variantes de fonte para letras no 1º ciclo
+// Widget para mostrar variantes de fontes (Slabo e Cursive) para uma letra
 class CharacterFontVariants extends StatelessWidget {
   final String character;
 
@@ -132,42 +121,25 @@ class CharacterFontVariants extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          character.toUpperCase(),
-          style: TextStyle(
-            fontSize: 24.sp,
-            fontFamily: 'Slabo',
-            decoration: TextDecoration.none,
-          ),
-        ),
+        _styledChar(character.toUpperCase(), 'Slabo'),
         SizedBox(width: 8.w),
-        Text(
-          character.toUpperCase(),
-          style: TextStyle(
-            fontSize: 24.sp,
-            fontFamily: 'Cursive',
-            decoration: TextDecoration.none,
-          ),
-        ),
+        _styledChar(character.toUpperCase(), 'Cursive'),
         SizedBox(width: 16.w),
-        Text(
-          character.toLowerCase(),
-          style: TextStyle(
-            fontSize: 24.sp,
-            fontFamily: 'Slabo',
-            decoration: TextDecoration.none,
-          ),
-        ),
+        _styledChar(character.toLowerCase(), 'Slabo'),
         SizedBox(width: 8.w),
-        Text(
-          character.toLowerCase(),
-          style: TextStyle(
-            fontSize: 24.sp,
-            fontFamily: 'Cursive',
-            decoration: TextDecoration.none,
-          ),
-        ),
+        _styledChar(character.toLowerCase(), 'Cursive'),
       ],
+    );
+  }
+
+  Widget _styledChar(String char, String font) {
+    return Text(
+      char,
+      style: TextStyle(
+        fontSize: 24.sp,
+        fontFamily: font,
+        decoration: TextDecoration.none,
+      ),
     );
   }
 }

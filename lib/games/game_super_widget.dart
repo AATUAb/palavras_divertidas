@@ -4,7 +4,7 @@ import '../widgets/level_manager.dart';
 import '../widgets/game_item.dart';
 import '../widgets/conquest_manager.dart';
 import '../widgets/game_animations.dart';
-import '../widgets/games_design.dart';
+import '../widgets/game_design.dart';
 
 /// Widget base para todos os jogos
 class GamesSuperWidget extends StatefulWidget {
@@ -14,6 +14,7 @@ class GamesSuperWidget extends StatefulWidget {
   final int Function(LevelManager) currentRound;
   final int Function(LevelManager) totalRounds;
   final Widget Function() topTextContent;
+  final bool isFirstCycle;
   final Widget Function(
     BuildContext context,
     LevelManager levelManager,
@@ -28,6 +29,7 @@ class GamesSuperWidget extends StatefulWidget {
     required this.currentRound,
     required this.totalRounds,
     required this.topTextContent,
+    required this.isFirstCycle,
     required this.builder,
   });
 
@@ -37,45 +39,45 @@ class GamesSuperWidget extends StatefulWidget {
 
 class GamesSuperWidgetState extends State<GamesSuperWidget> {
   late LevelManager levelManager;
+  late ConquestManager conquestManager;
+  bool isConquestAnimationShown = false;
   Widget get correctIcon => GameAnimations.correctAnswerIcon();
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
+
+// Método para reproduzir o som da resposta
+  Future<void> playAnswerFeedback({required bool isCorrect}) async {
+    print("🔊 Reproduzir som: ${isCorrect ? 'correto' : 'errado'}");
+    await GameAnimations.playAnswerFeedback(isCorrect: isCorrect);
+  }
 
   @override
   void initState() {
     super.initState();
-    levelManager = LevelManager(user: widget.user, gameName: 'generic'); // Substitua 'game_name' pelo nome do jogo
+    levelManager = LevelManager(user: widget.user, gameName: 'generic');
+    conquestManager = ConquestManager();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return GamesDesign(
-      user: widget.user,
-      child: Column(
-        children: [
-          GameAnimations.buildTopInfo(
-            progressValue: widget.progressValue,
-            level: widget.level(levelManager),
-            currentRound: widget.currentRound(levelManager),
-            totalRounds: widget.totalRounds(levelManager),
-            topTextWidget: widget.topTextContent(),
-          ),
-          Expanded(
-            child: widget.builder(
-              context,
-              levelManager,
-              widget.user,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+ @override
+Widget build(BuildContext context) {
+  // recebe o design a aplicar nos jogos
+  return GameDesign(
+    user: widget.user,
+    progressValue: widget.progressValue,     // envia o progresso para a barra
+    topTextWidget: DefaultTextStyle(         // mostra a instrução no topo    
+      style: getInstructionFont(isFirstCycle: widget.isFirstCycle),
+      textAlign: TextAlign.center,
+      child: widget.topTextContent(),
+    ),
+    child: widget.builder(
+      context,
+      levelManager,                       // envia o levelManager para o jogo
+      widget.user,                       // envia o utilizador para o jogo
+      
+    ),
+  );
+}
 
-  Future<void> playAnswerFeedback({required bool isCorrect}) async {
-    print("🔊 Reproduzir som: \${isCorrect ? 'correto' : 'errado'}");
-    await GameAnimations.playAnswerFeedback(isCorrect: isCorrect);
-  }
-
+// Função para exibir feedback de sucesso
   Future<void> showSuccessFeedback() async {
     print("🎉 Mostrar animação de sucesso");
     if (!mounted) return;
@@ -140,14 +142,13 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
     );
   }
 
+// Função para exibir feedback de conquista
   Future<void> showConquestFeedback({required VoidCallback onFinished}) async {
-    print("🏅 Mostrar conquista");
     await GameAnimations.showConquestDialog(
       context,
-      onFinished: () {
-        if (mounted) onFinished();
-      },
+      onFinished: onFinished,
     );
+    print("🏅 Mostrar conquista");
   }
 
   void showTimeout({
@@ -191,122 +192,136 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
   );
 }
 
+Future<void> processCorrectAnswer({
+  required GameItem selectedItem,
+  required int currentTry,
+  required int correctCount,
+  required int foundCorrect,
+  required VoidCallback cancelTimers,
+  required Future<void> Function() applySettings,
+  required VoidCallback generateNewChallenge,
+  required ConquestManager conquestManager,
+  required void Function(int) updateFoundCorrect,
+  required String target,
+}) async {
+  final newFoundCorrect = foundCorrect + 1;
+  updateFoundCorrect(newFoundCorrect);
+  print("🔢 Atualizar foundCorrect: $newFoundCorrect");
 
-  Future<void> processCorrectAnswer({
-    required GameItem selectedItem,
-    required int currentTry,
-    required int correctCount,
-    required int foundCorrect,
-    required VoidCallback cancelTimers,
-    required Future<void> Function() applySettings,
-    required VoidCallback generateNewChallenge,
-    required ConquestManager conquestManager,
-    required void Function(int) updateFoundCorrect,
-    required String target,
-  }) async {
-    final newFoundCorrect = foundCorrect + 1;
-    updateFoundCorrect(newFoundCorrect);
-    print("🔢 Atualizar foundCorrect: \$newFoundCorrect");
+  if (newFoundCorrect >= correctCount) {
+    print("🛑 Temporizadores cancelados após sucesso");
+    cancelTimers();
 
-    if (newFoundCorrect >= correctCount) {
-      print("🛑 Temporizadores cancelados após sucesso");
-      cancelTimers();
+    await showSuccessFeedback();
+    if (!mounted) return;
 
-      await showSuccessFeedback();
-      if (!mounted) return;
+    final bool firstTry = currentTry == correctCount;
 
-      final bool firstTry = currentTry == correctCount;
+    await levelManager.registerRoundForLevel(
+      context: context,
+      correct: firstTry,
+      applySettings: () async {
+        await applySettings();
+      },
+      onFinished: () async {
+        if (!mounted) return;
 
-      await levelManager.registerRoundForLevel(
-        context: context,
-        correct: firstTry,
-        applySettings: () async {
-          await applySettings();
-        },
-        onFinished: () async {
-          if (!mounted) return;
-          final bool shouldConquer = await conquestManager.registerRoundForConquest(
-            context: context,
-            firstTry: firstTry,
-            userKey: widget.user.key!,
-            applySettings: applySettings,
+        final bool shouldConquer = await conquestManager.registerRoundForConquest(
+          context: context,
+          firstTry: firstTry,
+          userKey: widget.user.key!,
+          applySettings: applySettings,
+        );
+
+        // Mostrar animação de conquista apenas se a conquista for nova e se a animação ainda não foi exibida
+        if (shouldConquer) {
+          await showConquestFeedback(
+            onFinished: () {
+              if (mounted) {
+                generateNewChallenge();
+              }
+            },
           );
-
-          if (!mounted) return;
-
-          if (shouldConquer) {
-            await showConquestFeedback(
-              onFinished: () {
-                if (mounted) generateNewChallenge();
-              },
-            );
-          } else {
-            if (mounted) generateNewChallenge();
-          }
-        },
-        showLevelFeedback: (newLevel, increased) async {
-          if (!mounted) return;
-          await showLevelChangeFeedback(
-            newLevel: newLevel,
-            increased: increased,
-          );
-        },
-      );
-    }
+        } else {
+          if (mounted) generateNewChallenge();
+        }
+      },
+      showLevelFeedback: (newLevel, increased) async {
+        if (!mounted) return;
+        await showLevelChangeFeedback(
+          newLevel: newLevel,
+          increased: increased,
+        );
+      },
+    );
   }
+}
 
-  Future<void> checkAnswer({
-    required GameItem selectedItem,
-    required String target,
-    required int correctCount,
-    required int currentTry,
-    required int foundCorrect,
-    required Future<void> Function() applySettings,
-    required VoidCallback generateNewChallenge,
-    required ConquestManager conquestManager,
-    required void Function(int) updateFoundCorrect,
-    required VoidCallback cancelTimers,
-  }) async {
-    print("✅ checkAnswer chamado para \${selectedItem.content}");
+Future<void> checkAnswer({
+  required GameItem selectedItem,
+  required String target,
+  required int correctCount,
+  required int currentTry,
+  required int foundCorrect,
+  required Future<void> Function() applySettings,
+  required VoidCallback generateNewChallenge,
+  required void Function(int) updateFoundCorrect,
+  required VoidCallback cancelTimers,
+}) async {
+  print("✅ checkAnswer chamado para \${selectedItem.content}");
 
-    final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
+  final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
 
-    setState(() {
-      selectedItem.isTapped = true;
-      selectedItem.isCorrect = isCorrect;
-    });
+  setState(() {
+    selectedItem.isTapped = true;
+    selectedItem.isCorrect = isCorrect;
+  });
 
-    await playAnswerFeedback(isCorrect: isCorrect);
+  await playAnswerFeedback(isCorrect: isCorrect);
 
-    if (isCorrect) {
-      await processCorrectAnswer(
-        selectedItem: selectedItem,
-        currentTry: currentTry,
-        correctCount: correctCount,
-        foundCorrect: foundCorrect,
-        cancelTimers: cancelTimers,
-        applySettings: applySettings,
-        generateNewChallenge: generateNewChallenge,
-        conquestManager: conquestManager,
-        updateFoundCorrect: updateFoundCorrect,
-        target: target,
-      );
-    } else {
-      await levelManager.registerRoundForLevel(
-        context: context,
-        correct: false,
-        applySettings: () async {
-          await applySettings();
-        },
-        onFinished: () {},
-        showLevelFeedback: (newLevel, increased) async {
-          if (!mounted) return;
-          await showLevelChangeFeedback(
-            newLevel: newLevel,
-            increased: increased,
-          );
-        },
-      );
-    }
+  if (isCorrect) {
+    await processCorrectAnswer(
+      selectedItem: selectedItem,
+      currentTry: currentTry,
+      correctCount: correctCount,
+      foundCorrect: foundCorrect,
+      cancelTimers: cancelTimers,
+      applySettings: applySettings,
+      generateNewChallenge: generateNewChallenge,
+      conquestManager: conquestManager,
+      updateFoundCorrect: updateFoundCorrect,
+      target: target,
+    );
+  } else {
+    await levelManager.registerRoundForLevel(
+      context: context,
+      correct: false,
+      applySettings: () async {
+        await applySettings();
+      },
+      onFinished: () {},
+      showLevelFeedback: (newLevel, increased) async {
+        if (!mounted) return;
+        await showLevelChangeFeedback(
+          newLevel: newLevel,
+          increased: increased,
+        );
+      },
+    );
+  }
+}
+  
+    // Mostrar animação de destaque, no ecrã de menus de jogos
+  void showConquestNotification() {
+  // Verifica se há novas conquistas
+  if (conquestManager.hasNewConquest) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Nova conquista desbloqueada!"),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
   }
 }

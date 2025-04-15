@@ -5,77 +5,81 @@ import 'package:lottie/lottie.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class GameAnimations {
-  /// Mostra som + ícone de resposta certa ou errada
+  
   static Future<void> playAnswerFeedback({required bool isCorrect}) async {
-    final player = AudioPlayer();
-    await player.play(AssetSource('sounds/${isCorrect ? 'correct' : 'wrong'}.wav'));
-    // Adicionando um pequeno atraso para garantir que o som seja reproduzido
-    await Future.delayed(const Duration(milliseconds: 100));
-  }
+  final sound = isCorrect ? 'correct.wav' : 'wrong.wav';
+  await _playSound(sound);
+}
   
-  /// Toca o som de resposta correta
-  static Future<void> playCorrectSound() async {
-    final player = AudioPlayer();
-    await player.play(AssetSource('sounds/correct.wav'));
-  }
-  
-  /// Toca o som de resposta errada
-  static Future<void> playWrongSound() async {
-    final player = AudioPlayer();
-    await player.play(AssetSource('sounds/wrong.wav'));
-  }
-
-  static Widget correctAnswerIcon() => const Icon(Icons.check, color: Colors.green, size: 30);
-  static Widget wrongAnswerIcon() => const Icon(Icons.close, color: Colors.red, size: 30);
-
-  /// Animação de sucesso com confetes
-  static Widget coffetiesTimed({VoidCallback? onFinished}) {
+  static Widget coffetiesTimed({
+    double? width,
+    double? height,
+    VoidCallback? onFinished,
+  }) {
     return _TimedAnimationWidget(
       animationPath: 'assets/animations/coffeties.json',
       duration: const Duration(seconds: 2),
-      width: 640.w,
-      height: 640.h,
+      width: width ?? 640.w,
+      height: height ?? 640.h,
       onFinished: onFinished,
     );
   }
 
-  /// Animação de estrela por nível
   static Widget starByLevel({
-    required int level,
-    VoidCallback? onFinished,
-  }) {
-    String path;
-    switch (level) {
-      case 1:
-        path = 'assets/animations/one_star.json';
-        break;
-      case 2:
-        path = 'assets/animations/two_star.json';
-        break;
-      case 3:
-      default:
-        path = 'assets/animations/tree_star.json';
-    }
-
-    return _TimedAnimationWidget(
-      animationPath: path,
-      duration: const Duration(seconds: 3),
-      width: 350.w,
-      height: 200.h,
-      sound: 'level_up.wav',
-      onFinished: onFinished,
-    );
+  required int level,
+  double? width,
+  double? height,
+  VoidCallback? onFinished,
+}) {
+  String path;
+  switch (level) {
+    case 1:
+      path = 'assets/animations/one_star.json';
+      break;
+    case 2:
+      path = 'assets/animations/two_star.json';
+      break;
+    case 3:
+    default:
+      path = 'assets/animations/tree_star.json';
   }
 
-  /// Mensagem personalizada por subida ou descida de nível
-  static String levelMessage({required int level, required bool increased}) {
-    return increased
-        ? 'Parabéns! Subiste de nível'
-        : 'Vamos praticar melhor o nível $level';
-        
-  }
+  final message = levelMessage(level: level, increased: level > 1);
+  final color = level > 1 ? Colors.orange : Colors.red;
 
-  /// Animação de conquista com som e frase
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      _TimedAnimationWidget(
+        animationPath: path,
+        duration: const Duration(seconds: 3),
+        width: width ?? 300.w,
+        height: height ?? 150.h,
+        sound: 'level_up.wav',
+        onFinished: onFinished,
+      ),
+      SizedBox(height: 16.h),
+      Text(
+        message,
+        style: TextStyle(
+          fontSize: 22.sp,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    ],
+  );
+}
+
+static String levelMessage({required int level, required bool increased}) {
+  if (increased) {
+    return 'Parabéns! Subiste para o nível $level!';
+  } else {
+    return 'Vamos particar melhor o nível $level!';
+  }
+}
+
   static Future<void> showConquestDialog(
     BuildContext context, {
     VoidCallback? onFinished,
@@ -91,15 +95,16 @@ class GameAnimations {
             _TimedAnimationWidget(
               animationPath: 'assets/animations/conquest.json',
               duration: const Duration(seconds: 3),
-              width: 684.w,
+              width: 250.w,
               height: 250.h,
               sound: 'conquest.wav',
               onFinished: onFinished,
             ),
+            SizedBox(height: 16.h),
             Text(
-              'Boa! Ganhaste um autocolante para a caderneta!',
+              'Uau! Ganhaste uma conquista para a caderneta!',
               style: TextStyle(
-                fontSize: 20.sp,
+                fontSize: 22.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.orange,
               ),
@@ -111,7 +116,6 @@ class GameAnimations {
     );
   }
 
-  /// Mostra snackbar de tempo esgotado
   static void showTimeoutSnackbar(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -129,74 +133,13 @@ class GameAnimations {
     );
   }
 
-  /// Info de topo com barra de progresso e texto
-  static Widget buildTopInfo({
-    required double progressValue,
-    required int level,
-    required int currentRound,
-    required int totalRounds,
-    required Widget topTextWidget,
-  }) {
-    return Stack(
-      children: [
-        Align(
-          alignment: Alignment.topCenter,
-          child: Padding(
-            padding: EdgeInsets.only(top: 10.h),
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10.h),
-                  child: topTextWidget,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: LinearProgressIndicator(
-                    value: progressValue,
-                    minHeight: 8.h,
-                    backgroundColor: Colors.grey[300],
-                    color: Colors.orange,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Positioned(
-          top: 20.h,
-          right: 20.w,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'Nível $level',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 5.h),
-              Text(
-                'Ronda $currentRound de $totalRounds',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Método genérico para ser usado pelo SuperWidget
-  static Future<void> _playSound(String fileName) async {
+   static Future<void> _playSound(String fileName) async {
     final player = AudioPlayer();
     await player.play(AssetSource('sounds/$fileName'));
   }
+
+  static Widget correctAnswerIcon() => const Icon(Icons.check, color: Colors.green, size: 30);
+  static Widget wrongAnswerIcon() => const Icon(Icons.close, color: Colors.red, size: 30);
 }
 
 class _TimedAnimationWidget extends StatefulWidget {
@@ -243,11 +186,90 @@ class _TimedAnimationWidgetState extends State<_TimedAnimationWidget> {
   Widget build(BuildContext context) {
     return _visible
         ? Lottie.asset(
-            widget.animationPath,
-            width: widget.width,
-            height: widget.height,
-            repeat: false,
-          )
+          widget.animationPath,
+          width: widget.width,
+          height: widget.height,
+          repeat: false,
+        )
         : const SizedBox.shrink();
+  }
+}
+
+class AnimatedAnswerItem extends StatefulWidget {
+  final Widget child;
+  final bool isCorrect;
+  final VoidCallback? onRemoved;
+
+  const AnimatedAnswerItem({
+    super.key,
+    required this.child,
+    required this.isCorrect,
+    this.onRemoved,
+  });
+
+  @override
+  State<AnimatedAnswerItem> createState() => _AnimatedAnswerItemState();
+}
+class _AnimatedAnswerItemState extends State<AnimatedAnswerItem>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _offsetAnimation;
+  bool _showCheckIcon = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    if (widget.isCorrect) {
+      GameAnimations._playSound('correct.wav');
+      setState(() => _showCheckIcon = true);
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (widget.onRemoved != null) widget.onRemoved!();
+      });
+    }
+    }
+
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(widget.isCorrect ? 0 : _offsetAnimation.value, 0),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (!_showCheckIcon) widget.child,
+              if (_showCheckIcon)
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: 32.sp,
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant AnimatedAnswerItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isCorrect && !_showCheckIcon) {
+      setState(() => _showCheckIcon = true);
+    }
   }
 }
