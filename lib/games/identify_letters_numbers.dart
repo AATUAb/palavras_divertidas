@@ -1,4 +1,4 @@
-// Estrutura para o jogo "Detetive de Letras e Números", que desafia os jogadores a identificar letras e números em um conjunto de opções.
+/*// Estrutura para o jogo "Detetive de Letras e Números", que desafia os jogadores a identificar letras e números em um conjunto de opções.
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
@@ -327,7 +327,7 @@ class IdentifyLettersNumbersGameState extends State<IdentifyLettersNumbersGame> 
  @override
 Widget build(BuildContext context) {
   final Widget topTextWidget = Padding(
-    padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
+    padding: EdgeInsets.only(top: 16.h, bottom: 6.h),
     child: isFirstCycle && _isLetter(targetCharacter)
         ? Column(
             children: [
@@ -410,4 +410,4 @@ Widget build(BuildContext context) {
     ),
   );
 }
-}
+}*/

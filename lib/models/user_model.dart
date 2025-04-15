@@ -38,6 +38,14 @@ class UserModel extends HiveObject {
   @HiveField(8)
   int otherSuccesses;
 
+   /// Total de acertos à primeira tentativa (histórico)
+  @HiveField(9)
+  int firstTryCorrectTotal;
+
+  /// Total de acertos depois da primeira tentativa (histórico)
+  @HiveField(10)
+  int correctButNotFirstTryTotal;
+
   UserModel({
     required this.name,
     required this.schoolLevel,
@@ -46,8 +54,10 @@ class UserModel extends HiveObject {
     this.overallAccuracy,
     this.gameLevel = 1,
     this.conquest = 0,
-    this.firstTrySuccesses = 0, // Initialize new field
-    this.otherSuccesses = 0,    // Initialize new field
+    this.firstTrySuccesses = 0, 
+    this.otherSuccesses = 0,   
+    this.firstTryCorrectTotal = 0,
+    this.correctButNotFirstTryTotal = 0,
   }) : knownLetters = knownLetters ?? [];
 
   /// Atualiza a taxa de acerto por nível e a média geral
@@ -82,7 +92,9 @@ void incrementConquest() {
   double? overallAccuracy,
   int? conquest,
   int? firstTrySuccesses,
-  int? otherSuccesses,
+  //int? otherSuccesses,
+  int? firstTryCorrectTotal,
+  int? correctButNotFirstTryTotal,
 }) {
   return UserModel(
     name: name ?? this.name,
@@ -93,7 +105,10 @@ void incrementConquest() {
     overallAccuracy: overallAccuracy ?? this.overallAccuracy,
     conquest: conquest ?? this.conquest,
     firstTrySuccesses: firstTrySuccesses ?? this.firstTrySuccesses,
-    otherSuccesses: otherSuccesses ?? this.otherSuccesses,
+    //otherSuccesses: otherSuccesses ?? this.otherSuccesses,
+    firstTryCorrectTotal: firstTryCorrectTotal ?? this.firstTryCorrectTotal,
+    correctButNotFirstTryTotal: correctButNotFirstTryTotal ?? this.correctButNotFirstTryTotal,
+
   );
 }
 

@@ -2,393 +2,288 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../widgets/level_manager.dart';
-import '../widgets/games_animations.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
+import '../widgets/conquest_manager.dart';
 import 'game_super_widget.dart';
-import '../widgets/menu_design.dart';
-import 'package:logger/logger.dart';
-import 'package:audioplayers/audioplayers.dart';
-
-// Helper function to get the instruction font style
-TextStyle getInstructionFont({required bool isFirstCycle}) {
-  return TextStyle(
-    fontSize: 22.sp,
-    fontWeight: FontWeight.bold,
-    color: Colors.black,
-    fontFamily: isFirstCycle ? 'ComicNeue' : null,
-  );
-}
-
-// Widget to display character variants (uppercase and lowercase)
-class CharacterFontVariants extends StatelessWidget {
-  final String character;
-  
-  const CharacterFontVariants({Key? key, required this.character}) : super(key: key);
-  
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          character.toUpperCase(),
-          style: TextStyle(fontSize: 32.sp, fontFamily: 'Slabo'),
-        ),
-        SizedBox(width: 8.w),
-        Text(
-          character.toUpperCase(),
-          style: TextStyle(fontSize: 32.sp, fontFamily: 'Cursive'),
-        ),
-        SizedBox(width: 16.w),
-        Text(
-          character.toLowerCase(),
-          style: TextStyle(fontSize: 32.sp, fontFamily: 'Slabo'),
-        ),
-        SizedBox(width: 8.w),
-        Text(
-          character.toLowerCase(),
-          style: TextStyle(fontSize: 32.sp, fontFamily: 'Cursive'),
-        ),
-      ],
-    );
-  }
-}
 
 class TestGame extends StatefulWidget {
   final UserModel user;
   const TestGame({super.key, required this.user});
 
   @override
-  TestGameState createState() => TestGameState();
+  State<TestGame> createState() => _TestGameState();
 }
 
-class TestGameState extends State<TestGame> {
-  bool isFirstCycle = false;
-  bool showSuccessAnimation = false;
-  late LevelManager levelManager;
+class _TestGameState extends State<TestGame> {
+  final GlobalKey<GamesSuperWidgetState> _gamesSuperKey = GlobalKey();
 
-  final logger = Logger(); // Logger instance
-
+  late ConquestManager conquestManager;
+  final Random _random = Random();
   final List<String> characters = [
     ...'ABCDEFGHIJLMNOPQRSTUVXZ'.split(''),
     ...'abcdefghijlmnopqrstuvxz'.split(''),
     ...'0123456789'.split(''),
   ];
 
-  bool _isLetter(String char) => RegExp(r'[a-zA-Z]').hasMatch(char);
-  bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
-  String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
-
-  final Random _random = Random();
   int correctCount = 4;
   int wrongCount = 5;
   Duration levelTime = const Duration(seconds: 10);
-
   int currentTry = 0;
   int foundCorrect = 0;
-
   String targetCharacter = '';
   List<GameItem> gamesItems = [];
-
   Timer? roundTimer;
   Timer? progressTimer;
   double progressValue = 1.0;
 
-  Color _generateStrongColor() {
-    final colors = [
-      Colors.red,
-      Colors.blue,
-      Colors.green,
-      Colors.purple,
-      Colors.orange,
-      Colors.pink,
-      Colors.teal,
-      Colors.indigo,
-      Colors.deepPurple,
-      Colors.cyan,
-    ];
-    return colors[_random.nextInt(colors.length)];
-  }
-
-  // AudioPlayer to control music
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
+  bool _isLetter(String char) => RegExp(r'[a-zA-Z]').hasMatch(char);
+  bool _isNumber(String char) => RegExp(r'[0-9]').hasMatch(char);
+  String _chooseRandomFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
+  Color _generateStrongColor() => [
+    Colors.red, Colors.blue, Colors.green, Colors.purple,
+    Colors.orange, Colors.pink, Colors.teal,
+    Colors.indigo, Colors.deepPurple, Colors.cyan,
+  ][_random.nextInt(10)];
 
   @override
   void initState() {
     super.initState();
-    isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
-    levelManager = LevelManager(user: widget.user);
-    
-    // Pause any background music when entering the game
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _audioPlayer.stop();
+    conquestManager = ConquestManager();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await applyLevelSettings();
+      generateNewChallenge();
     });
   }
 
   @override
   void dispose() {
-    roundTimer?.cancel();
-    progressTimer?.cancel();
+    print("🗑 TestGame dispose chamado");
+    cancelTimers();
     super.dispose();
   }
 
-  void applyLevelSettings(LevelManager levelManager) {
-    switch (levelManager.level) {
-      case 1:
-        correctCount = 4;
-        wrongCount = 8;
-        levelTime = const Duration(seconds: 15);
-        break;
-      case 2:
-        correctCount = 5;
-        wrongCount = 10;
-        levelTime = const Duration(seconds: 20);
-        break;
-      case 3:
-        correctCount = 6;
-        wrongCount = 12;
-        levelTime = const Duration(seconds: 25);
-        break;
+  Future<void> applyLevelSettings() async {
+    await Future.delayed(Duration.zero);
+
+    final superState = _gamesSuperKey.currentState;
+    if (superState == null) {
+      print("⚠️ superState nulo em applyLevelSettings");
+      return;
     }
+
+    final currentLevel = superState.levelManager.level;
+
+    setState(() {
+      switch (currentLevel) {
+        case 1:
+          correctCount = 4;
+          wrongCount = 8;
+          levelTime = const Duration(seconds: 10);
+          break;
+        case 2:
+          correctCount = 5;
+          wrongCount = 10;
+          levelTime = const Duration(seconds: 15);
+          break;
+        case 3:
+          correctCount = 6;
+          wrongCount = 12;
+          levelTime = const Duration(seconds: 20);
+          break;
+      }
+
+      print("⚙️ [TestGame] applyLevelSettings chamado para o nível $currentLevel");
+    });
   }
 
-  void generateNewChallenge(LevelManager levelManager) {
-    setState(() => gamesItems.clear());
-    foundCorrect = 0;
+  void cancelTimers() {
     roundTimer?.cancel();
     progressTimer?.cancel();
-    currentTry = 0;
-    progressValue = 1.0;
+    print("🛑 Temporizadores cancelados Jogo");
+  }
 
-    final rawChar = characters[_random.nextInt(characters.length)];
-    targetCharacter =
-        _isLetter(rawChar)
-            ? (_random.nextBool()
-                ? rawChar.toUpperCase()
-                : rawChar.toLowerCase())
-            : rawChar;
+  void generateNewChallenge() {
+    if (!mounted) return;
+    cancelTimers();
 
-    Set<String> uniqueOptions = {};
+    setState(() {
+      gamesItems.clear();
+      foundCorrect = 0;
+      currentTry = 0;
+      progressValue = 1.0;
+    });
+
+    print("--- Novo desafio gerado ---");
+
+    final String rawChar = characters[_random.nextInt(characters.length)];
+    targetCharacter = _isLetter(rawChar)
+        ? (_random.nextBool() ? rawChar.toUpperCase() : rawChar.toLowerCase())
+        : rawChar;
+
+    final uniqueOptions = <String>{};
     while (uniqueOptions.length < wrongCount) {
       String c = characters[_random.nextInt(characters.length)];
-      String option =
-          _isLetter(c)
-              ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
-              : c;
-      if (option.toLowerCase() != targetCharacter.toLowerCase() &&
-          !uniqueOptions.any((e) => e.toLowerCase() == option.toLowerCase())) {
+      String option = _isLetter(c)
+          ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
+          : c;
+      if (option.toLowerCase() != targetCharacter.toLowerCase()) {
         uniqueOptions.add(option);
       }
     }
 
-    List<String> correctOptions = List.generate(
-      correctCount,
-      (_) =>
-          _random.nextBool()
-              ? targetCharacter.toUpperCase()
-              : targetCharacter.toLowerCase(),
-    );
+    final correctOptions = List.generate(correctCount, (_) =>
+        _random.nextBool() ? targetCharacter.toUpperCase() : targetCharacter.toLowerCase());
 
     final allOptions = [...uniqueOptions, ...correctOptions]..shuffle();
     final cols = (allOptions.length / 3).ceil();
     final spacingX = 1.0 / (cols + 1);
     final spacingY = 0.18;
 
-    List<GameItem> placedItems = [];
-    for (int i = 0; i < allOptions.length; i++) {
+    gamesItems = List.generate(allOptions.length, (i) {
       final col = i % cols;
       final row = i ~/ cols;
       final dx = spacingX * (col + 1);
       final dy = 0.45 + spacingY * row;
 
-      placedItems.add(
-        GameItem(
-          id: i.toString(),
-          type: GameItemType.character,
-          content: allOptions[i],
-          dx: dx,
-          dy: dy,
-          fontFamily: isFirstCycle ? _chooseRandomFont() : null,
-          backgroundColor: _generateStrongColor(),
-          isCorrect:
-              allOptions[i].toLowerCase() == targetCharacter.toLowerCase(),
-        ),
+      return GameItem(
+        id: i.toString(),
+        type: GameItemType.character,
+        content: allOptions[i],
+        dx: dx,
+        dy: dy,
+        fontFamily: isFirstCycle ? _chooseRandomFont() : null,
+        backgroundColor: _generateStrongColor(),
+        isCorrect: allOptions[i].toLowerCase() == targetCharacter.toLowerCase(),
       );
-    }
+    });
 
-    setState(() => gamesItems = placedItems);
+    setState(() {});
 
-    final int totalMillis = levelTime.inMilliseconds;
-    const tick = Duration(milliseconds: 100);
-    int elapsed = 0;
-
-    progressTimer = Timer.periodic(tick, (timer) {
-      if (showSuccessAnimation) return;
+    progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (!mounted) return timer.cancel();
       setState(() {
-        elapsed += tick.inMilliseconds;
-        progressValue = 1.0 - (elapsed / totalMillis);
+        progressValue -= 0.01;
+        if (progressValue <= 0) timer.cancel();
       });
-      if (elapsed >= totalMillis) timer.cancel();
     });
 
-    roundTimer = Timer(levelTime, () {
-      if (showSuccessAnimation) return;
-      GameAnimations.showTimeoutSnackbar(context);
-      final firstTryCorrect = currentTry == correctCount;
-      levelManager.registerRoundForLevel(
-        context: context,
-        correct: firstTryCorrect,
-        applySettings: () => applyLevelSettings(levelManager),
-        onFinished: () => generateNewChallenge(levelManager),
-      );
-    });
-}
-
-Future<void> checkAnswer(
-  GameItem selectedItem,
-  LevelManager levelManager,
-  ConquestFeedbackCallback triggerConquestFeedback,
-) async {
-  currentTry++;
-
-  if (selectedItem.content.toLowerCase() == targetCharacter.toLowerCase()) {
-    foundCorrect++;
-    GameAnimations.playCorrectSound();
-    setState(() {
-      selectedItem.isTapped = true;
-      selectedItem.isCorrect = true;
-    });
-
-    if (foundCorrect >= correctCount) {
-      roundTimer?.cancel();
-      progressTimer?.cancel();
-      final firstTryCorrect = currentTry == correctCount;
-
-      // Animação de sucesso
-      setState(() => showSuccessAnimation = true);
-      await Future.delayed(const Duration(seconds: 1));
-      setState(() => showSuccessAnimation = false);
-
-      // Primeiro regista o progresso do nível
-      await levelManager.registerRoundForLevel(
-        context: context,
-        correct: firstTryCorrect,
-        applySettings: () => applyLevelSettings(levelManager),
-        onFinished: () async {
-          // Só depois avalia se houve conquista
-          await triggerConquestFeedback(
-            firstTry: firstTryCorrect,
-            applySettings: () => applyLevelSettings(levelManager),
-            onFinished: () => generateNewChallenge(levelManager),
-          );
+    roundTimer = Timer(levelTime, () async {
+      if (!mounted) return;
+      final superState = _gamesSuperKey.currentState;
+      superState?.showTimeout(
+        applySettings: applyLevelSettings,
+        generateNewChallenge: () {
+          if (mounted) generateNewChallenge();
         },
       );
-    }
-  } else {
-    GameAnimations.playWrongSound();
-    setState(() {
-      selectedItem.isTapped = true;
-      selectedItem.isCorrect = false;
     });
   }
-}
 
-  Widget buildGameItem(GameItem item, ConquestFeedbackCallback triggerConquestFeedback) {
-  return Align(
-    alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
-    child: GestureDetector(
-      onTap: () => checkAnswer(item, levelManager, triggerConquestFeedback),
-      child: Container(
-        width: 60.r,
-        height: 60.r,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: item.isTapped ? Colors.transparent : item.backgroundColor,
-          boxShadow: item.isTapped
-              ? []
-              : [
-                  BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(2, 2),
-                    blurRadius: 4.r,
-                  ),
-                ],
-        ),
-        alignment: Alignment.center,
-        child: item.isTapped
-            ? Icon(
-                item.isCorrect ? Icons.check : Icons.close,
-                color: item.isCorrect ? Colors.green : Colors.red,
-                size: 32.sp,
-              )
-            : Text(
-                item.content,
-                style: TextStyle(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: item.fontFamily,
-                  decoration: TextDecoration.none,
-                ),
-              ),
-      ),
-    ),
-  );
-}
+  void handleTap(GameItem item) {
+    if (item.isTapped) return;
 
-  Widget buildSuccessAnimation(bool showAnimation) {
-    return showAnimation
-        ? IgnorePointer(
-            ignoring: true,
-            child: GameAnimations.coffetiesTimed(),
-          )
-        : const SizedBox.shrink();
+    final superState = _gamesSuperKey.currentState;
+    print("🔍 superState: $superState");
+    if (superState == null) return;
+
+    print("🖱 Toque registado em: ${item.content}");
+
+    setState(() {
+      currentTry++;
+      item.isTapped = true;
+    });
+
+    print("📤 A chamar checkAnswer do superState...");
+
+    superState.checkAnswer(
+      selectedItem: item,
+      target: targetCharacter,
+      correctCount: correctCount,
+      currentTry: currentTry,
+      foundCorrect: foundCorrect,
+      applySettings: () async {
+        await applyLevelSettings();
+      },
+      generateNewChallenge: () {
+        if (!mounted) return;
+        generateNewChallenge();
+      },
+      conquestManager: conquestManager,
+      updateFoundCorrect: (int value) {
+        if (!mounted) return;
+        print("✅ Atualizar foundCorrect: $value");
+        setState(() => foundCorrect = value);
+      },
+      cancelTimers: cancelTimers,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (gamesItems.isEmpty) {
-      applyLevelSettings(levelManager);
-      generateNewChallenge(levelManager);
-    }
-
-  return GamesSuperWidget(
-    user: widget.user,
-    progressValue: progressValue,
-    level: (_) => levelManager.level,
-    currentRound: (_) => levelManager.totalRoundsCount + 1,
-    totalRounds: (_) => levelManager.evaluationRounds,
-    topTextContent: () => Padding(
-      padding: EdgeInsets.only(top: 10.h, bottom: 6.h),
-      child: isFirstCycle && _isLetter(targetCharacter)
-          ? Column(
-              children: [
-                Text(
-                  'Encontra a letra',
-                  style: getInstructionFont(isFirstCycle: isFirstCycle),
-                ),
-                CharacterFontVariants(character: targetCharacter),
-              ],
-            )
-          : Text(
-              _isNumber(targetCharacter)
-                  ? 'Encontra o número $targetCharacter'
-                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-              style: getInstructionFont(isFirstCycle: isFirstCycle),
-              textAlign: TextAlign.center,
-            ),
-    ),
-    builder: (context, levelManager, user, triggerConquestFeedback) {
-      return Stack(
-        children: [
-          ...gamesItems.map((item) => buildGameItem(item, triggerConquestFeedback)),
-          if (showSuccessAnimation) buildSuccessAnimation(true),
-        ],
-      );
-    },
-  );
-}
-  
+    return GamesSuperWidget(
+      key: _gamesSuperKey,
+      user: widget.user,
+      progressValue: progressValue,
+      level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
+      currentRound: (_) => 1,
+      totalRounds: (_) => 3,
+      topTextContent: () => Padding(
+        padding: EdgeInsets.only(top: 16.h, bottom: 6.h),
+        child: isFirstCycle && _isLetter(targetCharacter)
+            ? Column(
+                children: [
+                  Text('Encontra a letra', style: getInstructionFont(isFirstCycle: isFirstCycle)),
+                  CharacterFontVariants(character: targetCharacter),
+                ],
+              )
+            : Text(
+                _isNumber(targetCharacter)
+                    ? "Encontra o número $targetCharacter"
+                    : "Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}",
+                style: getInstructionFont(isFirstCycle: isFirstCycle),
+                textAlign: TextAlign.center,
+              ),
+      ),
+      builder: (context, levelManager, user) {
+        return Stack(
+          children: gamesItems.map((item) {
+            return Align(
+              alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
+              child: GestureDetector(
+                onTap: () => handleTap(item),
+                child: item.isTapped
+                    ? (item.isCorrect
+                        ? _gamesSuperKey.currentState!.correctIcon
+                        : _gamesSuperKey.currentState!.wrongIcon)
+                    : Container(
+                        width: 60.r,
+                        height: 60.r,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: item.backgroundColor,
+                          boxShadow: [
+                            BoxShadow(color: Colors.black26, offset: Offset(2, 2), blurRadius: 4.r),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          item.content,
+                          style: TextStyle(
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: item.fontFamily,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                      ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
   }
+}

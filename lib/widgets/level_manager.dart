@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
 import '../services/hive_service.dart';
-import '../widgets/games_animations.dart';
+//import 'game_animations.dart';
+//import '../games/game_super_widget.dart';
 
 class LevelManager {
+  final UserModel user;
   int level;
   int totalRounds = 0;
   int correctAnswers = 0;
-  final UserModel user;
 
   final int maxLevel;
   final int minLevel;
@@ -19,10 +19,65 @@ class LevelManager {
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 1, // ajustar para 4 na release
+    this.roundsToEvaluate = 1,
   }) : level = level ?? user.gameLevel;
 
   int get totalRoundsCount => totalRounds;
+  int get evaluationRounds => roundsToEvaluate;
+
+  void registerRound({required bool correct}) {
+    totalRounds++;
+    if (correct) correctAnswers++;
+  }
+
+  Future<void> registerRoundForLevel({
+  required BuildContext context,
+  required bool correct,
+  required VoidCallback applySettings,
+  required VoidCallback onFinished,
+  required void Function(int newLevel, bool increased)? showLevelFeedback,
+}) async {
+  final int previousLevel = level;
+
+  registerRound(correct: correct);
+
+  final double accuracy = correctAnswers / totalRounds;
+  final int userKey = user.key as int;
+
+  user.updateAccuracy(level: level, accuracy: accuracy);
+  await HiveService.updateUserByKey(userKey, user);
+
+  bool subiuNivel = false;
+  bool desceuNivel = false;
+
+  if (totalRounds >= roundsToEvaluate * 2 && accuracy >= 0.8 && level < maxLevel) {
+    level++;
+    subiuNivel = true;
+  } else if (totalRounds >= roundsToEvaluate && accuracy < 0.5 && level > minLevel) {
+    level--;
+    desceuNivel = true;
+  }
+
+  if (subiuNivel || desceuNivel) {
+    user.gameLevel = level;
+    await HiveService.updateUserByKey(userKey, user);
+
+    if (showLevelFeedback != null) {
+      showLevelFeedback(level, subiuNivel);
+    }
+
+    totalRounds = 0;
+    correctAnswers = 0;
+  }
+
+  applySettings();
+  onFinished();
+}
+}
+
+
+
+ /* int get totalRoundsCount => totalRounds;
   int get evaluationRounds => roundsToEvaluate;
 
   void registerRound({required bool correct}) {
@@ -54,7 +109,7 @@ class LevelManager {
     }
   }
 
-  Future<void> registerRoundForLevel({
+  /Future<void> registerRoundForLevel({
     required BuildContext context,
     required bool correct,
     required VoidCallback applySettings,
@@ -118,4 +173,4 @@ class LevelManager {
     applySettings();
     onFinished();
   }
-}
+}*/

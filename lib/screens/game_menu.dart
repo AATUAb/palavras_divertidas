@@ -39,7 +39,8 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Detetive de letras e números",
         icon: Icons.search,
-        onTap: _startIdentifyLettersNumbersGame,
+        //onTap: _startIdentifyLettersNumbersGame,
+        onTap: () => _navigateToGame("Ouvir e procurar"),
         backgroundColor: AppColors.green,
       ),
       GameCardData(
@@ -196,7 +197,7 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
-  void _startIdentifyLettersNumbersGame() {
+  /*void _startIdentifyLettersNumbersGame() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -205,7 +206,7 @@ class _GameMenuState extends State<GameMenu> {
                 IdentifyLettersNumbersGame(key: widget.key, user: widget.user),
       ),
     );
-  }
+  }*/
 
   void _startWriteGame() {
     Navigator.pushReplacement(

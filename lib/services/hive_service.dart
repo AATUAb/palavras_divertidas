@@ -123,7 +123,7 @@ static int getUserKey(int userID) {
 
 // --- Métodos para contadores específicos de conquistas ---
 
-static Future<void> incrementFirstTrySuccesses(int userKey) async {
+/*static Future<void> incrementFirstTrySuccesses(int userKey) async {
   try {
     final user = _userBox.get(userKey);
     if (user != null) {
@@ -136,9 +136,9 @@ static Future<void> incrementFirstTrySuccesses(int userKey) async {
   } catch (e) {
     logger.e("❌ Error incrementing firstTrySuccesses for user $userKey: $e");
   }
-}
+}*/
 
-static Future<void> incrementOtherSuccesses(int userKey) async {
+/*static Future<void> incrementOtherSuccesses(int userKey) async {
   try {
     final user = _userBox.get(userKey);
     if (user != null) {
@@ -151,9 +151,9 @@ static Future<void> incrementOtherSuccesses(int userKey) async {
   } catch (e) {
     logger.e("❌ Error incrementing otherSuccesses for user $userKey: $e");
   }
-}
+}*/
 
-static Future<void> resetFirstTrySuccesses(int userKey) async {
+/*static Future<void> resetFirstTrySuccesses(int userKey) async {
   try {
     final user = _userBox.get(userKey);
     if (user != null) {
@@ -166,9 +166,9 @@ static Future<void> resetFirstTrySuccesses(int userKey) async {
   } catch (e) {
     logger.e("❌ Error resetting firstTrySuccesses for user $userKey: $e");
   }
-}
+}*/
 
-static Future<void> resetOtherSuccesses(int userKey) async {
+/*static Future<void> resetOtherSuccesses(int userKey) async {
   try {
     final user = _userBox.get(userKey);
     if (user != null) {
@@ -181,5 +181,34 @@ static Future<void> resetOtherSuccesses(int userKey) async {
   } catch (e) {
     logger.e("❌ Error resetting otherSuccesses for user $userKey: $e");
   }
+}*/
+
+static Future<void> incrementTryStats({
+  required int userKey,
+  required bool firstTry,
+}) async {
+  try {
+    final user = _userBox.get(userKey);
+    if (user != null) {
+      if (firstTry) {
+        user.firstTryCorrectTotal++;
+      } else {
+        user.correctButNotFirstTryTotal++;
+      }
+
+      await updateUserByKey(userKey, user);
+
+      logger.i(
+        "📊 Atualizado stats para user $userKey ➤ "
+        "Primeira tentativa: ${user.firstTryCorrectTotal}, "
+        "Outras tentativas: ${user.correctButNotFirstTryTotal}"
+      );
+    } else {
+      logger.w("⚠️ Utilizador com chave $userKey não encontrado para atualizar estatísticas de tentativa.");
+    }
+  } catch (e) {
+    logger.e("❌ Erro ao atualizar estatísticas de tentativa para user $userKey: $e");
+  }
 }
+
 }
