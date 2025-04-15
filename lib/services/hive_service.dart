@@ -27,7 +27,6 @@ class HiveService {
       if (!Hive.isBoxOpen('users')) {
         throw Exception('Hive box "users" not opened!');
       }
-
       final users = _userBox.values.toList();
       logger.i("🔍 Retrieved ${users.length} users from Hive");
       return users;
@@ -73,7 +72,34 @@ class HiveService {
     }
   }
 
-//funcão para incrementar as conquistas do utilizador
+  static UserModel? getUser(int userKey) {
+    try {
+      final user = _userBox.get(userKey);
+      if (user == null) {
+        logger.e("❌ No user found with key $userKey");
+      }
+      return user;
+    } catch (e) {
+      logger.e("❌ Error retrieving user by key: $e");
+      return null;
+    }
+  }
+
+  static int getUserKey(int userID) {
+    try {
+      final user = _userBox.values.firstWhere(
+        (user) => user.key == userID,
+        orElse: () => throw Exception('User not found'),
+      );
+      return user.key as int;
+    } catch (e) {
+      logger.e("❌ Error retrieving user key for $userID: $e");
+      return -1;
+    }
+  }
+
+  // --- Conquistas ---
+  //funcão para incrementar as conquistas do utilizador
 static Future<void> incrementConquests(int userKey) async {
   try {
     final user = _userBox.get(userKey);
@@ -89,99 +115,6 @@ static Future<void> incrementConquests(int userKey) async {
     logger.e("❌ Error updating user's conquest: $e");
   }
 }
-
-// Função para recuperar o usuário a partir da chave
-static UserModel? getUser(int userKey) {
-  try {
-    // Recupera o usuário do Hive usando o userKey
-    final user = _userBox.get(userKey);
-    if (user == null) {
-      logger.e("❌ No user found with key $userKey");
-    }
-    return user;
-  } catch (e) {
-    logger.e("❌ Error retrieving user by key: $e");
-    return null;
-  }
-}
-
-static int getUserKey(int userID) {
-  try {
-    // Itera sobre os usuários para encontrar o usuário com o nome especificado
-    final user = _userBox.values.firstWhere(
-      (user) => user.key == userID,
-      orElse: () => throw Exception('User not found')
-    );
-
-    // Retorna a chave do usuário
-    return user.key as int;
-  } catch (e) {
-    logger.e("❌ Error retrieving user key for $userID: $e");
-    return -1;  // Retorna um valor inválido se não conseguir encontrar o usuário
-  }
-}
-
-// --- Métodos para contadores específicos de conquistas ---
-
-/*static Future<void> incrementFirstTrySuccesses(int userKey) async {
-  try {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      user.firstTrySuccesses++;
-      await updateUserByKey(userKey, user);
-      logger.i("✅ Incremented firstTrySuccesses for user $userKey. New count: ${user.firstTrySuccesses}");
-    } else {
-      logger.w("⚠️ User not found with key $userKey for incrementing firstTrySuccesses");
-    }
-  } catch (e) {
-    logger.e("❌ Error incrementing firstTrySuccesses for user $userKey: $e");
-  }
-}*/
-
-/*static Future<void> incrementOtherSuccesses(int userKey) async {
-  try {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      user.otherSuccesses++;
-      await updateUserByKey(userKey, user);
-      logger.i("✅ Incremented otherSuccesses for user $userKey. New count: ${user.otherSuccesses}");
-    } else {
-      logger.w("⚠️ User not found with key $userKey for incrementing otherSuccesses");
-    }
-  } catch (e) {
-    logger.e("❌ Error incrementing otherSuccesses for user $userKey: $e");
-  }
-}*/
-
-/*static Future<void> resetFirstTrySuccesses(int userKey) async {
-  try {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      user.firstTrySuccesses = 0;
-      await updateUserByKey(userKey, user);
-      logger.i("✅ Reset firstTrySuccesses for user $userKey.");
-    } else {
-      logger.w("⚠️ User not found with key $userKey for resetting firstTrySuccesses");
-    }
-  } catch (e) {
-    logger.e("❌ Error resetting firstTrySuccesses for user $userKey: $e");
-  }
-}*/
-
-/*static Future<void> resetOtherSuccesses(int userKey) async {
-  try {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      user.otherSuccesses = 0;
-      await updateUserByKey(userKey, user);
-      logger.i("✅ Reset otherSuccesses for user $userKey.");
-    } else {
-      logger.w("⚠️ User not found with key $userKey for resetting otherSuccesses");
-    }
-  } catch (e) {
-    logger.e("❌ Error resetting otherSuccesses for user $userKey: $e");
-  }
-}*/
 
 static Future<void> incrementTryStats({
   required int userKey,
@@ -211,4 +144,79 @@ static Future<void> incrementTryStats({
   }
 }
 
+  // --- Taxa de acerto por jogo ---
+  static Future<void> updateGameAccuracy({
+    required int userKey,
+    required String gameName,
+    required List<double> accuracyPerLevel,
+  }) async {
+    final user = _userBox.get(userKey);
+    if (user != null) {
+      user.gamesAccuracy[gameName] = accuracyPerLevel;
+      await updateUserByKey(userKey, user);
+      logger.i("🎯 Updated accuracy for $gameName: $accuracyPerLevel");
+    } else {
+      logger.w("⚠️ User not found with key $userKey for resetting otherSuccesses");
+    }
+ /* } catch (e) {
+    logger.e("❌ Error resetting otherSuccesses for user $userKey: $e");
+  }*/
 }
+}
+
+
+/*static Future<void> incrementFirstTrySuccesses(int userKey) async {
+  try {
+    final user = _userBox.get(userKey);
+    if (user != null) {
+      user.firstTrySuccesses++;
+      await updateUserByKey(userKey, user);
+      logger.i("✅ Incremented firstTrySuccesses for user $userKey. New count: ${user.firstTrySuccesses}");
+    } else {
+      logger.w("⚠️ User not found with key $userKey for incrementing firstTrySuccesses");
+    }
+  } catch (e) {
+    logger.e("❌ Error incrementing firstTrySuccesses for user $userKey: $e");
+  }
+}
+
+static Future<void> incrementOtherSuccesses(int userKey) async {
+  try {
+    final user = _userBox.get(userKey);
+    if (user != null) {
+      user.otherSuccesses++;
+      await updateUserByKey(userKey, user);
+      logger.i("✅ Incremented otherSuccesses for user $userKey. New count: ${user.otherSuccesses}");
+    } else {
+      logger.w("⚠️ User not found with key $userKey for incrementing otherSuccesses");
+    }
+  } catch (e) {
+    logger.e("❌ Error incrementing otherSuccesses for user $userKey: $e");
+  }
+}
+
+
+static Future<void> resetFirstTrySuccesses(int userKey) async {
+  try {
+    final user = _userBox.get(userKey);
+    if (user != null) {
+      user.firstTrySuccesses = 0;
+      await updateUserByKey(userKey, user);
+      logger.i("✅ Reset firstTrySuccesses for user $userKey.");
+    } else {
+      logger.w("⚠️ User not found with key $userKey for resetting firstTrySuccesses");
+    }
+  } catch (e) {
+    logger.e("❌ Error resetting firstTrySuccesses for user $userKey: $e");
+  }
+}
+
+static Future<void> resetOtherSuccesses(int userKey) async {
+  try {
+    final user = _userBox.get(userKey);
+    if (user != null) {
+      user.otherSuccesses = 0;
+      await updateUserByKey(userKey, user);
+      logger.i("✅ Reset otherSuccesses for user $userKey.");
+    }
+  }*/

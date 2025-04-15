@@ -26,7 +26,7 @@ class UserModel extends HiveObject {
   @HiveField(5)
   int gameLevel;
 
-   /// Contagem de conquistas (autocolantes)
+  /// Contagem de conquistas (autocolantes)
   @HiveField(6)
   int conquest;
 
@@ -73,16 +73,33 @@ class UserModel extends HiveObject {
     }
   }
 
-/// Incrementa o número de conquistas
-final Logger logger = Logger();
+  /// Atualiza a lista de acertos por jogo
+  void updateGameAccuracy({
+    required String gameId,
+    required int level,
+    required double value,
+  }) {
+    final updatedList = [...(gamesAccuracy[gameId] ?? List.filled(3, 0))];
+    if (level >= 1 && level <= updatedList.length) {
+      updatedList[level - 1] = value;
+      gamesAccuracy = {
+        ...gamesAccuracy,
+        gameId: updatedList.map((e) => e.toDouble()).toList(),
+      };
+    }
+  }
 
-void incrementConquest() {
-  logger.i("Incrementing conquest. Current value: $conquest");
-  conquest++;
-  logger.i("New conquest value: $conquest");
-}
+  /// Map to store game accuracy data
+  Map<String, List<double>> gamesAccuracy = {};
 
-  /// Método de cópia para atualização do modelo
+  final Logger logger = Logger();
+
+  void incrementConquest() {
+    logger.i("Incrementing conquest. Current value: $conquest");
+    conquest++;
+    logger.i("New conquest value: $conquest");
+  }
+
   UserModel copyWith({
   String? name,
   String? schoolLevel,
@@ -112,8 +129,9 @@ void incrementConquest() {
   );
 }
 
-// Salva o UserModel no Hive
+  /// Salva o UserModel no Hive
+  @override
   Future<void> save() async {
-    await this.save();
+    await super.save();
   }
 }

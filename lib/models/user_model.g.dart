@@ -26,13 +26,15 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       conquest: fields[6] as int,
       firstTrySuccesses: fields[7] as int,
       otherSuccesses: fields[8] as int,
+      firstTryCorrectTotal: fields[9] as int,
+      correctButNotFirstTryTotal: fields[10] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -50,7 +52,11 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(7)
       ..write(obj.firstTrySuccesses)
       ..writeByte(8)
-      ..write(obj.otherSuccesses);
+      ..write(obj.otherSuccesses)
+      ..writeByte(9)
+      ..write(obj.firstTryCorrectTotal)
+      ..writeByte(10)
+      ..write(obj.correctButNotFirstTryTotal);
   }
 
   @override

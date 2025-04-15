@@ -10,39 +10,31 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Logger
+  # Logging
   logger: ^1.2.0
 
-  # UI e Icons
+  # UI e Responsividade
   cupertino_icons: ^1.0.8
-
-  # Responsividade da aplicação
   flutter_screenutil: ^5.9.0
+  lottie: ^3.3.1
 
-  # Lottie para animações pré-renderizadas
-  lottie: ^3.3.1  
-
-  # Efeitos sonoros
+  # Sons
   audioplayers: ^5.2.1
 
-  # Armazenamento local
+  # Persistência
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   path_provider: ^2.1.2
+  shared_preferences: ^2.2.2
 
   # Gráficos
-  fl_chart: ^0.64.0
-
-  # Estado persistente para configurações (ex: mute)
-  shared_preferences: ^2.2.2
+  fl_chart: ^0.60.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^5.0.0
-
-  # Geração automática dos Hive adapters
   hive_generator: ^2.0.1
   build_runner: ^2.4.7
 

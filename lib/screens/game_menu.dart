@@ -34,6 +34,12 @@ class GameMenu extends StatefulWidget {
 
 class _GameMenuState extends State<GameMenu> {
   @override
+  void initState() {
+    super.initState();
+    resumeMenuMusic(); // <- Isto garante que a música toca ao voltar ao menu
+  }
+
+  @override
   Widget build(BuildContext context) {
     final List<GameCardData> jogosBase = [
       GameCardData(
@@ -86,24 +92,20 @@ class _GameMenuState extends State<GameMenu> {
     return Scaffold(
       body: MenuDesign(
         headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
+        showHomeButton: true,
+        onHomePressed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const MyHomePage(title: 'Mundo das Palavras'),
+            ),
+          );
+        },
         topLeftWidget: Padding(
-          padding: EdgeInsets.only(top: 150.h, left: 0.w),
+          padding: EdgeInsets.only(top: 170.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                icon: Icon(Icons.home, size: 25.sp),
-                tooltip: 'Menu Principal',
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => const MyHomePage(title: 'Mundo das Palavras'),
-                    ),
-                  );
-                },
-              ),
               IconButton(
                 icon: Icon(Icons.emoji_events, size: 25.sp),
                 tooltip: 'Conquistas',
@@ -111,18 +113,15 @@ class _GameMenuState extends State<GameMenu> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const StickerBookScreen(),
+                      builder: (_) => StickerBookScreen(user: widget.user),
                     ),
                   );
                 },
               ),
-              Positioned(
-                top: 10.h,
-                left: 10.w,
-                child: IconButton(
-                  icon: Icon(Icons.bar_chart, size: 25.sp),
-                  tooltip: 'Estastísticas',
-                  onPressed: () {
+              IconButton(
+                icon: Icon(Icons.bar_chart, size: 25.sp),
+                tooltip: 'Estatísticas',
+                onPressed: () {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -131,13 +130,9 @@ class _GameMenuState extends State<GameMenu> {
                   );
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-
-
-
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.w),
@@ -211,7 +206,9 @@ class _GameMenuState extends State<GameMenu> {
   void _startWriteGame() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => WriteGameScreen(character: "A")),
+      MaterialPageRoute(
+        builder: (_) => WriteGameScreen(character: "A", user: widget.user),
+      ),
     );
   }
 

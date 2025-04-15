@@ -43,7 +43,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
   @override
   void initState() {
     super.initState();
-    levelManager = LevelManager(user: widget.user);
+    levelManager = LevelManager(user: widget.user, gameName: 'generic'); // Substitua 'game_name' pelo nome do jogo
   }
 
   @override
