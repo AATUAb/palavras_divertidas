@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
 import '../widgets/game_item.dart';
-import 'game_super_widget.dart';  // Importação correta
+import 'game_super_widget.dart'; 
 
 class TestGame extends StatefulWidget {
   final UserModel user;
@@ -16,6 +16,7 @@ class TestGame extends StatefulWidget {
 
 class _TestGameState extends State<TestGame> {
   final GlobalKey<GamesSuperWidgetState> _gamesSuperKey = GlobalKey();
+  bool isRoundActive = true;
 
   final Random _random = Random();
   final List<String> characters = [
@@ -56,7 +57,6 @@ class _TestGameState extends State<TestGame> {
 
   @override
   void dispose() {
-    print("🗑 TestGame dispose chamado");
     cancelTimers();
     super.dispose();
   }
@@ -65,10 +65,7 @@ class _TestGameState extends State<TestGame> {
     await Future.delayed(Duration.zero);
 
     final superState = _gamesSuperKey.currentState;
-    if (superState == null) {
-      print("⚠️ superState nulo em applyLevelSettings");
-      return;
-    }
+    if (superState == null) return;
 
     final currentLevel = superState.levelManager.level;
 
@@ -90,15 +87,12 @@ class _TestGameState extends State<TestGame> {
           levelTime = const Duration(seconds: 20);
           break;
       }
-
-      print("⚙️ [TestGame] applyLevelSettings chamado para o nível $currentLevel");
     });
   }
 
   void cancelTimers() {
     roundTimer?.cancel();
     progressTimer?.cancel();
-    print("🛑 Temporizadores cancelados Jogo");
   }
 
   void generateNewChallenge() {
@@ -106,13 +100,12 @@ class _TestGameState extends State<TestGame> {
     cancelTimers();
 
     setState(() {
+      isRoundActive = true;
       gamesItems.clear();
       foundCorrect = 0;
       currentTry = 0;
       progressValue = 1.0;
     });
-
-    print("--- Novo desafio gerado ---");
 
     final String rawChar = characters[_random.nextInt(characters.length)];
     targetCharacter = _isLetter(rawChar)
@@ -168,54 +161,55 @@ class _TestGameState extends State<TestGame> {
 
     roundTimer = Timer(levelTime, () async {
       if (!mounted) return;
+
+      setState(() {
+        isRoundActive = false;
+      });
+
       final superState = _gamesSuperKey.currentState;
       superState?.showTimeout(
         applySettings: applyLevelSettings,
         generateNewChallenge: () {
-          if (mounted) generateNewChallenge();
+          if (!mounted) return;
+          setState(() => isRoundActive = true);
+          generateNewChallenge();
         },
       );
     });
   }
 
   void handleTap(GameItem item) {
-  if (item.isTapped) return;
+    if (!isRoundActive || item.isTapped) return;
 
-  final superState = _gamesSuperKey.currentState;
-  print("🔍 superState: $superState");
-  if (superState == null) return;
+    final superState = _gamesSuperKey.currentState;
+    if (superState == null) return;
 
-  print("🖱 Toque registado em: ${item.content}");
+    setState(() {
+      currentTry++;
+      item.isTapped = true;
+    });
 
-  setState(() {
-    currentTry++;
-    item.isTapped = true;
-  });
-
-  print("📤 A chamar checkAnswer do superState...");
-
-  superState.checkAnswer(
-    selectedItem: item,
-    target: targetCharacter,
-    correctCount: correctCount,
-    currentTry: currentTry,
-    foundCorrect: foundCorrect,
-    applySettings: () async {
-      await applyLevelSettings();
-    },
-    generateNewChallenge: () {
-      if (!mounted) return;
-      generateNewChallenge();
-    },
-    updateFoundCorrect: (int value) {
-      setState(() {
-        foundCorrect = value; // Atualiza o número de respostas corretas
-      });
-      print("✅ Atualizar foundCorrect: $value");
-    },
-    cancelTimers: cancelTimers, // Chama a função para cancelar os temporizadores
-  );
-}
+    superState.checkAnswer(
+      selectedItem: item,
+      target: targetCharacter,
+      correctCount: correctCount,
+      currentTry: currentTry,
+      foundCorrect: foundCorrect,
+      applySettings: () async {
+        await applyLevelSettings();
+      },
+      generateNewChallenge: () {
+        if (!mounted) return;
+        generateNewChallenge();
+      },
+      updateFoundCorrect: (int value) {
+        setState(() {
+          foundCorrect = value;
+        });
+      },
+      cancelTimers: cancelTimers,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
