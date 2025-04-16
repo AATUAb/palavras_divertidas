@@ -3,9 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/menu_design.dart';
-import '../games/write_game.dart';
 import '../games/identify_letters_numbers.dart';
-import '../games/test.dart';
 import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
@@ -44,27 +42,25 @@ class _GameMenuState extends State<GameMenu> {
     resumeMenuMusic(); // Garante que a música toca ao voltar ao menu
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final List<GameCardData> jogosBase = [
       GameCardData(
         title: "Detetive de letras e números",
         icon: Icons.search,
-        onTap: () => _navigateToGame("Ouvir e procurar"),
+        onTap: _identifyLettersNumbers,
         backgroundColor: AppColors.green,
       ),
       GameCardData(
         title: "Escrever",
         icon: Icons.edit,
-        onTap: _startWriteGame,
+        onTap: () => _navigateToGame("Escrever"),
         backgroundColor: AppColors.orange,
       ),
       GameCardData(
         title: "Contar sílabas",
         icon: Icons.format_list_numbered,
-        onTap: _startTestGame,
+        onTap: () => _navigateToGame("Contar Sílabas"),
         backgroundColor: AppColors.yellow,
       ),
       GameCardData(
@@ -198,21 +194,13 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
-  void _startWriteGame() {
+  void _identifyLettersNumbers() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => WriteGameScreen(character: "A", user: widget.user),
-      ),
-    );
-  }
-
-  void _startTestGame() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => TestGame(key: widget.key, user: widget.user),
-      ),
+        builder:
+            (_) => IdentifyLettersNumbers(key: widget.key, user: widget.user),
+      ), // MaterialPageRoute
     );
   }
 

@@ -5,12 +5,11 @@ import 'package:lottie/lottie.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class GameAnimations {
-  
   static Future<void> playAnswerFeedback({required bool isCorrect}) async {
-  final sound = isCorrect ? 'correct.wav' : 'wrong.wav';
-  await _playSound(sound);
-}
-  
+    final sound = isCorrect ? 'correct.wav' : 'wrong.wav';
+    await _playSound(sound);
+  }
+
   static Widget coffetiesTimed({
     double? width,
     double? height,
@@ -26,59 +25,59 @@ class GameAnimations {
   }
 
   static Widget starByLevel({
-  required int level,
-  double? width,
-  double? height,
-  VoidCallback? onFinished,
-}) {
-  String path;
-  switch (level) {
-    case 1:
-      path = 'assets/animations/one_star.json';
-      break;
-    case 2:
-      path = 'assets/animations/two_star.json';
-      break;
-    case 3:
-    default:
-      path = 'assets/animations/tree_star.json';
-  }
+    required int level,
+    double? width,
+    double? height,
+    VoidCallback? onFinished,
+  }) {
+    String path;
+    switch (level) {
+      case 1:
+        path = 'assets/animations/one_star.json';
+        break;
+      case 2:
+        path = 'assets/animations/two_star.json';
+        break;
+      case 3:
+      default:
+        path = 'assets/animations/tree_star.json';
+    }
 
-  final message = levelMessage(level: level, increased: level > 1);
-  final color = level > 1 ? Colors.orange : Colors.red;
+    final message = levelMessage(level: level, increased: level > 1);
+    final color = level > 1 ? Colors.orange : Colors.red;
 
-  return Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      _TimedAnimationWidget(
-        animationPath: path,
-        duration: const Duration(seconds: 3),
-        width: width ?? 300.w,
-        height: height ?? 150.h,
-        sound: 'level_up.wav',
-        onFinished: onFinished,
-      ),
-      SizedBox(height: 16.h),
-      Text(
-        message,
-        style: TextStyle(
-          fontSize: 22.sp,
-          fontWeight: FontWeight.bold,
-          color: color,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _TimedAnimationWidget(
+          animationPath: path,
+          duration: const Duration(seconds: 3),
+          width: width ?? 300.w,
+          height: height ?? 150.h,
+          sound: 'level_up.wav',
+          onFinished: onFinished,
         ),
-        textAlign: TextAlign.center,
-      ),
-    ],
-  );
-}
-
-static String levelMessage({required int level, required bool increased}) {
-  if (increased) {
-    return 'Parabéns! Subiste para o nível $level!';
-  } else {
-    return 'Vamos particar melhor o nível $level!';
+        SizedBox(height: 16.h),
+        Text(
+          message,
+          style: TextStyle(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
   }
-}
+
+  static String levelMessage({required int level, required bool increased}) {
+    if (increased) {
+      return 'Parabéns! Subiste para o nível $level!';
+    } else {
+      return 'Vamos particar melhor o nível $level!';
+    }
+  }
 
   static Future<void> showConquestDialog(
     BuildContext context, {
@@ -87,32 +86,33 @@ static String levelMessage({required int level, required bool increased}) {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _TimedAnimationWidget(
-              animationPath: 'assets/animations/conquest.json',
-              duration: const Duration(seconds: 3),
-              width: 250.w,
-              height: 250.h,
-              sound: 'conquest.wav',
-              onFinished: onFinished,
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _TimedAnimationWidget(
+                  animationPath: 'assets/animations/conquest.json',
+                  duration: const Duration(seconds: 3),
+                  width: 100.w,
+                  height: 100.h,
+                  sound: 'conquest.wav',
+                  onFinished: onFinished,
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'Uau! Ganhaste uma conquista para a caderneta!',
+                  style: TextStyle(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            SizedBox(height: 16.h),
-            Text(
-              'Uau! Ganhaste uma conquista para a caderneta!',
-              style: TextStyle(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.orange,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -133,13 +133,15 @@ static String levelMessage({required int level, required bool increased}) {
     );
   }
 
-   static Future<void> _playSound(String fileName) async {
+  static Future<void> _playSound(String fileName) async {
     final player = AudioPlayer();
     await player.play(AssetSource('sounds/$fileName'));
   }
 
-  static Widget correctAnswerIcon() => const Icon(Icons.check, color: Colors.green, size: 30);
-  static Widget wrongAnswerIcon() => const Icon(Icons.close, color: Colors.red, size: 30);
+  static Widget correctAnswerIcon() =>
+      const Icon(Icons.check, color: Colors.green, size: 30);
+  static Widget wrongAnswerIcon() =>
+      const Icon(Icons.close, color: Colors.red, size: 30);
 }
 
 class _TimedAnimationWidget extends StatefulWidget {
@@ -210,6 +212,7 @@ class AnimatedAnswerItem extends StatefulWidget {
   @override
   State<AnimatedAnswerItem> createState() => _AnimatedAnswerItemState();
 }
+
 class _AnimatedAnswerItemState extends State<AnimatedAnswerItem>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
@@ -232,8 +235,7 @@ class _AnimatedAnswerItemState extends State<AnimatedAnswerItem>
         if (widget.onRemoved != null) widget.onRemoved!();
       });
     }
-    }
-
+  }
 
   @override
   void dispose() {
@@ -253,11 +255,7 @@ class _AnimatedAnswerItemState extends State<AnimatedAnswerItem>
             children: [
               if (!_showCheckIcon) widget.child,
               if (_showCheckIcon)
-                Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                  size: 32.sp,
-                ),
+                Icon(Icons.check_circle, color: Colors.green, size: 32.sp),
             ],
           ),
         );
