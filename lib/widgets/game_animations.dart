@@ -24,53 +24,59 @@ class GameAnimations {
     );
   }
 
-  static Widget starByLevel({
-    required int level,
-    double? width,
-    double? height,
-    VoidCallback? onFinished,
-  }) {
-    String path;
-    switch (level) {
-      case 1:
-        path = 'assets/animations/one_star.json';
-        break;
-      case 2:
-        path = 'assets/animations/two_star.json';
-        break;
-      case 3:
-      default:
-        path = 'assets/animations/tree_star.json';
-    }
-
-    final message = levelMessage(level: level, increased: level > 1);
-    final color = level > 1 ? Colors.orange : Colors.red;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _TimedAnimationWidget(
-          animationPath: path,
-          duration: const Duration(seconds: 3),
-          width: width ?? 300.w,
-          height: height ?? 150.h,
-          sound: 'level_up.wav',
-          onFinished: onFinished,
-        ),
-        SizedBox(height: 16.h),
-        Text(
-          message,
-          style: TextStyle(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
+static Future<void> showLevelDialog(
+  BuildContext context, {
+  required int level,
+  required bool increased,
+  VoidCallback? onFinished,
+}) async {
+  String path;
+  switch (level) {
+    case 1:
+      path = 'assets/animations/one_star.json';
+      break;
+    case 2:
+      path = 'assets/animations/two_star.json';
+      break;
+    case 3:
+    default:
+      path = 'assets/animations/tree_star.json';
   }
 
+  final message = levelMessage(level: level, increased: increased);
+  final color = increased ? Colors.orange : Colors.red;
+
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => Dialog(
+      backgroundColor: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _TimedAnimationWidget(
+            animationPath: path,
+            duration: const Duration(seconds: 3),
+            width: 300.w,
+            height: 150.h,
+            sound: 'level_up.wav',
+            onFinished: onFinished,
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    ),
+  );
+}
   static String levelMessage({required int level, required bool increased}) {
     if (increased) {
       return 'Parabéns! Subiste para o nível $level!';
@@ -95,8 +101,8 @@ class GameAnimations {
                 _TimedAnimationWidget(
                   animationPath: 'assets/animations/conquest.json',
                   duration: const Duration(seconds: 3),
-                  width: 100.w,
-                  height: 100.h,
+                  width: 200.w,
+                  height: 200.h,
                   sound: 'conquest.wav',
                   onFinished: onFinished,
                 ),

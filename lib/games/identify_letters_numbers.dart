@@ -203,7 +203,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return GamesSuperWidget(
       key: _gamesSuperKey,
@@ -223,16 +223,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
                     TextSpan(
                       text: targetCharacter.toUpperCase(),
                       style: TextStyle(fontFamily: 'Slabo', fontSize: 22.sp),
-                    ),
-                    const TextSpan(text: ', '),
-                    TextSpan(
-                      text: targetCharacter.toLowerCase(),
-                      style: TextStyle(fontFamily: 'Slabo', fontSize: 22.sp),
-                    ),
-                    const TextSpan(text: ', '),
-                    TextSpan(
-                      text: targetCharacter.toUpperCase(),
-                      style: TextStyle(fontFamily: 'Cursive', fontSize: 22.sp),
                     ),
                     const TextSpan(text: ', '),
                     TextSpan(

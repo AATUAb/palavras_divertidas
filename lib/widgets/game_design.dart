@@ -78,7 +78,7 @@ class _GameDesignState extends State<GameDesign> {
             top: 10.h,
             left: 10.w,
             child: IconButton(
-              icon: Icon(Icons.home, color: Colors.black, size: 30.sp),
+              icon: Icon(Icons.home,  color: AppColors.orange, size: 30.sp),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               tooltip: 'Voltar ao Menu de Jogos',

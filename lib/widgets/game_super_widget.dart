@@ -92,48 +92,21 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
     );
   }
 
-  Future<void> showLevelChangeFeedback({
-    required int newLevel,
-    required bool increased,
-  }) async {
-    final message = GameAnimations.levelMessage(
-      level: newLevel,
-      increased: increased,
-    );
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (_) => Dialog(
-            backgroundColor: Colors.transparent,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GameAnimations.starByLevel(
-                  level: newLevel,
-                  onFinished: () {
-                    if (mounted && Navigator.of(context).canPop()) {
-                      Navigator.of(context, rootNavigator: true).maybePop();
-                    }
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Text(
-                    message,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ),
-    );
-  }
+ Future<void> showLevelChangeFeedback({
+  required int newLevel,
+  required bool increased,
+}) async {
+  await GameAnimations.showLevelDialog(
+    context,
+    level: newLevel,
+    increased: increased,
+    onFinished: () {
+      if (mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context, rootNavigator: true).maybePop();
+      }
+    },
+  );
+}
 
   Future<void> showConquestFeedback({required VoidCallback onFinished}) async {
     await GameAnimations.showConquestDialog(context, onFinished: onFinished);
