@@ -8,6 +8,7 @@ import 'game_design.dart';
 
 class GamesSuperWidget extends StatefulWidget {
   final UserModel user;
+  final String gameName; // ✅ Novo parâmetro
   final double progressValue;
   final int Function(LevelManager) level;
   final int Function(LevelManager) currentRound;
@@ -18,11 +19,13 @@ class GamesSuperWidget extends StatefulWidget {
     BuildContext context,
     LevelManager levelManager,
     UserModel user,
-  ) builder;
+  )
+  builder;
 
   const GamesSuperWidget({
     super.key,
     required this.user,
+    required this.gameName, // ✅ Aqui também
     required this.progressValue,
     required this.level,
     required this.currentRound,
@@ -46,7 +49,10 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
   @override
   void initState() {
     super.initState();
-    levelManager = LevelManager(user: widget.user, gameName: 'generic');
+    levelManager = LevelManager(
+      user: widget.user,
+      gameName: widget.gameName, // ✅ gameName dinâmico
+    );
     conquestManager = ConquestManager();
   }
 
@@ -73,20 +79,21 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.9,
-          height: MediaQuery.of(context).size.height * 0.6,
-          child: GameAnimations.showSuccessAnimation(
-            onFinished: () {
-              if (mounted && Navigator.of(context).canPop()) {
-                Navigator.of(context, rootNavigator: true).maybePop();
-              }
-            },
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: GameAnimations.showSuccessAnimation(
+                onFinished: () {
+                  if (mounted && Navigator.of(context).canPop()) {
+                    Navigator.of(context, rootNavigator: true).maybePop();
+                  }
+                },
+              ),
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -127,10 +134,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
       onFinished: () {},
       showLevelFeedback: (newLevel, increased) async {
         if (!mounted) return;
-        await showLevelChangeFeedback(
-          newLevel: newLevel,
-          increased: increased,
-        );
+        await showLevelChangeFeedback(newLevel: newLevel, increased: increased);
       },
     );
   }
@@ -165,12 +169,13 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
         onFinished: () async {
           if (!mounted) return;
 
-          final bool shouldConquer = await conquestManager.registerRoundForConquest(
-            context: context,
-            firstTry: firstTry,
-            userKey: widget.user.key!,
-            applySettings: applySettings,
-          );
+          final bool shouldConquer = await conquestManager
+              .registerRoundForConquest(
+                context: context,
+                firstTry: firstTry,
+                userKey: widget.user.key!,
+                applySettings: applySettings,
+              );
 
           Future<void> continueAfterFeedback() async {
             if (!mounted) return;

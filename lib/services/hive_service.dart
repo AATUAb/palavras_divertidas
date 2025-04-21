@@ -98,66 +98,75 @@ class HiveService {
     }
   }
 
-  // Conquistas 
-  //funcão para incrementar as conquistas do utilizador
-static Future<void> incrementConquests(int userKey) async {
-  try {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      user.incrementConquest(); // Incrementa as conquistas
-      await updateUserByKey(userKey, user); // Atualiza o usuário no Hive
-      logger.i("After increment: ${user.conquest}");
-    } else {
-      logger.e("❌ User not found with key $userKey");
-    }
-  } catch (e) {
-    logger.e("❌ Error updating user's conquest: $e");
-  }
-}
-
-static Future<void> incrementTryStats({
-  required int userKey,
-  required bool firstTry,
-}) async {
-  try {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      if (firstTry) {
-        user.firstTryCorrectTotal++;
+  // Conquistas
+  static Future<void> incrementConquests(int userKey) async {
+    try {
+      final user = _userBox.get(userKey);
+      if (user != null) {
+        user.incrementConquest();
+        await updateUserByKey(userKey, user);
+        logger.i("After increment: ${user.conquest}");
       } else {
-        user.correctButNotFirstTryTotal++;
+        logger.e("❌ User not found with key $userKey");
       }
+    } catch (e) {
+      logger.e("❌ Error updating user's conquest: $e");
+    }
+  }
+
+  static Future<void> incrementTryStats({
+    required int userKey,
+    required bool firstTry,
+  }) async {
+    try {
+      final user = _userBox.get(userKey);
+      if (user != null) {
+        if (firstTry) {
+          user.firstTryCorrectTotal++;
+        } else {
+          user.correctButNotFirstTryTotal++;
+        }
+
+        await updateUserByKey(userKey, user);
+
+        logger.i(
+          "📊 Atualizado stats para user $userKey ➤ "
+          "Primeira tentativa: ${user.firstTryCorrectTotal}, "
+          "Outras tentativas: ${user.correctButNotFirstTryTotal}",
+        );
+      } else {
+        logger.w(
+          "⚠️ Utilizador com chave $userKey não encontrado para atualizar estatísticas de tentativa.",
+        );
+      }
+    } catch (e) {
+      logger.e(
+        "❌ Erro ao atualizar estatísticas de tentativa para user $userKey: $e",
+      );
+    }
+  }
+
+  // Taxa de acerto por jogo (corrigido!)
+  static Future<void> updateGameAccuracy({
+    required int userKey,
+    required String gameName,
+    required List<double> accuracyPerLevel,
+  }) async {
+    final user = _userBox.get(userKey);
+    if (user != null) {
+      final mutableMap = Map<String, List<double>>.from(user.gamesAccuracy);
+      mutableMap[gameName] = accuracyPerLevel;
+      user.gamesAccuracy = mutableMap;
 
       await updateUserByKey(userKey, user);
 
+      final accuracy =
+          accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0.0;
       logger.i(
-        "📊 Atualizado stats para user $userKey ➤ "
-        "Primeira tentativa: ${user.firstTryCorrectTotal}, "
-        "Outras tentativas: ${user.correctButNotFirstTryTotal}"
+        "🎯 Updated accuracy for $gameName, nível ${user.gameLevel}: ${(accuracy * 100).toStringAsFixed(1)}%",
       );
     } else {
-      logger.w("⚠️ Utilizador com chave $userKey não encontrado para atualizar estatísticas de tentativa.");
+      logger.w("⚠️ User not found with key $userKey for updating accuracy");
     }
-  } catch (e) {
-    logger.e("❌ Erro ao atualizar estatísticas de tentativa para user $userKey: $e");
   }
-}
-
-  //Taxa de acerto por jogo 
-static Future<void> updateGameAccuracy({
-  required int userKey,
-  required String gameName,
-  required List<double> accuracyPerLevel,
-}) async {
-  final user = _userBox.get(userKey);
-  if (user != null) {
-    user.gamesAccuracy[gameName] = accuracyPerLevel;
-    await updateUserByKey(userKey, user);
-
-    final accuracy = accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0.0;
-    logger.i("🎯 Updated accuracy for $gameName, nível ${user.gameLevel}: ${(accuracy * 100).toStringAsFixed(1)}%");
-  } else {
-    logger.w("⚠️ User not found with key $userKey for resetting otherSuccesses");
-  }
-}
 }

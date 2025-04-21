@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
+
 part 'user_model.g.dart';
 
 @HiveType(typeId: 0)
@@ -7,44 +8,46 @@ class UserModel extends HiveObject {
   @HiveField(0)
   String name;
 
-  /// Nível escolar: "Pré-Escolar", "1º Ciclo", etc.
   @HiveField(1)
   String schoolLevel;
 
   @HiveField(2)
   List<String> knownLetters;
 
-  /// Taxa de acerto por nível (ex: {1: 0.85, 2: 0.66})
   @HiveField(3)
-  Map<int, double> accuracyByLevel = {};
+  Map<int, double> accuracyByLevel;
 
-  /// Taxa de acerto geral (0.0 a 1.0)
   @HiveField(4)
   double? overallAccuracy;
 
-  /// Nível de jogo (1, 2, 3...)
   @HiveField(5)
   int gameLevel;
 
-  /// Contagem de conquistas (autocolantes)
   @HiveField(6)
   int conquest;
 
-  /// Contagem de acertos na primeira tentativa para a próxima conquista
   @HiveField(7)
   int firstTrySuccesses;
 
-  /// Contagem de acertos (não na primeira tentativa) para a próxima conquista
   @HiveField(8)
   int otherSuccesses;
 
-   /// Total de acertos à primeira tentativa (histórico)
   @HiveField(9)
   int firstTryCorrectTotal;
 
-  /// Total de acertos depois da primeira tentativa (histórico)
   @HiveField(10)
   int correctButNotFirstTryTotal;
+
+  @HiveField(11)
+  Map<String, List<double>> gamesAccuracy;
+
+  @HiveField(12)
+  Map<String, int> totalCorrectPerGame;
+
+  @HiveField(13)
+  Map<String, int> totalAttemptsPerGame;
+
+  final Logger logger = Logger();
 
   UserModel({
     required this.name,
@@ -54,16 +57,19 @@ class UserModel extends HiveObject {
     this.overallAccuracy,
     this.gameLevel = 1,
     this.conquest = 0,
-    this.firstTrySuccesses = 0, 
-    this.otherSuccesses = 0,   
+    this.firstTrySuccesses = 0,
+    this.otherSuccesses = 0,
     this.firstTryCorrectTotal = 0,
     this.correctButNotFirstTryTotal = 0,
-  }) : knownLetters = knownLetters ?? [];
+    this.gamesAccuracy = const {},
+    Map<String, int>? totalCorrectPerGame,
+    Map<String, int>? totalAttemptsPerGame,
+  }) : knownLetters = knownLetters ?? [],
+       totalCorrectPerGame = Map.from(totalCorrectPerGame ?? {}),
+       totalAttemptsPerGame = Map.from(totalAttemptsPerGame ?? {});
 
-  /// Atualiza a taxa de acerto por nível e a média geral
   void updateAccuracy({required int level, required double accuracy}) {
     accuracyByLevel = {...accuracyByLevel, level: accuracy};
-
     if (accuracyByLevel.isNotEmpty) {
       overallAccuracy =
           accuracyByLevel.values.reduce((a, b) => a + b) /
@@ -73,7 +79,6 @@ class UserModel extends HiveObject {
     }
   }
 
-  /// Atualiza a lista de acertos por jogo
   void updateGameAccuracy({
     required String gameId,
     required int level,
@@ -89,11 +94,6 @@ class UserModel extends HiveObject {
     }
   }
 
-  /// Map to store game accuracy data
-  Map<String, List<double>> gamesAccuracy = {};
-
-  final Logger logger = Logger();
-
   void incrementConquest() {
     logger.i("Incrementing conquest. Current value: $conquest");
     conquest++;
@@ -101,35 +101,40 @@ class UserModel extends HiveObject {
   }
 
   UserModel copyWith({
-  String? name,
-  String? schoolLevel,
-  List<String>? knownLetters,
-  int? gameLevel,
-  Map<int, double>? accuracyByLevel,
-  double? overallAccuracy,
-  int? conquest,
-  int? firstTrySuccesses,
-  //int? otherSuccesses,
-  int? firstTryCorrectTotal,
-  int? correctButNotFirstTryTotal,
-}) {
-  return UserModel(
-    name: name ?? this.name,
-    schoolLevel: schoolLevel ?? this.schoolLevel,
-    knownLetters: knownLetters ?? this.knownLetters,
-    gameLevel: gameLevel ?? this.gameLevel,
-    accuracyByLevel: accuracyByLevel ?? this.accuracyByLevel,
-    overallAccuracy: overallAccuracy ?? this.overallAccuracy,
-    conquest: conquest ?? this.conquest,
-    firstTrySuccesses: firstTrySuccesses ?? this.firstTrySuccesses,
-    //otherSuccesses: otherSuccesses ?? this.otherSuccesses,
-    firstTryCorrectTotal: firstTryCorrectTotal ?? this.firstTryCorrectTotal,
-    correctButNotFirstTryTotal: correctButNotFirstTryTotal ?? this.correctButNotFirstTryTotal,
+    String? name,
+    String? schoolLevel,
+    List<String>? knownLetters,
+    int? gameLevel,
+    Map<int, double>? accuracyByLevel,
+    double? overallAccuracy,
+    int? conquest,
+    int? firstTrySuccesses,
+    int? otherSuccesses,
+    int? firstTryCorrectTotal,
+    int? correctButNotFirstTryTotal,
+    Map<String, List<double>>? gamesAccuracy,
+    Map<String, int>? totalCorrectPerGame,
+    Map<String, int>? totalAttemptsPerGame,
+  }) {
+    return UserModel(
+      name: name ?? this.name,
+      schoolLevel: schoolLevel ?? this.schoolLevel,
+      knownLetters: knownLetters ?? this.knownLetters,
+      gameLevel: gameLevel ?? this.gameLevel,
+      accuracyByLevel: accuracyByLevel ?? this.accuracyByLevel,
+      overallAccuracy: overallAccuracy ?? this.overallAccuracy,
+      conquest: conquest ?? this.conquest,
+      firstTrySuccesses: firstTrySuccesses ?? this.firstTrySuccesses,
+      otherSuccesses: otherSuccesses ?? this.otherSuccesses,
+      firstTryCorrectTotal: firstTryCorrectTotal ?? this.firstTryCorrectTotal,
+      correctButNotFirstTryTotal:
+          correctButNotFirstTryTotal ?? this.correctButNotFirstTryTotal,
+      gamesAccuracy: gamesAccuracy ?? this.gamesAccuracy,
+      totalCorrectPerGame: totalCorrectPerGame ?? this.totalCorrectPerGame,
+      totalAttemptsPerGame: totalAttemptsPerGame ?? this.totalAttemptsPerGame,
+    );
+  }
 
-  );
-}
-
-  /// Salva o UserModel no Hive
   @override
   Future<void> save() async {
     await super.save();

@@ -22,7 +22,7 @@ class LevelManager {
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 4, //roundas para avaliar o nível
+    this.roundsToEvaluate = 4,
   }) : level = level ?? user.gameLevel;
 
   int get totalRoundsCount => totalRounds;
@@ -40,8 +40,6 @@ class LevelManager {
     required VoidCallback onFinished,
     required void Function(int newLevel, bool increased)? showLevelFeedback,
   }) async {
-    final int previousLevel = level;
-
     registerRound(correct: correct);
 
     final double accuracy = correctAnswers / totalRounds;
@@ -51,33 +49,55 @@ class LevelManager {
     user.accuracyByLevel[level] = accuracy;
     await HiveService.updateUserByKey(userKey, user);
 
-    bool subiuNivel = false;
-    bool desceuNivel = false;
+    bool increasedLevel = false;
+    bool decreasedLevel = false;
 
-    if (totalRounds >= roundsToEvaluate * 2 && accuracy >= 0.8 && level < maxLevel) {
+    if (totalRounds >= roundsToEvaluate * 2 &&
+        accuracy >= 0.8 &&
+        level < maxLevel) {
       level++;
-      subiuNivel = true;
-    } else if (totalRounds >= roundsToEvaluate && accuracy < 0.5 && level > minLevel) {
+      increasedLevel = true;
+    } else if (totalRounds >= roundsToEvaluate &&
+        accuracy < 0.5 &&
+        level > minLevel) {
       level--;
-      desceuNivel = true;
+      decreasedLevel = true;
     }
 
-    levelChanged = subiuNivel || desceuNivel;
-    levelIncreased = subiuNivel;
+    levelChanged = increasedLevel || decreasedLevel;
+    levelIncreased = increasedLevel;
 
-    // Atualiza a accuracy no Hive sempre, independentemente de subida ou descida
-  await HiveService.updateGameAccuracy(
-    userKey: userKey,
-    gameName: gameName,
-    accuracyPerLevel: [accuracy],
-  );
+    // ✅ Update total correct answers and attempts per game
+    final updatedCorrect = {
+      ...user.totalCorrectPerGame,
+      gameName: (user.totalCorrectPerGame[gameName] ?? 0) + correctAnswers,
+    };
 
-    if (subiuNivel || desceuNivel) {
+    final updatedAttempts = {
+      ...user.totalAttemptsPerGame,
+      gameName: (user.totalAttemptsPerGame[gameName] ?? 0) + totalRounds,
+    };
+
+    user.totalCorrectPerGame = updatedCorrect;
+    user.totalAttemptsPerGame = updatedAttempts;
+
+    final totalCorrect = updatedCorrect[gameName]!;
+    final totalAttempts = updatedAttempts[gameName]!;
+    final cumulativeAverage =
+        totalAttempts > 0 ? totalCorrect / totalAttempts : 0.0;
+
+    await HiveService.updateGameAccuracy(
+      userKey: userKey,
+      gameName: gameName,
+      accuracyPerLevel: [cumulativeAverage],
+    );
+
+    if (increasedLevel || decreasedLevel) {
       user.gameLevel = level;
       await HiveService.updateUserByKey(userKey, user);
 
       if (showLevelFeedback != null) {
-        showLevelFeedback(level, subiuNivel);
+        showLevelFeedback(level, increasedLevel);
       }
 
       totalRounds = 0;
