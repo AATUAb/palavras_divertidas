@@ -57,11 +57,9 @@ flutter:
     - assets/animations/check.json
 
     # Sons
-    - assets/sounds/conquest.wav
-    - assets/sounds/correct.wav
     - assets/sounds/intro_music.mp3
-    - assets/sounds/level_up.wav
-    - assets/sounds/wrong.wav
+    - assets/sounds/animations/
+    - assets/sounds/characters_sounds/
 
 # configuração de imagens a usar
     # Imagens gerais

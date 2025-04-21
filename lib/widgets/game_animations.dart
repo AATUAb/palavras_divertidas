@@ -148,7 +148,7 @@ static Future<void> showConquestDialog(
   // animação para tocar som de resposta correta ou errada
   static Future<void> _playSound(String fileName) async {
     final player = AudioPlayer();
-    await player.play(AssetSource('sounds/$fileName'));
+    await player.play(AssetSource('sounds/animations/$fileName'));
   }
 
   // animação de ícone de resposta correta ou errada

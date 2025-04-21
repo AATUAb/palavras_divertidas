@@ -5,6 +5,7 @@ part 'user_model.g.dart';
 
 @HiveType(typeId: 0)
 class UserModel extends HiveObject {
+  // Nome do utilizador
   @HiveField(0)
   String name;
 
