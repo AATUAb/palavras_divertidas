@@ -120,7 +120,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
                 'Mundo das Palavras',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontSize: 40.sp,
-                  color: Colors.orange,
+                  color: AppColors.orange,
                   fontWeight: FontWeight.bold,
                   shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 1)],
                 ),

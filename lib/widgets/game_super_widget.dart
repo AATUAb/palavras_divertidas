@@ -18,8 +18,7 @@ class GamesSuperWidget extends StatefulWidget {
     BuildContext context,
     LevelManager levelManager,
     UserModel user,
-  )
-  builder;
+  ) builder;
 
   const GamesSuperWidget({
     super.key,
@@ -74,39 +73,38 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (_) => Dialog(
-            backgroundColor: Colors.transparent,
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.9,
-              height: MediaQuery.of(context).size.height * 0.6,
-              child: GameAnimations.coffetiesTimed(
-                onFinished: () {
-                  if (mounted && Navigator.of(context).canPop()) {
-                    Navigator.of(context, rootNavigator: true).maybePop();
-                  }
-                },
-              ),
-            ),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: GameAnimations.showSuccessAnimation(
+            onFinished: () {
+              if (mounted && Navigator.of(context).canPop()) {
+                Navigator.of(context, rootNavigator: true).maybePop();
+              }
+            },
           ),
+        ),
+      ),
     );
   }
 
- Future<void> showLevelChangeFeedback({
-  required int newLevel,
-  required bool increased,
-}) async {
-  await GameAnimations.showLevelDialog(
-    context,
-    level: newLevel,
-    increased: increased,
-    onFinished: () {
-      if (mounted && Navigator.of(context).canPop()) {
-        Navigator.of(context, rootNavigator: true).maybePop();
-      }
-    },
-  );
-}
+  Future<void> showLevelChangeFeedback({
+    required int newLevel,
+    required bool increased,
+  }) async {
+    await GameAnimations.showLevelChangeDialog(
+      context,
+      level: newLevel,
+      increased: increased,
+      onFinished: () {
+        if (mounted && Navigator.of(context).canPop()) {
+          Navigator.of(context, rootNavigator: true).maybePop();
+        }
+      },
+    );
+  }
 
   Future<void> showConquestFeedback({required VoidCallback onFinished}) async {
     await GameAnimations.showConquestDialog(context, onFinished: onFinished);
@@ -120,16 +118,19 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
     GameAnimations.showTimeoutSnackbar(context);
     await Future.delayed(const Duration(milliseconds: 400));
 
+    generateNewChallenge();
+
     await levelManager.registerRoundForLevel(
       context: context,
       correct: false,
       applySettings: () async => await applySettings(),
-      onFinished: () {
-        if (mounted) generateNewChallenge();
-      },
+      onFinished: () {},
       showLevelFeedback: (newLevel, increased) async {
         if (!mounted) return;
-        await showLevelChangeFeedback(newLevel: newLevel, increased: increased);
+        await showLevelChangeFeedback(
+          newLevel: newLevel,
+          increased: increased,
+        );
       },
     );
   }
@@ -164,22 +165,35 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
         onFinished: () async {
           if (!mounted) return;
 
-          final bool shouldConquer = await conquestManager
-              .registerRoundForConquest(
-                context: context,
-                firstTry: firstTry,
-                userKey: widget.user.key!,
-                applySettings: applySettings,
-              );
+          final bool shouldConquer = await conquestManager.registerRoundForConquest(
+            context: context,
+            firstTry: firstTry,
+            userKey: widget.user.key!,
+            applySettings: applySettings,
+          );
 
-          if (shouldConquer) {
-            await showConquestFeedback(
-              onFinished: () {
-                if (mounted) generateNewChallenge();
-              },
+          Future<void> continueAfterFeedback() async {
+            if (!mounted) return;
+            await Future.delayed(const Duration(milliseconds: 300));
+            if (shouldConquer) {
+              await showConquestFeedback(
+                onFinished: () {
+                  if (mounted) generateNewChallenge();
+                },
+              );
+            } else {
+              if (mounted) generateNewChallenge();
+            }
+          }
+
+          if (levelManager.levelChanged) {
+            await showLevelChangeFeedback(
+              newLevel: levelManager.level,
+              increased: levelManager.levelIncreased,
             );
+            await continueAfterFeedback();
           } else {
-            if (mounted) generateNewChallenge();
+            await continueAfterFeedback();
           }
         },
         showLevelFeedback: (newLevel, increased) async {
@@ -226,20 +240,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
         conquestManager: conquestManager,
         updateFoundCorrect: updateFoundCorrect,
         target: target,
-      );
-    } else {
-      await levelManager.registerRoundForLevel(
-        context: context,
-        correct: false,
-        applySettings: () async => await applySettings(),
-        onFinished: () {},
-        showLevelFeedback: (newLevel, increased) async {
-          if (!mounted) return;
-          await showLevelChangeFeedback(
-            newLevel: newLevel,
-            increased: increased,
-          );
-        },
       );
     }
   }

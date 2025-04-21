@@ -98,7 +98,7 @@ class _GameDesignState extends State<GameDesign> {
             bottom: 10.h,
             left: 10.w,
             child: IconButton(
-              icon: Icon(Icons.info_outline, color: Colors.black, size: 30.sp),
+              icon: Icon(Icons.info_outline, color: AppColors.orange, size: 30.sp),
               tooltip: 'Tutorial',
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +127,7 @@ class _GameDesignState extends State<GameDesign> {
                 child: LinearProgressIndicator(
                   value: widget.progressValue,
                   backgroundColor: Colors.grey[300],
-                  color: Colors.orange,
+                  color: AppColors.orange,
                 ),
               ),
             ),

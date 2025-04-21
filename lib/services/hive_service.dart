@@ -144,18 +144,20 @@ static Future<void> incrementTryStats({
 }
 
   //Taxa de acerto por jogo 
-  static Future<void> updateGameAccuracy({
-    required int userKey,
-    required String gameName,
-    required List<double> accuracyPerLevel,
-  }) async {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      user.gamesAccuracy[gameName] = accuracyPerLevel;
-      await updateUserByKey(userKey, user);
-      logger.i("🎯 Updated accuracy for $gameName: $accuracyPerLevel");
-    } else {
-      logger.w("⚠️ User not found with key $userKey for resetting otherSuccesses");
-    }
+static Future<void> updateGameAccuracy({
+  required int userKey,
+  required String gameName,
+  required List<double> accuracyPerLevel,
+}) async {
+  final user = _userBox.get(userKey);
+  if (user != null) {
+    user.gamesAccuracy[gameName] = accuracyPerLevel;
+    await updateUserByKey(userKey, user);
+
+    final accuracy = accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0.0;
+    logger.i("🎯 Updated accuracy for $gameName, nível ${user.gameLevel}: ${(accuracy * 100).toStringAsFixed(1)}%");
+  } else {
+    logger.w("⚠️ User not found with key $userKey for resetting otherSuccesses");
+  }
 }
 }
