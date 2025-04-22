@@ -59,7 +59,7 @@ flutter:
     - assets/sounds/animations/
 
     # Sons das letras e números (pronúncia individual)
-    - assets/characters_sounds/characters/
+    - assets/sounds/characters_sounds/
 
     # Imagens gerais
     - assets/images/sun.png

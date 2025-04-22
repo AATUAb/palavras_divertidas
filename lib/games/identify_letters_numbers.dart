@@ -22,10 +22,24 @@ class IdentifyLettersNumbers extends StatefulWidget {
 }
 
 class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
-  final GlobalKey<GamesSuperWidgetState> _gamesSuperKey = GlobalKey();
-  final Random _random = Random();
+  final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
+  final _random = Random();
 
-  /* ───────────── helpers estáticos ───────────── */
+  late final AudioPlayer _introPlayer;
+  late final AudioPlayer _letterPlayer;
+
+  List<CharacterModel> _characters = [];
+  bool isRoundActive = true;
+  int correctCount = 4;
+  int wrongCount = 5;
+  Duration levelTime = const Duration(seconds: 10);
+  int currentTry = 0;
+  int foundCorrect = 0;
+  String targetCharacter = '';
+  List<GameItem> gamesItems = [];
+  Timer? roundTimer, progressTimer;
+  double progressValue = 1.0;
+
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
   bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);
   bool _isNumber(String c) => RegExp(r'[0-9]').hasMatch(c);
@@ -44,49 +58,29 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
         Colors.cyan,
       ][_random.nextInt(10)];
 
-  /* ───────────── estado dinâmico ───────────── */
-  late final AudioPlayer _introPlayer;
-  late final AudioPlayer _letterPlayer;
-  List<CharacterModel> _characters = [];
-  bool isRoundActive = true;
-  int correctCount = 4;
-  int wrongCount = 5;
-  Duration levelTime = const Duration(seconds: 10);
-  int currentTry = 0;
-  int foundCorrect = 0;
-  String targetCharacter = '';
-  List<GameItem> gamesItems = [];
-  Timer? roundTimer, progressTimer;
-  double progressValue = 1.0;
-
-  /* ───────────── lifecycle ───────────── */
   @override
   void initState() {
     super.initState();
-
     _introPlayer = AudioPlayer();
     _letterPlayer = AudioPlayer();
 
-    // 1️⃣ Toca apenas o áudio de introdução
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _introPlayer.play(
         AssetSource('sounds/detetive_letras_numeros.mp3'),
         volume: 0.6,
       );
+
+      _introPlayer.onPlayerComplete.listen((_) async {
+        await _loadCharacters();
+        await _applyLevelSettings();
+        _generateNewChallenge();
+      });
     });
+  }
 
-    // 2️⃣ Quando o áudio de introdução terminar, só aí carrega e inicia o jogo
-    _introPlayer.onPlayerComplete.listen((_) async {
-      // Carrega caracteres já seedados
-      final box = Hive.box<CharacterModel>('characters');
-      _characters = box.values.toList();
-
-      // Aplica configurações de nível
-      await _applyLevelSettings();
-
-      // Gerar o primeiro desafio (e disparar o timer)
-      _generateNewChallenge();
-    });
+  Future<void> _loadCharacters() async {
+    final box = await Hive.openBox<CharacterModel>('characters');
+    _characters = box.values.toList();
   }
 
   @override
@@ -97,7 +91,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     super.dispose();
   }
 
-  /* ───────────── configuração de nível ───────────── */
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
     switch (lvl) {
@@ -120,14 +113,12 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     setState(() {});
   }
 
-  /* ───────────── timers helpers ───────────── */
   void _cancelTimers() {
     roundTimer?.cancel();
     progressTimer?.cancel();
   }
 
-  /* ───────────── ciclo principal ───────────── */
-  void _generateNewChallenge() {
+  void _generateNewChallenge() async {
     if (!mounted || _characters.isEmpty) return;
     _cancelTimers();
 
@@ -139,39 +130,35 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       progressValue = 1.0;
     });
 
-    final ch = _characters[_random.nextInt(_characters.length)].character;
+    final raw = _characters[_random.nextInt(_characters.length)].character;
     targetCharacter =
-        _isLetter(ch)
-            ? (_random.nextBool() ? ch.toUpperCase() : ch.toLowerCase())
-            : ch;
+        _isLetter(raw)
+            ? (_random.nextBool() ? raw.toUpperCase() : raw.toLowerCase())
+            : raw;
 
-    final uniqueOptions = <String>{};
-    while (uniqueOptions.length < wrongCount) {
-      var opt = _characters[_random.nextInt(_characters.length)].character;
-      opt =
-          _isLetter(opt)
-              ? (_random.nextBool() ? opt.toUpperCase() : opt.toLowerCase())
-              : opt;
-      if (opt.toLowerCase() != targetCharacter.toLowerCase())
-        uniqueOptions.add(opt);
+    final bad = <String>{};
+    while (bad.length < wrongCount) {
+      final c = _characters[_random.nextInt(_characters.length)].character;
+      final opt =
+          _isLetter(c)
+              ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
+              : c;
+      if (opt.toLowerCase() != targetCharacter.toLowerCase()) {
+        bad.add(opt);
+      }
     }
+    final good = List.generate(correctCount, (_) {
+      return _random.nextBool()
+          ? targetCharacter.toUpperCase()
+          : targetCharacter.toLowerCase();
+    });
+    final all = [...bad, ...good]..shuffle();
 
-    final correctOptions = List.generate(
-      correctCount,
-      (_) =>
-          _random.nextBool()
-              ? targetCharacter.toUpperCase()
-              : targetCharacter.toLowerCase(),
-    );
-
-    final all = [...uniqueOptions, ...correctOptions]..shuffle();
-    final cols = (all.length / 3).ceil();
-    final sx = 1.0 / (cols + 1), sy = 0.18;
-
+    final cols = (all.length / 3).ceil(), sx = 1 / (cols + 1), sy = 0.18;
     gamesItems = List.generate(all.length, (i) {
       final col = i % cols, row = i ~/ cols;
       return GameItem(
-        id: i.toString(),
+        id: '$i',
         type: GameItemType.character,
         content: all[i],
         dx: sx * (col + 1),
@@ -183,12 +170,23 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
     setState(() {});
 
-    progressTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
-      if (!mounted) return;
+    // Toca som do carácter e aguarda fim
+    final file =
+        'sounds/characters_sounds/${targetCharacter.toUpperCase()}.mp3';
+
+    try {
+      await _letterPlayer.play(AssetSource(file));
+      await _letterPlayer.onPlayerComplete.first;
+    } catch (e) {
+      debugPrint('⚠️ Erro ao tocar som do carácter: $file');
+    }
+
+    progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+      if (!mounted) return t.cancel();
       setState(() {
         progressValue -= 0.01;
+        if (progressValue <= 0) t.cancel();
       });
-      if (progressValue <= 0) progressTimer?.cancel();
     });
 
     roundTimer = Timer(levelTime, () {
@@ -201,18 +199,17 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
   }
 
-  /* ───────────── interação ───────────── */
   void _handleTap(GameItem item) {
     if (!isRoundActive || item.isTapped) return;
-    final state = _gamesSuperKey.currentState;
-    if (state == null) return;
+    final s = _gamesSuperKey.currentState;
+    if (s == null) return;
 
     setState(() {
       currentTry++;
       item.isTapped = true;
     });
 
-    state.checkAnswer(
+    s.checkAnswer(
       selectedItem: item,
       target: targetCharacter,
       correctCount: correctCount,
@@ -225,20 +222,21 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
-  /* ───────────── UI ───────────── */
   @override
-  Widget build(BuildContext context) => GamesSuperWidget(
-    key: _gamesSuperKey,
-    user: widget.user,
-    gameName: 'Detetive de letras e números',
-    progressValue: progressValue,
-    level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
-    currentRound: (_) => 1,
-    totalRounds: (_) => 3,
-    isFirstCycle: isFirstCycle,
-    topTextContent: _buildTopText,
-    builder: _buildBoard,
-  );
+  Widget build(BuildContext context) {
+    return GamesSuperWidget(
+      key: _gamesSuperKey,
+      user: widget.user,
+      gameName: 'Detetive de letras e números',
+      progressValue: progressValue,
+      level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
+      currentRound: (_) => 1,
+      totalRounds: (_) => 3,
+      isFirstCycle: isFirstCycle,
+      topTextContent: _buildTopText,
+      builder: _buildBoard,
+    );
+  }
 
   Widget _buildTopText() => Padding(
     padding: EdgeInsets.only(top: 16.h, bottom: 6.h),
@@ -264,8 +262,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
             : Text(
               _isNumber(targetCharacter)
                   ? 'Encontra o número $targetCharacter'
-                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, '
-                      '${targetCharacter.toLowerCase()}',
+                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
               textAlign: TextAlign.center,
             ),
   );
@@ -304,7 +301,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontFamily: item.fontFamily,
-                            decoration: TextDecoration.none,
                           ),
                         ),
                       ),
