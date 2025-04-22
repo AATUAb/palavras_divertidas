@@ -55,7 +55,7 @@ flutter:
 
     # Sons gerais
     - assets/sounds/intro_music.mp3
-    - assets/sounds/detetive_letras_numeros.mp3
+    - assets/sounds/identify_letters_numbers.mp3
     - assets/sounds/animations/
 
     # Sons das letras e números (pronúncia individual)
@@ -63,6 +63,7 @@ flutter:
 
     # Imagens gerais
     - assets/images/sun.png
+    - assets/images/identify_letters_numbers.png
 
     # Imagens dos stickers
     - assets/stickers/monkey.jpg

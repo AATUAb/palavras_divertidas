@@ -78,12 +78,6 @@ class LevelManager {
     gameName: gameName,
     accuracyPerLevel: [accuracy],
   );
-
- /* // 🎯 Feedback visual (nível mudou)
-  if (levelChanged && showLevelFeedback != null) {
-    showLevelFeedback(level, subiuNivel);
-  }*/
-
   applySettings();
   onFinished();
 }

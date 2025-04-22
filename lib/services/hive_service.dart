@@ -70,7 +70,7 @@ class HiveService {
   static Future<void> addUser(UserModel user) async {
     try {
       await _userBox.add(user);
-      logger.i("✅ User \${user.name} added successfully");
+      logger.i("✅ User ${user.name} added successfully");
     } catch (e) {
       logger.e("❌ Error adding user: $e");
     }

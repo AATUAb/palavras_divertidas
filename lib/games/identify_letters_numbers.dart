@@ -27,6 +27,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   late final AudioPlayer _introPlayer;
   late final AudioPlayer _letterPlayer;
+  bool hasChallengeStarted = false;
 
   List<CharacterModel> _characters = [];
   bool isRoundActive = true;
@@ -66,13 +67,14 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _introPlayer.play(
-        AssetSource('sounds/detetive_letras_numeros.mp3'),
+        AssetSource('sounds/identify_letters_numbers.mp3'),
         volume: 0.6,
       );
 
       _introPlayer.onPlayerComplete.listen((_) async {
         await _loadCharacters();
         await _applyLevelSettings();
+        setState(() => hasChallengeStarted = true);
         _generateNewChallenge();
       });
     });
@@ -170,7 +172,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
     setState(() {});
 
-    // Toca som do carácter e aguarda fim
     final file =
         'sounds/characters_sounds/${targetCharacter.toUpperCase()}.mp3';
 
@@ -238,74 +239,115 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
-  Widget _buildTopText() => Padding(
-    padding: EdgeInsets.only(top: 16.h, bottom: 6.h),
-    child:
-        isFirstCycle && _isLetter(targetCharacter)
-            ? Text.rich(
-              TextSpan(
-                children: [
-                  const TextSpan(text: 'Encontra a letra '),
-                  TextSpan(
-                    text: targetCharacter.toUpperCase(),
-                    style: TextStyle(fontFamily: 'Slabo', fontSize: 22.sp),
-                  ),
-                  const TextSpan(text: ', '),
-                  TextSpan(
-                    text: targetCharacter.toLowerCase(),
-                    style: TextStyle(fontFamily: 'Cursive', fontSize: 22.sp),
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            )
-            : Text(
-              _isNumber(targetCharacter)
-                  ? 'Encontra o número $targetCharacter'
-                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-              textAlign: TextAlign.center,
+  Widget _buildTopText() => hasChallengeStarted
+      ? Padding(
+          padding: EdgeInsets.only(top: 20.h, left: 16.w, right: 16.w),
+          child: _buildChallengeText(),
+        )
+      : Padding(
+          padding: EdgeInsets.only(top: 24.h, left: 16.w, right: 16.w),
+          child: Text(
+            'És um detetive de letras e números! Encontra todas as letras e números.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-  );
+          ),
+        );
+
+
+
+  Widget _buildChallengeText() {
+    if (isFirstCycle && _isLetter(targetCharacter)) {
+      return Text.rich(
+        TextSpan(
+          children: [
+            const TextSpan(text: 'Encontra a letra '),
+            TextSpan(
+              text: targetCharacter.toUpperCase(),
+              style: TextStyle(fontFamily: 'Slabo', fontSize: 22.sp),
+            ),
+            const TextSpan(text: ', '),
+            TextSpan(
+              text: targetCharacter.toLowerCase(),
+              style: TextStyle(fontFamily: 'Cursive', fontSize: 22.sp),
+            ),
+          ],
+        ),
+        textAlign: TextAlign.center,
+      );
+    } else {
+      return Text(
+        _isNumber(targetCharacter)
+            ? 'Encontra o número $targetCharacter'
+            : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+        textAlign: TextAlign.center,
+      );
+    }
+  }
 
   Widget _buildBoard(BuildContext _, __, ___) => Stack(
-    children:
-        gamesItems.map((item) {
-          return Align(
-            alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
-            child: GestureDetector(
-              onTap: () => _handleTap(item),
-              child:
-                  item.isTapped
-                      ? (item.isCorrect
-                          ? _gamesSuperKey.currentState!.correctIcon
-                          : _gamesSuperKey.currentState!.wrongIcon)
-                      : Container(
-                        width: 60.r,
-                        height: 60.r,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: item.backgroundColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              offset: const Offset(2, 2),
-                              blurRadius: 4.r,
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          item.content,
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: item.fontFamily,
+    children: [
+      // Imagem de introdução (apenas quando o desafio não começou)
+      if (!hasChallengeStarted)
+        Positioned(
+          top: 80.h,  // Posicionado mais próximo da faixa verde
+          left: 0,
+          right: 0,
+          child: Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 250.w,
+              height: 180.h,
+              child: Image.asset(
+                'assets/images/identify_letters_numbers.png',
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+      
+      // Itens do jogo (apenas quando o desafio começou)
+      ...gamesItems.map((item) {
+        return Align(
+          alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
+          child: GestureDetector(
+            onTap: () => _handleTap(item),
+            child:
+                item.isTapped
+                    ? (item.isCorrect
+                        ? _gamesSuperKey.currentState!.correctIcon
+                        : _gamesSuperKey.currentState!.wrongIcon)
+                    : Container(
+                      width: 60.r,
+                      height: 60.r,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: item.backgroundColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            offset: const Offset(2, 2),
+                            blurRadius: 4.r,
                           ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        item.content,
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: item.fontFamily,
                         ),
                       ),
-            ),
-          );
-        }).toList(),
+                    ),
+          ),
+        );
+      }).toList(),
+    ],
   );
 }

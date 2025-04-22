@@ -199,7 +199,7 @@ class _GameMenuState extends State<GameMenu> {
       context,
       MaterialPageRoute(
         builder:
-            (_) => IdentifyLettersNumbers(key: widget.key, user: widget.user),
+            (_) => IdentifyLettersNumbers(user: widget.user),
       ), // MaterialPageRoute
     );
   }
