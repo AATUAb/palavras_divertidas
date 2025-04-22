@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:collection';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/user_model.dart';
 import 'level_manager.dart';
 import 'game_item.dart';
@@ -21,6 +24,9 @@ class GamesSuperWidget extends StatefulWidget {
     UserModel user,
   ) builder;
   final VoidCallback? onRepeatInstruction;
+  final String? introImagePath;
+  final String? introAudioPath;
+  final VoidCallback? onIntroFinished;
 
   const GamesSuperWidget({
     super.key,
@@ -34,6 +40,9 @@ class GamesSuperWidget extends StatefulWidget {
     required this.isFirstCycle,
     required this.builder,
     this.onRepeatInstruction,
+    this.introImagePath,
+    this.introAudioPath,
+    this.onIntroFinished,
   });
 
   @override
@@ -43,6 +52,12 @@ class GamesSuperWidget extends StatefulWidget {
 class GamesSuperWidgetState extends State<GamesSuperWidget> {
   late LevelManager levelManager;
   late ConquestManager conquestManager;
+  final Queue<String> _retryQueue = Queue();
+  int _roundCounter = 0;
+  final int retryDelay = 2;
+  bool _introPlayed = false;
+  bool _introCompleted = false;
+
   Widget get correctIcon => GameAnimations.correctAnswerIcon();
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
 
@@ -51,6 +66,29 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
     super.initState();
     levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
     conquestManager = ConquestManager();
+
+    if (widget.introImagePath != null && widget.introAudioPath != null) {
+      final player = AudioPlayer();
+      player.play(AssetSource(widget.introAudioPath!), volume: 0.6).then((_) {
+        player.onPlayerComplete.first.then((_) {
+          if (mounted) {
+            setState(() {
+              _introPlayed = true;
+              _introCompleted = true;
+            });
+            widget.onIntroFinished?.call();
+          }
+        });
+      });
+    } else {
+      _introPlayed = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _introCompleted = true);
+          widget.onIntroFinished?.call();
+        }
+      });
+    }
   }
 
   @override
@@ -65,8 +103,23 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
       ),
       child: Stack(
         children: [
-          widget.builder(context, levelManager, widget.user),
-          if (widget.onRepeatInstruction != null)
+          if (!_introCompleted && widget.introImagePath != null)
+            Center(
+              child: Padding(
+              padding: EdgeInsets.only(top: 80.h),
+              child: SizedBox(
+                width: 250.w,
+                height: 180.h,
+                child: Image.asset(
+                  widget.introImagePath!,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            )
+          else
+            widget.builder(context, levelManager, widget.user),
+          if (widget.onRepeatInstruction != null && _introCompleted)
             Positioned(
               top: 40,
               left: 20,
@@ -79,7 +132,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
       ),
     );
   }
-
+  
   Future<void> playAnswerFeedback({required bool isCorrect}) async {
     await GameAnimations.playAnswerFeedback(isCorrect: isCorrect);
   }
@@ -92,8 +145,8 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.9,
-          height: MediaQuery.of(context).size.height * 0.6,
+          width: 0.9.sw,
+          height: 0.6.sh,
           child: GameAnimations.showSuccessAnimation(
             onFinished: () {
               if (mounted && Navigator.of(context).canPop()) {
@@ -104,8 +157,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
         ),
       ),
     );
-
-    // Espera adicional para garantir fecho completo do modal
     await Future.delayed(const Duration(milliseconds: 100));
   }
 
@@ -123,8 +174,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
         }
       },
     );
-
-    // Delay para evitar sobreposição com próximo diálogo
     await Future.delayed(const Duration(milliseconds: 100));
   }
 
@@ -190,13 +239,12 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
         onFinished: () async {
           if (!mounted) return;
 
-          final bool shouldConquer = await conquestManager
-              .registerRoundForConquest(
-                context: context,
-                firstTry: firstTry,
-                userKey: widget.user.key!,
-                applySettings: applySettings,
-              );
+          final bool shouldConquer = await conquestManager.registerRoundForConquest(
+            context: context,
+            firstTry: firstTry,
+            userKey: widget.user.key!,
+            applySettings: applySettings,
+          );
 
           Future<void> continueAfterFeedback() async {
             if (!mounted) return;
@@ -244,8 +292,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
     required void Function(int) updateFoundCorrect,
     required VoidCallback cancelTimers,
   }) async {
-    final isCorrect =
-        selectedItem.content.toLowerCase() == target.toLowerCase();
+    final isCorrect = selectedItem.content == target;
 
     setState(() {
       selectedItem.isTapped = true;
@@ -267,7 +314,18 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
         updateFoundCorrect: updateFoundCorrect,
         target: target,
       );
+    } else {
+      _retryQueue.add(target);
     }
+  }
+
+  String? getNextRetryTarget() {
+    _roundCounter++;
+    if (_retryQueue.isNotEmpty && _roundCounter > retryDelay) {
+      _roundCounter = 0;
+      return _retryQueue.removeFirst();
+    }
+    return null;
   }
 
   void showConquestNotification() {

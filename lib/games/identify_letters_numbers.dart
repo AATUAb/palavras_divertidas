@@ -9,86 +9,75 @@ import '../models/user_model.dart';
 import '../models/character_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
-import '../widgets/game_sequence_manager.dart';
 
+// Classe do jogo "Identifica letras e números"
 class IdentifyLettersNumbers extends StatefulWidget {
   final UserModel user;
   const IdentifyLettersNumbers({super.key, required this.user});
 
+  // Define o nome do jogo
   @override
   State<IdentifyLettersNumbers> createState() => _IdentifyLettersNumbersState();
 }
 
+// Classe que controla o estado do jogo
 class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
   final _random = Random();
-
-  late final AudioPlayer _introPlayer;
   late final AudioPlayer _letterPlayer;
   bool hasChallengeStarted = false;
+  late int correctCount;
+  late int wrongCount;
+  late Duration levelTime;
+  late int currentTry;
+  late int foundCorrect;
 
-  late CharacterSequenceManager _sequenceManager;
+  // Lista de caracteres disponíveis para o jogo, que são carregados do Hive
   List<CharacterModel> _characters = [];
-  bool isRoundActive = true;
-  int totalRounds = 3;
-  int correctCount = 4;
-  int wrongCount = 5;
-  Duration levelTime = const Duration(seconds: 10);
-  int currentTry = 0;
-  int foundCorrect = 0;
-  String targetCharacter = '';
-  bool isRoundFinished = false;
-  List<GameItem> gamesItems = [];
-  Timer? roundTimer, progressTimer;
-  double progressValue = 1.0;
+  // Lista de caracteres já utilizados no jogo, para evitar repetições
+  List<String> _usedCharacters = [];
 
-  bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
-  bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);
-  bool _isNumber(String c) => RegExp(r'[0-9]').hasMatch(c);
-  String _randFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
+  bool isRoundActive = true;     // Indica se a ronda atual está ativa
+  String targetCharacter = '';  // Carácter alvo a encontrar
+  bool isRoundFinished = false;  // Indica se a ronda atual terminou
+  List<GameItem> gamesItems = [];  // Lista de itens do jogo (letras, números a usar na grelha de jogo)
+  Timer? roundTimer, progressTimer;  // Timers para controlar o tempo da ronda e o progresso
+  double progressValue = 1.0;  // Valor do progresso da ronda, de 0 (tempo esgotado) a 1 (tempo total)
 
+  bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';  // Verifica se o utilizador está no 1º ciclo de ensino
+  bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);     // Verifica se o carácter é uma letra
+  bool _isNumber(String c) => RegExp(r'[0-9]').hasMatch(c);        // Verifica se o carácter é um número
+  String _randFont() => _random.nextBool() ? 'Slabo' : 'Cursive';  // Seleciona aleatoriamente uma fonte entre Slabo e Cursive
+
+  // Cores a aplicar aleatoriamente aos itens do jogo
   Color _randColor() =>
       [Colors.red, Colors.blue, Colors.green, Colors.purple, Colors.orange,
        Colors.pink, Colors.teal, Colors.indigo, Colors.deepPurple, Colors.cyan][
         _random.nextInt(10)
       ];
 
+  // Inicializa o estado do jogo
   @override
   void initState() {
     super.initState();
-    _introPlayer = AudioPlayer();
     _letterPlayer = AudioPlayer();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _introPlayer.play(
-        AssetSource('sounds/identify_letters_numbers.mp3'),
-        volume: 0.6,
-      );
-
-      _introPlayer.onPlayerComplete.listen((_) async {
-        await _loadCharacters();
-        await _applyLevelSettings();
-        setState(() => hasChallengeStarted = true);
-        _generateNewChallenge();
-      });
-    });
   }
 
+  // Carrega os caracteres do Hive, que são utilizados no jogo
   Future<void> _loadCharacters() async {
     final box = await Hive.openBox<CharacterModel>('characters');
     _characters = box.values.toList();
-    final all = _characters.map((e) => e.character.toUpperCase()).toList();
-    _sequenceManager = CharacterSequenceManager(all);
   }
 
+  // Libera os recursos utilizados pelo áudio e cancela os timers ao sair do jogo
   @override
   void dispose() {
-    _introPlayer.dispose();
     _letterPlayer.dispose();
     _cancelTimers();
     super.dispose();
   }
 
+  // Aplica as definições de nível do jogo, como o número de tentativas corretas e erradas, e o tempo da ronda
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
     switch (lvl) {
@@ -111,11 +100,13 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     setState(() {});
   }
 
+  // Cancela os timers de ronda e progresso
   void _cancelTimers() {
     roundTimer?.cancel();
     progressTimer?.cancel();
   }
 
+  // Reproduz o som da instrução de desafio, que indica qual o carácter a encontrar
   Future<void> _reproduzirInstrucao() async {
     final file = 'sounds/characters_sounds/${targetCharacter.toUpperCase()}.mp3';
     try {
@@ -127,11 +118,19 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
   }
 
-  void _generateNewChallenge() async {
-    if (!mounted || _sequenceManager.isFinished) {
+  // Gera um novo desafio, escolhe um  carácter alvo e cria as opções de resposta
+  // Se não houver mais caracteres disponíveis, termina o jogo e pergunta se o utilizador quer jogar novamente
+  Future<void> _generateNewChallenge() async {
+    final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
+    final availableChars = allChars.where((c) => !_usedCharacters.contains(c)).toList();
+
+    if (availableChars.isEmpty) {
       _showEndOfGameDialog();
       return;
     }
+
+    final target = availableChars[_random.nextInt(availableChars.length)];
+    _usedCharacters.add(target);
 
     _cancelTimers();
     setState(() {
@@ -140,33 +139,27 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       foundCorrect = 0;
       currentTry = 0;
       progressValue = 1.0;
+      targetCharacter = target;
     });
-
-    final nextChars = _sequenceManager.takeNextForCustomChallenge(letters: 4, numbers: 1);
-    if (nextChars.isEmpty) {
-      _showEndOfGameDialog();
-      return;
-    }
-
-    targetCharacter = nextChars.first;
 
     final bad = <String>{};
     while (bad.length < wrongCount) {
       final c = _characters[_random.nextInt(_characters.length)].character;
       final opt = _random.nextBool() ? c.toUpperCase() : c.toLowerCase();
-      if (opt.toLowerCase() != targetCharacter.toLowerCase()) {
+      if (opt.toLowerCase() != target.toLowerCase()) {
         bad.add(opt);
       }
     }
 
     final good = List.generate(correctCount, (_) {
       return _random.nextBool()
-          ? targetCharacter.toUpperCase()
-          : targetCharacter.toLowerCase();
+          ? target.toUpperCase()
+          : target.toLowerCase();
     });
-    final all = [...bad, ...good]..shuffle();
 
+    final all = [...bad, ...good]..shuffle();
     final cols = (all.length / 3).ceil(), sx = 1 / (cols + 1), sy = 0.18;
+
     gamesItems = List.generate(all.length, (i) {
       final col = i % cols, row = i ~/ cols;
       return GameItem(
@@ -177,11 +170,11 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
         dy: 0.45 + sy * row,
         fontFamily: isFirstCycle ? _randFont() : null,
         backgroundColor: _randColor(),
-        isCorrect: all[i].toLowerCase() == targetCharacter.toLowerCase(),
+        isCorrect: all[i].toLowerCase() == target.toLowerCase(),
       );
     });
-    setState(() {});
 
+    setState(() {});
     await _reproduzirInstrucao();
 
     progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
@@ -195,7 +188,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     roundTimer = Timer(levelTime, () {
       if (!mounted) return;
       setState(() => isRoundActive = false);
-      _sequenceManager.registerFailure(targetCharacter);
       _gamesSuperKey.currentState?.showTimeout(
         applySettings: _applyLevelSettings,
         generateNewChallenge: _generateNewChallenge,
@@ -208,18 +200,21 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Fim do jogo'),
-        content: const Text('Chegaste ao fim do jogo! Queres jogar novamente?'),
+        content: const Text('Queres jogar novamente?'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _sequenceManager.reset();
+              setState(() => _usedCharacters.clear());
               _generateNewChallenge();
             },
             child: const Text('Sim'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).maybePop();
+            },
             child: const Text('Não'),
           ),
         ],
@@ -239,7 +234,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
     s.checkAnswer(
       selectedItem: item,
-      target: targetCharacter,
+      target: targetCharacter.toLowerCase(),
       correctCount: correctCount,
       currentTry: currentTry,
       foundCorrect: foundCorrect,
@@ -264,6 +259,16 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       topTextContent: _buildTopText,
       builder: _buildBoard,
       onRepeatInstruction: _reproduzirInstrucao,
+      introImagePath: 'assets/images/identify_letters_numbers.png',
+      introAudioPath: 'sounds/identify_letters_numbers.mp3',
+      onIntroFinished: () async {
+        await _loadCharacters();
+        await _applyLevelSettings();
+        if (mounted) {
+          setState(() => hasChallengeStarted = true);
+          _generateNewChallenge();
+        }
+      },
     );
   }
 
@@ -314,60 +319,43 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
   }
 
+  /// Constrói o tabuleiro do jogo
   Widget _buildBoard(BuildContext _, __, ___) => Stack(
     children: [
-      if (!hasChallengeStarted)
-        Positioned(
-          top: 60.h, 
-          left: 0,
-          right: 0,
-          child: Align(
-            alignment: Alignment.center,
-            child: SizedBox(
-              width: 250.w,
-              height: 180.h,
-              child: Image.asset(
-                'assets/images/identify_letters_numbers.png',
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ),
       ...gamesItems.map((item) {
         return Align(
           alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
           child: GestureDetector(
             onTap: () => _handleTap(item),
-            child:
-                item.isTapped
-                    ? (item.isCorrect
-                        ? _gamesSuperKey.currentState!.correctIcon
-                        : _gamesSuperKey.currentState!.wrongIcon)
-                    : Container(
-                      width: 60.r,
-                      height: 60.r,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: item.backgroundColor,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            offset: const Offset(2, 2),
-                            blurRadius: 4.r,
-                          ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        item.content,
-                        style: TextStyle(
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontFamily: item.fontFamily,
+            child: item.isTapped
+                ? (item.isCorrect
+                    ? _gamesSuperKey.currentState!.correctIcon
+                    : _gamesSuperKey.currentState!.wrongIcon)
+                : Container(
+                    width: 60.r,
+                    height: 60.r,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: item.backgroundColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          offset: const Offset(2, 2),
+                          blurRadius: 4.r,
                         ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      item.content,
+                      style: TextStyle(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: item.fontFamily,
                       ),
                     ),
+                  ),
           ),
         );
       }).toList(),
