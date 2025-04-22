@@ -8,7 +8,7 @@ import 'game_design.dart';
 
 class GamesSuperWidget extends StatefulWidget {
   final UserModel user;
-  final String gameName; // ✅ Novo parâmetro
+  final String gameName;
   final double progressValue;
   final int Function(LevelManager) level;
   final int Function(LevelManager) currentRound;
@@ -25,7 +25,7 @@ class GamesSuperWidget extends StatefulWidget {
   const GamesSuperWidget({
     super.key,
     required this.user,
-    required this.gameName, // ✅ Aqui também
+    required this.gameName,
     required this.progressValue,
     required this.level,
     required this.currentRound,
@@ -49,10 +49,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
   @override
   void initState() {
     super.initState();
-    levelManager = LevelManager(
-      user: widget.user,
-      gameName: widget.gameName, // ✅ gameName dinâmico
-    );
+    levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
     conquestManager = ConquestManager();
   }
 
@@ -95,6 +92,9 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
             ),
           ),
     );
+
+    // Espera adicional para garantir fecho completo do modal
+    await Future.delayed(const Duration(milliseconds: 100));
   }
 
   Future<void> showLevelChangeFeedback({
@@ -111,10 +111,19 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
         }
       },
     );
+
+    // Delay para evitar sobreposição com próximo diálogo
+    await Future.delayed(const Duration(milliseconds: 100));
   }
 
   Future<void> showConquestFeedback({required VoidCallback onFinished}) async {
-    await GameAnimations.showConquestDialog(context, onFinished: onFinished);
+    await GameAnimations.showConquestDialog(
+      context,
+      onFinished: () async {
+        await Future.delayed(const Duration(milliseconds: 100));
+        onFinished();
+      },
+    );
   }
 
   void showTimeout({
