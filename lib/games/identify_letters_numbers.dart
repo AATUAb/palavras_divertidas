@@ -9,18 +9,16 @@ import '../models/user_model.dart';
 import '../models/character_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
+import '../widgets/game_sequence_manager.dart';
 
-// Classe principal do jogo "Identifica letras e números"
 class IdentifyLettersNumbers extends StatefulWidget {
   final UserModel user;
   const IdentifyLettersNumbers({super.key, required this.user});
 
-  // Método para criar o estado do jogo
   @override
   State<IdentifyLettersNumbers> createState() => _IdentifyLettersNumbersState();
 }
 
-// Classe que faz a gestão do estado do jogo
 class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
   final _random = Random();
@@ -29,48 +27,38 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   late final AudioPlayer _letterPlayer;
   bool hasChallengeStarted = false;
 
-  List<CharacterModel> _characters = [];  // Lista de caracteres
-  bool isRoundActive = true;              // Indica se o desafio está ativo
-  int totalRounds = 3;                   // Número total de rondas      
-  int correctCount = 4;                 // Número de respostas corretas
-  int wrongCount = 5;                  // Número de respostas erradas
-  Duration levelTime = const Duration(seconds: 10);      // Tempo de cada ronda
-  int currentTry = 0;                  // Tentativas atuais do utilizador
-  int foundCorrect = 0;                // Número de respostas corretas encontradas
-  String targetCharacter = '';          // Carácter alvo a ser encontrado
-  bool isRoundFinished = false;         // Indica se a ronda terminou     
-  List<GameItem> gamesItems = [];        // Lista de itens do jogo
-  Timer? roundTimer, progressTimer;                               // Temporizadores para a ronda e progresso
-  double progressValue = 1.0;                                    // Valor do progresso da ronda 
+  late CharacterSequenceManager _sequenceManager;
+  List<CharacterModel> _characters = [];
+  bool isRoundActive = true;
+  int totalRounds = 3;
+  int correctCount = 4;
+  int wrongCount = 5;
+  Duration levelTime = const Duration(seconds: 10);
+  int currentTry = 0;
+  int foundCorrect = 0;
+  String targetCharacter = '';
+  bool isRoundFinished = false;
+  List<GameItem> gamesItems = [];
+  Timer? roundTimer, progressTimer;
+  double progressValue = 1.0;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
   bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);
   bool _isNumber(String c) => RegExp(r'[0-9]').hasMatch(c);
   String _randFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
 
-  // Cores para os circulos que contêm as letras e números
   Color _randColor() =>
-      [
-        Colors.red,
-        Colors.blue,
-        Colors.green,
-        Colors.purple,
-        Colors.orange,
-        Colors.pink,
-        Colors.teal,
-        Colors.indigo,
-        Colors.deepPurple,
-        Colors.cyan,
-      ][_random.nextInt(10)];
+      [Colors.red, Colors.blue, Colors.green, Colors.purple, Colors.orange,
+       Colors.pink, Colors.teal, Colors.indigo, Colors.deepPurple, Colors.cyan][
+        _random.nextInt(10)
+      ];
 
-  // Método que inicializa o estado do jogo
   @override
   void initState() {
     super.initState();
     _introPlayer = AudioPlayer();
     _letterPlayer = AudioPlayer();
 
-    // 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _introPlayer.play(
         AssetSource('sounds/identify_letters_numbers.mp3'),
@@ -86,13 +74,13 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
   }
 
-  // Método que carrega os caracteres da base de dados Hive
   Future<void> _loadCharacters() async {
     final box = await Hive.openBox<CharacterModel>('characters');
     _characters = box.values.toList();
+    final all = _characters.map((e) => e.character.toUpperCase()).toList();
+    _sequenceManager = CharacterSequenceManager(all);
   }
 
-  // Método que limpa os recursos utilizados pelo jogo e cancela os temporizadores
   @override
   void dispose() {
     _introPlayer.dispose();
@@ -101,7 +89,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     super.dispose();
   }
 
-  // Método que aplica as definições de nível a este jogo especifico
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
     switch (lvl) {
@@ -124,13 +111,11 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     setState(() {});
   }
 
-  // Método que cancela os temporizadores do jogo
   void _cancelTimers() {
     roundTimer?.cancel();
     progressTimer?.cancel();
   }
 
-  // Método que toca o som da instrução atual
   Future<void> _reproduzirInstrucao() async {
     final file = 'sounds/characters_sounds/${targetCharacter.toUpperCase()}.mp3';
     try {
@@ -142,11 +127,13 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
   }
 
-  // Método que gera um novo desafio
   void _generateNewChallenge() async {
-    if (!mounted || _characters.isEmpty) return;
-    _cancelTimers();
+    if (!mounted || _sequenceManager.isFinished) {
+      _showEndOfGameDialog();
+      return;
+    }
 
+    _cancelTimers();
     setState(() {
       isRoundActive = true;
       gamesItems.clear();
@@ -155,23 +142,23 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       progressValue = 1.0;
     });
 
-    final raw = _characters[_random.nextInt(_characters.length)].character;
-    targetCharacter =
-        _isLetter(raw)
-            ? (_random.nextBool() ? raw.toUpperCase() : raw.toLowerCase())
-            : raw;
+    final nextChars = _sequenceManager.takeNextForCustomChallenge(letters: 4, numbers: 1);
+    if (nextChars.isEmpty) {
+      _showEndOfGameDialog();
+      return;
+    }
+
+    targetCharacter = nextChars.first;
 
     final bad = <String>{};
     while (bad.length < wrongCount) {
       final c = _characters[_random.nextInt(_characters.length)].character;
-      final opt =
-          _isLetter(c)
-              ? (_random.nextBool() ? c.toUpperCase() : c.toLowerCase())
-              : c;
+      final opt = _random.nextBool() ? c.toUpperCase() : c.toLowerCase();
       if (opt.toLowerCase() != targetCharacter.toLowerCase()) {
         bad.add(opt);
       }
     }
+
     final good = List.generate(correctCount, (_) {
       return _random.nextBool()
           ? targetCharacter.toUpperCase()
@@ -208,6 +195,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     roundTimer = Timer(levelTime, () {
       if (!mounted) return;
       setState(() => isRoundActive = false);
+      _sequenceManager.registerFailure(targetCharacter);
       _gamesSuperKey.currentState?.showTimeout(
         applySettings: _applyLevelSettings,
         generateNewChallenge: _generateNewChallenge,
@@ -215,7 +203,30 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
   }
 
-  // Método que lida com o toque do utilizador nos itens do jogo
+  void _showEndOfGameDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Fim do jogo'),
+        content: const Text('Chegaste ao fim do jogo! Queres jogar novamente?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _sequenceManager.reset();
+              _generateNewChallenge();
+            },
+            child: const Text('Sim'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Não'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _handleTap(GameItem item) {
     if (!isRoundActive || item.isTapped) return;
     final s = _gamesSuperKey.currentState;
@@ -239,7 +250,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
-  // Método que toca o som de feedback quando o utilizador acerta ou erra
   @override
   Widget build(BuildContext context) {
     return GamesSuperWidget(
@@ -257,7 +267,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
-  // Método que constrói o texto do topo do jogo quando o desafio ainda não começou
   Widget _buildTopText() => hasChallengeStarted
       ? Padding(
           padding: EdgeInsets.only(top: 20.h, left: 16.w, right: 16.w),
@@ -276,13 +285,12 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
           ),
         );
 
-  // Método que constrói o texto de cada desafio
   Widget _buildChallengeText() {
     if (isFirstCycle && _isLetter(targetCharacter)) {
       return Text.rich(
         TextSpan(
           children: [
-            const TextSpan(text: 'Encontra a letra '),
+            const TextSpan(text: 'Encontra as letras '),
             TextSpan(
               text: '${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
               style: TextStyle(fontFamily: 'Slabo', fontSize: 22.sp),
@@ -299,17 +307,15 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     } else {
       return Text(
         _isNumber(targetCharacter)
-            ? 'Encontra o número $targetCharacter'
-            : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+            ? 'Encontra os números $targetCharacter'
+            : 'Encontra as letras ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
         textAlign: TextAlign.center,
       );
     }
   }
 
-  // Método que constrói a grelha de jogo
   Widget _buildBoard(BuildContext _, __, ___) => Stack(
     children: [
-      // Imagem de introdução, antes do desafio começar
       if (!hasChallengeStarted)
         Positioned(
           top: 60.h, 
@@ -327,7 +333,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
             ),
           ),
         ),
-      // Itens do jogo, quando o desafio começa
       ...gamesItems.map((item) {
         return Align(
           alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
