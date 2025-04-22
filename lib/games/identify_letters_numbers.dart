@@ -47,7 +47,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);
   bool _isNumber(String c) => RegExp(r'[0-9]').hasMatch(c);
   String _randFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
-  
+
   // Cores para os circulos que contêm as letras e números
   Color _randColor() =>
       [
@@ -130,6 +130,18 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     progressTimer?.cancel();
   }
 
+  // Método que toca o som da instrução atual
+  Future<void> _reproduzirInstrucao() async {
+    final file = 'sounds/characters_sounds/${targetCharacter.toUpperCase()}.mp3';
+    try {
+      await _letterPlayer.stop();
+      await _letterPlayer.release();
+      await _letterPlayer.play(AssetSource(file));
+    } catch (e) {
+      debugPrint('⚠️ Erro ao repetir som do carácter: $file');
+    }
+  }
+
   // Método que gera um novo desafio
   void _generateNewChallenge() async {
     if (!mounted || _characters.isEmpty) return;
@@ -183,18 +195,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
     setState(() {});
 
-    final file =
-        'sounds/characters_sounds/${targetCharacter.toUpperCase()}.mp3';
-
-    try {
-      await _letterPlayer.stop();
-      await _letterPlayer.release();
-      await _letterPlayer.play(AssetSource(file));
-      await _letterPlayer.onPlayerComplete.first;
-      await _letterPlayer.release();
-    } catch (e) {
-      debugPrint('⚠️ Erro ao tocar som do carácter: $file');
-    }
+    await _reproduzirInstrucao();
 
     progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
       if (!mounted) return t.cancel();
@@ -252,6 +253,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       isFirstCycle: isFirstCycle,
       topTextContent: _buildTopText,
       builder: _buildBoard,
+      onRepeatInstruction: _reproduzirInstrucao,
     );
   }
 
@@ -274,8 +276,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
           ),
         );
 
-
-
   // Método que constrói o texto de cada desafio
   Widget _buildChallengeText() {
     if (isFirstCycle && _isLetter(targetCharacter)) {
@@ -284,13 +284,13 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
           children: [
             const TextSpan(text: 'Encontra a letra '),
             TextSpan(
-              text: targetCharacter.toUpperCase(),
+              text: '${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
               style: TextStyle(fontFamily: 'Slabo', fontSize: 22.sp),
             ),
             const TextSpan(text: ', '),
             TextSpan(
-              text: targetCharacter.toLowerCase(),
-              style: TextStyle(fontFamily: 'Cursive', fontSize: 22.sp),
+              text: '${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+              style: TextStyle(fontFamily: 'Cursive', fontSize: 23.sp),
             ),
           ],
         ),
@@ -327,7 +327,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
             ),
           ),
         ),
-      
       // Itens do jogo, quando o desafio começa
       ...gamesItems.map((item) {
         return Align(

@@ -19,8 +19,8 @@ class GamesSuperWidget extends StatefulWidget {
     BuildContext context,
     LevelManager levelManager,
     UserModel user,
-  )
-  builder;
+  ) builder;
+  final VoidCallback? onRepeatInstruction;
 
   const GamesSuperWidget({
     super.key,
@@ -33,6 +33,7 @@ class GamesSuperWidget extends StatefulWidget {
     required this.topTextContent,
     required this.isFirstCycle,
     required this.builder,
+    this.onRepeatInstruction,
   });
 
   @override
@@ -42,7 +43,6 @@ class GamesSuperWidget extends StatefulWidget {
 class GamesSuperWidgetState extends State<GamesSuperWidget> {
   late LevelManager levelManager;
   late ConquestManager conquestManager;
-
   Widget get correctIcon => GameAnimations.correctAnswerIcon();
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
 
@@ -63,7 +63,20 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
         textAlign: TextAlign.center,
         child: widget.topTextContent(),
       ),
-      child: widget.builder(context, levelManager, widget.user),
+      child: Stack(
+        children: [
+          widget.builder(context, levelManager, widget.user),
+          if (widget.onRepeatInstruction != null)
+            Positioned(
+              top: 40,
+              left: 20,
+              child: IconButton(
+                icon: Icon(Icons.play_circle_fill, color: Colors.red, size: 30),
+                onPressed: widget.onRepeatInstruction,
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -76,21 +89,20 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (_) => Dialog(
-            backgroundColor: Colors.transparent,
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.9,
-              height: MediaQuery.of(context).size.height * 0.6,
-              child: GameAnimations.showSuccessAnimation(
-                onFinished: () {
-                  if (mounted && Navigator.of(context).canPop()) {
-                    Navigator.of(context, rootNavigator: true).maybePop();
-                  }
-                },
-              ),
-            ),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: GameAnimations.showSuccessAnimation(
+            onFinished: () {
+              if (mounted && Navigator.of(context).canPop()) {
+                Navigator.of(context, rootNavigator: true).maybePop();
+              }
+            },
           ),
+        ),
+      ),
     );
 
     // Espera adicional para garantir fecho completo do modal
