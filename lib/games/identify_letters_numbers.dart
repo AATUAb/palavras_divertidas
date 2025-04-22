@@ -118,14 +118,18 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
   }
 
-  // Gera um novo desafio, escolhe um  carácter alvo e cria as opções de resposta
-  // Se não houver mais caracteres disponíveis, termina o jogo e pergunta se o utilizador quer jogar novamente
+  // Gera um novo desafio
   Future<void> _generateNewChallenge() async {
     final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
     final availableChars = allChars.where((c) => !_usedCharacters.contains(c)).toList();
 
     if (availableChars.isEmpty) {
-      _showEndOfGameDialog();
+      _gamesSuperKey.currentState?.showEndOfGameDialog(
+        onRestart: () {
+          setState(() => _usedCharacters.clear());
+          _generateNewChallenge();
+        },
+      );
       return;
     }
 
@@ -195,33 +199,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
   }
 
-  void _showEndOfGameDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Fim do jogo'),
-        content: const Text('Queres jogar novamente?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              setState(() => _usedCharacters.clear());
-              _generateNewChallenge();
-            },
-            child: const Text('Sim'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).maybePop();
-            },
-            child: const Text('Não'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _handleTap(GameItem item) {
     if (!isRoundActive || item.isTapped) return;
     final s = _gamesSuperKey.currentState;
@@ -232,9 +209,16 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       item.isTapped = true;
     });
 
+    final targetLower = targetCharacter.toLowerCase();
+    final targetUpper = targetCharacter.toUpperCase();
+    final selected = item.content;
+    final isCorrect = selected == targetLower || selected == targetUpper;
+
+    item.isCorrect = isCorrect;
+
     s.checkAnswer(
       selectedItem: item,
-      target: targetCharacter.toLowerCase(),
+      target: selected, // já validado antes
       correctCount: correctCount,
       currentTry: currentTry,
       foundCorrect: foundCorrect,

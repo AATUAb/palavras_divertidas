@@ -168,7 +168,7 @@ class TopWave extends StatelessWidget {
           // Instrução
           if (child != null)
             Padding(
-              padding: EdgeInsets.only(top: 20.h),
+              padding: EdgeInsets.only(top: 5.h),
               child: child,
             ),
         ],

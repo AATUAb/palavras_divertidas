@@ -49,7 +49,8 @@ class GamesSuperWidget extends StatefulWidget {
   State<GamesSuperWidget> createState() => GamesSuperWidgetState();
 }
 
-class GamesSuperWidgetState extends State<GamesSuperWidget> {
+class GamesSuperWidgetState extends State<GamesSuperWidget> 
+    with SingleTickerProviderStateMixin {
   late LevelManager levelManager;
   late ConquestManager conquestManager;
   final Queue<String> _retryQueue = Queue();
@@ -57,6 +58,8 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
   final int retryDelay = 2;
   bool _introPlayed = false;
   bool _introCompleted = false;
+  late AnimationController _fadeController;
+  late Animation<double> _rotationAnimation;
 
   Widget get correctIcon => GameAnimations.correctAnswerIcon();
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
@@ -67,16 +70,29 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
     levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
     conquestManager = ConquestManager();
 
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _rotationAnimation = Tween<double>(begin: 0.0, end: 1).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
+    );
+
     if (widget.introImagePath != null && widget.introAudioPath != null) {
       final player = AudioPlayer();
-      player.play(AssetSource(widget.introAudioPath!), volume: 0.6).then((_) {
+      player.play(AssetSource(widget.introAudioPath!), volume: 1).then((_) {
         player.onPlayerComplete.first.then((_) {
           if (mounted) {
-            setState(() {
-              _introPlayed = true;
-              _introCompleted = true;
+            _fadeController.forward().then((_) {
+              if (mounted) {
+                setState(() {
+                  _introPlayed = true;
+                  _introCompleted = true;
+                });
+                widget.onIntroFinished?.call();
+              }
             });
-            widget.onIntroFinished?.call();
           }
         });
       });
@@ -92,6 +108,12 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
   }
 
   @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GameDesign(
       user: widget.user,
@@ -104,15 +126,21 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
       child: Stack(
         children: [
           if (!_introCompleted && widget.introImagePath != null)
-            Center(
-              child: Padding(
-              padding: EdgeInsets.only(top: 80.h),
-              child: SizedBox(
-                width: 250.w,
-                height: 180.h,
-                child: Image.asset(
-                  widget.introImagePath!,
-                  fit: BoxFit.contain,
+            FadeTransition(
+              opacity: Tween(begin: 1.0, end: 0.0).animate(_fadeController),
+              child: RotationTransition(
+                turns: _rotationAnimation,
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 80.h),
+                  child: SizedBox(
+                    width: 250.w,
+                    height: 180.h,
+                    child: Image.asset(
+                      widget.introImagePath!,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -326,6 +354,34 @@ class GamesSuperWidgetState extends State<GamesSuperWidget> {
       return _retryQueue.removeFirst();
     }
     return null;
+  }
+
+  void showEndOfGameDialog({
+    required VoidCallback onRestart,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Fim do jogo'),
+        content: const Text('Queres jogar novamente?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              onRestart();
+            },
+            child: const Text('Sim'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).maybePop();
+            },
+            child: const Text('Não'),
+          ),
+        ],
+      ),
+    );
   }
 
   void showConquestNotification() {
