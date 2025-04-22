@@ -59,7 +59,7 @@ static Future<void> showLevelChangeDialog(
             duration: const Duration(seconds: 3),
             width: 300.w,
             height: 100.h,
-            sound: 'level_up.wav',
+            sound: 'level.wav',
             onFinished: onFinished,
           ),
           SizedBox(height: 8.h),
@@ -188,7 +188,7 @@ class _TimedAnimationWidgetState extends State<_TimedAnimationWidget> {
     super.initState();
     if (widget.sound != null) {
       final player = AudioPlayer();
-      player.play(AssetSource('sounds/${widget.sound!}'));
+      player.play(AssetSource('sounds/animations/${widget.sound!}'));
     }
     Timer(widget.duration, () {
       if (mounted) {

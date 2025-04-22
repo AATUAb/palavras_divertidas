@@ -139,7 +139,6 @@ class HiveService {
       if (user != null) {
         user.incrementConquest();
         await updateUserByKey(userKey, user);
-        logger.i("After increment: ${user.conquest}");
       } else {
         logger.e("❌ User not found with key $userKey");
       }
