@@ -1,4 +1,4 @@
-// Jogo 1 – Identificar letras e números (lê caracteres de Hive e toca som de arranque)
+// lib/games/identify_letters_numbers.dart
 
 import 'dart:async';
 import 'dart:math';
@@ -46,6 +46,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   /* ───────────── estado dinâmico ───────────── */
   late final AudioPlayer _introPlayer;
+  late final AudioPlayer _letterPlayer;
   List<CharacterModel> _characters = [];
   bool isRoundActive = true;
   int correctCount = 4;
@@ -62,27 +63,36 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   @override
   void initState() {
     super.initState();
-    _introPlayer = AudioPlayer();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _introPlayer.play(
+    _introPlayer = AudioPlayer();
+    _letterPlayer = AudioPlayer();
+
+    // 1️⃣ Toca apenas o áudio de introdução
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _introPlayer.play(
         AssetSource('sounds/detetive_letras_numeros.mp3'),
         volume: 0.6,
       );
-      await _loadCharacters();
+    });
+
+    // 2️⃣ Quando o áudio de introdução terminar, só aí carrega e inicia o jogo
+    _introPlayer.onPlayerComplete.listen((_) async {
+      // Carrega caracteres já seedados
+      final box = Hive.box<CharacterModel>('characters');
+      _characters = box.values.toList();
+
+      // Aplica configurações de nível
       await _applyLevelSettings();
+
+      // Gerar o primeiro desafio (e disparar o timer)
       _generateNewChallenge();
     });
-  }
-
-  Future<void> _loadCharacters() async {
-    final box = await Hive.openBox<CharacterModel>('characters');
-    _characters = box.values.toList();
   }
 
   @override
   void dispose() {
     _introPlayer.dispose();
+    _letterPlayer.dispose();
     _cancelTimers();
     super.dispose();
   }
@@ -254,7 +264,8 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
             : Text(
               _isNumber(targetCharacter)
                   ? 'Encontra o número $targetCharacter'
-                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
+                  : 'Encontra a letra ${targetCharacter.toUpperCase()}, '
+                      '${targetCharacter.toLowerCase()}',
               textAlign: TextAlign.center,
             ),
   );
