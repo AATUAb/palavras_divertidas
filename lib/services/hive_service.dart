@@ -1,26 +1,57 @@
+// Hive service refatorado: agora regista o CharacterModelAdapter, abre a box "characters" e garante o seed com populateCharactersIfNeeded()
+
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:logger/logger.dart';
+
 import '../models/user_model.dart';
+import '../models/character_model.dart';
+import '../models/character_model.dart'
+    show populateCharactersIfNeeded; // função de seed
 
 class HiveService {
+  // Boxes principais
   static late Box<UserModel> _userBox;
-  static var logger = Logger();
+  static late Box<CharacterModel> _characterBox;
 
+  static final Logger logger = Logger();
+
+  /// Inicializa Hive, regista adapters e abre as boxes necessárias.
   static Future<void> init() async {
     await Hive.initFlutter();
 
+    // ────────────────────────────────────────────────────────────────
+    // Registo de adapters (idempotente)
+    // ────────────────────────────────────────────────────────────────
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(UserModelAdapter());
     }
+    if (!Hive.isAdapterRegistered(1)) {
+      Hive.registerAdapter(CharacterModelAdapter());
+    }
 
+    // ────────────────────────────────────────────────────────────────
+    // Abertura das boxes
+    // ────────────────────────────────────────────────────────────────
     try {
       _userBox = await Hive.openBox<UserModel>('users');
       logger.i("✅ Box 'users' opened successfully");
+
+      _characterBox = await Hive.openBox<CharacterModel>('characters');
+      logger.i("✅ Box 'characters' opened successfully");
     } catch (e) {
-      logger.e("❌ Error opening box: $e");
+      logger.e("❌ Error opening boxes: $e");
       rethrow;
     }
+
+    // ────────────────────────────────────────────────────────────────
+    // Seed da box 'characters' (é idempotente)
+    // ────────────────────────────────────────────────────────────────
+    await populateCharactersIfNeeded();
   }
+
+  // ──────────────────────────────────────────────────────────────────
+  // Operações sobre utilizadores (código existente mantido)
+  // ──────────────────────────────────────────────────────────────────
 
   static List<UserModel> getUsers() {
     try {
@@ -28,7 +59,7 @@ class HiveService {
         throw Exception('Hive box "users" not opened!');
       }
       final users = _userBox.values.toList();
-      logger.i("🔍 Retrieved ${users.length} users from Hive");
+      logger.i("🔍 Retrieved \${users.length} users from Hive");
       return users;
     } catch (e) {
       logger.e("❌ Error retrieving users: $e");
@@ -39,7 +70,7 @@ class HiveService {
   static Future<void> addUser(UserModel user) async {
     try {
       await _userBox.add(user);
-      logger.i("✅ User ${user.name} added successfully");
+      logger.i("✅ User \${user.name} added successfully");
     } catch (e) {
       logger.e("❌ Error adding user: $e");
     }
@@ -98,14 +129,17 @@ class HiveService {
     }
   }
 
-  // Conquistas
+  // ──────────────────────────────────────────────────────────────────
+  // Conquistas e estatísticas (código intacto)
+  // ──────────────────────────────────────────────────────────────────
+
   static Future<void> incrementConquests(int userKey) async {
     try {
       final user = _userBox.get(userKey);
       if (user != null) {
         user.incrementConquest();
         await updateUserByKey(userKey, user);
-        logger.i("After increment: ${user.conquest}");
+        logger.i("After increment: \${user.conquest}");
       } else {
         logger.e("❌ User not found with key $userKey");
       }
@@ -131,8 +165,8 @@ class HiveService {
 
         logger.i(
           "📊 Atualizado stats para user $userKey ➤ "
-          "Primeira tentativa: ${user.firstTryCorrectTotal}, "
-          "Outras tentativas: ${user.correctButNotFirstTryTotal}",
+          "Primeira tentativa: \${user.firstTryCorrectTotal}, "
+          "Outras tentativas: \${user.correctButNotFirstTryTotal}",
         );
       } else {
         logger.w(
@@ -146,7 +180,7 @@ class HiveService {
     }
   }
 
-  // Taxa de acerto por jogo (corrigido!)
+  // Taxa de acerto por jogo
   static Future<void> updateGameAccuracy({
     required int userKey,
     required String gameName,
@@ -163,7 +197,7 @@ class HiveService {
       final accuracy =
           accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0.0;
       logger.i(
-        "🎯 Updated accuracy for $gameName, nível ${user.gameLevel}: ${(accuracy * 100).toStringAsFixed(1)}%",
+        "🎯 Updated accuracy for $gameName, nível \${user.gameLevel}: \${(accuracy * 100).toStringAsFixed(1)}%",
       );
     } else {
       logger.w("⚠️ User not found with key $userKey for updating accuracy");
