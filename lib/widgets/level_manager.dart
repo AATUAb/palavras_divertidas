@@ -22,7 +22,7 @@ class LevelManager {
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 4,
+    this.roundsToEvaluate = 4, //roundas para avaliar o nível
   }) : level = level ?? user.gameLevel;
 
   int get totalRoundsCount => totalRounds;
@@ -34,77 +34,57 @@ class LevelManager {
   }
 
   Future<void> registerRoundForLevel({
-    required BuildContext context,
-    required bool correct,
-    required VoidCallback applySettings,
-    required VoidCallback onFinished,
-    required void Function(int newLevel, bool increased)? showLevelFeedback,
-  }) async {
-    registerRound(correct: correct);
+  required BuildContext context,
+  required bool correct,
+  required VoidCallback applySettings,
+  required VoidCallback onFinished,
+  required void Function(int newLevel, bool increased)? showLevelFeedback,
+}) async {
+  registerRound(correct: correct);
 
-    final double accuracy = correctAnswers / totalRounds;
-    final int userKey = user.key as int;
+  final userKey = user.key;
+  if (userKey == null) return;
 
-    user.updateAccuracy(level: level, accuracy: accuracy);
-    user.accuracyByLevel[level] = accuracy;
-    await HiveService.updateUserByKey(userKey, user);
+  bool subiuNivel = false;
+  bool desceuNivel = false;
 
-    bool increasedLevel = false;
-    bool decreasedLevel = false;
+  final double accuracy = correctAnswers / totalRounds;
 
-    if (totalRounds >= roundsToEvaluate * 2 &&
-        accuracy >= 0.8 &&
-        level < maxLevel) {
-      level++;
-      increasedLevel = true;
-    } else if (totalRounds >= roundsToEvaluate &&
-        accuracy < 0.5 &&
-        level > minLevel) {
-      level--;
-      decreasedLevel = true;
-    }
-
-    levelChanged = increasedLevel || decreasedLevel;
-    levelIncreased = increasedLevel;
-
-    // ✅ Update total correct answers and attempts per game
-    final updatedCorrect = {
-      ...user.totalCorrectPerGame,
-      gameName: (user.totalCorrectPerGame[gameName] ?? 0) + correctAnswers,
-    };
-
-    final updatedAttempts = {
-      ...user.totalAttemptsPerGame,
-      gameName: (user.totalAttemptsPerGame[gameName] ?? 0) + totalRounds,
-    };
-
-    user.totalCorrectPerGame = updatedCorrect;
-    user.totalAttemptsPerGame = updatedAttempts;
-
-    final totalCorrect = updatedCorrect[gameName]!;
-    final totalAttempts = updatedAttempts[gameName]!;
-    final cumulativeAverage =
-        totalAttempts > 0 ? totalCorrect / totalAttempts : 0.0;
-
-    await HiveService.updateGameAccuracy(
-      userKey: userKey,
-      gameName: gameName,
-      accuracyPerLevel: [cumulativeAverage],
-    );
-
-    if (increasedLevel || decreasedLevel) {
-      user.gameLevel = level;
-      await HiveService.updateUserByKey(userKey, user);
-
-      if (showLevelFeedback != null) {
-        showLevelFeedback(level, increasedLevel);
-      }
-
-      totalRounds = 0;
-      correctAnswers = 0;
-    }
-
-    applySettings();
-    onFinished();
+  if (totalRounds >= roundsToEvaluate * 2 && accuracy >= 0.8 && level < maxLevel) {
+    level++;
+    subiuNivel = true;
+  } else if (totalRounds >= roundsToEvaluate && accuracy <= 0.5 && level > minLevel) {
+    level--;
+    desceuNivel = true;
   }
+
+  levelChanged = subiuNivel || desceuNivel;
+  levelIncreased = subiuNivel;
+
+  // 🧠 Se mudou de nível, limpa estatísticas ANTES de guardar
+  if (levelChanged) {
+    totalRounds = 0;
+    correctAnswers = 0;
+  }
+
+  // 📝 Atualiza info do utilizador
+  user.gameLevel = level;
+  user.updateAccuracy(level: level, accuracy: accuracy);
+  user.accuracyByLevel[level] = accuracy;
+
+  await HiveService.updateUserByKey(userKey, user);
+  await HiveService.updateGameAccuracy(
+    userKey: userKey,
+    gameName: gameName,
+    accuracyPerLevel: [accuracy],
+  );
+
+ /* // 🎯 Feedback visual (nível mudou)
+  if (levelChanged && showLevelFeedback != null) {
+    showLevelFeedback(level, subiuNivel);
+  }*/
+
+  applySettings();
+  onFinished();
+}
 }

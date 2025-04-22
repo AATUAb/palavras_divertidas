@@ -59,7 +59,7 @@ class HiveService {
         throw Exception('Hive box "users" not opened!');
       }
       final users = _userBox.values.toList();
-      logger.i("🔍 Retrieved \${users.length} users from Hive");
+      logger.i("🔍 Retrieved ${users.length} users from Hive");
       return users;
     } catch (e) {
       logger.e("❌ Error retrieving users: $e");
@@ -139,7 +139,7 @@ class HiveService {
       if (user != null) {
         user.incrementConquest();
         await updateUserByKey(userKey, user);
-        logger.i("After increment: \${user.conquest}");
+        logger.i("After increment: ${user.conquest}");
       } else {
         logger.e("❌ User not found with key $userKey");
       }
@@ -165,8 +165,8 @@ class HiveService {
 
         logger.i(
           "📊 Atualizado stats para user $userKey ➤ "
-          "Primeira tentativa: \${user.firstTryCorrectTotal}, "
-          "Outras tentativas: \${user.correctButNotFirstTryTotal}",
+          "Primeira tentativa: ${user.firstTryCorrectTotal}, "
+          "Outras tentativas: ${user.correctButNotFirstTryTotal}",
         );
       } else {
         logger.w(
@@ -197,7 +197,7 @@ class HiveService {
       final accuracy =
           accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0.0;
       logger.i(
-        "🎯 Updated accuracy for $gameName, nível \${user.gameLevel}: \${(accuracy * 100).toStringAsFixed(1)}%",
+        "🎯 Updated accuracy for $gameName, nível ${user.gameLevel}: ${(accuracy * 100).toStringAsFixed(1)}%",
       );
     } else {
       logger.w("⚠️ User not found with key $userKey for updating accuracy");

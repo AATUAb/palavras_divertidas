@@ -46,9 +46,5 @@ Future<void> populateCharactersIfNeeded() async {
 
       await box.add(model);
     }
-
-    print('✅ Base de dados de caracteres populada com ${box.length} itens.');
-  } else {
-    print('📚 Base de dados de caracteres já está populada.');
   }
 }
