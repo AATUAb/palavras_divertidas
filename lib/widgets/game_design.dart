@@ -8,8 +8,9 @@ import '../widgets/menu_design.dart';
 class GameDesign extends StatefulWidget {
   final Widget child;
   final dynamic user;
-  final Widget? topTextWidget;     // ✅ Instrução no topo (dentro da faixa verde)
-  final double? progressValue;     // ✅ Barra de tempo opcional
+  final Widget? topTextWidget;
+  final double? progressValue;
+  final int level;
 
   const GameDesign({
     super.key,
@@ -17,6 +18,7 @@ class GameDesign extends StatefulWidget {
     required this.user,
     this.topTextWidget,
     this.progressValue,
+    required this.level,
   });
 
   @override
@@ -55,7 +57,7 @@ class _GameDesignState extends State<GameDesign> {
           // Conteúdo principal do jogo
           Positioned.fill(
             child: Padding(
-              padding: EdgeInsets.only(top:0.h), // ⬅️ altura inicial da grelha
+              padding: EdgeInsets.only(top: 0.h), // ⬅️ altura inicial da grelha
               child: widget.child,
             ),
           ),
@@ -65,7 +67,11 @@ class _GameDesignState extends State<GameDesign> {
             top: 10.h,
             right: 10.w,
             child: IconButton(
-              icon: Icon(Icons.close_rounded, color: AppColors.red, size: 30.sp),
+              icon: Icon(
+                Icons.close_rounded,
+                color: AppColors.red,
+                size: 30.sp,
+              ),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               tooltip: 'Fechar App',
@@ -78,7 +84,7 @@ class _GameDesignState extends State<GameDesign> {
             top: 10.h,
             left: 10.w,
             child: IconButton(
-              icon: Icon(Icons.home,  color: AppColors.orange, size: 30.sp),
+              icon: Icon(Icons.home, color: AppColors.orange, size: 30.sp),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               tooltip: 'Voltar ao Menu de Jogos',
@@ -93,12 +99,31 @@ class _GameDesignState extends State<GameDesign> {
             ),
           ),
 
+          // ★ Indicador de nível (estrelas)
+          Positioned(
+            top: 70.h,
+            right: 10.w, // desloca um pouco à esquerda do botão fechar
+            child: Row(
+              children: List.generate(
+                widget.level,
+                (_) => Padding(
+                  padding: EdgeInsets.only(left: 2.w),
+                  child: Icon(Icons.star, size: 30.sp, color: AppColors.orange),
+                ),
+              ),
+            ),
+          ),
+
           // ℹ️ Botão de tutorial
           Positioned(
             bottom: 10.h,
             left: 10.w,
             child: IconButton(
-              icon: Icon(Icons.info_outline, color: AppColors.orange, size: 30.sp),
+              icon: Icon(
+                Icons.info_outline,
+                color: AppColors.orange,
+                size: 30.sp,
+              ),
               tooltip: 'Tutorial',
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -167,10 +192,7 @@ class TopWave extends StatelessWidget {
 
           // Instrução
           if (child != null)
-            Padding(
-              padding: EdgeInsets.only(top: 5.h),
-              child: child,
-            ),
+            Padding(padding: EdgeInsets.only(top: 0.h), child: child),
         ],
       ),
     );
@@ -186,20 +208,28 @@ class CloudPainter extends CustomPainter {
 
     path.lineTo(0, size.height * 0.6);
     path.quadraticBezierTo(
-      size.width * 0.1, size.height,
-      size.width * 0.25, size.height * 0.7,
+      size.width * 0.1,
+      size.height,
+      size.width * 0.25,
+      size.height * 0.7,
     );
     path.quadraticBezierTo(
-      size.width * 0.4, size.height * 0.4,
-      size.width * 0.5, size.height * 0.7,
+      size.width * 0.4,
+      size.height * 0.4,
+      size.width * 0.5,
+      size.height * 0.7,
     );
     path.quadraticBezierTo(
-      size.width * 0.6, size.height,
-      size.width * 0.75, size.height * 0.6,
+      size.width * 0.6,
+      size.height,
+      size.width * 0.75,
+      size.height * 0.6,
     );
     path.quadraticBezierTo(
-      size.width * 0.9, size.height * 0.3,
-      size.width, size.height * 0.6,
+      size.width * 0.9,
+      size.height * 0.3,
+      size.width,
+      size.height * 0.6,
     );
     path.lineTo(size.width, 0);
     path.close();

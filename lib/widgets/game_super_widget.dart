@@ -22,7 +22,8 @@ class GamesSuperWidget extends StatefulWidget {
     BuildContext context,
     LevelManager levelManager,
     UserModel user,
-  ) builder;
+  )
+  builder;
   final VoidCallback? onRepeatInstruction;
   final String? introImagePath;
   final String? introAudioPath;
@@ -49,7 +50,7 @@ class GamesSuperWidget extends StatefulWidget {
   State<GamesSuperWidget> createState() => GamesSuperWidgetState();
 }
 
-class GamesSuperWidgetState extends State<GamesSuperWidget> 
+class GamesSuperWidgetState extends State<GamesSuperWidget>
     with SingleTickerProviderStateMixin {
   late LevelManager levelManager;
   late ConquestManager conquestManager;
@@ -75,9 +76,10 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       duration: const Duration(milliseconds: 500),
     );
 
-    _rotationAnimation = Tween<double>(begin: 0.0, end: 1).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
-    );
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
     if (widget.introImagePath != null && widget.introAudioPath != null) {
       final player = AudioPlayer();
@@ -118,6 +120,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     return GameDesign(
       user: widget.user,
       progressValue: widget.progressValue,
+      level: levelManager.level, // ← nível passado ao GameDesign
       topTextWidget: DefaultTextStyle(
         style: getInstructionFont(isFirstCycle: widget.isFirstCycle),
         textAlign: TextAlign.center,
@@ -130,27 +133,27 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
               opacity: Tween(begin: 1.0, end: 0.0).animate(_fadeController),
               child: RotationTransition(
                 turns: _rotationAnimation,
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 80.h),
-                  child: SizedBox(
-                    width: 250.w,
-                    height: 180.h,
-                    child: Image.asset(
-                      widget.introImagePath!,
-                      fit: BoxFit.contain,
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 80.h),
+                    child: SizedBox(
+                      width: 250.w,
+                      height: 180.h,
+                      child: Image.asset(
+                        widget.introImagePath!,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
             )
           else
             widget.builder(context, levelManager, widget.user),
           if (widget.onRepeatInstruction != null && _introCompleted)
             Positioned(
-              top: 40,
-              left: 20,
+              top: 50,
+              left: 10,
               child: IconButton(
                 icon: Icon(Icons.play_circle_fill, color: Colors.red, size: 30),
                 onPressed: widget.onRepeatInstruction,
@@ -160,7 +163,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       ),
     );
   }
-  
+
   Future<void> playAnswerFeedback({required bool isCorrect}) async {
     await GameAnimations.playAnswerFeedback(isCorrect: isCorrect);
   }
@@ -170,20 +173,21 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: SizedBox(
-          width: 0.9.sw,
-          height: 0.6.sh,
-          child: GameAnimations.showSuccessAnimation(
-            onFinished: () {
-              if (mounted && Navigator.of(context).canPop()) {
-                Navigator.of(context, rootNavigator: true).maybePop();
-              }
-            },
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: SizedBox(
+              width: 0.9.sw,
+              height: 0.6.sh,
+              child: GameAnimations.showSuccessAnimation(
+                onFinished: () {
+                  if (mounted && Navigator.of(context).canPop()) {
+                    Navigator.of(context, rootNavigator: true).maybePop();
+                  }
+                },
+              ),
+            ),
           ),
-        ),
-      ),
     );
     await Future.delayed(const Duration(milliseconds: 100));
   }
@@ -267,12 +271,13 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
         onFinished: () async {
           if (!mounted) return;
 
-          final bool shouldConquer = await conquestManager.registerRoundForConquest(
-            context: context,
-            firstTry: firstTry,
-            userKey: widget.user.key!,
-            applySettings: applySettings,
-          );
+          final bool shouldConquer = await conquestManager
+              .registerRoundForConquest(
+                context: context,
+                firstTry: firstTry,
+                userKey: widget.user.key!,
+                applySettings: applySettings,
+              );
 
           Future<void> continueAfterFeedback() async {
             if (!mounted) return;
@@ -310,45 +315,48 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   }
 
   Future<void> checkAnswer({
-  required GameItem selectedItem,
-  required String target,
-  required int correctCount,
-  required int currentTry,
-  required int foundCorrect,
-  required Future<void> Function() applySettings,
-  required VoidCallback generateNewChallenge,
-  required void Function(int) updateFoundCorrect,
-  required VoidCallback cancelTimers,
-}) async {
-  final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
+    required GameItem selectedItem,
+    required String target,
+    required int correctCount,
+    required int currentTry,
+    required int foundCorrect,
+    required Future<void> Function() applySettings,
+    required VoidCallback generateNewChallenge,
+    required void Function(int) updateFoundCorrect,
+    required VoidCallback cancelTimers,
+  }) async {
+    final isCorrect =
+        selectedItem.content.toLowerCase() == target.toLowerCase();
 
-  setState(() {
-    selectedItem.isTapped = true;
-    selectedItem.isCorrect = isCorrect;
-  });
+    setState(() {
+      selectedItem.isTapped = true;
+      selectedItem.isCorrect = isCorrect;
+    });
 
-  await playAnswerFeedback(isCorrect: isCorrect);
+    await playAnswerFeedback(isCorrect: isCorrect);
 
-  if (isCorrect) {
-    await processCorrectAnswer(
-      selectedItem: selectedItem,
-      currentTry: currentTry,
-      correctCount: correctCount,
-      foundCorrect: foundCorrect,
-      cancelTimers: cancelTimers,
-      applySettings: applySettings,
-      generateNewChallenge: generateNewChallenge,
-      conquestManager: conquestManager,
-      updateFoundCorrect: updateFoundCorrect,
-      target: target,
-    );
-  } else {
-    registerFailedRound(target);
+    if (isCorrect) {
+      await processCorrectAnswer(
+        selectedItem: selectedItem,
+        currentTry: currentTry,
+        correctCount: correctCount,
+        foundCorrect: foundCorrect,
+        cancelTimers: cancelTimers,
+        applySettings: applySettings,
+        generateNewChallenge: generateNewChallenge,
+        conquestManager: conquestManager,
+        updateFoundCorrect: updateFoundCorrect,
+        target: target,
+      );
+    } else {
+      registerFailedRound(target);
+    }
   }
-}
 
-   void registerFailedRound(String target) {
-    final alreadyExists = _retryQueue.any((entry) => entry.key.toLowerCase() == target.toLowerCase());
+  void registerFailedRound(String target) {
+    final alreadyExists = _retryQueue.any(
+      (entry) => entry.key.toLowerCase() == target.toLowerCase(),
+    );
     if (!alreadyExists) {
       _retryQueue.add(MapEntry(target, _roundCounter));
       debugPrint('➕ Adicionado à fila de retry: $target');
@@ -359,18 +367,20 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   }
 
   String? peekNextRetryTarget() {
-  if (_retryQueue.isNotEmpty) {
-    final oldest = _retryQueue.first;
-    final roundsSinceFail = _roundCounter - oldest.value;
-    if (roundsSinceFail >= retryDelay) {
-      return oldest.key; // ← só devolve, não remove
+    if (_retryQueue.isNotEmpty) {
+      final oldest = _retryQueue.first;
+      final roundsSinceFail = _roundCounter - oldest.value;
+      if (roundsSinceFail >= retryDelay) {
+        return oldest.key;
+      }
     }
+    return null;
   }
-  return null;
-}
 
   void removeFromRetryQueue(String target) {
-    _retryQueue.removeWhere((entry) => entry.key.toLowerCase() == target.toLowerCase());
+    _retryQueue.removeWhere(
+      (entry) => entry.key.toLowerCase() == target.toLowerCase(),
+    );
     debugPrint('➖ Removido da fila de retry (já acertou): $target');
     debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
   }
@@ -388,32 +398,30 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     debugPrint('🔄 Ronda concluída. Contador: $_roundCounter');
   }
 
-
-  void showEndOfGameDialog({
-    required VoidCallback onRestart,
-  }) {
+  void showEndOfGameDialog({required VoidCallback onRestart}) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Parabéns, chegaste ao fim do jogo!'),
-        content: const Text('Queres jogar novamente?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              onRestart();
-            },
-            child: const Text('Sim'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Parabéns, chegaste ao fim do jogo!'),
+            content: const Text('Queres jogar novamente?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  onRestart();
+                },
+                child: const Text('Sim'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).maybePop();
+                },
+                child: const Text('Não'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).maybePop();
-            },
-            child: const Text('Não'),
-          ),
-        ],
-      ),
     );
   }
 
