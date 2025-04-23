@@ -55,7 +55,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   late ConquestManager conquestManager;
   final Queue<String> _retryQueue = Queue();
   int _roundCounter = 0;
-  final int retryDelay = 2;
+  final int retryDelay = 3;
   bool _introPlayed = false;
   bool _introCompleted = false;
   late AnimationController _fadeController;
@@ -320,7 +320,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     required void Function(int) updateFoundCorrect,
     required VoidCallback cancelTimers,
   }) async {
-    final isCorrect = selectedItem.content == target;
+    final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
 
     setState(() {
       selectedItem.isTapped = true;

@@ -118,6 +118,11 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
   }
 
+  // Verifica se o retry já está na lista usada
+  bool retryIsUsed(String value) {
+    return _usedCharacters.contains(value);
+  }
+
   // Gera um novo desafio
   Future<void> _generateNewChallenge() async {
     final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
@@ -133,8 +138,10 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       return;
     }
 
-    final target = availableChars[_random.nextInt(availableChars.length)];
-    _usedCharacters.add(target);
+    final retry = _gamesSuperKey.currentState?.getNextRetryTarget();
+    final target = retry ?? availableChars[_random.nextInt(availableChars.length)];
+
+    if (!retryIsUsed(target)) _usedCharacters.add(target);
 
     _cancelTimers();
     setState(() {
@@ -155,9 +162,10 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       }
     }
 
-    final good = List.generate(correctCount, (_) {
-      return _random.nextBool()
-          ? target.toUpperCase()
+    final good = List.generate(correctCount, (index) {
+      // Garante que metade seja maiúscula e metade minúscula
+      return index % 2 == 0 
+          ? target.toUpperCase() 
           : target.toLowerCase();
     });
 
@@ -166,15 +174,17 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
     gamesItems = List.generate(all.length, (i) {
       final col = i % cols, row = i ~/ cols;
+      final content = all[i];
+      final isCorrect = content.toLowerCase() == target.toLowerCase();
       return GameItem(
         id: '$i',
         type: GameItemType.character,
-        content: all[i],
+        content: content,
         dx: sx * (col + 1),
         dy: 0.45 + sy * row,
         fontFamily: isFirstCycle ? _randFont() : null,
         backgroundColor: _randColor(),
-        isCorrect: all[i].toLowerCase() == target.toLowerCase(),
+        isCorrect: isCorrect,
       );
     });
 
@@ -199,6 +209,8 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
   }
 
+  // Lida com o toque no item do jogo, verifica se o item já foi tocado e se a ronda está ativa
+  // Se o item for correto, atualiza o estado do jogo e verifica se o jogador acertou
   void _handleTap(GameItem item) {
     if (!isRoundActive || item.isTapped) return;
     final s = _gamesSuperKey.currentState;
@@ -209,16 +221,14 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       item.isTapped = true;
     });
 
-    final targetLower = targetCharacter.toLowerCase();
-    final targetUpper = targetCharacter.toUpperCase();
-    final selected = item.content;
-    final isCorrect = selected == targetLower || selected == targetUpper;
-
+    // Verifica se o item é correto
+    final isCorrect = item.content.toLowerCase() == targetCharacter.toLowerCase();
     item.isCorrect = isCorrect;
 
+    // Envia para validação no super_widget
     s.checkAnswer(
       selectedItem: item,
-      target: selected, // já validado antes
+      target: targetCharacter.toLowerCase(),
       correctCount: correctCount,
       currentTry: currentTry,
       foundCorrect: foundCorrect,
