@@ -34,51 +34,55 @@ class LevelManager {
   }
 
   Future<void> registerRoundForLevel({
-  required BuildContext context,
-  required bool correct,
-  required VoidCallback applySettings,
-  required VoidCallback onFinished,
-  required void Function(int newLevel, bool increased)? showLevelFeedback,
-}) async {
-  registerRound(correct: correct);
+    required BuildContext context,
+    required bool correct,
+    required VoidCallback applySettings,
+    required VoidCallback onFinished,
+    required void Function(int newLevel, bool increased)? showLevelFeedback,
+  }) async {
+    registerRound(correct: correct);
 
-  final userKey = user.key;
-  if (userKey == null) return;
+    final userKey = user.key;
+    if (userKey == null) return;
 
-  bool subiuNivel = false;
-  bool desceuNivel = false;
+    bool subiuNivel = false; //mudar nome da variável para inglês
+    bool desceuNivel = false; // mudar nome da variável para inglês
 
-  final double accuracy = correctAnswers / totalRounds;
+    final double accuracy = correctAnswers / totalRounds;
 
-  if (totalRounds >= roundsToEvaluate * 2 && accuracy >= 0.8 && level < maxLevel) {
-    level++;
-    subiuNivel = true;
-  } else if (totalRounds >= roundsToEvaluate && accuracy <= 0.5 && level > minLevel) {
-    level--;
-    desceuNivel = true;
+    if (totalRounds >= roundsToEvaluate * 2 &&
+        accuracy >= 0.8 &&
+        level < maxLevel) {
+      level++;
+      subiuNivel = true;
+    } else if (totalRounds >= roundsToEvaluate &&
+        accuracy <= 0.5 &&
+        level > minLevel) {
+      level--;
+      desceuNivel = true;
+    }
+
+    levelChanged = subiuNivel || desceuNivel;
+    levelIncreased = subiuNivel;
+
+    // 🧠 Se mudou de nível, limpa estatísticas ANTES de guardar
+    if (levelChanged) {
+      totalRounds = 0;
+      correctAnswers = 0;
+    }
+
+    // 📝 Atualiza info do utilizador
+    user.gameLevel = level;
+    user.updateAccuracy(level: level, accuracy: accuracy);
+    user.accuracyByLevel[level] = accuracy;
+
+    await HiveService.updateUserByKey(userKey, user);
+    await HiveService.updateGameAccuracy(
+      userKey: userKey,
+      gameName: gameName,
+      accuracyPerLevel: [accuracy],
+    );
+    applySettings();
+    onFinished();
   }
-
-  levelChanged = subiuNivel || desceuNivel;
-  levelIncreased = subiuNivel;
-
-  // 🧠 Se mudou de nível, limpa estatísticas ANTES de guardar
-  if (levelChanged) {
-    totalRounds = 0;
-    correctAnswers = 0;
-  }
-
-  // 📝 Atualiza info do utilizador
-  user.gameLevel = level;
-  user.updateAccuracy(level: level, accuracy: accuracy);
-  user.accuracyByLevel[level] = accuracy;
-
-  await HiveService.updateUserByKey(userKey, user);
-  await HiveService.updateGameAccuracy(
-    userKey: userKey,
-    gameName: gameName,
-    accuracyPerLevel: [accuracy],
-  );
-  applySettings();
-  onFinished();
-}
 }
