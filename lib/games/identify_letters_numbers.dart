@@ -10,17 +10,14 @@ import '../models/character_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
 
-// Classe do jogo "Identifica letras e números"
 class IdentifyLettersNumbers extends StatefulWidget {
   final UserModel user;
   const IdentifyLettersNumbers({super.key, required this.user});
 
-  // Define o nome do jogo
   @override
   State<IdentifyLettersNumbers> createState() => _IdentifyLettersNumbersState();
 }
 
-// Classe que controla o estado do jogo
 class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
   final _random = Random();
@@ -32,44 +29,36 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   late int currentTry;
   late int foundCorrect;
 
-  // Lista de caracteres disponíveis para o jogo, que são carregados do Hive
   List<CharacterModel> _characters = [];
-  // Lista de caracteres já utilizados no jogo, para evitar repetições
   List<String> _usedCharacters = [];
 
-  bool isRoundActive = true;     // Indica se a ronda atual está ativa
-  String targetCharacter = '';  // Carácter alvo a encontrar
-  bool isRoundFinished = false;  // Indica se a ronda atual terminou
-  List<GameItem> gamesItems = [];  // Lista de itens do jogo (letras, números a usar na grelha de jogo)
-  Timer? roundTimer, progressTimer;  // Timers para controlar o tempo da ronda e o progresso
-  double progressValue = 1.0;  // Valor do progresso da ronda, de 0 (tempo esgotado) a 1 (tempo total)
+  bool isRoundActive = true;
+  String targetCharacter = '';
+  bool isRoundFinished = false;
+  List<GameItem> gamesItems = [];
+  Timer? roundTimer, progressTimer;
+  double progressValue = 1.0;
 
-  bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';  // Verifica se o utilizador está no 1º ciclo de ensino
-  bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);     // Verifica se o carácter é uma letra
-  bool _isNumber(String c) => RegExp(r'[0-9]').hasMatch(c);        // Verifica se o carácter é um número
-  String _randFont() => _random.nextBool() ? 'Slabo' : 'Cursive';  // Seleciona aleatoriamente uma fonte entre Slabo e Cursive
+  bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
+  bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);
+  bool _isNumber(String c) => RegExp(r'[0-9]').hasMatch(c);
+  String _randFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
+  Color _randColor() => [
+    Colors.red, Colors.blue, Colors.green, Colors.purple, Colors.orange,
+    Colors.pink, Colors.teal, Colors.indigo, Colors.deepPurple, Colors.cyan
+  ][_random.nextInt(10)];
 
-  // Cores a aplicar aleatoriamente aos itens do jogo
-  Color _randColor() =>
-      [Colors.red, Colors.blue, Colors.green, Colors.purple, Colors.orange,
-       Colors.pink, Colors.teal, Colors.indigo, Colors.deepPurple, Colors.cyan][
-        _random.nextInt(10)
-      ];
-
-  // Inicializa o estado do jogo
   @override
   void initState() {
     super.initState();
     _letterPlayer = AudioPlayer();
   }
 
-  // Carrega os caracteres do Hive, que são utilizados no jogo
   Future<void> _loadCharacters() async {
     final box = await Hive.openBox<CharacterModel>('characters');
     _characters = box.values.toList();
   }
 
-  // Libera os recursos utilizados pelo áudio e cancela os timers ao sair do jogo
   @override
   void dispose() {
     _letterPlayer.dispose();
@@ -77,7 +66,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     super.dispose();
   }
 
-  // Aplica as definições de nível do jogo, como o número de tentativas corretas e erradas, e o tempo da ronda
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
     switch (lvl) {
@@ -100,13 +88,11 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     setState(() {});
   }
 
-  // Cancela os timers de ronda e progresso
   void _cancelTimers() {
     roundTimer?.cancel();
     progressTimer?.cancel();
   }
 
-  // Reproduz o som da instrução de desafio, que indica qual o carácter a encontrar
   Future<void> _reproduzirInstrucao() async {
     final file = 'sounds/characters_sounds/${targetCharacter.toUpperCase()}.mp3';
     try {
@@ -118,12 +104,8 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
   }
 
-  // Verifica se o retry já está na lista usada
-  bool retryIsUsed(String value) {
-    return _usedCharacters.contains(value);
-  }
+  bool retryIsUsed(String value) => _usedCharacters.contains(value);
 
-  // Gera um novo desafio
   Future<void> _generateNewChallenge() async {
     final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
     final availableChars = allChars.where((c) => !_usedCharacters.contains(c)).toList();
@@ -140,8 +122,10 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
     final retry = _gamesSuperKey.currentState?.getNextRetryTarget();
     final target = retry ?? availableChars[_random.nextInt(availableChars.length)];
-
     if (!retryIsUsed(target)) _usedCharacters.add(target);
+
+    // ⚠️ Se este target estava na fila de retry e o jogador já acertou, vamos garantir que o removemos
+    _gamesSuperKey.currentState?.removeFromRetryQueue(target);
 
     _cancelTimers();
     setState(() {
@@ -157,17 +141,11 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     while (bad.length < wrongCount) {
       final c = _characters[_random.nextInt(_characters.length)].character;
       final opt = _random.nextBool() ? c.toUpperCase() : c.toLowerCase();
-      if (opt.toLowerCase() != target.toLowerCase()) {
-        bad.add(opt);
-      }
+      if (opt.toLowerCase() != target.toLowerCase()) bad.add(opt);
     }
 
-    final good = List.generate(correctCount, (index) {
-      // Garante que metade seja maiúscula e metade minúscula
-      return index % 2 == 0 
-          ? target.toUpperCase() 
-          : target.toLowerCase();
-    });
+    final good = List.generate(correctCount, (_) =>
+      _random.nextBool() ? target.toUpperCase() : target.toLowerCase());
 
     final all = [...bad, ...good]..shuffle();
     final cols = (all.length / 3).ceil(), sx = 1 / (cols + 1), sy = 0.18;
@@ -202,6 +180,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     roundTimer = Timer(levelTime, () {
       if (!mounted) return;
       setState(() => isRoundActive = false);
+      _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
       _gamesSuperKey.currentState?.showTimeout(
         applySettings: _applyLevelSettings,
         generateNewChallenge: _generateNewChallenge,
@@ -209,8 +188,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
   }
 
-  // Lida com o toque no item do jogo, verifica se o item já foi tocado e se a ronda está ativa
-  // Se o item for correto, atualiza o estado do jogo e verifica se o jogador acertou
   void _handleTap(GameItem item) {
     if (!isRoundActive || item.isTapped) return;
     final s = _gamesSuperKey.currentState;
@@ -221,14 +198,16 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       item.isTapped = true;
     });
 
-    // Verifica se o item é correto
     final isCorrect = item.content.toLowerCase() == targetCharacter.toLowerCase();
     item.isCorrect = isCorrect;
 
-    // Envia para validação no super_widget
+    if (!isCorrect) {
+      s.registerFailedRound(targetCharacter);
+    }
+
     s.checkAnswer(
       selectedItem: item,
-      target: targetCharacter.toLowerCase(),
+      target: targetCharacter,
       correctCount: correctCount,
       currentTry: currentTry,
       foundCorrect: foundCorrect,
@@ -313,7 +292,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
   }
 
-  /// Constrói o tabuleiro do jogo
   Widget _buildBoard(BuildContext _, __, ___) => Stack(
     children: [
       ...gamesItems.map((item) {

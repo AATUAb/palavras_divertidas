@@ -347,6 +347,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     }
   }
 
+
   String? getNextRetryTarget() {
     _roundCounter++;
     if (_retryQueue.isNotEmpty && _roundCounter > retryDelay) {
@@ -355,6 +356,14 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     }
     return null;
   }
+
+void registerFailedRound(String target) {
+  _retryQueue.add(target);
+}
+
+void removeFromRetryQueue(String target) {
+  _retryQueue.removeWhere((element) => element.toLowerCase() == target.toLowerCase());
+}
 
   void showEndOfGameDialog({
     required VoidCallback onRestart,

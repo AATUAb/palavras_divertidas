@@ -62,8 +62,7 @@ flutter:
     - assets/sounds/characters_sounds/
 
     # Imagens gerais
-    - assets/images/sun.png
-    - assets/images/identify_letters_numbers.png
+    - assets/images/
 
     # Imagens dos stickers
     - assets/stickers/monkey.jpg
