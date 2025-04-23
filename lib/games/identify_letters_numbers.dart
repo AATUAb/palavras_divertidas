@@ -95,98 +95,97 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   Future<void> _reproduzirInstrucao() async {
     final file = 'sounds/characters_sounds/${targetCharacter.toUpperCase()}.mp3';
-    try {
       await _letterPlayer.stop();
       await _letterPlayer.release();
       await _letterPlayer.play(AssetSource(file));
-    } catch (e) {
-      debugPrint('⚠️ Erro ao repetir som do carácter: $file');
-    }
   }
 
   bool retryIsUsed(String value) => _usedCharacters.contains(value);
 
-  Future<void> _generateNewChallenge() async {
-    final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
-    final availableChars = allChars.where((c) => !_usedCharacters.contains(c)).toList();
+Future<void> _generateNewChallenge() async {
+  
+   _gamesSuperKey.currentState?.registerCompletedRound();
+  final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
+  if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
 
-    if (availableChars.isEmpty) {
-      _gamesSuperKey.currentState?.showEndOfGameDialog(
-        onRestart: () {
-          setState(() => _usedCharacters.clear());
-          _generateNewChallenge();
-        },
-      );
-      return;
-    }
+  final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
+  final availableChars = allChars.where((c) => !_usedCharacters.contains(c)).toList();
 
-    final retry = _gamesSuperKey.currentState?.getNextRetryTarget();
-    final target = retry ?? availableChars[_random.nextInt(availableChars.length)];
-    if (!retryIsUsed(target)) _usedCharacters.add(target);
-
-    // ⚠️ Se este target estava na fila de retry e o jogador já acertou, vamos garantir que o removemos
-    _gamesSuperKey.currentState?.removeFromRetryQueue(target);
-
-    _cancelTimers();
-    setState(() {
-      isRoundActive = true;
-      gamesItems.clear();
-      foundCorrect = 0;
-      currentTry = 0;
-      progressValue = 1.0;
-      targetCharacter = target;
-    });
-
-    final bad = <String>{};
-    while (bad.length < wrongCount) {
-      final c = _characters[_random.nextInt(_characters.length)].character;
-      final opt = _random.nextBool() ? c.toUpperCase() : c.toLowerCase();
-      if (opt.toLowerCase() != target.toLowerCase()) bad.add(opt);
-    }
-
-    final good = List.generate(correctCount, (_) =>
-      _random.nextBool() ? target.toUpperCase() : target.toLowerCase());
-
-    final all = [...bad, ...good]..shuffle();
-    final cols = (all.length / 3).ceil(), sx = 1 / (cols + 1), sy = 0.18;
-
-    gamesItems = List.generate(all.length, (i) {
-      final col = i % cols, row = i ~/ cols;
-      final content = all[i];
-      final isCorrect = content.toLowerCase() == target.toLowerCase();
-      return GameItem(
-        id: '$i',
-        type: GameItemType.character,
-        content: content,
-        dx: sx * (col + 1),
-        dy: 0.45 + sy * row,
-        fontFamily: isFirstCycle ? _randFont() : null,
-        backgroundColor: _randColor(),
-        isCorrect: isCorrect,
-      );
-    });
-
-    setState(() {});
-    await _reproduzirInstrucao();
-
-    progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-      if (!mounted) return t.cancel();
-      setState(() {
-        progressValue -= 0.01;
-        if (progressValue <= 0) t.cancel();
-      });
-    });
-
-    roundTimer = Timer(levelTime, () {
-      if (!mounted) return;
-      setState(() => isRoundActive = false);
-      _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
-      _gamesSuperKey.currentState?.showTimeout(
-        applySettings: _applyLevelSettings,
-        generateNewChallenge: _generateNewChallenge,
-      );
-    });
+  if (availableChars.isEmpty && retry  == null) {
+    _gamesSuperKey.currentState?.showEndOfGameDialog(
+      onRestart: () {
+        setState(() => _usedCharacters.clear());
+        _generateNewChallenge();
+      },
+    );
+    return;
   }
+
+  final target = retry ?? availableChars[_random.nextInt(availableChars.length)];
+  if (!retryIsUsed(target)) _usedCharacters.add(target);
+
+  _gamesSuperKey.currentState?.removeFromRetryQueue(target);
+
+  _cancelTimers();
+  setState(() {
+    isRoundActive = true;
+    gamesItems.clear();
+    foundCorrect = 0;
+    currentTry = 0;
+    progressValue = 1.0;
+    targetCharacter = target;
+  });
+
+  final bad = <String>{};
+  while (bad.length < wrongCount) {
+    final c = _characters[_random.nextInt(_characters.length)].character;
+    final opt = _random.nextBool() ? c.toUpperCase() : c.toLowerCase();
+    if (opt.toLowerCase() != target.toLowerCase()) bad.add(opt);
+  }
+
+  final good = List.generate(correctCount, (_) =>
+    _random.nextBool() ? target.toUpperCase() : target.toLowerCase());
+
+  final all = [...bad, ...good]..shuffle();
+  final cols = (all.length / 3).ceil(), sx = 1 / (cols + 1), sy = 0.18;
+
+  gamesItems = List.generate(all.length, (i) {
+    final col = i % cols, row = i ~/ cols;
+    final content = all[i];
+    final isCorrect = content.toLowerCase() == target.toLowerCase();
+    return GameItem(
+      id: '$i',
+      type: GameItemType.character,
+      content: content,
+      dx: sx * (col + 1),
+      dy: 0.45 + sy * row,
+      fontFamily: isFirstCycle ? _randFont() : null,
+      backgroundColor: _randColor(),
+      isCorrect: isCorrect,
+    );
+  });
+
+  setState(() {});
+  await _reproduzirInstrucao();
+
+  progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+    if (!mounted) return t.cancel();
+    setState(() {
+      progressValue -= 0.01;
+      if (progressValue <= 0) t.cancel();
+    });
+  });
+
+  roundTimer = Timer(levelTime, () {
+    if (!mounted) return;
+    setState(() => isRoundActive = false);
+    _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
+    _gamesSuperKey.currentState?.showTimeout(
+    applySettings: _applyLevelSettings,
+    generateNewChallenge: _generateNewChallenge,
+  );
+  });
+}
 
   void _handleTap(GameItem item) {
     if (!isRoundActive || item.isTapped) return;

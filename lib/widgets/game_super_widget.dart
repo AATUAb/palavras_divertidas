@@ -53,7 +53,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     with SingleTickerProviderStateMixin {
   late LevelManager levelManager;
   late ConquestManager conquestManager;
-  final Queue<String> _retryQueue = Queue();
+  final Queue<MapEntry<String, int>> _retryQueue = Queue();
   int _roundCounter = 0;
   final int retryDelay = 3;
   bool _introPlayed = false;
@@ -310,60 +310,84 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   }
 
   Future<void> checkAnswer({
-    required GameItem selectedItem,
-    required String target,
-    required int correctCount,
-    required int currentTry,
-    required int foundCorrect,
-    required Future<void> Function() applySettings,
-    required VoidCallback generateNewChallenge,
-    required void Function(int) updateFoundCorrect,
-    required VoidCallback cancelTimers,
-  }) async {
-    final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
+  required GameItem selectedItem,
+  required String target,
+  required int correctCount,
+  required int currentTry,
+  required int foundCorrect,
+  required Future<void> Function() applySettings,
+  required VoidCallback generateNewChallenge,
+  required void Function(int) updateFoundCorrect,
+  required VoidCallback cancelTimers,
+}) async {
+  final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
 
-    setState(() {
-      selectedItem.isTapped = true;
-      selectedItem.isCorrect = isCorrect;
-    });
+  setState(() {
+    selectedItem.isTapped = true;
+    selectedItem.isCorrect = isCorrect;
+  });
 
-    await playAnswerFeedback(isCorrect: isCorrect);
+  await playAnswerFeedback(isCorrect: isCorrect);
 
-    if (isCorrect) {
-      await processCorrectAnswer(
-        selectedItem: selectedItem,
-        currentTry: currentTry,
-        correctCount: correctCount,
-        foundCorrect: foundCorrect,
-        cancelTimers: cancelTimers,
-        applySettings: applySettings,
-        generateNewChallenge: generateNewChallenge,
-        conquestManager: conquestManager,
-        updateFoundCorrect: updateFoundCorrect,
-        target: target,
-      );
+  if (isCorrect) {
+    await processCorrectAnswer(
+      selectedItem: selectedItem,
+      currentTry: currentTry,
+      correctCount: correctCount,
+      foundCorrect: foundCorrect,
+      cancelTimers: cancelTimers,
+      applySettings: applySettings,
+      generateNewChallenge: generateNewChallenge,
+      conquestManager: conquestManager,
+      updateFoundCorrect: updateFoundCorrect,
+      target: target,
+    );
+  } else {
+    registerFailedRound(target);
+  }
+}
+
+   void registerFailedRound(String target) {
+    final alreadyExists = _retryQueue.any((entry) => entry.key.toLowerCase() == target.toLowerCase());
+    if (!alreadyExists) {
+      _retryQueue.add(MapEntry(target, _roundCounter));
+      debugPrint('➕ Adicionado à fila de retry: $target');
     } else {
-      _retryQueue.add(target);
+      debugPrint('🔁 Já na fila de retry: $target');
     }
+    debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
   }
 
+  String? peekNextRetryTarget() {
+  if (_retryQueue.isNotEmpty) {
+    final oldest = _retryQueue.first;
+    final roundsSinceFail = _roundCounter - oldest.value;
+    if (roundsSinceFail >= retryDelay) {
+      return oldest.key; // ← só devolve, não remove
+    }
+  }
+  return null;
+}
 
-  String? getNextRetryTarget() {
+  void removeFromRetryQueue(String target) {
+    _retryQueue.removeWhere((entry) => entry.key.toLowerCase() == target.toLowerCase());
+    debugPrint('➖ Removido da fila de retry (já acertou): $target');
+    debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
+  }
+
+  List<String> retryQueueContents() {
+    return _retryQueue.map((e) => e.key).toList();
+  }
+
+  bool canUseRetry() {
+    return _roundCounter >= retryDelay;
+  }
+
+  void registerCompletedRound() {
     _roundCounter++;
-    if (_retryQueue.isNotEmpty && _roundCounter > retryDelay) {
-      _roundCounter = 0;
-      return _retryQueue.removeFirst();
-    }
-    return null;
+    debugPrint('🔄 Ronda concluída. Contador: $_roundCounter');
   }
 
-void registerFailedRound(String target) {
-  _retryQueue.add(target);
-}
-
-void removeFromRetryQueue(String target) {
-  _retryQueue.removeWhere((element) => element.toLowerCase() == target.toLowerCase());
-}
 
   void showEndOfGameDialog({
     required VoidCallback onRestart,
@@ -371,7 +395,7 @@ void removeFromRetryQueue(String target) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Fim do jogo'),
+        title: const Text('Parabéns, chegaste ao fim do jogo!'),
         content: const Text('Queres jogar novamente?'),
         actions: [
           TextButton(
