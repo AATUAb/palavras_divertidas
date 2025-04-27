@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/menu_design.dart';
 import 'game_menu.dart';
-import '../themes/colors.dart'; // para AppColors.green e AppColors.red
 
 class StickerBookScreen extends StatefulWidget {
   final dynamic user;
@@ -44,7 +43,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const double mapAspectRatio = 1.5;
+    const double mapAspectRatio = 1.55;
 
     return Scaffold(
       floatingActionButton: Column(
@@ -90,7 +89,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
                     ),
                   ),
 
-                  // Sticker do macaco no Brasil
+                  // Sticker do macaco
                   Align(
                     alignment: const Alignment(-0.35, 0.5),
                     child: _buildSticker(
@@ -99,11 +98,38 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
                     ),
                   ),
 
-                  // Sticker do elefante na Índia
+                  // Sticker do elefante
                   Align(
-                    alignment: const Alignment(0.35, 0.2),
+                    alignment: const Alignment(0.38, 0.2),
                     child: _buildSticker(
                       'assets/stickers/elephant.png',
+                      unlocked: _localConquest >= 1,
+                    ),
+                  ),
+
+                  // Sticker do leão
+                  Align(
+                    alignment: const Alignment(0.05, 0.2),
+                    child: _buildSticker(
+                      'assets/stickers/lion.png',
+                      unlocked: _localConquest >= 1,
+                    ),
+                  ),
+
+                  // sticker do tubarão
+                  Align(
+                    alignment: const Alignment(0.3, 0.6),
+                    child: _buildSticker(
+                      'assets/stickers/shark.png',
+                      unlocked: _localConquest >= 1,
+                    ),
+                  ),
+
+                  // sticker do canguru
+                  Align(
+                    alignment: const Alignment(0.63, 0.7),
+                    child: _buildSticker(
+                      'assets/stickers/kangaroo.png',
                       unlocked: _localConquest >= 1,
                     ),
                   ),
@@ -124,11 +150,11 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
               ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply)
               : const ColorFilter.mode(Colors.grey, BlendMode.saturation),
       child: Opacity(
-        opacity: unlocked ? 1.0 : 0.1,
+        opacity: unlocked ? 1.0 : 0.5,
         child: Image.asset(
           assetPath,
-          width: 20.w,
-          height: 20.h,
+          width: 25.w,
+          height: 25.h,
           fit: BoxFit.contain,
         ),
       ),

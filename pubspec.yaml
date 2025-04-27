@@ -70,6 +70,9 @@ flutter:
     # Imagens dos stickers
     - assets/stickers/monkey.png
     - assets/stickers/elephant.png
+    - assets/stickers/lion.png
+    - assets/stickers/shark.png
+    - assets/stickers/kangaroo.png
 
   fonts:
     - family: ComicNeue
