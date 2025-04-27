@@ -68,8 +68,8 @@ flutter:
 
 
     # Imagens dos stickers
-    - assets/stickers/monkey.jpg
-    - assets/stickers/elephant.jpg
+    - assets/stickers/monkey.png
+    - assets/stickers/elephant.png
 
   fonts:
     - family: ComicNeue

@@ -1,8 +1,10 @@
+// lib/screens/sticker_book.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/menu_design.dart';
 import 'game_menu.dart';
-import '../themes/colors.dart'; // para usar AppColors.green
+import '../themes/colors.dart'; // para AppColors.green e AppColors.red
 
 class StickerBookScreen extends StatefulWidget {
   final dynamic user;
@@ -13,40 +15,55 @@ class StickerBookScreen extends StatefulWidget {
 }
 
 class _StickerBookScreenState extends State<StickerBookScreen> {
-  // armazena localmente o nº de conquistas para demo
+  // armazena o nº de conquistas localmente (demo)
   late int _localConquest;
 
   @override
   void initState() {
     super.initState();
-    // inicia com o valor real do usuário
     _localConquest = (widget.user.conquest as int?) ?? 0;
   }
 
+  /// Destrava 1 conquista
   void _unlockOne() {
     setState(() {
       _localConquest++;
-      // atualiza o objeto real (e persiste, se for HiveObject)
       widget.user.conquest = _localConquest;
+      widget.user.save();
+    });
+  }
+
+  /// Re-bloqueia todas as conquistas (modo dev)
+  void _lockAll() {
+    setState(() {
+      _localConquest = 0;
+      widget.user.conquest = 0;
       widget.user.save();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // proporção largura/altura do mapa
-    const double mapAspectRatio = 1.2;
-
-    // decide se cada sticker está desbloqueado
-    final bool monkeyUnlocked = _localConquest >= 2;
-    final bool elephantUnlocked = _localConquest >= 3;
+    const double mapAspectRatio = 1.5;
 
     return Scaffold(
-      // ← botão para “destravar” uma conquista a cada toque
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.green,
-        child: const Icon(Icons.lock_open),
-        onPressed: _unlockOne,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            heroTag: 'unlock',
+            tooltip: 'Destravar um sticker',
+            child: const Icon(Icons.lock_open),
+            onPressed: _unlockOne,
+          ),
+          SizedBox(height: 5.h),
+          FloatingActionButton(
+            heroTag: 'lock',
+            tooltip: 'Re-bloquear todos',
+            child: const Icon(Icons.lock),
+            onPressed: _lockAll,
+          ),
+        ],
       ),
 
       body: MenuDesign(
@@ -58,7 +75,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             MaterialPageRoute(builder: (_) => GameMenu(user: widget.user)),
           );
         },
-        // 1️⃣ fundo do mapa, por baixo da curva
+        // 1️⃣ Mapa de fundo, por baixo da curva verde
         background: Padding(
           padding: EdgeInsets.only(top: 90.h),
           child: Center(
@@ -66,27 +83,28 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
               aspectRatio: mapAspectRatio,
               child: Stack(
                 children: [
-                  // o próprio mapa
                   Positioned.fill(
                     child: Image.asset(
                       'assets/images/earth.png',
                       fit: BoxFit.cover,
                     ),
                   ),
-                  // macaco no Brasil
+
+                  // Sticker do macaco no Brasil
                   Align(
-                    alignment: const Alignment(-0.35, 0.4),
+                    alignment: const Alignment(-0.35, 0.5),
                     child: _buildSticker(
-                      'assets/stickers/monkey.jpg',
-                      unlocked: monkeyUnlocked,
+                      'assets/stickers/monkey.png',
+                      unlocked: _localConquest >= 1,
                     ),
                   ),
-                  // elefante na Índia
+
+                  // Sticker do elefante na Índia
                   Align(
-                    alignment: const Alignment(0.4, 0.2),
+                    alignment: const Alignment(0.35, 0.2),
                     child: _buildSticker(
-                      'assets/stickers/elephant.jpg',
-                      unlocked: elephantUnlocked,
+                      'assets/stickers/elephant.png',
+                      unlocked: _localConquest >= 1,
                     ),
                   ),
                 ],
@@ -94,7 +112,6 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             ),
           ),
         ),
-        // não há conteúdo extra sobre o mapa + stickers
         child: const SizedBox.shrink(),
       ),
     );
@@ -110,8 +127,8 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
         opacity: unlocked ? 1.0 : 0.1,
         child: Image.asset(
           assetPath,
-          width: 30.w,
-          height: 30.h,
+          width: 20.w,
+          height: 20.h,
           fit: BoxFit.contain,
         ),
       ),
