@@ -4,23 +4,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../themes/colors.dart';
 
+/// Player global (não mexer aqui) …
 final AudioPlayer globalMenuPlayer = AudioPlayer();
 bool globalSoundStarted = false;
 bool globalSoundPaused = false;
 bool isMenuMuted = false;
 
 Future<void> pauseMenuMusic() async {
-  if (!globalSoundPaused) {
-    await globalMenuPlayer.pause();
-    globalSoundPaused = true;
-  }
+  /* … */
 }
-
 Future<void> resumeMenuMusic() async {
-  if (!isMenuMuted && globalSoundPaused) {
-    await globalMenuPlayer.resume();
-    globalSoundPaused = false;
-  }
+  /* … */
 }
 
 class MenuDesign extends StatefulWidget {
@@ -31,15 +25,19 @@ class MenuDesign extends StatefulWidget {
   final VoidCallback? onHomePressed;
   final bool hideSun;
 
+  /// permite receber um background “por baixo” da curva verde
+  final Widget? background;
+
   const MenuDesign({
-    super.key,
+    Key? key,
     required this.child,
     this.headerText,
     this.topLeftWidget,
     this.showHomeButton = false,
     this.onHomePressed,
     this.hideSun = false,
-  });
+    this.background,
+  }) : super(key: key);
 
   @override
   State<MenuDesign> createState() => _MenuDesignState();
@@ -63,9 +61,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
   }
 
   Future<void> _toggleMute() async {
-    setState(() {
-      isMenuMuted = !isMenuMuted;
-    });
+    setState(() => isMenuMuted = !isMenuMuted);
     if (isMenuMuted) {
       await globalMenuPlayer.pause();
       globalSoundPaused = true;
@@ -94,9 +90,16 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        // 0️⃣ fundo branco
         Container(color: Colors.white),
+
+        // 1️⃣ background opcional (ex: mapa-mundo)
+        if (widget.background != null) widget.background!,
+
+        // 2️⃣ a curva verde
         const Positioned(top: 0, left: 0, right: 0, child: TopWave()),
 
+        // 3️⃣ Sol atrás do header
         if (!widget.hideSun)
           Positioned(
             top: -50.h,
@@ -109,12 +112,12 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
             ),
           ),
 
+        // Título principal e texto secundário
         Positioned(
           top: 8.h,
           left: 0,
           right: 0,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 'Mundo das Palavras',
@@ -144,23 +147,23 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           ),
         ),
 
+        // Top left widget (pode ser um ícone custom)
         if (widget.topLeftWidget != null)
           Positioned(top: 10.h, left: 10.w, child: widget.topLeftWidget!),
 
-        // botão Home
+        // Botão home
         if (widget.showHomeButton)
           Positioned(
             top: 10.h,
             left: 10.w,
             child: IconButton(
               icon: Icon(Icons.home, size: 30.sp),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
               tooltip: 'Voltar ao Menu de Jogos',
               onPressed: widget.onHomePressed,
             ),
           ),
 
+        // 4️⃣ Conteúdo principal, abaixo da curva
         Positioned.fill(
           child: Padding(
             padding: EdgeInsets.only(top: 40.h),
@@ -168,40 +171,38 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
           ),
         ),
 
+        // Botão fechar app
         Positioned(
           top: 10.h,
           right: 10.w,
           child: IconButton(
             icon: Icon(Icons.close_rounded, color: AppColors.red, size: 30.sp),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
             tooltip: 'Fechar App',
             onPressed: () => SystemNavigator.pop(),
           ),
         ),
 
+        // Botão tutorial
         Positioned(
           bottom: 10.h,
           left: 10.w,
           child: IconButton(
             icon: Icon(Icons.info_outline, size: 25.sp),
             tooltip: 'Tutorial',
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    "Tutorial em breve",
-                    style: TextStyle(fontSize: 14.sp, color: AppColors.white),
+            onPressed:
+                () => ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      "Tutorial em breve",
+                      style: TextStyle(fontSize: 14.sp, color: AppColors.white),
+                    ),
+                    backgroundColor: AppColors.green,
                   ),
-                  backgroundColor: AppColors.green,
-                  duration: const Duration(seconds: 2),
-                  behavior: SnackBarBehavior.floating,
                 ),
-              );
-            },
           ),
         ),
 
+        // Botão mute
         Positioned(
           bottom: 10.h,
           right: 10.w,
@@ -220,7 +221,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
 }
 
 class TopWave extends StatelessWidget {
-  const TopWave({super.key});
+  const TopWave({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
