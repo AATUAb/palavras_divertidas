@@ -14,7 +14,6 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isFirstCycle = user.schoolLevel == '1º Ciclo';
 
-    // 1️⃣ Jogos conforme o ciclo
     final gameNames =
         isFirstCycle
             ? [
@@ -32,7 +31,6 @@ class DashboardScreen extends StatelessWidget {
               'Ouvir e procurar',
             ];
 
-    // Ícones por jogo
     final gameIcons = {
       'Detetive de letras e números': Icons.search,
       'Escrever': Icons.edit,
@@ -42,7 +40,6 @@ class DashboardScreen extends StatelessWidget {
       'Sílabas perdidas': Icons.extension,
     };
 
-    // 2️⃣ Calcula a % média (0.0–1.0) e converte para 0–100
     final allStats = user.gamesAccuracy;
     final percents =
         gameNames.map((game) {
@@ -52,64 +49,62 @@ class DashboardScreen extends StatelessWidget {
         }).toList();
 
     return MenuDesign(
-      hideSun: true,
+      headerText: 'Estatísticas', // ✅ Agora consistente
       showHomeButton: true,
+      hideSun: false,
       onHomePressed: () {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => GameMenu(user: user)),
         );
       },
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-        child: AspectRatio(
-          aspectRatio: 1,
-          child: RadarChart(
-            RadarChartData(
-              // 0 no centro
-              isMinValueAtCenter: true,
-
-              // 4 círculos de referência: 25, 50, 75, 100
-              tickCount: 4,
-
-              ticksTextStyle: TextStyle(fontSize: 10.sp, color: AppColors.grey),
-              tickBorderData: BorderSide(color: AppColors.grey),
-              gridBorderData: BorderSide(
-                color: AppColors.grey.withOpacity(0.5),
-              ),
-
-              // distância dos ícones ao centro
-              titlePositionPercentageOffset: 0.25,
-
-              dataSets: [
-                RadarDataSet(
-                  dataEntries:
-                      percents.map((p) => RadarEntry(value: p)).toList(),
-                  borderColor: AppColors.orange,
-                  fillColor: AppColors.orange.withOpacity(0.3),
-                  borderWidth: 2,
-                  entryRadius: 3.sp,
-                ),
-              ],
-
-              // ícones nos vértices em vez de texto
-              getTitle:
-                  (index, angle) => RadarChartTitle(
-                    text: '',
-                    angle: angle,
-                    children: [
-                      WidgetSpan(
-                        alignment: PlaceholderAlignment.middle,
-                        child: Icon(
-                          gameIcons[gameNames[index]]!,
-                          size: 24.sp,
-                          color: AppColors.orange,
-                        ),
-                      ),
-                    ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 55.h),
+          child: Center(
+            child: AspectRatio(
+              aspectRatio: 3.2,
+              child: RadarChart(
+                RadarChartData(
+                  isMinValueAtCenter: true,
+                  tickCount: 4,
+                  ticksTextStyle: TextStyle(
+                    fontSize: 10.sp,
+                    color: AppColors.grey,
                   ),
-
-              radarShape: RadarShape.polygon,
+                  tickBorderData: BorderSide(color: AppColors.grey),
+                  gridBorderData: BorderSide(
+                    color: AppColors.grey.withOpacity(0.5),
+                  ),
+                  titlePositionPercentageOffset: 0.25,
+                  dataSets: [
+                    RadarDataSet(
+                      dataEntries:
+                          percents.map((p) => RadarEntry(value: p)).toList(),
+                      borderColor: AppColors.orange,
+                      fillColor: AppColors.orange.withOpacity(0.3),
+                      borderWidth: 2,
+                      entryRadius: 3.sp,
+                    ),
+                  ],
+                  getTitle:
+                      (index, angle) => RadarChartTitle(
+                        text: '',
+                        angle: angle,
+                        children: [
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Icon(
+                              gameIcons[gameNames[index]]!,
+                              size: 24.sp,
+                              color: AppColors.orange,
+                            ),
+                          ),
+                        ],
+                      ),
+                  radarShape: RadarShape.polygon,
+                ),
+              ),
             ),
           ),
         ),
