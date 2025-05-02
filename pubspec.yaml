@@ -44,35 +44,19 @@ flutter:
 
   assets:
     # Animações
-    - assets/animations/loading.json
-    - assets/animations/coffeties.json
-    - assets/animations/conquest.json
-    - assets/animations/one_star.json
-    - assets/animations/two_star.json
-    - assets/animations/tree_star.json
-    - assets/animations/check.json
+    - assets/animations/
 
     # Sons gerais
-    - assets/sounds/intro_music.mp3
-    - assets/sounds/identify_letters_numbers.mp3
-    - assets/sounds/animations/
+    - assets/sounds/
 
     # Sons das letras e números (pronúncia individual)
     - assets/sounds/characters_sounds/
 
     # Imagens gerais
-    - assets/images/sun.png
-    - assets/images/world.png
-    - assets/images/identify_letters_numbers.png
-    - assets/images/end_game.png
-
+    - assets/images/
 
     # Imagens dos stickers
-    - assets/stickers/monkey.png
-    - assets/stickers/elephant.png
-    - assets/stickers/lion.png
-    - assets/stickers/shark.png
-    - assets/stickers/kangaroo.png
+    - assets/stickers/
 
   fonts:
     - family: ComicNeue

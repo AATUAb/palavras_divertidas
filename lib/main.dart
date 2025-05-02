@@ -9,17 +9,17 @@ import 'themes/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ► Bloqueio de orientação (mantido)
+  // ► Bloqueio de orientação (mantido)
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
 
-  // ► Inicialização única do Hive + seed de caracteres
+  // ► Inicialização única do Hive + seed de caracteres
   await HiveService.init(); // já faz initFlutter, regista adapters e corre o populateCharactersIfNeeded()
 
-  // ⚠️  Durante desenvolvimento, se continuar a querer limpar a box "users", descomente:
-  // await Hive.deleteBoxFromDisk('users');
+  // ⚠️ Durante desenvolvimento, se continuar a querer limpar a box "users", descomente:
+  // await HiveService.deleteUsersBox();
 
   runApp(const MyApp());
 }

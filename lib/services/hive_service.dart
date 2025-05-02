@@ -1,5 +1,3 @@
-// Hive service refatorado: agora regista o CharacterModelAdapter, abre a box "characters" e garante o seed com populateCharactersIfNeeded()
-
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:logger/logger.dart';
 
@@ -19,9 +17,9 @@ class HiveService {
   static Future<void> init() async {
     await Hive.initFlutter();
 
-    // ────────────────────────────────────────────────────────────────
-    // Registo de adapters (idempotente)
-    // ────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────
+    // Registo de adapters
+    // ─────────────────────────────────────────────
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(UserModelAdapter());
     }
@@ -29,9 +27,9 @@ class HiveService {
       Hive.registerAdapter(CharacterModelAdapter());
     }
 
-    // ────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────
     // Abertura das boxes
-    // ────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────
     try {
       _userBox = await Hive.openBox<UserModel>('users');
       logger.i("✅ Box 'users' opened successfully");
@@ -43,15 +41,35 @@ class HiveService {
       rethrow;
     }
 
-    // ────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────
     // Seed da box 'characters' (é idempotente)
-    // ────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────
     await populateCharactersIfNeeded();
   }
 
-  // ──────────────────────────────────────────────────────────────────
-  // Operações sobre utilizadores (código existente mantido)
-  // ──────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────
+  // Métodos utilitários para desenvolvimento
+  // ─────────────────────────────────────────────
+
+  static Future<void> deleteUsersBox() async {
+    if (Hive.isBoxOpen('users')) {
+      await _userBox.clear();
+    }
+    await Hive.deleteBoxFromDisk('users');
+    logger.w("⚠️ Box 'users' foi eliminada do disco.");
+  }
+
+  static Future<void> deleteCharactersBox() async {
+    if (Hive.isBoxOpen('characters')) {
+      await _characterBox.clear();
+    }
+    await Hive.deleteBoxFromDisk('characters');
+    logger.w("⚠️ Box 'characters' foi eliminada do disco.");
+  }
+
+  // ─────────────────────────────────────────────
+  // Operações sobre utilizadores
+  // ─────────────────────────────────────────────
 
   static List<UserModel> getUsers() {
     try {
@@ -129,9 +147,9 @@ class HiveService {
     }
   }
 
-  // ──────────────────────────────────────────────────────────────────
-  // Conquistas e estatísticas (código intacto)
-  // ──────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────
+  // Estatísticas e conquistas
+  // ─────────────────────────────────────────────
 
   static Future<void> incrementConquests(int userKey) async {
     try {
@@ -179,7 +197,6 @@ class HiveService {
     }
   }
 
-  // Taxa de acerto por jogo
   static Future<void> updateGameAccuracy({
     required int userKey,
     required String gameName,
