@@ -49,9 +49,10 @@ class DashboardScreen extends StatelessWidget {
         }).toList();
 
     return MenuDesign(
-      headerText: 'Estatísticas', // ✅ Agora consistente
+      titleText: 'Mundo das Palavras',
+      headerText: 'Estatísticas',
       showHomeButton: true,
-      hideSun: false,
+      showSun: true,
       onHomePressed: () {
         Navigator.pushReplacement(
           context,

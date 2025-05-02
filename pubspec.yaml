@@ -62,7 +62,7 @@ flutter:
 
     # Imagens gerais
     - assets/images/sun.png
-    - assets/images/earth.png
+    - assets/images/world.png
     - assets/images/identify_letters_numbers.png
     - assets/images/end_game.png
 

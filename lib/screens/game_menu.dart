@@ -93,6 +93,7 @@ class _GameMenuState extends State<GameMenu> {
 
     return Scaffold(
       body: MenuDesign(
+        titleText: "Mundo das Palavras",
         headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
         showHomeButton: true,
         onHomePressed: () {
@@ -198,8 +199,7 @@ class _GameMenuState extends State<GameMenu> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder:
-            (_) => IdentifyLettersNumbers(user: widget.user),
+        builder: (_) => IdentifyLettersNumbers(user: widget.user),
       ), // MaterialPageRoute
     );
   }
