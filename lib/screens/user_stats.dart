@@ -7,6 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/menu_design.dart';
+import 'game_menu.dart';
 
 class UserStats extends StatelessWidget {
   final UserModel user;
@@ -32,6 +33,7 @@ class UserStats extends StatelessWidget {
               'Ouvir e procurar',
             ];
 
+    // 1) Mapa de ícones por jogo
     final gameIcons = <String, IconData>{
       'Detetive de letras e números': Icons.search,
       'Escrever': Icons.edit,
@@ -41,16 +43,13 @@ class UserStats extends StatelessWidget {
       'Sílabas perdidas': Icons.extension,
     };
 
-    // Calcula percentagens (0 se nunca jogado)
+    // 2) Percentagens [0..100] vindas de gamesAccuracy (o primeiro valor da lista)
     final percents = <String, double>{
       for (var game in allGames)
-        game: () {
-          final attempts = user.totalAttemptsPerGame[game] ?? 0;
-          final correct = user.totalCorrectPerGame[game] ?? 0;
-          return attempts > 0 ? (correct / attempts) * 100 : 0.0;
-        }(),
+        game: (user.gamesAccuracy[game]?.first ?? 0.0) * 100,
     };
 
+    // 3) Entradas para o radar
     final radarEntries =
         percents.values
             .map((v) => RadarEntry(value: v.clamp(0.0, 100.0)))
@@ -62,48 +61,32 @@ class UserStats extends StatelessWidget {
       headerText: 'Estatísticas',
       showHomeButton: true,
       showSun: true,
-      onHomePressed: () => Navigator.pop(context),
+      onHomePressed:
+          () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => GameMenu(user: user)),
+          ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
         child: Column(
           children: [
-            // Indicadores globais
-            Wrap(
-              spacing: 30.w,
-              runSpacing: 16.h,
-              alignment: WrapAlignment.center,
-              children: [
-                _buildStatCard(
-                  'Taxa Global',
-                  '${(user.overallAccuracy ?? 0).toStringAsFixed(1)}%',
-                ),
-                _buildStatCard('Conquistas', '${user.conquest}'),
-                _buildStatCard('1ª Tentativa', '${user.firstTryCorrectTotal}'),
-                _buildStatCard(
-                  'Outras Tentativas',
-                  '${user.correctButNotFirstTryTotal}',
-                ),
-              ],
-            ),
-            SizedBox(height: 40.h),
+            SizedBox(height: 50.h), // para descer abaixo do cabeçalho
 
-            // RadarChart + ícones sobrepostos
             Expanded(
               child: AspectRatio(
-                aspectRatio: 1.3,
+                aspectRatio: 1.1,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final size = constraints.biggest;
                     final center = Offset(size.width / 2, size.height / 2);
-                    // Raios independentes para X e Y
                     final xRadius = size.width * 0.45;
                     final yRadius = size.height * 0.45;
                     final n = gameNames.length;
-                    final angleOffset = -pi / 2; // iniciar no topo
+                    final angleOffset = -pi / 2;
 
                     return Stack(
                       children: [
-                        // 1) O RadarChart sem títulos internos
+                        // A) RadarChart sem labels nem pontos internos
                         RadarChart(
                           RadarChartData(
                             radarShape: RadarShape.polygon,
@@ -113,14 +96,14 @@ class UserStats extends StatelessWidget {
                                 dataEntries: radarEntries,
                                 borderColor: AppColors.orange,
                                 fillColor: AppColors.orange.withOpacity(0.3),
-                                entryRadius: 3.sp,
+                                entryRadius: 0,
                                 borderWidth: 2,
                               ),
                             ],
-                            tickCount: 4,
-                            ticksTextStyle: TextStyle(
-                              color: AppColors.grey,
-                              fontSize: 10.sp,
+                            tickCount: 3,
+                            ticksTextStyle: const TextStyle(
+                              color: Colors.transparent,
+                              fontSize: 0,
                             ),
                             tickBorderData: BorderSide(color: AppColors.grey),
                             gridBorderData: BorderSide(
@@ -129,7 +112,32 @@ class UserStats extends StatelessWidget {
                           ),
                         ),
 
-                        // 2) Ícones posicionados nos vértices com xRadius/yRadius
+                        // B) Círculo no ponto proporcional à percentagem
+                        for (var i = 0; i < n; i++)
+                          Positioned(
+                            left:
+                                center.dx +
+                                xRadius *
+                                    cos(2 * pi * i / n + angleOffset) *
+                                    (percents[gameNames[i]]! / 100) -
+                                6.sp,
+                            top:
+                                center.dy +
+                                yRadius *
+                                    sin(2 * pi * i / n + angleOffset) *
+                                    (percents[gameNames[i]]! / 100) -
+                                6.sp,
+                            child: Container(
+                              width: 12.sp,
+                              height: 12.sp,
+                              decoration: const BoxDecoration(
+                                color: AppColors.orange,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+
+                        // C) Ícone fixo no vértice (100%)
                         for (var i = 0; i < n; i++)
                           Positioned(
                             left:
@@ -155,24 +163,6 @@ class UserStats extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStatCard(String title, String value) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color: AppColors.orange,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        Text(title, style: TextStyle(fontSize: 14.sp, color: AppColors.grey)),
-      ],
     );
   }
 }
