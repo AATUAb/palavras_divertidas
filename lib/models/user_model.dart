@@ -3,9 +3,8 @@ import 'package:logger/logger.dart';
 
 part 'user_model.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 1)
 class UserModel extends HiveObject {
-  // Nome do utilizador
   @HiveField(0)
   String name;
 
@@ -40,7 +39,7 @@ class UserModel extends HiveObject {
   int correctButNotFirstTryTotal;
 
   @HiveField(11)
-  Map<String, List<double>> gamesAccuracy;
+  Map<String, List<int>> gamesAccuracy;
 
   @HiveField(12)
   Map<String, int> totalCorrectPerGame;
@@ -83,15 +82,12 @@ class UserModel extends HiveObject {
   void updateGameAccuracy({
     required String gameId,
     required int level,
-    required double value,
+    required int value,
   }) {
     final updatedList = [...(gamesAccuracy[gameId] ?? List.filled(3, 0))];
     if (level >= 1 && level <= updatedList.length) {
       updatedList[level - 1] = value;
-      gamesAccuracy = {
-        ...gamesAccuracy,
-        gameId: updatedList.map((e) => e.toDouble()).toList(),
-      };
+      gamesAccuracy = {...gamesAccuracy, gameId: updatedList};
     }
   }
 
@@ -113,7 +109,7 @@ class UserModel extends HiveObject {
     int? otherSuccesses,
     int? firstTryCorrectTotal,
     int? correctButNotFirstTryTotal,
-    Map<String, List<double>>? gamesAccuracy,
+    Map<String, List<int>>? gamesAccuracy,
     Map<String, int>? totalCorrectPerGame,
     Map<String, int>? totalAttemptsPerGame,
   }) {

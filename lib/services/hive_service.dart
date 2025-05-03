@@ -17,9 +17,6 @@ class HiveService {
   static Future<void> init() async {
     await Hive.initFlutter();
 
-    // ─────────────────────────────────────────────
-    // Registo de adapters
-    // ─────────────────────────────────────────────
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(UserModelAdapter());
     }
@@ -27,9 +24,6 @@ class HiveService {
       Hive.registerAdapter(CharacterModelAdapter());
     }
 
-    // ─────────────────────────────────────────────
-    // Abertura das boxes
-    // ─────────────────────────────────────────────
     try {
       _userBox = await Hive.openBox<UserModel>('users');
       logger.i("✅ Box 'users' opened successfully");
@@ -41,15 +35,8 @@ class HiveService {
       rethrow;
     }
 
-    // ─────────────────────────────────────────────
-    // Seed da box 'characters' (é idempotente)
-    // ─────────────────────────────────────────────
     await populateCharactersIfNeeded();
   }
-
-  // ─────────────────────────────────────────────
-  // Métodos utilitários para desenvolvimento
-  // ─────────────────────────────────────────────
 
   static Future<void> deleteUsersBox() async {
     if (Hive.isBoxOpen('users')) {
@@ -66,10 +53,6 @@ class HiveService {
     await Hive.deleteBoxFromDisk('characters');
     logger.w("⚠️ Box 'characters' foi eliminada do disco.");
   }
-
-  // ─────────────────────────────────────────────
-  // Operações sobre utilizadores
-  // ─────────────────────────────────────────────
 
   static List<UserModel> getUsers() {
     try {
@@ -147,10 +130,6 @@ class HiveService {
     }
   }
 
-  // ─────────────────────────────────────────────
-  // Estatísticas e conquistas
-  // ─────────────────────────────────────────────
-
   static Future<void> incrementConquests(int userKey) async {
     try {
       final user = _userBox.get(userKey);
@@ -200,20 +179,19 @@ class HiveService {
   static Future<void> updateGameAccuracy({
     required int userKey,
     required String gameName,
-    required List<double> accuracyPerLevel,
+    required List<int> accuracyPerLevel,
   }) async {
     final user = _userBox.get(userKey);
     if (user != null) {
-      final mutableMap = Map<String, List<double>>.from(user.gamesAccuracy);
+      final mutableMap = Map<String, List<int>>.from(user.gamesAccuracy);
       mutableMap[gameName] = accuracyPerLevel;
       user.gamesAccuracy = mutableMap;
 
       await updateUserByKey(userKey, user);
 
-      final accuracy =
-          accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0.0;
+      final accuracy = accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0;
       logger.i(
-        "🎯 Updated accuracy for $gameName, nível ${user.gameLevel}: ${(accuracy * 100).toStringAsFixed(1)}%",
+        "🎯 Updated accuracy for $gameName, nível ${user.gameLevel}: $accuracy%",
       );
     } else {
       logger.w("⚠️ User not found with key $userKey for updating accuracy");

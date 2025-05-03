@@ -57,8 +57,8 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   final Queue<MapEntry<String, int>> _retryQueue = Queue();
   int _roundCounter = 0;
   final int retryDelay = 3;
-  bool _introPlayed = false;
-  bool _introCompleted = false;
+  bool introPlayed = false;
+  bool introCompleted = false;
   late AnimationController _fadeController;
   late Animation<double> _rotationAnimation;
 
@@ -89,8 +89,8 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
             _fadeController.forward().then((_) {
               if (mounted) {
                 setState(() {
-                  _introPlayed = true;
-                  _introCompleted = true;
+                  introPlayed = true;
+                  introCompleted = true;
                 });
                 widget.onIntroFinished?.call();
               }
@@ -99,10 +99,10 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
         });
       });
     } else {
-      _introPlayed = true;
+      introPlayed = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() => _introCompleted = true);
+          setState(() => introCompleted = true);
           widget.onIntroFinished?.call();
         }
       });
@@ -128,7 +128,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       ),
       child: Stack(
         children: [
-          if (!_introCompleted && widget.introImagePath != null)
+          if (!introCompleted && widget.introImagePath != null)
             FadeTransition(
               opacity: Tween(begin: 1.0, end: 0.0).animate(_fadeController),
               child: RotationTransition(
@@ -150,7 +150,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
             )
           else
             widget.builder(context, levelManager, widget.user),
-          if (widget.onRepeatInstruction != null && _introCompleted)
+          if (widget.onRepeatInstruction != null && introCompleted)
             Positioned(
               top: 50,
               left: 10,

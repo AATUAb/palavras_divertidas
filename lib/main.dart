@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'services/hive_service.dart';
 import 'screens/loading_screen.dart';
@@ -9,17 +10,20 @@ import 'themes/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ► Bloqueio de orientação (mantido)
+  // ► Bloqueio de orientação
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
 
-  // ► Inicialização única do Hive + seed de caracteres
-  await HiveService.init(); // já faz initFlutter, regista adapters e corre o populateCharactersIfNeeded()
+  // ► Inicialização básica do Hive
+  await Hive.initFlutter();
 
-  // ⚠️ Durante desenvolvimento, se continuar a querer limpar a box "users", descomente:
-  // await HiveService.deleteUsersBox();
+  // ⚠️ Apagar box antes de qualquer abertura (durante desenvolvimento)
+  // await Hive.deleteBoxFromDisk('users');
+
+  // ► Agora inicializa com adapters e seed
+  await HiveService.init();
 
   runApp(const MyApp());
 }

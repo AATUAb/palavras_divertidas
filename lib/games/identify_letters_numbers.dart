@@ -200,7 +200,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
   }
 
-  void _handleTap(GameItem item) {
+  void _handleTap(GameItem item) async {
     if (!isRoundActive || item.isTapped) return;
     final s = _gamesSuperKey.currentState;
     if (s == null) return;

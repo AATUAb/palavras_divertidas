@@ -28,8 +28,12 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       otherSuccesses: fields[8] as int,
       firstTryCorrectTotal: fields[9] as int,
       correctButNotFirstTryTotal: fields[10] as int,
-      gamesAccuracy: (fields[11] as Map).map((dynamic k, dynamic v) =>
-          MapEntry(k as String, (v as List).cast<double>())),
+      gamesAccuracy:
+          (fields[11] as Map?)?.map(
+            (dynamic k, dynamic v) =>
+                MapEntry(k as String, (v as List).cast<int>()),
+          ) ??
+          {},
       totalCorrectPerGame: (fields[12] as Map?)?.cast<String, int>(),
       totalAttemptsPerGame: (fields[13] as Map?)?.cast<String, int>(),
     );

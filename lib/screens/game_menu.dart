@@ -7,7 +7,7 @@ import '../games/identify_letters_numbers.dart';
 import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
-import 'dashboard.dart';
+import 'user_stats.dart';
 
 class GameCardData {
   final String title;
@@ -128,7 +128,7 @@ class _GameMenuState extends State<GameMenu> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => DashboardScreen(user: widget.user),
+                      builder: (_) => UserStats(user: widget.user),
                     ),
                   );
                 },

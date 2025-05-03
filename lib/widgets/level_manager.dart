@@ -22,7 +22,7 @@ class LevelManager {
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 1, //roundas para avaliar o nível
+    this.roundsToEvaluate = 1,
   }) : level = level ?? user.gameLevel;
 
   int get totalRoundsCount => totalRounds;
@@ -45,33 +45,32 @@ class LevelManager {
     final userKey = user.key;
     if (userKey == null) return;
 
-    bool subiuNivel = false; //mudar nome da variável para inglês
-    bool desceuNivel = false; // mudar nome da variável para inglês
+    bool levelUp = false;
+    bool levelDown = false;
 
     final double accuracy = correctAnswers / totalRounds;
+    final int accuracyPercent = (accuracy * 100).round();
 
     if (totalRounds >= roundsToEvaluate * 2 &&
         accuracy >= 0.8 &&
         level < maxLevel) {
       level++;
-      subiuNivel = true;
+      levelUp = true;
     } else if (totalRounds >= roundsToEvaluate &&
         accuracy <= 0.5 &&
         level > minLevel) {
       level--;
-      desceuNivel = true;
+      levelDown = true;
     }
 
-    levelChanged = subiuNivel || desceuNivel;
-    levelIncreased = subiuNivel;
+    levelChanged = levelUp || levelDown;
+    levelIncreased = levelUp;
 
-    // 🧠 Se mudou de nível, limpa estatísticas ANTES de guardar
     if (levelChanged) {
       totalRounds = 0;
       correctAnswers = 0;
     }
 
-    // 📝 Atualiza info do utilizador
     user.gameLevel = level;
     user.updateAccuracy(level: level, accuracy: accuracy);
     user.accuracyByLevel[level] = accuracy;
@@ -80,8 +79,9 @@ class LevelManager {
     await HiveService.updateGameAccuracy(
       userKey: userKey,
       gameName: gameName,
-      accuracyPerLevel: [accuracy],
+      accuracyPerLevel: [accuracyPercent],
     );
+
     applySettings();
     onFinished();
   }
