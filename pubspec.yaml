@@ -36,7 +36,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  hive_generator: ^2.0.1          # geração automática dos Hive adapters
+  hive_generator: ^2.0.1
   build_runner:  ^2.4.7
 
 flutter:
@@ -48,8 +48,7 @@ flutter:
 
     # Sons gerais
     - assets/sounds/
-
-    # Sons das letras e números (pronúncia individual)
+    - assets/sounds/animations/
     - assets/sounds/characters_sounds/
 
     # Imagens gerais
