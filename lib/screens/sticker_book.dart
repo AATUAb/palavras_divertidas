@@ -335,13 +335,13 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
   }
 
   Widget _buildSticker(String assetPath, {required bool unlocked}) {
-    return ColorFiltered(
-      colorFilter:
-          unlocked
-              ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply)
-              : const ColorFilter.mode(Colors.grey, BlendMode.saturation),
-      child: Opacity(
-        opacity: unlocked ? 1.0 : 0.7,
+    return Opacity(
+      opacity: unlocked ? 1.0 : 0.5, // só controla visibilidade
+      child: ColorFiltered(
+        colorFilter:
+            unlocked
+                ? const ColorFilter.mode(Colors.transparent, BlendMode.dst)
+                : const ColorFilter.mode(Colors.black, BlendMode.srcIn),
         child: Image.asset(
           assetPath,
           width: 45.w,
