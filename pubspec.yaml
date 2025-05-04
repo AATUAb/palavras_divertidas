@@ -57,6 +57,9 @@ flutter:
     # Imagens dos stickers
     - assets/stickers/
 
+    # Imagens dos pontos de controle de letras e números
+    - assets/phontics_assets_points/
+
   fonts:
     - family: ComicNeue
       fonts:
