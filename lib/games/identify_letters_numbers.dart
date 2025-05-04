@@ -10,6 +10,7 @@ import '../models/character_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
 
+// Classe principal do jogo, que recebe o utilizador como argumento
 class IdentifyLettersNumbers extends StatefulWidget {
   final UserModel user;
   const IdentifyLettersNumbers({super.key, required this.user});
@@ -19,30 +20,33 @@ class IdentifyLettersNumbers extends StatefulWidget {
 }
 
 class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
-  final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
-  final _random = Random();
-  late final AudioPlayer _letterPlayer;
-  bool hasChallengeStarted = false;
-  late int correctCount;
-  late int wrongCount;
-  late Duration levelTime;
-  late int currentTry;
-  late int foundCorrect;
+  final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();     // Chave global para o widget de jogo
+  final _random = Random();                                     // Gerador de letras e números aleatórios         
+  late final AudioPlayer _letterPlayer;                         // Player de áudio para reproduzir sons de letras e números
+  bool hasChallengeStarted = false;                             // Indica se o desafio começou
+  late int correctCount;                                        // Número de letras/números corretos a encontrar
+  late int wrongCount;                                         // Número de letras/números errados a encontrar
+  late Duration levelTime;                                     // Tempo total para completar o nível
+  late int currentTry;                                         // Tentativas atuais do jogador                            
+  late int foundCorrect;                                      // Número de letras/números encontrados corretamente
 
-  List<CharacterModel> _characters = [];
-  List<String> _usedCharacters = [];
-
-  bool isRoundActive = true;
-  String targetCharacter = '';
-  bool isRoundFinished = false;
-  List<GameItem> gamesItems = [];
-  Timer? roundTimer, progressTimer;
+  List<CharacterModel> _characters = [];                       // Lista de caracteres disponíveis
+  List<String> _usedCharacters = [];                          // Lista de caracteres já utilizados
+ 
+  bool isRoundActive = true;                                 // Indica se a ronda está ativa
+  String targetCharacter = '';                               // Caractere alvo a encontrar   
+  bool isRoundFinished = false;                              // Indica se a ronda está terminada
+  List<GameItem> gamesItems = [];                            // Lista de itens do jogo (letras/números)                   
+  Timer? roundTimer, progressTimer;                           // Temporizadores para controlar o tempo da ronda e o progresso
+  double progress = 0.0;                                      // Progresso atual do jogador 
   double progressValue = 1.0;
 
-  bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
-  bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);
-  bool _isNumber(String c) => RegExp(r'[0-9]').hasMatch(c);
-  String _randFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
+  bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';       // Verifica se o utilizador está no 1º ciclo
+  bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);          // Verifica se o caractere é uma letra
+  bool _isNumber(String c) => RegExp(r'[0-9]').hasMatch(c);             // Verifica se o caractere é um número
+  String _randFont() => _random.nextBool() ? 'Slabo' : 'Cursive';       // Seleciona aleatoriamente uma fonte entre 'Slabo' e 'Cursive'
+ 
+  // Seleciona uma cor entre uma lista de cores pré-definidas para as bolhas das letras/números
   Color _randColor() =>
       [
         Colors.red,
@@ -57,17 +61,20 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
         Colors.cyan,
       ][_random.nextInt(10)];
 
+  // Inicializa o estado do jogo
   @override
   void initState() {
     super.initState();
     _letterPlayer = AudioPlayer();
   }
 
+  // Carrega os caracteres disponíveis a partir do Hive
   Future<void> _loadCharacters() async {
     final box = await Hive.openBox<CharacterModel>('characters');
     _characters = box.values.toList();
   }
 
+  //  Fecha o player de áudio e cancela os temporizadores
   @override
   void dispose() {
     _letterPlayer.dispose();
@@ -75,6 +82,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     super.dispose();
   }
 
+  // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
     switch (lvl) {
@@ -97,11 +105,13 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     setState(() {});
   }
 
+  // Cancela os temporizadores ativos
   void _cancelTimers() {
     roundTimer?.cancel();
     progressTimer?.cancel();
   }
 
+  // Reproduz a instrução de áudio para o jogador
   Future<void> _reproduzirInstrucao() async {
     final file =
         'sounds/characters_sounds/${targetCharacter.toUpperCase()}.mp3';
@@ -110,6 +120,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     await _letterPlayer.play(AssetSource(file));
   }
 
+  // Verifica se o caractere já foi utilizado na ronda atual, para controlar a repetição
   bool retryIsUsed(String value) => _usedCharacters.contains(value);
 
   Future<void> _generateNewChallenge() async {
@@ -131,13 +142,16 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       return;
     }
 
+    // Se não houver caracteres disponíveis, reinicia o jogo
     final target =
         retry ?? availableChars[_random.nextInt(availableChars.length)];
     if (!retryIsUsed(target)) _usedCharacters.add(target);
 
     _gamesSuperKey.currentState?.removeFromRetryQueue(target);
 
+    // Cancela os temporizadores de ronda e progresso
     _cancelTimers();
+    // Reinicia o estado do jogo
     setState(() {
       isRoundActive = true;
       gamesItems.clear();
@@ -147,6 +161,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       targetCharacter = target;
     });
 
+      // Verifica se o caractere é uma letra ou número e ajusta o número de tentativas
     final bad = <String>{};
     while (bad.length < wrongCount) {
       final c = _characters[_random.nextInt(_characters.length)].character;
@@ -154,6 +169,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       if (opt.toLowerCase() != target.toLowerCase()) bad.add(opt);
     }
 
+    //  Gera os itens do jogo com base nos caracteres corretos e errados
     final good = List.generate(
       correctCount,
       (_) => _random.nextBool() ? target.toUpperCase() : target.toLowerCase(),
@@ -178,9 +194,11 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       );
     });
 
+    // Reproduz a instrução de áudio para o jogador
     setState(() {});
     await _reproduzirInstrucao();
 
+    // Inicia os temporizadores de progresso e ronda
     progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
       if (!mounted) return t.cancel();
       setState(() {
@@ -189,6 +207,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       });
     });
 
+    // Inicia o temporizador da ronda
     roundTimer = Timer(levelTime, () {
       if (!mounted) return;
       setState(() => isRoundActive = false);
@@ -200,6 +219,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
   }
 
+  // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
     if (!isRoundActive || item.isTapped) return;
     final s = _gamesSuperKey.currentState;
@@ -218,6 +238,8 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       s.registerFailedRound(targetCharacter);
     }
 
+    // Verifica se o jogador encontrou o caractere correto
+    // Faz callback para o método checkAnswer do GamesSuperWidget
     s.checkAnswer(
       selectedItem: item,
       target: targetCharacter,
@@ -231,6 +253,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
+  // Constrói o widget principal do jogo
   @override
   Widget build(BuildContext context) {
     return GamesSuperWidget(
@@ -258,6 +281,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
+  // Constrói o texto superior do jogo, que é apresenado quando o jogo arranca
   Widget _buildTopText() {
     return Padding(
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
@@ -276,6 +300,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
+  // Constrói o texto do desafio, que apresenta o caractere alvo a encontrar
   Widget _buildChallengeText() {
     if (isFirstCycle && _isLetter(targetCharacter)) {
       return Text.rich(
@@ -307,6 +332,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
   }
 
+  // Constrói o tabuleiro do jogo, que contém os itens (letras/números) a encontrar
   Widget _buildBoard(BuildContext _, __, ___) => Stack(
     children: [
       ...gamesItems.map((item) {
