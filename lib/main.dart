@@ -7,6 +7,9 @@ import 'services/hive_service.dart';
 import 'screens/loading_screen.dart';
 import 'themes/app_theme.dart';
 
+// 1️⃣ Importa o modelo (que inclui o adapter gerado)
+import 'models/character_model.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -19,8 +22,11 @@ Future<void> main() async {
   // ► Inicialização básica do Hive
   await Hive.initFlutter();
 
-  // ⚠️ Apagar box antes de qualquer abertura (durante desenvolvimento)
-  // await Hive.deleteBoxFromDisk('users');
+  // ─────────── Registro de Adapters ───────────
+  Hive.registerAdapter(CharacterModelAdapter());
+  // Se tiveres outros modelos, regista aqui também:
+  // Hive.registerAdapter(UserModelAdapter());
+  // ──────────────────────────────────────────────
 
   // ► Agora inicializa com adapters e seed
   await HiveService.init();
