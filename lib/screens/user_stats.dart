@@ -40,16 +40,25 @@ class UserStats extends StatelessWidget {
       'Sílabas perdidas': Icons.extension,
     };
 
+    // Dados simulados para teste
+    final mockedData = {
+      'Detetive de letras e números': [0.8, 0.5, 0.6],
+      'Escrever': [0.3, 0.7, 0.4],
+      'Contar sílabas': [0.6, 0.2, 0.5],
+      'Ouvir e procurar': [0.4, 0.9, 0.3],
+      'Detetive de palavras': [0.7, 0.6, 0.8],
+      'Sílabas perdidas': [0.5, 0.4, 0.7],
+    };
+
     Widget buildCustomRadarChart(int levelIndex, double size) {
       final n = allGames.length;
       final center = Offset(size / 2, size / 2);
       final radius = size / 2.3;
+
       final scores =
           allGames.map((game) {
-            final values = user.gamesAccuracy[game] ?? [];
-            return values.length >= levelIndex
-                ? values[levelIndex - 1].toDouble()
-                : 0.0;
+            final values = mockedData[game] ?? [];
+            return values.length >= levelIndex ? values[levelIndex - 1] : 0.0;
           }).toList();
 
       return SizedBox(
@@ -111,27 +120,45 @@ class UserStats extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Legenda
+                // Legenda com percentagens
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children:
                       allGames.map((game) {
+                        final values = mockedData[game] ?? [0.0, 0.0, 0.0];
                         return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.h),
-                          child: Row(
+                          padding: EdgeInsets.symmetric(vertical: 3.h),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                gameIcons[game]!,
-                                color: AppColors.orange,
-                                size: 15.sp,
+                              Row(
+                                children: [
+                                  Icon(
+                                    gameIcons[game]!,
+                                    color: AppColors.orange,
+                                    size: 15.sp,
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  Text(
+                                    game,
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: AppColors.orange,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: 10.w),
-                              Text(
-                                game,
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  color: AppColors.orange,
-                                  decoration: TextDecoration.none,
+                              SizedBox(height: 3.h),
+                              Padding(
+                                padding: EdgeInsets.only(left: 25.w),
+                                child: Text(
+                                  'Nível 1: ${(values[0] * 100).toInt()}%; Nível 2: ${(values[1] * 100).toInt()}%; Nível 3: ${(values[2] * 100).toInt()}%',
+                                  style: TextStyle(
+                                    fontSize: 6.sp,
+                                    color: Colors.grey[500],
+                                    decoration: TextDecoration.none,
+                                  ),
                                 ),
                               ),
                             ],
@@ -174,7 +201,6 @@ class UserStats extends StatelessWidget {
   }
 }
 
-// 🎯 CustomPainter para radar chart
 class RadarPainter extends CustomPainter {
   final List<double> scores;
   final Offset center;
@@ -210,9 +236,12 @@ class RadarPainter extends CustomPainter {
           ..strokeWidth = 2
           ..style = PaintingStyle.stroke;
 
-    // Draw grid
+    final textStyle = TextStyle(color: Colors.grey[600], fontSize: 5);
+
+    // Desenhar a grade com rótulos de percentagem
     for (int s = 1; s <= segments; s++) {
       final path = Path();
+
       for (int i = 0; i < sides; i++) {
         final angle = 2 * pi * i / sides - pi / 2;
         final point = Offset(
@@ -225,19 +254,37 @@ class RadarPainter extends CustomPainter {
           path.lineTo(point.dx, point.dy);
         }
       }
+
       path.close();
       canvas.drawPath(path, paintGrid);
+
+      // Rótulo de percentagem
+      final labelOffset = Offset(
+        center.dx - 12,
+        center.dy - radius * s / segments - 3,
+      );
+
+      final textSpan = TextSpan(text: '${s * 25}%', style: textStyle);
+      final tp = TextPainter(
+        text: textSpan,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+      tp.layout();
+      tp.paint(canvas, labelOffset);
     }
 
-    // Draw radar area
+    // Desenhar a área do radar
     final path = Path();
+    final points = <Offset>[];
     for (int i = 0; i < sides; i++) {
       final angle = 2 * pi * i / sides - pi / 2;
-      final value = max(scores[i].clamp(0.0, 1.0), 0.05); // visibilidade mínima
+      final value = max(scores[i].clamp(0.0, 1.0), 0.05);
       final point = Offset(
         center.dx + radius * value * cos(angle),
         center.dy + radius * value * sin(angle),
       );
+      points.add(point);
       if (i == 0) {
         path.moveTo(point.dx, point.dy);
       } else {
@@ -247,6 +294,18 @@ class RadarPainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, paintRadar);
     canvas.drawPath(path, paintBorder);
+
+    // Círculo central
+    final centerCircle =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, 3, centerCircle);
+
+    // Círculos nos vértices
+    for (final point in points) {
+      canvas.drawCircle(point, 2, centerCircle);
+    }
   }
 
   @override
