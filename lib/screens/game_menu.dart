@@ -4,6 +4,7 @@ import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/menu_design.dart';
 import '../games/identify_letters_numbers.dart';
+import '../games/writing_game.dart';
 import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
@@ -54,7 +55,7 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Escrever",
         icon: Icons.edit,
-        onTap: () => _navigateToGame("Escrever"),
+        onTap: _writingGame,
         backgroundColor: AppColors.orange,
       ),
       GameCardData(
@@ -201,6 +202,15 @@ class _GameMenuState extends State<GameMenu> {
       MaterialPageRoute(
         builder: (_) => IdentifyLettersNumbers(user: widget.user),
       ), // MaterialPageRoute
+    );
+  }
+
+    void _writingGame() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WritingGame(user: widget.user),
+      ),
     );
   }
 
