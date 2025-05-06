@@ -4,7 +4,7 @@ import 'package:mundodaspalavras/games/writing_game/tracing/tracing_page.dart';
 import '../../models/user_model.dart'; // se precisares de usar o user para algo
 
 class WritingGame extends StatelessWidget {
-  final UserModel user; // se for necessário
+  final UserModel user; 
   const WritingGame({super.key, required this.user});
 
   @override
