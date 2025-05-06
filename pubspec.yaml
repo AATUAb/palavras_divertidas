@@ -32,6 +32,12 @@ dependencies:
   # Gráficos
   fl_chart: 0.71.0
 
+  # Gerência de estado
+  flutter_bloc: ^9.0.0
+  bloc: ^9.0.0
+  equatable: ^2.0.7
+  svg_path_parser: ^1.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -39,10 +45,6 @@ dev_dependencies:
   hive_generator: ^2.0.1
   build_runner:  ^2.4.7
   plugin_platform_interface: ^2.0.2
-  flutter_bloc: ^9.0.0
-  equatable: ^2.0.7
-  svg_path_parser: ^1.1.2
-  bloc: ^9.0.0
 
 flutter:
   uses-material-design: true

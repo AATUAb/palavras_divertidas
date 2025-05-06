@@ -5,7 +5,7 @@ import 'package:mundodaspalavras/themes/colors.dart';
 import 'package:mundodaspalavras/games/writing_game/phontics_constants/pt_shape_path.dart';
 import 'package:mundodaspalavras/games/writing_game/phontics_constants/numbers_svg.dart';
 import 'package:mundodaspalavras/games/writing_game/phontics_constants/shape_paths.dart';
-import 'package:mundodaspalavras/games/writing_game/points_manager/shape_points_manger.dart';
+import 'package:mundodaspalavras/games/writing_game/points_manager/shape_points_manager.dart';
 import 'package:mundodaspalavras/games/writing_game/tracing/tracing_models.dart';
 import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
 
