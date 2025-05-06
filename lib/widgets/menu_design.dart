@@ -68,7 +68,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
   Future<void> _initAudio() async {
     await globalMenuPlayer.setReleaseMode(ReleaseMode.loop);
     if (!isMenuMuted && !globalSoundStarted) {
-      await globalMenuPlayer.play(AssetSource('sounds/intro_music.mp3'));
+      await globalMenuPlayer.play(AssetSource('sounds/intro_music.ogg'));
       globalSoundStarted = true;
       globalSoundPaused = false;
     }

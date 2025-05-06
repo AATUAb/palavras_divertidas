@@ -114,7 +114,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   // Reproduz a instrução de áudio para o jogador
   Future<void> _reproduzirInstrucao() async {
     final file =
-        'sounds/characters_sounds/${targetCharacter.toUpperCase()}.mp3';
+        'sounds/characters_sounds/${targetCharacter.toUpperCase()}.ogg';
     await _letterPlayer.stop();
     await _letterPlayer.release();
     await _letterPlayer.play(AssetSource(file));
@@ -269,7 +269,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       builder: _buildBoard,
       onRepeatInstruction: _reproduzirInstrucao,
       introImagePath: 'assets/images/identify_letters_numbers.webp',
-      introAudioPath: 'sounds/identify_letters_numbers.mp3',
+      introAudioPath: 'sounds/identify_letters_numbers.ogg',
       onIntroFinished: () async {
         await _loadCharacters();
         await _applyLevelSettings();

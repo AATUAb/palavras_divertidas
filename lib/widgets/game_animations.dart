@@ -7,7 +7,7 @@ import 'package:audioplayers/audioplayers.dart';
 // classe para animações e sons do jogo
 class GameAnimations {
   static Future<void> playAnswerFeedback({required bool isCorrect}) async {
-    final sound = isCorrect ? 'correct.wav' : 'wrong.wav';
+    final sound = isCorrect ? 'correct.ogg' : 'wrong.ogg';
     await _playSound(sound);
   }
 
@@ -59,7 +59,7 @@ static Future<void> showLevelChangeDialog(
             duration: const Duration(seconds: 3),
             width: 300.w,
             height: 100.h,
-            sound: 'level.wav',
+            sound: 'level.ogg',
             onFinished: onFinished,
           ),
           SizedBox(height: 8.h),
@@ -104,7 +104,7 @@ static Future<void> showConquestDialog(
               duration: const Duration(seconds: 3),
               width: 200.w,
               height: 120.h,
-              sound: 'conquest.wav',
+              sound: 'conquest.ogg',
               onFinished: onFinished,
             ),
             SizedBox(height: 4.h),
@@ -248,7 +248,7 @@ class _AnimatedAnswerItemState extends State<AnimatedAnswerItem>
     );
 
     if (widget.isCorrect) {
-      GameAnimations._playSound('correct.wav');
+      GameAnimations._playSound('correct.ogg');
       setState(() => _showCheckIcon = true);
       Future.delayed(const Duration(milliseconds: 200), () {
         if (widget.onRemoved != null) widget.onRemoved!();
