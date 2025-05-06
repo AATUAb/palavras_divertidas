@@ -117,7 +117,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
             top: -50.h,
             left: 12.w,
             child: Image.asset(
-              'assets/images/sun.png',
+              'assets/images/sun.webp',
               width: 300.w,
               height: 300.h,
               fit: BoxFit.contain,
