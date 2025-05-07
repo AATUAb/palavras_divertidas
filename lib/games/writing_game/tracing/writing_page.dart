@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mundodaspalavras/games/writing_game/tracing/phonetics_painter.dart';
-import 'package:mundodaspalavras/games/writing_game/tracing/tracing_models.dart';
-import 'package:mundodaspalavras/games/writing_game/tracing/tracing_manager.dart';
+import 'package:mundodaspalavras/games/writing_game/tracing/writing_models.dart';
+import 'package:mundodaspalavras/games/writing_game/tracing/writing_manager.dart';
 import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
 
 
@@ -205,7 +205,7 @@ class TracingGameScaffold extends StatelessWidget {
                                 top: model.anchorPos!.dy,
                                 left: model.anchorPos!.dx,
                                 child: Image.asset(
-                                  'packages/tracing_game/assets/images/position_2_finger.png',
+                                  'assets/images/position_2_finger.png',
                                   height: 50,
                                 ),
                               ),
