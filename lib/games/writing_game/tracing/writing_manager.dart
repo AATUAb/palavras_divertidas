@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:svg_path_parser/svg_path_parser.dart';
 import 'package:mundodaspalavras/games/writing_game/tracing/letter_paths_model.dart';
-import 'package:mundodaspalavras/games/writing_game/tracing/tracing_models.dart';
+import 'package:mundodaspalavras/games/writing_game/tracing/writing_models.dart';
 import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
 import 'package:mundodaspalavras/games/writing_game/get_shape_helper/enum_of_numbers_and_letters.dart';
 
@@ -311,18 +311,15 @@ class TracingCubit extends Cubit<TracingState> {
     return path.transform(matrix.storage);
   }
 
-  Future<List<List<Offset>>> _loadPointsFromJson(
-      String path, Size viewSize) async {
-    final jsonString = await rootBundle.loadString('assets/phontics_assets_points/pt_phontics/a_PointsInfo.json');
-
+  Future<List<List<Offset>>> _loadPointsFromJson(String path, Size viewSize) async {
+    final jsonString = await rootBundle.loadString(path);
     final jsonData = jsonDecode(jsonString);
     final List<List<Offset>> strokePointsList = [];
 
     for (var stroke in jsonData['strokes']) {
       final List<dynamic> strokePointsData = stroke['points'];
       final points = strokePointsData.map<Offset>((pointString) {
-        final coords =
-            pointString.split(',').map((e) => double.parse(e)).toList();
+        final coords = pointString.split(',').map((e) => double.parse(e)).toList();
         return Offset(coords[0] * viewSize.width, coords[1] * viewSize.height);
       }).toList();
       strokePointsList.add(points);
@@ -330,6 +327,7 @@ class TracingCubit extends Cubit<TracingState> {
 
     return strokePointsList;
   }
+
 
   void handlePanStart(Offset position) {
     if (!isTracingStartPoint(position)) {
