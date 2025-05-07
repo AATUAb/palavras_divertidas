@@ -38,8 +38,8 @@ class WordModel extends HiveObject {
     this.imageFileName,
   });
 
-  String get audioPath => 'assets/audio/${audioFileName ?? text}.ogg';
-  String get imagePath => 'assets/images/${imageFileName ?? text}.webp';
+  String get audioPath => 'assets/sounds/${audioFileName ?? text}.ogg';
+  String get imagePath => 'assets/images/words${imageFileName ?? text}.webp';
 }
 
 
@@ -1088,14 +1088,6 @@ WordModel(
   difficulty: 'baixa',
   syllables: ['do', 'ze'],
   syllableCount: 2,
-),
-WordModel(
-  text: 'quatorze',
-  newLetter: 'z',
-  topic: 'numeros',
-  difficulty: 'baixa',
-  syllables: ['qua', 'tor', 'ze'],
-  syllableCount: 3,
 ),
 WordModel(
   text: 'quinze',
@@ -3310,6 +3302,14 @@ WordModel(
   difficulty: 'media',
   syllables: ['ca', 'puz'],
   syllableCount: 2,
+),
+WordModel(
+  text: 'quatorze',
+  newLetter: 'z',
+  topic: 'numeros',
+  difficulty: 'media',
+  syllables: ['qua', 'tor', 'ze'],
+  syllableCount: 3,
 ),
 WordModel(
   text: 'galochas',

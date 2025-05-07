@@ -10,13 +10,9 @@ class CharacterModel extends HiveObject {
   @HiveField(1) // ◉ índice 1
   final String soundPath;
 
-  @HiveField(2) // ◉ índice 2
-  final String? imagePath; // Apenas números terão imagem
-
   CharacterModel({
     required this.character,
     required this.soundPath,
-    this.imagePath,
   });
 }
 
@@ -30,19 +26,12 @@ Future<void> populateCharactersIfNeeded() async {
     final characters = [...letters, ...numbers];
 
     for (var char in characters) {
-      final fileName = '$char.mp3';
-      final soundPath = 'assets/characters_sounds/characters/$fileName';
-
-      // Apenas números terão imagem associada
-      final imagePath =
-          RegExp(r'\d').hasMatch(char)
-              ? 'assets/images/numbers/$char.png'
-              : null;
+      final fileName = '$char.ogg';
+      final soundPath = 'assets/sounds/words_characters/$fileName';
 
       final model = CharacterModel(
         character: char,
         soundPath: soundPath,
-        imagePath: imagePath,
       );
 
       await box.add(model);

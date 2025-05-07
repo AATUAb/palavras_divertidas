@@ -19,20 +19,17 @@ class CharacterModelAdapter extends TypeAdapter<CharacterModel> {
     return CharacterModel(
       character: fields[0] as String,
       soundPath: fields[1] as String,
-      imagePath: fields[2] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, CharacterModel obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(2)
       ..writeByte(0)
       ..write(obj.character)
       ..writeByte(1)
-      ..write(obj.soundPath)
-      ..writeByte(2)
-      ..write(obj.imagePath);
+      ..write(obj.soundPath);
   }
 
   @override

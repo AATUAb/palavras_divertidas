@@ -114,7 +114,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   // Reproduz a instrução de áudio para o jogador
   Future<void> _reproduzirInstrucao() async {
     final file =
-        'sounds/characters_sounds/${targetCharacter.toUpperCase()}.ogg';
+        'sounds/words_characters/${targetCharacter.toUpperCase()}.ogg';
     await _letterPlayer.stop();
     await _letterPlayer.release();
     await _letterPlayer.play(AssetSource(file));
