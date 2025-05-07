@@ -90,7 +90,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.25, -1),
               child: _buildSticker(
-                'assets/stickers/polar_bear.webp',
+                'assets/images/words/urso_polar.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -99,7 +99,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.45, -0.4),
               child: _buildSticker(
-                'assets/stickers/alligator.webp',
+                'assets/images/words/crocodilo.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -108,7 +108,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.52, -0.7),
               child: _buildSticker(
-                'assets/stickers/eagle.webp',
+                'assets/images/words/aguia.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -117,7 +117,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.65, -0.9),
               child: _buildSticker(
-                'assets/stickers/bison.webp',
+                'assets/images/words/bisonte.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -126,7 +126,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.55, -0.25),
               child: _buildSticker(
-                'assets/stickers/iguana.webp',
+                'assets/images/words/iguana.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -135,7 +135,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.40, 0.20),
               child: _buildSticker(
-                'assets/stickers/monkey.webp',
+                'assets/images/words/macaco.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -144,7 +144,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.35, 0.55),
               child: _buildSticker(
-                'assets/stickers/toucan.webp',
+                'assets/images/words/tucano.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -153,7 +153,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.2, -0.4),
               child: _buildSticker(
-                'assets/stickers/dolphin.webp',
+                'assets/images/words/golfinho.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -162,7 +162,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.03, -0.7),
               child: _buildSticker(
-                'assets/stickers/rabbit.webp',
+                'assets/images/words/coelho.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -171,7 +171,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.1, -0.8),
               child: _buildSticker(
-                'assets/stickers/fox.webp',
+                'assets/images/words/raposa.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -180,7 +180,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.30, -1.0),
               child: _buildSticker(
-                'assets/stickers/moose.webp',
+                'assets/images/words/rato.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -189,7 +189,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.40, -0.55),
               child: _buildSticker(
-                'assets/stickers/elephant.webp',
+                'assets/images/words/elefante.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -198,7 +198,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.38, -0.2),
               child: _buildSticker(
-                'assets/stickers/snake.webp',
+                'assets/images/words/cobra.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -207,7 +207,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.25, -0.40),
               child: _buildSticker(
-                'assets/stickers/tiger.webp',
+                'assets/images/words/tigre.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -216,7 +216,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.55, -0.40),
               child: _buildSticker(
-                'assets/stickers/panda.webp',
+                'assets/images/words/panda.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -225,7 +225,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.50, -0.85),
               child: _buildSticker(
-                'assets/stickers/bear.webp',
+                'assets/images/words/urso.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -234,7 +234,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.1, -0.1),
               child: _buildSticker(
-                'assets/stickers/lion.webp',
+                'assets/images/words/leao.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -243,7 +243,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.07, 0.5),
               child: _buildSticker(
-                'assets/stickers/giraffe.webp',
+                'assets/images/words/girafa.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -252,7 +252,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.05, -0.25),
               child: _buildSticker(
-                'assets/stickers/camel.webp',
+                'assets/images/words/camelo.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -261,7 +261,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.15, 0),
               child: _buildSticker(
-                'assets/stickers/hippo.webp',
+                'assets/images/words/hipopotamo.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -270,7 +270,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.25, 0.5),
               child: _buildSticker(
-                'assets/stickers/shark.webp',
+                'assets/images/words/tubarao.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -279,7 +279,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.75, 0.1),
               child: _buildSticker(
-                'assets/stickers/whale.webp',
+                'assets/images/words/baleia.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -288,7 +288,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.4, 0.95),
               child: _buildSticker(
-                'assets/stickers/orca.webp',
+                'assets/images/words/orca.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -297,7 +297,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.5, 0.6),
               child: _buildSticker(
-                'assets/stickers/turtle.webp',
+                'assets/images/words/tartaruga.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -306,7 +306,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(-0.15, 0.4),
               child: _buildSticker(
-                'assets/stickers/octopus.webp',
+                'assets/images/words/polvo.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -315,7 +315,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.70, 0.60),
               child: _buildSticker(
-                'assets/stickers/kangaroo.webp',
+                'assets/images/words/canguru.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
@@ -324,7 +324,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.58, 0.50),
               child: _buildSticker(
-                'assets/stickers/kuala.webp',
+                'assets/images/words/kuala.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),
