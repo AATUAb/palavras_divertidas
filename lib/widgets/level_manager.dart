@@ -22,7 +22,7 @@ class LevelManager {
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 4,
+    this.roundsToEvaluate = 1,
   }) : level = level ?? user.gameLevel;
 
   int get totalRoundsCount => totalRounds;
@@ -69,6 +69,10 @@ class LevelManager {
     if (levelChanged) {
       totalRounds = 0;
       correctAnswers = 0;
+    }
+
+    if (showLevelFeedback != null) {
+      showLevelFeedback(level, levelIncreased);
     }
 
     user.gameLevel = level;
