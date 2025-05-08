@@ -80,22 +80,20 @@ class _WritingGameState extends State<WritingGame> {
 
   Future<void> _handleTracingFinished(String char) async {
     _gamesSuperKey.currentState?.registerCompletedRound();
-    await _gamesSuperKey.currentState?.showSuccessFeedback();
+    final levelChanged = await _gamesSuperKey.currentState?.levelManager
+    .registerRoundForLevel(correct: true);
 
-    await _gamesSuperKey.currentState?.levelManager.registerRoundForLevel(
-      context: context,
-      correct: true,
-      applySettings: _applyLevelSettings,
-      onFinished: () async {
-        if (mounted) _nextLetter();
-      },
-      showLevelFeedback: (newLevel, increased) async {
-        await _gamesSuperKey.currentState?.showLevelChangeFeedback(
-          newLevel: newLevel,
-          increased: increased,
-        );
-      },
+    await _applyLevelSettings();
+
+    if (!mounted) return;
+
+    if (levelChanged == true) {
+      await _gamesSuperKey.currentState?.showLevelChangeFeedback(
+      newLevel: _gamesSuperKey.currentState!.levelManager.level,
+      increased: _gamesSuperKey.currentState!.levelManager.levelIncreased,
     );
+  }
+  _nextLetter();
   }
 
   @override

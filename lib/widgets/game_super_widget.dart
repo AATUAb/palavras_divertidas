@@ -68,58 +68,52 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   Widget get correctIcon => GameAnimations.correctAnswerIcon();
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
 
-@override
-void initState() {
-  super.initState();
-  levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
-  conquestManager = ConquestManager();
+  @override
+  void initState() {
+    super.initState();
+    levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
+    conquestManager = ConquestManager();
 
-  _fadeController = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 500),
-  );
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
 
-  _rotationAnimation = Tween<double>(
-    begin: 0.0,
-    end: 1.0,
-  ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
-  if (widget.introImagePath != null && widget.introAudioPath != null) {
-    _playIntroAndStartFade();
-  } else {
-    introPlayed = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() => introCompleted = true);
-        widget.onIntroFinished?.call();
-      }
-    });
+    if (widget.introImagePath != null && widget.introAudioPath != null) {
+      _playIntroAndStartFade();
+    } else {
+      introPlayed = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => introCompleted = true);
+          widget.onIntroFinished?.call();
+        }
+      });
+    }
   }
-}
 
-Future<void> _playIntroAndStartFade() async {
-  final player = AudioPlayer();
-  await player.play(AssetSource(widget.introAudioPath!), volume: 1);
+  Future<void> _playIntroAndStartFade() async {
+    final player = AudioPlayer();
+    await player.play(AssetSource(widget.introAudioPath!), volume: 1);
+    await player.onPlayerComplete.first;
 
-  await player.onPlayerComplete.first;
+    if (!mounted) return;
 
-  if (!mounted) return;
+    _fadeController.forward();
+    await Future.delayed(_fadeController.duration ?? Duration(milliseconds: 500));
 
-  // 🔁 Começa a rotação e fade
-  _fadeController.forward();
-
-  // ⏳ Aguarda o tempo da rotação antes de esconder a imagem
-  await Future.delayed(_fadeController.duration ?? Duration(milliseconds: 500));
-
-  if (!mounted) return;
-
-  setState(() {
-    introPlayed = true;
-    introCompleted = true;
-  });
-
-  widget.onIntroFinished?.call();
-}
+    if (!mounted) return;
+    setState(() {
+      introPlayed = true;
+      introCompleted = true;
+    });
+    widget.onIntroFinished?.call();
+  }
 
   Future<void> playNewChallengeSound(GameItem item) async {
     _currentChallengeItem = item;
@@ -194,29 +188,25 @@ Future<void> _playIntroAndStartFade() async {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (_) => Dialog(
-            backgroundColor: Colors.transparent,
-            child: SizedBox(
-              width: 0.9.sw,
-              height: 0.6.sh,
-              child: GameAnimations.showSuccessAnimation(
-                onFinished: () {
-                  if (mounted && Navigator.of(context).canPop()) {
-                    Navigator.of(context, rootNavigator: true).maybePop();
-                  }
-                },
-              ),
-            ),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: SizedBox(
+          width: 0.9.sw,
+          height: 0.6.sh,
+          child: GameAnimations.showSuccessAnimation(
+            onFinished: () {
+              if (mounted && Navigator.of(context).canPop()) {
+                Navigator.of(context, rootNavigator: true).maybePop();
+              }
+            },
           ),
+        ),
+      ),
     );
     await Future.delayed(const Duration(milliseconds: 100));
   }
 
-  Future<void> showLevelChangeFeedback({
-    required int newLevel,
-    required bool increased,
-  }) async {
+  Future<void> showLevelChangeFeedback({required int newLevel, required bool increased}) async {
     await GameAnimations.showLevelChangeDialog(
       context,
       level: newLevel,
@@ -241,26 +231,34 @@ Future<void> _playIntroAndStartFade() async {
   }
 
   void showTimeout({
-    required Future<void> Function() applySettings,
-    required VoidCallback generateNewChallenge,
-  }) async {
-    if (!mounted) return;
-    GameAnimations.showTimeoutSnackbar(context);
-    await Future.delayed(const Duration(milliseconds: 400));
+  required Future<void> Function() applySettings,
+  required VoidCallback generateNewChallenge,
+}) async {
+  if (!mounted) return;
 
-    generateNewChallenge();
+  // Mostra aviso e som em paralelo (sem await)
+  GameAnimations.showTimeoutSnackbar(context); // ← dispara imediatamente
 
-    await levelManager.registerRoundForLevel(
-      context: context,
-      correct: false,
-      applySettings: () async => await applySettings(),
-      onFinished: () {},
-      showLevelFeedback: (newLevel, increased) async {
-        if (!mounted) return;
-        await showLevelChangeFeedback(newLevel: newLevel, increased: increased);
-      },
+  // Aguarda 2s para dar tempo ao som e à barra
+  await Future.delayed(const Duration(seconds: 2));
+
+  // Avalia o nível
+  final levelChanged = await levelManager.registerRoundForLevel(correct: false);
+  await applySettings();
+
+  if (!mounted) return;
+
+  // Animação de alteração de nível, se necessário
+  if (levelChanged) {
+    await showLevelChangeFeedback(
+      newLevel: levelManager.level,
+      increased: levelManager.levelIncreased,
     );
   }
+
+  if (!mounted) return;
+  generateNewChallenge();
+}
 
   Future<void> processCorrectAnswer({
     required GameItem selectedItem,
@@ -285,53 +283,39 @@ Future<void> _playIntroAndStartFade() async {
 
       final bool firstTry = currentTry == correctCount;
 
-      await levelManager.registerRoundForLevel(
+      final levelChanged = await levelManager.registerRoundForLevel(correct: firstTry);
+      await applySettings();
+
+      final shouldConquer = await conquestManager.registerRoundForConquest(
         context: context,
-        correct: firstTry,
-        applySettings: () async => await applySettings(),
-        onFinished: () async {
-          if (!mounted) return;
-
-          final bool shouldConquer = await conquestManager
-              .registerRoundForConquest(
-                context: context,
-                firstTry: firstTry,
-                userKey: widget.user.key!,
-                applySettings: applySettings,
-              );
-
-          Future<void> continueAfterFeedback() async {
-            if (!mounted) return;
-            await Future.delayed(const Duration(milliseconds: 300));
-            if (shouldConquer) {
-              await showConquestFeedback(
-                onFinished: () {
-                  if (mounted) generateNewChallenge();
-                },
-              );
-            } else {
-              if (mounted) generateNewChallenge();
-            }
-          }
-
-          if (levelManager.levelChanged) {
-            await showLevelChangeFeedback(
-              newLevel: levelManager.level,
-              increased: levelManager.levelIncreased,
-            );
-            await continueAfterFeedback();
-          } else {
-            await continueAfterFeedback();
-          }
-        },
-        showLevelFeedback: (newLevel, increased) async {
-          if (!mounted) return;
-          await showLevelChangeFeedback(
-            newLevel: newLevel,
-            increased: increased,
-          );
-        },
+        firstTry: firstTry,
+        userKey: widget.user.key!,
+        applySettings: applySettings,
       );
+
+      Future<void> continueAfterFeedback() async {
+        if (!mounted) return;
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (shouldConquer) {
+          await showConquestFeedback(
+            onFinished: () {
+              if (mounted) generateNewChallenge();
+            },
+          );
+        } else {
+          if (mounted) generateNewChallenge();
+        }
+      }
+
+      if (levelChanged) {
+        await showLevelChangeFeedback(
+          newLevel: levelManager.level,
+          increased: levelManager.levelIncreased,
+        );
+        await continueAfterFeedback();
+      } else {
+        await continueAfterFeedback();
+      }
     }
   }
 
@@ -346,8 +330,7 @@ Future<void> _playIntroAndStartFade() async {
     required void Function(int) updateFoundCorrect,
     required VoidCallback cancelTimers,
   }) async {
-    final isCorrect =
-        selectedItem.content.toLowerCase() == target.toLowerCase();
+    final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
 
     setState(() {
       selectedItem.isTapped = true;
@@ -375,9 +358,7 @@ Future<void> _playIntroAndStartFade() async {
   }
 
   void registerFailedRound(String target) {
-    final alreadyExists = _retryQueue.any(
-      (entry) => entry.key.toLowerCase() == target.toLowerCase(),
-    );
+    final alreadyExists = _retryQueue.any((entry) => entry.key.toLowerCase() == target.toLowerCase());
     if (!alreadyExists) {
       _retryQueue.add(MapEntry(target, _roundCounter));
       debugPrint('➕ Adicionado à fila de retry: $target');
@@ -399,9 +380,7 @@ Future<void> _playIntroAndStartFade() async {
   }
 
   void removeFromRetryQueue(String target) {
-    _retryQueue.removeWhere(
-      (entry) => entry.key.toLowerCase() == target.toLowerCase(),
-    );
+    _retryQueue.removeWhere((entry) => entry.key.toLowerCase() == target.toLowerCase());
     debugPrint('➖ Removido da fila de retry (já acertou): $target');
     debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
   }
@@ -419,105 +398,95 @@ Future<void> _playIntroAndStartFade() async {
     debugPrint('🔄 Ronda concluída. Contador: $_roundCounter');
   }
 
-void showEndOfGameDialog({required VoidCallback onRestart}) async {
-  final player = AudioPlayer();
-  await player.play(AssetSource('sounds/animations/end_game_message.ogg'));
+  void showEndOfGameDialog({required VoidCallback onRestart}) async {
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/animations/end_game_message.ogg'));
 
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      contentPadding: const EdgeInsets.all(20),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      content: SizedBox(
-        width: 400,
-        child: Row(
-          children: [
-            // Mensagem à esquerda
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Parabéns, chegaste ao fim do jogo!',
-                    style: getInstructionFont(
-                      isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        contentPadding: const EdgeInsets.all(20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: SizedBox(
+          width: 400,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Parabéns, chegaste ao fim do jogo!',
+                      style: getInstructionFont(
+                        isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    'Queres jogar novamente?',
-                    style: getInstructionFont(
-                      isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
-                    ).copyWith(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.blueAccent,
+                    SizedBox(height: 12),
+                    Text(
+                      'Queres jogar novamente?',
+                      style: getInstructionFont(
+                        isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
+                      ).copyWith(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.blueAccent,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      // Botão Sim
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: TextButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            onRestart();
-                          },
-                          icon: const Icon(Icons.check, color: Colors.white),
-                          label: const Text(
-                            'Sim',
-                            style: TextStyle(color: Colors.white),
+                    SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: TextButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              onRestart();
+                            },
+                            icon: const Icon(Icons.check, color: Colors.white),
+                            label: const Text('Sim', style: TextStyle(color: Colors.white)),
                           ),
                         ),
-                      ),
-                      SizedBox(width: 12),
-                      // Botão Não
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: TextButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).maybePop();
-                          },
-                          icon: const Icon(Icons.close, color: Colors.white),
-                          label: const Text(
-                            'Não',
-                            style: TextStyle(color: Colors.white),
+                        SizedBox(width: 12),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: TextButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).maybePop();
+                            },
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            label: const Text('Não', style: TextStyle(color: Colors.white)),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(width: 20),
-            // Imagem à direita
-            ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 150,
-                maxHeight: 150,
+              SizedBox(width: 20),
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 150,
+                  maxHeight: 150,
+                ),
+                child: Image.asset(
+                  'assets/images/games/end_game.webp',
+                  fit: BoxFit.contain,
+                ),
               ),
-              child: Image.asset(
-                'assets/images/games/end_game.webp',
-                fit: BoxFit.contain,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   void showConquestNotification() {
     if (conquestManager.hasNewConquest) {

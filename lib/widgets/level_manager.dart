@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../services/hive_service.dart';
 
@@ -33,60 +32,51 @@ class LevelManager {
     if (correct) correctAnswers++;
   }
 
-  Future<void> registerRoundForLevel({
-    required BuildContext context,
-    required bool correct,
-    required VoidCallback applySettings,
-    required VoidCallback onFinished,
-    required void Function(int newLevel, bool increased)? showLevelFeedback,
-  }) async {
-    registerRound(correct: correct);
+Future<bool> registerRoundForLevel({
+  required bool correct,
+}) async {
+  registerRound(correct: correct);
 
-    final userKey = user.key;
-    if (userKey == null) return;
+  final userKey = user.key;
+  if (userKey == null) return false;
 
-    bool levelUp = false;
-    bool levelDown = false;
+  bool levelUp = false;
+  bool levelDown = false;
 
-    final double accuracy = correctAnswers / totalRounds;
-    final int accuracyPercent = (accuracy * 100).round();
+  final double accuracy = correctAnswers / totalRounds;
+  final int accuracyPercent = (accuracy * 100).round();
 
-    if (totalRounds >= roundsToEvaluate * 2 &&
-        accuracy >= 0.8 &&
-        level < maxLevel) {
-      level++;
-      levelUp = true;
-    } else if (totalRounds >= roundsToEvaluate &&
-        accuracy <= 0.5 &&
-        level > minLevel) {
-      level--;
-      levelDown = true;
-    }
-
-    levelChanged = levelUp || levelDown;
-    levelIncreased = levelUp;
-
-    if (levelChanged) {
-      totalRounds = 0;
-      correctAnswers = 0;
-    }
-
-    if (showLevelFeedback != null) {
-      showLevelFeedback(level, levelIncreased);
-    }
-
-    user.gameLevel = level;
-    user.updateAccuracy(level: level, accuracy: accuracy);
-    user.accuracyByLevel[level] = accuracy;
-
-    await HiveService.updateUserByKey(userKey, user);
-    await HiveService.updateGameAccuracy(
-      userKey: userKey,
-      gameName: gameName,
-      accuracyPerLevel: [accuracyPercent],
-    );
-
-    applySettings();
-    onFinished();
+  if (totalRounds >= roundsToEvaluate * 2 &&
+      accuracy >= 0.8 &&
+      level < maxLevel) {
+    level++;
+    levelUp = true;
+  } else if (totalRounds >= roundsToEvaluate &&
+      accuracy <= 0.5 &&
+      level > minLevel) {
+    level--;
+    levelDown = true;
   }
+
+  levelChanged = levelUp || levelDown;
+  levelIncreased = levelUp;
+
+  if (levelChanged) {
+    totalRounds = 0;
+    correctAnswers = 0;
+  }
+
+  user.gameLevel = level;
+  user.updateAccuracy(level: level, accuracy: accuracy);
+  user.accuracyByLevel[level] = accuracy;
+
+  await HiveService.updateUserByKey(userKey, user);
+  await HiveService.updateGameAccuracy(
+    userKey: userKey,
+    gameName: gameName,
+    accuracyPerLevel: [accuracyPercent],
+  );
+
+  return levelChanged;
+}
 }

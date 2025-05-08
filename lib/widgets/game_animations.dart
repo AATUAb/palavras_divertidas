@@ -105,9 +105,9 @@ static Future<void> showLevelChangeDialog(
 }
   static String levelMessage({required int level, required bool increased}) {
     if (increased) {
-      return 'Parabéns! Subiste para o nível $level!';
+      return 'Parabéns! Subiste para o nível $level.';
     } else {
-      return 'Vamos particar o nível $level!';
+      return 'Vamos particar o nível $level.';
     }
   }
 
@@ -137,7 +137,7 @@ static Future<void> showConquestDialog(
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 4.w),
               child: Text(
-                'Espetacular! Ganhaste uma conquista para a caderneta!',
+                'Espetáculo! Ganhaste uma conquista para a caderneta.',
                 style: TextStyle(
                   fontSize: 25.sp,
                   fontWeight: FontWeight.bold,
@@ -154,11 +154,14 @@ static Future<void> showConquestDialog(
 }
 
 // animação de tempo esgotado, com barra ingerior com mensagem
-  static void showTimeoutSnackbar(BuildContext context) {
+  static void showTimeoutSnackbar(BuildContext context) async {
+  final player = AudioPlayer();
+  await player.play(AssetSource('sounds/animations/time_out.ogg'));
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Tempo esgotado! ⏰',
+          '⏰ Vamos tentar outro desafio!',
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.bold,
@@ -166,7 +169,7 @@ static Future<void> showConquestDialog(
           ),
         ),
         backgroundColor: Colors.orange,
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
