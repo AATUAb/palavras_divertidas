@@ -289,7 +289,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
           hasChallengeStarted
               ? _buildChallengeText()
               : Text(
-                'És um detetive de letras e números! Encontra todas as letras e números.',
+                'Vamos encontrar todas as letras e números.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.sp,

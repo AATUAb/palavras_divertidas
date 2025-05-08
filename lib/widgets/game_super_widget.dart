@@ -61,6 +61,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   bool introCompleted = false;
   late AnimationController _fadeController;
   late Animation<double> _rotationAnimation;
+  bool get isFirstCycle => widget.isFirstCycle;
 
   Widget get correctIcon => GameAnimations.correctAnswerIcon();
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
@@ -398,32 +399,105 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     debugPrint('🔄 Ronda concluída. Contador: $_roundCounter');
   }
 
-  void showEndOfGameDialog({required VoidCallback onRestart}) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Parabéns, chegaste ao fim do jogo!'),
-            content: const Text('Queres jogar novamente?'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  onRestart();
-                },
-                child: const Text('Sim'),
+void showEndOfGameDialog({required VoidCallback onRestart}) async {
+  final player = AudioPlayer();
+  await player.play(AssetSource('sounds/animations/end_game_message.ogg'));
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      contentPadding: const EdgeInsets.all(20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      content: SizedBox(
+        width: 400,
+        child: Row(
+          children: [
+            // Mensagem à esquerda
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Parabéns, chegaste ao fim do jogo!',
+                    style: getInstructionFont(
+                      isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    'Queres jogar novamente?',
+                    style: getInstructionFont(
+                      isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
+                    ).copyWith(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    children: [
+                      // Botão Sim
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            onRestart();
+                          },
+                          icon: const Icon(Icons.check, color: Colors.white),
+                          label: const Text(
+                            'Sim',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      // Botão Não
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).maybePop();
+                          },
+                          icon: const Icon(Icons.close, color: Colors.white),
+                          label: const Text(
+                            'Não',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).maybePop();
-                },
-                child: const Text('Não'),
+            ),
+            SizedBox(width: 20),
+            // Imagem à direita
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 150,
+                maxHeight: 150,
               ),
-            ],
-          ),
-    );
-  }
+              child: Image.asset(
+                'assets/images/games/end_game.webp',
+                fit: BoxFit.contain,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
   void showConquestNotification() {
     if (conquestManager.hasNewConquest) {

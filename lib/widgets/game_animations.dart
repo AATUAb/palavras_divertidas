@@ -90,41 +90,70 @@ static Future<void> showConquestDialog(
   BuildContext context, {
   VoidCallback? onFinished,
 }) async {
-  await showDialog(
+  final fxPlayer = AudioPlayer();
+  final voicePlayer = AudioPlayer();
+
+  // Cria um controller para controlar a animação manualmente, se necessário
+  final Completer<void> conquestSequence = Completer<void>();
+
+  // Mostra o diálogo imediatamente
+  showDialog(
     context: context,
     barrierDismissible: false,
     builder: (_) => Dialog(
       backgroundColor: Colors.transparent,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _TimedAnimationWidget(
-              animationPath: 'assets/animations/conquest.json',
-              duration: const Duration(seconds: 3),
-              width: 200.w,
-              height: 120.h,
-              sound: 'conquest.ogg',
-              onFinished: onFinished,
-            ),
-            SizedBox(height: 4.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.w),
-              child: Text(
-                'Uau! Ganhaste uma conquista para a caderneta!',
-                style: TextStyle(
-                  fontSize: 25.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
-                ),
-                textAlign: TextAlign.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Animação visível desde o início
+          Lottie.asset(
+            'assets/animations/conquest.json',
+            width: 200.w,
+            height: 120.h,
+            repeat: false,
+            onLoaded: (composition) {
+              // 1. Toca o som "txanam"
+              fxPlayer.play(AssetSource('sounds/animations/conquest.ogg')).then((_) async {
+                // 2. Espera que o som termine
+                await fxPlayer.onPlayerComplete.first;
+
+                // 3. Só depois toca a mensagem falada
+                await voicePlayer.play(
+                  AssetSource('sounds/animations/conquest_message.ogg'),
+                );
+                await voicePlayer.onPlayerComplete.first;
+
+                // 4. Agora sim, pode terminar
+                conquestSequence.complete();
+              });
+            },
+          ),
+          SizedBox(height: 12.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            child: Text(
+              'Espetáculo! Ganhaste uma conquista para a caderneta!',
+              style: TextStyle(
+                fontSize: 25.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.orange,
               ),
+              textAlign: TextAlign.center,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     ),
   );
+
+  // Aguarda que toda a sequência termine antes de continuar
+  await conquestSequence.future;
+
+  // Fecha o diálogo e chama callback
+  if (Navigator.of(context).canPop()) {
+    Navigator.of(context).pop();
+  }
+  onFinished?.call();
 }
 
 // animação de tempo esgotado, com barra ingerior com mensagem

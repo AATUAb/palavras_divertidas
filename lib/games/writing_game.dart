@@ -111,8 +111,8 @@ class _WritingGameState extends State<WritingGame> {
       isFirstCycle: isFirstCycle,
       topTextContent: _buildTopText,
       builder: _buildBoard,
-      introImagePath: 'assets/images/games/write_game.webp',
-      // introAudioPath: 'sounds/games/blank_intro.ogg',
+      introImagePath: 'assets/images/games/writing_game.webp',
+      introAudioPath: 'sounds/games/writing_game.ogg',
       onIntroFinished: () async {
         await Future.delayed(const Duration(seconds: 2));
         await _applyLevelSettings();
@@ -129,7 +129,7 @@ class _WritingGameState extends State<WritingGame> {
     return Padding(
       padding: EdgeInsets.only(top: 20.h),
       child: Text(
-        hasChallengeStarted ? 'Traça a letra $currentLetter' : 'Prepara-te para traçar as letras!',
+        hasChallengeStarted ? 'Escreve a letra $currentLetter' : 'Vamos escrever!',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 24.sp,
