@@ -31,21 +31,47 @@ static Future<void> showLevelChangeDialog(
   required bool increased,
   VoidCallback? onFinished,
 }) async {
-  String path;
+  // Seleciona animação com base no nível
+  String animationPath;
   switch (level) {
     case 1:
-      path = 'assets/animations/one_star.json';
+      animationPath = 'assets/animations/one_star.json';
       break;
     case 2:
-      path = 'assets/animations/two_star.json';
+      animationPath = 'assets/animations/two_star.json';
       break;
     case 3:
     default:
-      path = 'assets/animations/tree_star.json';
+      animationPath = 'assets/animations/tree_star.json';
   }
+
+  // Define a mensagem escrita
   final message = levelMessage(level: level, increased: increased);
   final color = increased ? Colors.orange : Colors.red;
 
+  // Seleciona o som de voz correto
+  String? voiceMessage;
+  if (increased) {
+    switch (level) {
+      case 2:
+        voiceMessage = 'level_up_message_2.ogg';
+        break;
+      case 3:
+        voiceMessage = 'level_up_message_3.ogg';
+        break;
+    }
+  } else {
+    switch (level) {
+      case 1:
+        voiceMessage = 'level_down_message_1.ogg';
+        break;
+      case 2:
+        voiceMessage = 'level_down_message_2.ogg';
+        break;
+    }
+  }
+
+  // Mostra o diálogo com a animação e som correto
   await showDialog(
     context: context,
     barrierDismissible: false,
@@ -55,11 +81,11 @@ static Future<void> showLevelChangeDialog(
         mainAxisSize: MainAxisSize.min,
         children: [
           _TimedAnimationWidget(
-            animationPath: path,
-            duration: const Duration(seconds: 3),
+            animationPath: animationPath,
+            duration: const Duration(seconds: 4),
             width: 300.w,
             height: 100.h,
-            sound: 'level.ogg',
+            sound: voiceMessage, // som ajustado via switch
             onFinished: onFinished,
           ),
           SizedBox(height: 8.h),
@@ -79,9 +105,9 @@ static Future<void> showLevelChangeDialog(
 }
   static String levelMessage({required int level, required bool increased}) {
     if (increased) {
-      return 'Parabéns! Subiste para o nível $level!';
+      return 'Parabéns! Subiste para o nível $level.';
     } else {
-      return 'Vamos particar melhor o nível $level!';
+      return 'Vamos particar o nível $level.';
     }
   }
 
@@ -101,17 +127,17 @@ static Future<void> showConquestDialog(
           children: [
             _TimedAnimationWidget(
               animationPath: 'assets/animations/conquest.json',
-              duration: const Duration(seconds: 3),
+              duration: const Duration(seconds: 5),
               width: 200.w,
               height: 120.h,
-              sound: 'conquest.ogg',
+              sound: 'conquest_message.ogg',
               onFinished: onFinished,
             ),
             SizedBox(height: 4.h),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 4.w),
               child: Text(
-                'Uau! Ganhaste uma conquista para a caderneta!',
+                'Espetáculo! Ganhaste uma conquista para a caderneta.',
                 style: TextStyle(
                   fontSize: 25.sp,
                   fontWeight: FontWeight.bold,
@@ -128,11 +154,14 @@ static Future<void> showConquestDialog(
 }
 
 // animação de tempo esgotado, com barra ingerior com mensagem
-  static void showTimeoutSnackbar(BuildContext context) {
+  static void showTimeoutSnackbar(BuildContext context) async {
+  final player = AudioPlayer();
+  await player.play(AssetSource('sounds/animations/time_out.ogg'));
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Tempo esgotado! ⏰',
+          '⏰ Vamos tentar outro desafio!',
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.bold,
@@ -140,7 +169,7 @@ static Future<void> showConquestDialog(
           ),
         ),
         backgroundColor: Colors.orange,
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(seconds: 2),
       ),
     );
   }

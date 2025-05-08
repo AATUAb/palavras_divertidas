@@ -8,6 +8,7 @@ import 'game_item.dart';
 import 'conquest_manager.dart';
 import 'game_animations.dart';
 import 'game_design.dart';
+import 'sound_manager.dart';
 
 class GamesSuperWidget extends StatefulWidget {
   final UserModel user;
@@ -22,8 +23,7 @@ class GamesSuperWidget extends StatefulWidget {
     BuildContext context,
     LevelManager levelManager,
     UserModel user,
-  )
-  builder;
+  ) builder;
   final VoidCallback? onRepeatInstruction;
   final String? introImagePath;
   final String? introAudioPath;
@@ -61,6 +61,9 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   bool introCompleted = false;
   late AnimationController _fadeController;
   late Animation<double> _rotationAnimation;
+  bool get isFirstCycle => widget.isFirstCycle;
+
+  GameItem? _currentChallengeItem;
 
   Widget get correctIcon => GameAnimations.correctAnswerIcon();
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
@@ -78,26 +81,11 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
 
     _rotationAnimation = Tween<double>(
       begin: 0.0,
-      end: 1,
+      end: 1.0,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
     if (widget.introImagePath != null && widget.introAudioPath != null) {
-      final player = AudioPlayer();
-      player.play(AssetSource(widget.introAudioPath!), volume: 1).then((_) {
-        player.onPlayerComplete.first.then((_) {
-          if (mounted) {
-            _fadeController.forward().then((_) {
-              if (mounted) {
-                setState(() {
-                  introPlayed = true;
-                  introCompleted = true;
-                });
-                widget.onIntroFinished?.call();
-              }
-            });
-          }
-        });
-      });
+      _playIntroAndStartFade();
     } else {
       introPlayed = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -107,6 +95,29 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
         }
       });
     }
+  }
+
+  Future<void> _playIntroAndStartFade() async {
+    final player = AudioPlayer();
+    await player.play(AssetSource(widget.introAudioPath!), volume: 1);
+    await player.onPlayerComplete.first;
+
+    if (!mounted) return;
+
+    _fadeController.forward();
+    await Future.delayed(_fadeController.duration ?? Duration(milliseconds: 500));
+
+    if (!mounted) return;
+    setState(() {
+      introPlayed = true;
+      introCompleted = true;
+    });
+    widget.onIntroFinished?.call();
+  }
+
+  Future<void> playNewChallengeSound(GameItem item) async {
+    _currentChallengeItem = item;
+    await SoundManager.playGameItem(item);
   }
 
   @override
@@ -120,7 +131,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     return GameDesign(
       user: widget.user,
       progressValue: widget.progressValue,
-      level: levelManager.level, // ← nível passado ao GameDesign
+      level: levelManager.level,
       topTextWidget: DefaultTextStyle(
         style: getInstructionFont(isFirstCycle: widget.isFirstCycle),
         textAlign: TextAlign.center,
@@ -150,13 +161,17 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
             )
           else
             widget.builder(context, levelManager, widget.user),
-          if (widget.onRepeatInstruction != null && introCompleted)
+          if (introCompleted)
             Positioned(
               top: 50,
               left: 10,
               child: IconButton(
                 icon: Icon(Icons.play_circle_fill, color: Colors.red, size: 30),
-                onPressed: widget.onRepeatInstruction,
+                onPressed: widget.onRepeatInstruction ?? () async {
+                  if (_currentChallengeItem != null) {
+                    await SoundManager.playGameItem(_currentChallengeItem!);
+                  }
+                },
               ),
             ),
         ],
@@ -173,29 +188,25 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (_) => Dialog(
-            backgroundColor: Colors.transparent,
-            child: SizedBox(
-              width: 0.9.sw,
-              height: 0.6.sh,
-              child: GameAnimations.showSuccessAnimation(
-                onFinished: () {
-                  if (mounted && Navigator.of(context).canPop()) {
-                    Navigator.of(context, rootNavigator: true).maybePop();
-                  }
-                },
-              ),
-            ),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: SizedBox(
+          width: 0.9.sw,
+          height: 0.6.sh,
+          child: GameAnimations.showSuccessAnimation(
+            onFinished: () {
+              if (mounted && Navigator.of(context).canPop()) {
+                Navigator.of(context, rootNavigator: true).maybePop();
+              }
+            },
           ),
+        ),
+      ),
     );
     await Future.delayed(const Duration(milliseconds: 100));
   }
 
-  Future<void> showLevelChangeFeedback({
-    required int newLevel,
-    required bool increased,
-  }) async {
+  Future<void> showLevelChangeFeedback({required int newLevel, required bool increased}) async {
     await GameAnimations.showLevelChangeDialog(
       context,
       level: newLevel,
@@ -220,26 +231,34 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   }
 
   void showTimeout({
-    required Future<void> Function() applySettings,
-    required VoidCallback generateNewChallenge,
-  }) async {
-    if (!mounted) return;
-    GameAnimations.showTimeoutSnackbar(context);
-    await Future.delayed(const Duration(milliseconds: 400));
+  required Future<void> Function() applySettings,
+  required VoidCallback generateNewChallenge,
+}) async {
+  if (!mounted) return;
 
-    generateNewChallenge();
+  // Mostra aviso e som em paralelo (sem await)
+  GameAnimations.showTimeoutSnackbar(context); // ← dispara imediatamente
 
-    await levelManager.registerRoundForLevel(
-      context: context,
-      correct: false,
-      applySettings: () async => await applySettings(),
-      onFinished: () {},
-      showLevelFeedback: (newLevel, increased) async {
-        if (!mounted) return;
-        await showLevelChangeFeedback(newLevel: newLevel, increased: increased);
-      },
+  // Aguarda 2s para dar tempo ao som e à barra
+  await Future.delayed(const Duration(seconds: 2));
+
+  // Avalia o nível
+  final levelChanged = await levelManager.registerRoundForLevel(correct: false);
+  await applySettings();
+
+  if (!mounted) return;
+
+  // Animação de alteração de nível, se necessário
+  if (levelChanged) {
+    await showLevelChangeFeedback(
+      newLevel: levelManager.level,
+      increased: levelManager.levelIncreased,
     );
   }
+
+  if (!mounted) return;
+  generateNewChallenge();
+}
 
   Future<void> processCorrectAnswer({
     required GameItem selectedItem,
@@ -264,53 +283,39 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
 
       final bool firstTry = currentTry == correctCount;
 
-      await levelManager.registerRoundForLevel(
+      final levelChanged = await levelManager.registerRoundForLevel(correct: firstTry);
+      await applySettings();
+
+      final shouldConquer = await conquestManager.registerRoundForConquest(
         context: context,
-        correct: firstTry,
-        applySettings: () async => await applySettings(),
-        onFinished: () async {
-          if (!mounted) return;
-
-          final bool shouldConquer = await conquestManager
-              .registerRoundForConquest(
-                context: context,
-                firstTry: firstTry,
-                userKey: widget.user.key!,
-                applySettings: applySettings,
-              );
-
-          Future<void> continueAfterFeedback() async {
-            if (!mounted) return;
-            await Future.delayed(const Duration(milliseconds: 300));
-            if (shouldConquer) {
-              await showConquestFeedback(
-                onFinished: () {
-                  if (mounted) generateNewChallenge();
-                },
-              );
-            } else {
-              if (mounted) generateNewChallenge();
-            }
-          }
-
-          if (levelManager.levelChanged) {
-            await showLevelChangeFeedback(
-              newLevel: levelManager.level,
-              increased: levelManager.levelIncreased,
-            );
-            await continueAfterFeedback();
-          } else {
-            await continueAfterFeedback();
-          }
-        },
-        showLevelFeedback: (newLevel, increased) async {
-          if (!mounted) return;
-          await showLevelChangeFeedback(
-            newLevel: newLevel,
-            increased: increased,
-          );
-        },
+        firstTry: firstTry,
+        userKey: widget.user.key!,
+        applySettings: applySettings,
       );
+
+      Future<void> continueAfterFeedback() async {
+        if (!mounted) return;
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (shouldConquer) {
+          await showConquestFeedback(
+            onFinished: () {
+              if (mounted) generateNewChallenge();
+            },
+          );
+        } else {
+          if (mounted) generateNewChallenge();
+        }
+      }
+
+      if (levelChanged) {
+        await showLevelChangeFeedback(
+          newLevel: levelManager.level,
+          increased: levelManager.levelIncreased,
+        );
+        await continueAfterFeedback();
+      } else {
+        await continueAfterFeedback();
+      }
     }
   }
 
@@ -325,8 +330,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     required void Function(int) updateFoundCorrect,
     required VoidCallback cancelTimers,
   }) async {
-    final isCorrect =
-        selectedItem.content.toLowerCase() == target.toLowerCase();
+    final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
 
     setState(() {
       selectedItem.isTapped = true;
@@ -354,9 +358,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   }
 
   void registerFailedRound(String target) {
-    final alreadyExists = _retryQueue.any(
-      (entry) => entry.key.toLowerCase() == target.toLowerCase(),
-    );
+    final alreadyExists = _retryQueue.any((entry) => entry.key.toLowerCase() == target.toLowerCase());
     if (!alreadyExists) {
       _retryQueue.add(MapEntry(target, _roundCounter));
       debugPrint('➕ Adicionado à fila de retry: $target');
@@ -378,9 +380,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   }
 
   void removeFromRetryQueue(String target) {
-    _retryQueue.removeWhere(
-      (entry) => entry.key.toLowerCase() == target.toLowerCase(),
-    );
+    _retryQueue.removeWhere((entry) => entry.key.toLowerCase() == target.toLowerCase());
     debugPrint('➖ Removido da fila de retry (já acertou): $target');
     debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
   }
@@ -398,30 +398,93 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     debugPrint('🔄 Ronda concluída. Contador: $_roundCounter');
   }
 
-  void showEndOfGameDialog({required VoidCallback onRestart}) {
+  void showEndOfGameDialog({required VoidCallback onRestart}) async {
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/animations/end_game_message.ogg'));
+
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Parabéns, chegaste ao fim do jogo!'),
-            content: const Text('Queres jogar novamente?'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  onRestart();
-                },
-                child: const Text('Sim'),
+      builder: (context) => AlertDialog(
+        contentPadding: const EdgeInsets.all(20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: SizedBox(
+          width: 400,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Parabéns, chegaste ao fim do jogo!',
+                      style: getInstructionFont(
+                        isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      'Queres jogar novamente?',
+                      style: getInstructionFont(
+                        isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
+                      ).copyWith(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: TextButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              onRestart();
+                            },
+                            icon: const Icon(Icons.check, color: Colors.white),
+                            label: const Text('Sim', style: TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: TextButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).maybePop();
+                            },
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            label: const Text('Não', style: TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).maybePop();
-                },
-                child: const Text('Não'),
+              SizedBox(width: 20),
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 150,
+                  maxHeight: 150,
+                ),
+                child: Image.asset(
+                  'assets/images/games/end_game.webp',
+                  fit: BoxFit.contain,
+                ),
               ),
             ],
           ),
+        ),
+      ),
     );
   }
 
