@@ -124,101 +124,107 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   bool retryIsUsed(String value) => _usedCharacters.contains(value);
 
   Future<void> _generateNewChallenge() async {
-    _gamesSuperKey.currentState?.registerCompletedRound();
-    final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
-    if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
+  _gamesSuperKey.currentState?.registerCompletedRound();
+  final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
+  if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
 
-    final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
-    final availableChars =
-        allChars.where((c) => !_usedCharacters.contains(c)).toList();
+  final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
+  final availableChars =
+      allChars.where((c) => !_usedCharacters.contains(c)).toList();
 
-    if (availableChars.isEmpty && retry == null) {
-      _gamesSuperKey.currentState?.showEndOfGameDialog(
-        onRestart: () {
-          setState(() => _usedCharacters.clear());
-          _generateNewChallenge();
-        },
-      );
-      return;
-    }
-
-    // Se não houver caracteres disponíveis, reinicia o jogo
-    final target =
-        retry ?? availableChars[_random.nextInt(availableChars.length)];
-    if (!retryIsUsed(target)) _usedCharacters.add(target);
-
-    _gamesSuperKey.currentState?.removeFromRetryQueue(target);
-
-    // Cancela os temporizadores de ronda e progresso
-    _cancelTimers();
-    // Reinicia o estado do jogo
-    setState(() {
-      isRoundActive = true;
-      gamesItems.clear();
-      foundCorrect = 0;
-      currentTry = 0;
-      progressValue = 1.0;
-      targetCharacter = target;
-    });
-
-      // Verifica se o caractere é uma letra ou número e ajusta o número de tentativas
-    final bad = <String>{};
-    while (bad.length < wrongCount) {
-      final c = _characters[_random.nextInt(_characters.length)].character;
-      final opt = _random.nextBool() ? c.toUpperCase() : c.toLowerCase();
-      if (opt.toLowerCase() != target.toLowerCase()) bad.add(opt);
-    }
-
-    //  Gera os itens do jogo com base nos caracteres corretos e errados
-    final good = List.generate(
-      correctCount,
-      (_) => _random.nextBool() ? target.toUpperCase() : target.toLowerCase(),
+  if (availableChars.isEmpty && retry == null) {
+    _gamesSuperKey.currentState?.showEndOfGameDialog(
+      onRestart: () {
+        setState(() => _usedCharacters.clear());
+        _generateNewChallenge();
+      },
     );
-
-    final all = [...bad, ...good]..shuffle();
-    final cols = (all.length / 3).ceil(), sx = 1 / (cols + 1), sy = 0.18;
-
-    gamesItems = List.generate(all.length, (i) {
-      final col = i % cols, row = i ~/ cols;
-      final content = all[i];
-      final isCorrect = content.toLowerCase() == target.toLowerCase();
-      return GameItem(
-        id: '$i',
-        type: GameItemType.character,
-        content: content,
-        dx: sx * (col + 1),
-        dy: 0.45 + sy * row,
-        fontFamily: isFirstCycle ? _randFont() : null,
-        backgroundColor: _randColor(),
-        isCorrect: isCorrect,
-      );
-    });
-
-    // Reproduz a instrução de áudio para o jogador
-    setState(() {});
-    await _reproduzirInstrucao();
-
-    // Inicia os temporizadores de progresso e ronda
-    progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-      if (!mounted) return t.cancel();
-      setState(() {
-        progressValue -= 0.01;
-        if (progressValue <= 0) t.cancel();
-      });
-    });
-
-    // Inicia o temporizador da ronda
-    roundTimer = Timer(levelTime, () {
-      if (!mounted) return;
-      setState(() => isRoundActive = false);
-      _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
-      _gamesSuperKey.currentState?.showTimeout(
-        applySettings: _applyLevelSettings,
-        generateNewChallenge: _generateNewChallenge,
-      );
-    });
+    return;
   }
 
+  final target =
+      retry ?? availableChars[_random.nextInt(availableChars.length)];
+  if (!retryIsUsed(target)) _usedCharacters.add(target);
+
+  _gamesSuperKey.currentState?.removeFromRetryQueue(target);
+
+  _cancelTimers();
+  setState(() {
+    isRoundActive = true;
+    gamesItems.clear();
+    foundCorrect = 0;
+    currentTry = 0;
+    progressValue = 1.0;
+    targetCharacter = target;
+  });
+
+  final bad = <String>{};
+  while (bad.length < wrongCount) {
+    final c = _characters[_random.nextInt(_characters.length)].character;
+    final opt = _random.nextBool() ? c.toUpperCase() : c.toLowerCase();
+    if (opt.toLowerCase() != target.toLowerCase()) bad.add(opt);
+  }
+
+  final good = List.generate(
+    correctCount,
+    (_) => _random.nextBool() ? target.toUpperCase() : target.toLowerCase(),
+  );
+
+  final all = [...bad, ...good]..shuffle();
+  final cols = (all.length / 3).ceil(), sx = 1 / (cols + 1), sy = 0.18;
+
+  gamesItems = List.generate(all.length, (i) {
+    final col = i % cols, row = i ~/ cols;
+    final content = all[i];
+    final isCorrect = content.toLowerCase() == target.toLowerCase();
+    return GameItem(
+      id: '$i',
+      type: GameItemType.character,
+      content: content,
+      dx: sx * (col + 1),
+      dy: 0.45 + sy * row,
+      fontFamily: isFirstCycle ? _randFont() : null,
+      backgroundColor: _randColor(),
+      isCorrect: isCorrect,
+    );
+  });
+
+  // 🆕 Identifica um dos itens corretos para tocar o som
+  final referenceItem = gamesItems.firstWhere(
+    (item) => item.isCorrect,
+    orElse: () => GameItem(
+      id: 'preview',
+      type: GameItemType.character,
+      content: target,
+      dx: 0,
+      dy: 0,
+      backgroundColor: Colors.transparent,
+    ),
+  );
+
+  // 🆕 Solicita ao super widget a reprodução do som do desafio
+  await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+
+  // Inicia temporizadores
+  setState(() {});
+  progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+    if (!mounted) return t.cancel();
+    setState(() {
+      progressValue -= 0.01;
+      if (progressValue <= 0) t.cancel();
+    });
+  });
+
+  roundTimer = Timer(levelTime, () {
+    if (!mounted) return;
+    setState(() => isRoundActive = false);
+    _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
+    _gamesSuperKey.currentState?.showTimeout(
+      applySettings: _applyLevelSettings,
+      generateNewChallenge: _generateNewChallenge,
+    );
+  });
+}
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
     if (!isRoundActive || item.isTapped) return;
@@ -289,7 +295,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
           hasChallengeStarted
               ? _buildChallengeText()
               : Text(
-                'Vamos encontrar todas as letras e números.',
+                'Vamos encontrar todas as letras e números!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.sp,

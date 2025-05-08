@@ -8,6 +8,7 @@ import 'game_item.dart';
 import 'conquest_manager.dart';
 import 'game_animations.dart';
 import 'game_design.dart';
+import 'sound_manager.dart';
 
 class GamesSuperWidget extends StatefulWidget {
   final UserModel user;
@@ -22,8 +23,7 @@ class GamesSuperWidget extends StatefulWidget {
     BuildContext context,
     LevelManager levelManager,
     UserModel user,
-  )
-  builder;
+  ) builder;
   final VoidCallback? onRepeatInstruction;
   final String? introImagePath;
   final String? introAudioPath;
@@ -63,51 +63,67 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   late Animation<double> _rotationAnimation;
   bool get isFirstCycle => widget.isFirstCycle;
 
+  GameItem? _currentChallengeItem;
+
   Widget get correctIcon => GameAnimations.correctAnswerIcon();
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
 
-  @override
-  void initState() {
-    super.initState();
-    levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
-    conquestManager = ConquestManager();
+@override
+void initState() {
+  super.initState();
+  levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
+  conquestManager = ConquestManager();
 
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
+  _fadeController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 500),
+  );
 
-    _rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+  _rotationAnimation = Tween<double>(
+    begin: 0.0,
+    end: 1.0,
+  ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
-    if (widget.introImagePath != null && widget.introAudioPath != null) {
-      final player = AudioPlayer();
-      player.play(AssetSource(widget.introAudioPath!), volume: 1).then((_) {
-        player.onPlayerComplete.first.then((_) {
-          if (mounted) {
-            _fadeController.forward().then((_) {
-              if (mounted) {
-                setState(() {
-                  introPlayed = true;
-                  introCompleted = true;
-                });
-                widget.onIntroFinished?.call();
-              }
-            });
-          }
-        });
-      });
-    } else {
-      introPlayed = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() => introCompleted = true);
-          widget.onIntroFinished?.call();
-        }
-      });
-    }
+  if (widget.introImagePath != null && widget.introAudioPath != null) {
+    _playIntroAndStartFade();
+  } else {
+    introPlayed = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => introCompleted = true);
+        widget.onIntroFinished?.call();
+      }
+    });
+  }
+}
+
+Future<void> _playIntroAndStartFade() async {
+  final player = AudioPlayer();
+  await player.play(AssetSource(widget.introAudioPath!), volume: 1);
+
+  await player.onPlayerComplete.first;
+
+  if (!mounted) return;
+
+  // 🔁 Começa a rotação e fade
+  _fadeController.forward();
+
+  // ⏳ Aguarda o tempo da rotação antes de esconder a imagem
+  await Future.delayed(_fadeController.duration ?? Duration(milliseconds: 500));
+
+  if (!mounted) return;
+
+  setState(() {
+    introPlayed = true;
+    introCompleted = true;
+  });
+
+  widget.onIntroFinished?.call();
+}
+
+  Future<void> playNewChallengeSound(GameItem item) async {
+    _currentChallengeItem = item;
+    await SoundManager.playGameItem(item);
   }
 
   @override
@@ -121,7 +137,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     return GameDesign(
       user: widget.user,
       progressValue: widget.progressValue,
-      level: levelManager.level, // ← nível passado ao GameDesign
+      level: levelManager.level,
       topTextWidget: DefaultTextStyle(
         style: getInstructionFont(isFirstCycle: widget.isFirstCycle),
         textAlign: TextAlign.center,
@@ -151,13 +167,17 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
             )
           else
             widget.builder(context, levelManager, widget.user),
-          if (widget.onRepeatInstruction != null && introCompleted)
+          if (introCompleted)
             Positioned(
               top: 50,
               left: 10,
               child: IconButton(
                 icon: Icon(Icons.play_circle_fill, color: Colors.red, size: 30),
-                onPressed: widget.onRepeatInstruction,
+                onPressed: widget.onRepeatInstruction ?? () async {
+                  if (_currentChallengeItem != null) {
+                    await SoundManager.playGameItem(_currentChallengeItem!);
+                  }
+                },
               ),
             ),
         ],

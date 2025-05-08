@@ -47,6 +47,7 @@ class GameItem {
   bool isTapped;
   bool showCheck = false;
 
+
   GameItem({
     required this.id,
     required this.type,
@@ -59,7 +60,18 @@ class GameItem {
     this.isTapped = false,
   });
 
-  // Constrói o widget visual do item com base no seu tipo
+  /// Retorna true se o item for um carácter isolado (letra ou número)
+  bool get isCharacter =>
+      type == GameItemType.character || (type == GameItemType.text && content.length == 1);
+
+  /// Retorna true se o item for uma palavra simples (sem espaços, mais de 1 letra)
+  bool get isWord =>
+
+      type == GameItemType.text &&
+      content.trim().length > 1 &&
+      !content.contains(' ');
+
+  /// Constrói o widget visual do item com base no seu tipo
   Widget buildWidget() {
     switch (type) {
       case GameItemType.character:

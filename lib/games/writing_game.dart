@@ -129,7 +129,7 @@ class _WritingGameState extends State<WritingGame> {
     return Padding(
       padding: EdgeInsets.only(top: 20.h),
       child: Text(
-        hasChallengeStarted ? 'Escreve a letra $currentLetter' : 'Vamos escrever!',
+        hasChallengeStarted ? 'Escreve a letra $currentLetter' : 'Vamos praticar a escrita!',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 24.sp,
