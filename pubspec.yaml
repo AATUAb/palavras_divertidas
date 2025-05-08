@@ -67,74 +67,11 @@ flutter:
     # Imagens dos pontos de controle de letras e números
     - assets/phontics_assets_points/
 
-
-# // lower pt
-
-    - assets/phontics_assets_points/pt_phontics/d_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/f_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/b_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/j_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/l_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/h_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/u_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/A_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/b_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/C_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/e_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/f_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/g_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/h_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/i_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/j_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/l_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/M_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/n_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/N_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/p_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/q_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/R_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/S_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/t_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/u_lower_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/v_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/x_PointsInfo.json
-    - assets/phontics_assets_points/pt_phontics/z_PointsInfo.json
-
-# /// upper pt
-    - assets/phontics_assets_points/pt_upper_phonetics/A_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/B_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/D_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/E_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/F_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/G_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/H_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/i_lowercase_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/I_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/J_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/L_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/M_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/O_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/p_lowercase_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/P_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/Q_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/R_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/T_PointsInfo.json
-    - assets/phontics_assets_points/pt_upper_phonetics/U_PointsInfo.json
-
-# /// numbers
-    - assets/phontics_assets_points/numbers_phontics/0_PointsInfo.json
-    - assets/phontics_assets_points/numbers_phontics/1_PointsInfo.json
-    - assets/phontics_assets_points/numbers_phontics/2_PointsInfo.json
-    - assets/phontics_assets_points/numbers_phontics/3_PointsInfo.json
-    - assets/phontics_assets_points/numbers_phontics/4_PointsInfo.json
-    - assets/phontics_assets_points/numbers_phontics/5_PointsInfo.json
-    - assets/phontics_assets_points/numbers_phontics/6_PointsInfo.json
-    - assets/phontics_assets_points/numbers_phontics/7_PointsInfo.json
-    - assets/phontics_assets_points/numbers_phontics/8_PointsInfo.json
-    - assets/phontics_assets_points/numbers_phontics/9_PointsInfo.json
-
-
-
+    # Jogo 2 
+    - assets/phontics_assets_points/pt_phontics/
+    - assets/phontics_assets_points/pt_upper_phonetics/
+    - assets/phontics_assets_points/numbers_phontics/
+    
   fonts:
     - family: ComicNeue
       fonts:
