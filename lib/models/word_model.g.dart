@@ -23,13 +23,15 @@ class WordModelAdapter extends TypeAdapter<WordModel> {
       difficulty: fields[3] as String,
       syllables: (fields[4] as List).cast<String>(),
       syllableCount: fields[5] as int,
+      audioFileName: fields[6] as String?,
+      imageFileName: fields[7] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, WordModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.text)
       ..writeByte(1)
@@ -41,7 +43,11 @@ class WordModelAdapter extends TypeAdapter<WordModel> {
       ..writeByte(4)
       ..write(obj.syllables)
       ..writeByte(5)
-      ..write(obj.syllableCount);
+      ..write(obj.syllableCount)
+      ..writeByte(6)
+      ..write(obj.audioFileName)
+      ..writeByte(7)
+      ..write(obj.imageFileName);
   }
 
   @override
