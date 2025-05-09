@@ -28,41 +28,51 @@ class SoundManager {
   }
 
   /// Toca o som de uma palavra, procurando pelo texto ou pelo audioFileName
-  static Future<void> playWord(String word) async {
-    final box = await Hive.openBox<WordModel>('words');
-    final model = box.values.firstWhere(
-      (m) => m.text.toLowerCase() == word.toLowerCase(),
-      orElse: () => WordModel(
-        text: word,
-        newLetter: '',
-        topic: '',
-        difficulty: '',
-        syllables: [],
-        syllableCount: 0,
-      ),
-    );
+  static Box<WordModel>? _wordBox;
 
-    final path = model.audioFileName != null
-        ? 'sounds/${model.audioFileName}.ogg'
-        : 'sounds/${model.text}.ogg';
+static Future<void> playWord(String word) async {
+  _wordBox ??= await Hive.openBox<WordModel>('words');
 
-    try {
-      await _player.play(AssetSource(path));
-    } catch (e) {
-      print("🔇 Erro ao tocar som da palavra '$word': $e");
-    }
+  final model = _wordBox!.values.firstWhere(
+    (m) => m.text.toLowerCase() == word.toLowerCase(),
+    orElse: () => WordModel(
+      text: word,
+      newLetter: '',
+      topic: '',
+      difficulty: '',
+      syllables: [],
+      syllableCount: 0,
+    ),
+  );
+
+  final filename = model.audioFileName ?? model.text;
+  final rawPath = 'assets/sounds/words_characters/$filename.ogg';
+  final assetPath = rawPath.replaceFirst(RegExp(r'^assets/'), '');
+
+  try {
+    await _player.play(AssetSource(assetPath));
+  } catch (e) {
+    print("🔇 Erro ao tocar som da palavra '$word': $e");
   }
+}
+
 
   /// Toca som com base no tipo de `GameItem`: carácter ou palavra
-  static Future<void> playGameItem(GameItem item) async {
-    if (item.isCharacter) {
-      await playCharacter(item.content);
-    } else if (item.isWord) {
-      await playWord(item.content);
-    } else {
-      print("🔇 Tipo de item não suportado para som: ${item.type}");
-    }
+ static Future<void> playGameItem(GameItem item) async {
+  final text = item.content.trim();
+
+  // Delay necessário no Flutter Web para evitar erro WebAudioError
+  await Future.delayed(const Duration(milliseconds: 300));
+
+  if (item.type == GameItemType.character && text.length == 1) {
+    await playCharacter(text);
+  } else if ((item.type == GameItemType.character && text.length > 1) ||
+             item.type == GameItemType.text) {
+    await playWord(text);
+  } else {
+    print("🔇 Tipo de item não suportado: ${item.type} — $text");
   }
+}
 
   /// Para qualquer som a tocar
   static Future<void> stop() async {

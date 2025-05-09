@@ -32,9 +32,9 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   List<CharacterModel> _characters = [];                       // Lista de caracteres disponíveis
   List<String> _usedCharacters = [];                          // Lista de caracteres já utilizados
- 
-  bool isRoundActive = true;                                 // Indica se a ronda está ativa
   String targetCharacter = '';                               // Caractere alvo a encontrar   
+
+  bool isRoundActive = true;                                 // Indica se a ronda está ativa
   bool isRoundFinished = false;                              // Indica se a ronda está terminada
   List<GameItem> gamesItems = [];                            // Lista de itens do jogo (letras/números)                   
   Timer? roundTimer, progressTimer;                           // Temporizadores para controlar o tempo da ronda e o progresso
@@ -140,11 +140,12 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   // Verifica se o caractere já foi utilizado na ronda atual, para controlar a repetição
   bool retryIsUsed(String value) => _usedCharacters.contains(value);
 
-    Future<void> _generateNewChallenge() async {
+  Future<void> _generateNewChallenge() async {
   _gamesSuperKey.currentState?.registerCompletedRound();
   final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
   if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
 
+  // Lista de caracteres disponíveis para o nível
   final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
   final availableChars =
       allChars.where((c) => !_usedCharacters.contains(c)).toList();
@@ -156,6 +157,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     return;
   }
 
+  // Seleciona a caracter-alvo
   final target =
       retry ?? availableChars[_random.nextInt(availableChars.length)];
   if (!retryIsUsed(target)) _usedCharacters.add(target);
@@ -172,6 +174,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     targetCharacter = target;
   });
 
+  // Geração das opções de resposta
   final bad = <String>{};
   while (bad.length < wrongCount) {
     final c = _characters[_random.nextInt(_characters.length)].character;
@@ -187,6 +190,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   final all = [...bad, ...good]..shuffle();
   final cols = (all.length / 3).ceil(), sx = 1 / (cols + 1), sy = 0.18;
 
+  // Gera GameItems com as respostas
   gamesItems = List.generate(all.length, (i) {
     final col = i % cols, row = i ~/ cols;
     final content = all[i];
@@ -203,7 +207,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   });
 
-  // 🆕 Identifica um dos itens corretos para tocar o som
+  // Identifica um dos itens corretos para tocar o som
   final referenceItem = gamesItems.firstWhere(
     (item) => item.isCorrect,
     orElse: () => GameItem(
@@ -215,8 +219,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       backgroundColor: Colors.transparent,
     ),
   );
-
-  // 🆕 Solicita ao super widget a reprodução do som do desafio
+  // Solicita ao super widget a reprodução do som do desafio
   await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
 
   // Inicia temporizadores
@@ -303,25 +306,28 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   // Constrói o texto superior do jogo, que é apresenado quando o jogo arranca
   Widget _buildTopText() {
+    final font = getFontFamily(isFirstCycle ? FontStrategy.slabo : FontStrategy.none);
     return Padding(
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
       child:
           hasChallengeStarted
               ? _buildChallengeText()
               : Text(
-                'Vamos encontrar todas as letras e números!',
+                'Vamos encontrar todas as letras e números.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
+                  fontFamily: font,
                   fontSize: 25.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
-    );
-  }
+            );
+          }
 
   // Constrói o texto do desafio, que apresenta o caractere alvo a encontrar
   Widget _buildChallengeText() {
+    final font = getFontFamily(isFirstCycle ? FontStrategy.slabo : FontStrategy.none);
     if (isFirstCycle && _isLetter(targetCharacter)) {
       return Text.rich(
         TextSpan(
@@ -330,13 +336,13 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
             TextSpan(
               text:
                   '${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-              style: TextStyle(fontFamily: 'Slabo', fontSize: 22.sp),
+              style: TextStyle(fontFamily: font, fontSize: 22.sp),
             ),
             const TextSpan(text: ', '),
             TextSpan(
               text:
                   '${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-              style: TextStyle(fontFamily: 'Cursive', fontSize: 23.sp),
+              style: TextStyle(fontFamily: font, fontSize: 23.sp),
             ),
           ],
         ),
