@@ -120,10 +120,27 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     await _letterPlayer.play(AssetSource(file));
   }
 
+  // Função que controla o comportamento do jogo quando o jogador termina o jogo e que reinicar o mesmo jogo
+  void _restartGame() async {
+  // Reinicia o nível manualmente
+  _gamesSuperKey.currentState?.levelManager.level = 1;
+
+  // Reinicia o progresso interno
+  setState(() {
+    _usedCharacters.clear();
+    hasChallengeStarted = true;
+    progressValue = 1.0;
+  });
+
+  // Reaplica definições e inicia primeiro desafio
+  await _applyLevelSettings();
+  _generateNewChallenge();
+}
+  
   // Verifica se o caractere já foi utilizado na ronda atual, para controlar a repetição
   bool retryIsUsed(String value) => _usedCharacters.contains(value);
 
-  Future<void> _generateNewChallenge() async {
+    Future<void> _generateNewChallenge() async {
   _gamesSuperKey.currentState?.registerCompletedRound();
   final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
   if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
@@ -134,10 +151,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   if (availableChars.isEmpty && retry == null) {
     _gamesSuperKey.currentState?.showEndOfGameDialog(
-      onRestart: () {
-        setState(() => _usedCharacters.clear());
-        _generateNewChallenge();
-      },
+    onRestart: _restartGame,
     );
     return;
   }
@@ -265,7 +279,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     return GamesSuperWidget(
       key: _gamesSuperKey,
       user: widget.user,
-      gameName: 'Detetive de letras e números',
+      gameName: 'Identificar de letras e números',
       progressValue: progressValue,
       level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
       currentRound: (_) => 1,

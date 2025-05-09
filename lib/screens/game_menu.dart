@@ -5,6 +5,7 @@ import '../themes/colors.dart';
 import '../widgets/menu_design.dart';
 import '../games/identify_letters_numbers.dart';
 import '../games/writing_game.dart';
+import '../games/count_syllables.dart';
 import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
@@ -61,7 +62,7 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Contar sílabas",
         icon: Icons.format_list_numbered,
-        onTap: () => _navigateToGame("Contar Sílabas"),
+        onTap: () =>  _countSyllablesGame(),
         backgroundColor: AppColors.yellow,
       ),
       GameCardData(
@@ -206,10 +207,19 @@ class _GameMenuState extends State<GameMenu> {
   }
 
     void _writingGame() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (_) => WritingGame(user: widget.user),
+      ),
+    );
+  }
+
+  void   _countSyllablesGame() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CountSyllablesGame(user: widget.user),
       ),
     );
   }

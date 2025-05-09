@@ -27,6 +27,7 @@ class _WritingGameState extends State<WritingGame> {
   int correctCount = 1;
   List<CharacterModel> _characters = [];
   List<String> _usedCharacters = [];
+  double progressValue = 1.0;
 
   String currentLetter = '';
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
@@ -94,13 +95,21 @@ class _WritingGameState extends State<WritingGame> {
     _playInstruction();
   }
 
-  void _restartGame() {
-    setState(() {
-      _usedCharacters.clear();
-      hasChallengeStarted = false;
-    });
-    _generateNextLetter();
-  }
+void _restartGame() async {
+  // Reinicia o nível manualmente
+  _gamesSuperKey.currentState?.levelManager.level = 1;
+
+  // Reinicia o progresso interno
+  setState(() {
+    _usedCharacters.clear();
+    hasChallengeStarted = true;
+    progressValue = 1.0;
+  });
+
+  // Reaplica definições e inicia primeiro desafio
+  await _applyLevelSettings();
+  _generateNextLetter();
+}
 
   Future<void> _handleTracingFinished(String char) async {
     _gamesSuperKey.currentState?.registerCompletedRound();

@@ -8,6 +8,7 @@ enum GameItemType {
   image,       // imagens
   audio,       // sons
   character,   // letras ou números isolados
+  number,      // números isolados
 }
 
 // Estratégias de fonte a aplicar ao conteúdo textual
@@ -117,6 +118,25 @@ class GameItem {
           ),
           padding: const EdgeInsets.all(16),
           child: const Icon(Icons.volume_up, color: Colors.white, size: 36),
+        );
+
+        case GameItemType.number:
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            content,
+            style: TextStyle(
+              fontSize: 32.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: fontFamily,
+              decoration: TextDecoration.none,
+            ),
+          ),
         );
     }
   }

@@ -3,13 +3,14 @@ import 'package:logger/logger.dart';
 
 import '../models/user_model.dart';
 import '../models/character_model.dart';
-import '../models/character_model.dart'
-    show populateCharactersIfNeeded; // função de seed
+import '../models/word_model.dart' show WordModel, WordModelAdapter, populateWordsIfNeeded, words;
+
 
 class HiveService {
   // Boxes principais
   static late Box<UserModel> _userBox;
   static late Box<CharacterModel> _characterBox;
+  static late Box<WordModel> _wordBox;
 
   static final Logger logger = Logger();
 
@@ -23,20 +24,28 @@ class HiveService {
     if (!Hive.isAdapterRegistered(1)) {
       Hive.registerAdapter(CharacterModelAdapter());
     }
-
-    try {
-      _userBox = await Hive.openBox<UserModel>('users');
-      logger.i("✅ Box 'users' opened successfully");
-
-      _characterBox = await Hive.openBox<CharacterModel>('characters');
-      logger.i("✅ Box 'characters' opened successfully");
-    } catch (e) {
-      logger.e("❌ Error opening boxes: $e");
-      rethrow;
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(WordModelAdapter());
     }
 
+    try {
+  _userBox = await Hive.openBox<UserModel>('users');
+  logger.i("✅ Box 'users' opened successfully");
+
+  _characterBox = await Hive.openBox<CharacterModel>('characters');
+  logger.i("✅ Box 'characters' opened successfully");
+
+  _wordBox = await Hive.openBox<WordModel>('words');
+  logger.i("✅ Box 'words' opened successfully");
+
+  logger.i('✅ Hive inicializado com sucesso.');
+} catch (e) {
+  logger.e('❌ Erro ao abrir boxes Hive: $e');
+  rethrow;
+}
     await populateCharactersIfNeeded();
-  }
+    await populateWordsIfNeeded(words); 
+}
 
   static Future<void> deleteUsersBox() async {
     if (Hive.isBoxOpen('users')) {
