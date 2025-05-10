@@ -69,7 +69,6 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
-
     switch (lvl) {
       case 1:
         levelTime = const Duration(seconds: 15);
@@ -94,8 +93,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
         .toList();
 
     setState(() {
-      currentLevel = lvl;
-      _words = filteredWords;
+     //_words = filteredWords;
     });
   }
 
@@ -126,9 +124,13 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     _generateNewChallenge();
   }
 
+  // Verifica se o caractere já foi utilizado na ronda atual, para controlar a repetição
+  bool retryIsUsed(String value) => _usedWords.contains(value);
+
   Future<void> _generateNewChallenge() async {
     _gamesSuperKey.currentState?.registerCompletedRound();
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
+    if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
 
     final availableWords = _words.where((w) =>
         !_usedWords.contains(w.text) &&
@@ -142,18 +144,14 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       return;
     }
 
-    targetWord = retry != null
-        ? availableWords.firstWhere(
-            (w) => w.text == retry,
-            orElse: () => availableWords[_random.nextInt(availableWords.length)],
-          )
-        : availableWords[_random.nextInt(availableWords.length)];
+    // Seleciona a caracter-alvo
+  final targetText = retry ?? availableWords[_random.nextInt(availableWords.length)].text;
+targetWord = availableWords.firstWhere(
+  (w) => w.text == targetText,
+  orElse: () => availableWords[_random.nextInt(availableWords.length)],
+);
 
-    if (!_usedWords.contains(targetWord.text)) {
-      _usedWords.add(targetWord.text);
-    }
-
-    _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord.text);
+  _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord.text);
     _cancelTimers();
 
     final correct = targetWord.syllableCount;
