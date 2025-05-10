@@ -322,6 +322,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   Future<void> checkAnswer({
     required GameItem selectedItem,
     required String target,
+    required String retryId,
     required int correctCount,
     required int currentTry,
     required int foundCorrect,
@@ -353,20 +354,24 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
         target: target,
       );
     } else {
-      registerFailedRound(target);
+      registerFailedRound(retryId);
     }
   }
 
-  void registerFailedRound(String target) {
-    final alreadyExists = _retryQueue.any((entry) => entry.key.toLowerCase() == target.toLowerCase());
-    if (!alreadyExists) {
-      _retryQueue.add(MapEntry(target, _roundCounter));
-      debugPrint('➕ Adicionado à fila de retry: $target');
-    } else {
-      debugPrint('🔁 Já na fila de retry: $target');
-    }
-    debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
+  void registerFailedRound(String retryId) {
+  final alreadyExists = _retryQueue.any(
+    (entry) => entry.key.toLowerCase() == retryId.toLowerCase(),
+  );
+
+  if (!alreadyExists) {
+    _retryQueue.add(MapEntry(retryId, _roundCounter));
+    debugPrint('➕ Adicionado à fila de retry: $retryId');
+  } else {
+    debugPrint('🔁 Já na fila de retry: $retryId');
   }
+
+  debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
+}
 
   String? peekNextRetryTarget() {
     if (_retryQueue.isNotEmpty) {

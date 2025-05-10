@@ -228,9 +228,18 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       item.isTapped = true;
     });
 
+    final retryId = targetWord.text;
+    final target = targetWord.syllableCount.toString();
+    final isCorrect = item.content == target;
+
+    if (!isCorrect) {
+      s.registerFailedRound(retryId);
+    }
+
     await s.checkAnswer(
       selectedItem: item,
       target: targetWord.syllableCount.toString(),
+      retryId: targetWord.text,
       correctCount: 1,
       currentTry: currentTry,
       foundCorrect: item.isCorrect ? 1 : 0,

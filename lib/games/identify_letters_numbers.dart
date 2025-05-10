@@ -266,6 +266,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     s.checkAnswer(
       selectedItem: item,
       target: targetCharacter,
+      retryId: item.id,
       correctCount: correctCount,
       currentTry: currentTry,
       foundCorrect: foundCorrect,
