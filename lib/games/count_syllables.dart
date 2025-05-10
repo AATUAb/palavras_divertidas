@@ -225,6 +225,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
     setState(() {
       currentTry++;
+      item.isTapped = true;
     });
 
     await s.checkAnswer(
@@ -300,41 +301,54 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     );
   }
 
-  Widget _buildBoard(BuildContext context, _, __) {
-    if (!hasChallengeStarted || _words.isEmpty) {
-      return const SizedBox();
-    }
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(height: 65.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              WordHighlightBox(word: targetWord.text),
-              SizedBox(width: 50.w),
-              ImageCardBox(imagePath: targetWord.imagePath),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          AnswerButtonsRow(
-            items: gamesItems,
-            onTap: (selected) {
-              final GameItem item = gamesItems.firstWhere(
-                (g) => g.content == selected,
-                orElse: () => throw Exception('❌ GameItem não encontrado para \$selected'),
-              );
-              _handleTap(item);
-            },
-          ),
-        ],
-      ),
-    );
+ Widget _buildBoard(BuildContext context, _, __) {
+  if (!hasChallengeStarted || _words.isEmpty) {
+    return const SizedBox();
   }
 
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 20.w),
+    child: Column(
+      children: [
+        SizedBox(height: 85.h),
+
+        // Palavra + imagem
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            WordHighlightBox(word: targetWord.text),
+            SizedBox(width: 50.w),     //espaçamento entre a palavra e a imagem
+            ImageCardBox(imagePath: targetWord.imagePath),
+          ],
+        ),
+
+        const Spacer(),
+
+        // Botões em linha, um por um com feedback
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: gamesItems.map((item) {
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6.w),
+              child: GestureDetector(
+                onTap: () => _handleTap(item),
+                child: item.isTapped
+                    ? (item.isCorrect
+                        ? _gamesSuperKey.currentState!.correctIcon
+                        : _gamesSuperKey.currentState!.wrongIcon)
+                    : FlexibleAnswerButton(
+                        label: item.content,
+                        onTap: () => _handleTap(item),
+                      ),
+              ),
+            );
+          }).toList(),
+        ),
+        SizedBox(height: 30.h),
+      ],
+    ),
+  );
+}
   Future<void> _playWordSound(String word) async {
     final path = 'sounds/words_characters/\${word.toLowerCase()}.ogg';
     await _wordPlayer.stop();
