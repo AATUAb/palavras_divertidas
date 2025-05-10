@@ -163,10 +163,10 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
             widget.builder(context, levelManager, widget.user),
           if (introCompleted)
             Positioned(
-              top: 50,
+              top: 100,
               left: 10,
               child: IconButton(
-                icon: Icon(Icons.play_circle_fill, color: Colors.red, size: 30),
+                icon: Icon(Icons.play_circle_fill, color: Colors.red, size: 70.sp),
                 onPressed: widget.onRepeatInstruction ?? () async {
                   if (_currentChallengeItem != null) {
                     await SoundManager.playGameItem(_currentChallengeItem!);

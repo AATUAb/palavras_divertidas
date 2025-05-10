@@ -53,7 +53,6 @@ Future<void> populateWordsIfNeeded(List<WordModel> words) async {
   }
 }
 
-
 final List<WordModel> words = [
 WordModel(
   text: 'pia',

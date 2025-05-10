@@ -359,46 +359,52 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   }
 
   // Constrói o tabuleiro do jogo, que contém os itens (letras/números) a encontrar
-  Widget _buildBoard(BuildContext _, __, ___) => Stack(
+  // Constrói o tabuleiro do jogo, que contém os itens (letras/números) a encontrar
+Widget _buildBoard(BuildContext _, __, ___) => Expanded(
+  child: Stack(
     children: [
       ...gamesItems.map((item) {
+        // Evita que os itens fiquem demasiado colados às margens
+        final safeDx = item.dx.clamp(0.05, 0.95);
+        final safeDy = item.dy.clamp(0.05, 0.95);
+
         return Align(
-          alignment: Alignment(item.dx * 2 - 1, item.dy * 2 - 1),
+          alignment: Alignment(safeDx * 2 - 1, safeDy * 2 - 1),
           child: GestureDetector(
             onTap: () => _handleTap(item),
-            child:
-                item.isTapped
-                    ? (item.isCorrect
-                        ? _gamesSuperKey.currentState!.correctIcon
-                        : _gamesSuperKey.currentState!.wrongIcon)
-                    : Container(
-                      width: 60.r,
-                      height: 60.r,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: item.backgroundColor,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            offset: const Offset(2, 2),
-                            blurRadius: 4.r,
-                          ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        item.content,
-                        style: TextStyle(
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontFamily: item.fontFamily,
+            child: item.isTapped
+                ? (item.isCorrect
+                    ? _gamesSuperKey.currentState!.correctIcon
+                    : _gamesSuperKey.currentState!.wrongIcon)
+                : Container(
+                    width: 60.w,
+                    height: 60.w, // mantém forma circular adaptada ao ecrã
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: item.backgroundColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          offset: const Offset(2, 2),
+                          blurRadius: 4.r,
                         ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      item.content,
+                      style: TextStyle(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: item.fontFamily,
                       ),
                     ),
+                  ),
           ),
         );
       }).toList(),
     ],
-  );
+  ),
+);
 }
