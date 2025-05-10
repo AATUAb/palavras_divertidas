@@ -19,6 +19,7 @@ class IdentifyLettersNumbers extends StatefulWidget {
   State<IdentifyLettersNumbers> createState() => _IdentifyLettersNumbersState();
 }
 
+// Classe que controla o estado do jogo
 class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();     // Chave global para o widget de jogo
   final _random = Random();                                     // Gerador de letras e números aleatórios         
@@ -124,14 +125,12 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   void _restartGame() async {
   // Reinicia o nível manualmente
   _gamesSuperKey.currentState?.levelManager.level = 1;
-
   // Reinicia o progresso interno
   setState(() {
     _usedCharacters.clear();
     hasChallengeStarted = true;
     progressValue = 1.0;
   });
-
   // Reaplica definições e inicia primeiro desafio
   await _applyLevelSettings();
   _generateNewChallenge();
@@ -140,12 +139,13 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   // Verifica se o caractere já foi utilizado na ronda atual, para controlar a repetição
   bool retryIsUsed(String value) => _usedCharacters.contains(value);
 
+  // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
   _gamesSuperKey.currentState?.registerCompletedRound();
   final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
   if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
 
-  // Lista de caracteres disponíveis para o nível
+  // Lista de caracteres disponíveis para o nível atual
   final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
   final availableChars =
       allChars.where((c) => !_usedCharacters.contains(c)).toList();
@@ -157,11 +157,12 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     return;
   }
 
-  // Seleciona a caracter-alvo
+      // Seleciona a caracter-alvo aleatoriamente ou da fila de repetição
   final target =
       retry ?? availableChars[_random.nextInt(availableChars.length)];
+  // Se o caractere volta a ser apresentado, remove-o da fila de repetição
+  // e adiciona-o à lista de caracteres já utilizados
   if (!retryIsUsed(target)) _usedCharacters.add(target);
-
   _gamesSuperKey.currentState?.removeFromRetryQueue(target);
 
   _cancelTimers();
@@ -242,6 +243,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   });
 }
+
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
     if (!isRoundActive || item.isTapped) return;
@@ -360,7 +362,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   }
 
   // Constrói o tabuleiro do jogo, que contém os itens (letras/números) a encontrar
-  // Constrói o tabuleiro do jogo, que contém os itens (letras/números) a encontrar
 Widget _buildBoard(BuildContext _, __, ___) => Expanded(
   child: Stack(
     children: [
@@ -379,7 +380,7 @@ Widget _buildBoard(BuildContext _, __, ___) => Expanded(
                     : _gamesSuperKey.currentState!.wrongIcon)
                 : Container(
                     width: 60.w,
-                    height: 60.w, // mantém forma circular adaptada ao ecrã
+                    height: 60.w, 
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: item.backgroundColor,
