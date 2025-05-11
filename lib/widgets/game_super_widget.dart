@@ -53,6 +53,7 @@ class GamesSuperWidget extends StatefulWidget {
 class GamesSuperWidgetState extends State<GamesSuperWidget>
     with SingleTickerProviderStateMixin {
   late LevelManager levelManager;
+  int _visibleLevel = 1;
   late ConquestManager conquestManager;
   final Queue<MapEntry<String, int>> _retryQueue = Queue();
   int _roundCounter = 0;
@@ -72,6 +73,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   void initState() {
     super.initState();
     levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
+    _visibleLevel = levelManager.level;
     conquestManager = ConquestManager();
 
     _fadeController = AnimationController(
@@ -131,7 +133,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     return GameDesign(
       user: widget.user,
       progressValue: widget.progressValue,
-      level: levelManager.level,
+      level: _visibleLevel,
       topTextWidget: DefaultTextStyle(
         style: getInstructionFont(isFirstCycle: widget.isFirstCycle),
         textAlign: TextAlign.center,
@@ -259,6 +261,9 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       newLevel: levelManager.level,
       increased: levelManager.levelIncreased,
     );
+    setState(() {
+      _visibleLevel = levelManager.level;
+    });
   }
 
   if (!mounted) return;
@@ -292,6 +297,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       final levelChanged = await levelManager.registerRoundForLevel(correct: firstTry);
       await applySettings();
 
+      // Verifica se o nível do utilizador deve ser atualizado
       final shouldConquer = await conquestManager.registerRoundForConquest(
         context: context,
         firstTry: firstTry,
@@ -312,7 +318,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
           if (mounted) generateNewChallenge();
         }
       }
-
       if (levelChanged) {
         await showLevelChangeFeedback(
           newLevel: levelManager.level,
@@ -410,6 +415,9 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       Future<void> continueAfterFeedback() async {
         if (!mounted) return;
         await Future.delayed(const Duration(milliseconds: 300));
+        setState(() {
+          _visibleLevel = levelManager.level;
+        });
         if (shouldConquer) {
           await showConquestFeedback(onFinished: generateNewChallenge);
         } else {
@@ -451,76 +459,92 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     selectedItem.isCorrect = isCorrect;
   });
 
+  // Ao receber uma resposta, cancela o timmer e mostra o feedback de reposta
   cancelTimers();
   await playAnswerFeedback(isCorrect: isCorrect);
   
+  // Se a resposta estiver errada, regista o item na fila de retry, regista o nível, a conquista e gera um desafio novo
   if (!isCorrect) {
   registerFailedRound(retryId);
   await levelManager.registerRoundForLevel(correct: false);
   await conquestManager.registerRoundForConquest(
-  context: context,
-  firstTry: false,
-  applySettings: applySettings,
-  userKey: widget.user.key!,
-);
+    context: context,
+    firstTry: false,
+    applySettings: applySettings,
+    userKey: widget.user.key!,
+  );
   await applySettings();
+
+  final levelIncreased = levelManager.levelIncreased;
+  final levelChanged = levelManager.levelChanged;
+
+  if (levelChanged) {
+    await showLevelChangeFeedback(
+      newLevel: levelManager.level,
+      increased: levelIncreased,
+    );
+    setState(() {
+      _visibleLevel = levelManager.level;
+    });
+  }
+
   generateNewChallenge();
   return;
 }
 
-// se correto
+//  Se a resposta estiver correta, regista o nível, a conquista, mostra um feedback opcional, mostra o feedback de sucesso e gera um desafio novo
   registerCompletedRound(retryId);
-
   final levelChanged = await levelManager.registerRoundForLevel(correct: true);
-  
   final shouldConquer = await conquestManager.registerRoundForConquest(
-  context: context,
-  firstTry: true,
-  userKey: widget.user.key!,
-  applySettings: applySettings,
-);
-
-  await applySettings();
+    context: context,
+    firstTry: true,
+    userKey: widget.user.key!,
+    applySettings: applySettings,
+  );
   await showExtraFeedback();
   await showSuccessFeedback();
+  await applySettings();
 
+  // Coninua após o registo e feedback geral de resposta correta ou errada
+  // Se aplicável mostra animação de nível e conquista e ajuste de nível
   Future<void> continueAfterFeedback() async {
     if (!mounted) return;
     await Future.delayed(const Duration(milliseconds: 300));
+    setState(() {
+    _visibleLevel = levelManager.level; // só agora atualiza estrelas
+  });
     if (shouldConquer) {
       await showConquestFeedback(onFinished: generateNewChallenge);
     } else {
       generateNewChallenge();
     }
   }
-
-  final levelIncreased = levelManager.levelIncreased;
-
-if (levelChanged) {
-  await showLevelChangeFeedback(
-    newLevel: levelManager.level,
-    increased: levelIncreased, // ✅ mostra mesmo que seja false (descida)
-  );
-}
-
-await continueAfterFeedback();
+      if (levelChanged) {
+        await showLevelChangeFeedback(
+          newLevel: levelManager.level,
+          increased: levelManager.levelIncreased,
+        );
+        await continueAfterFeedback();
+      } else {
+        await continueAfterFeedback();
+      }
+    }
   
-  // Verifica se a resposta está correta e atualiza o estado do item
+  // Se a resposta estiver errada, regista o item na fila de retry, sem repetição e gere a sua exibição
   void registerFailedRound(String retryId) {
   final alreadyExists = _retryQueue.any(
     (entry) => entry.key.toLowerCase() == retryId.toLowerCase(),
   );
-
   if (!alreadyExists) {
     _retryQueue.add(MapEntry(retryId, _roundCounter));
     debugPrint('➕ Adicionado à fila de retry: $retryId');
   } else {
     debugPrint('🔁 Já na fila de retry: $retryId');
   }
-
   debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
 }
 
+  // Se a fila de retry não estiver vazia, verifica se o item mais antigo pode ser usado
   String? peekNextRetryTarget() {
     if (_retryQueue.isNotEmpty) {
       final oldest = _retryQueue.first;
@@ -532,27 +556,27 @@ await continueAfterFeedback();
     return null;
   }
 
-  // Remove o item da fila de retry se já foi acertado
+
+  // Se o item da fila retry for respondido de forma correta, remove-o
   void removeFromRetryQueue(String target) {
     _retryQueue.removeWhere((entry) => entry.key.toLowerCase() == target.toLowerCase());
     debugPrint('➖ Removido da fila de retry (já acertou): $target');
     debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
   }
-
   List<String> retryQueueContents() {
     return _retryQueue.map((e) => e.key).toList();
   }
-
   bool canUseRetry() {
     return _roundCounter >= retryDelay;
   }
+
 
   // Regista a ronda concluída
   void registerCompletedRound(String retryId) {
     _roundCounter++;
     debugPrint('🔄 Ronda concluída. Contador: $_roundCounter');
   }
-
+  
 
   // Mostra o diálogo de fim de jogo
   void showEndOfGameDialog({required VoidCallback onRestart}) async {
