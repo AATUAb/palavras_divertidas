@@ -242,6 +242,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       introAudioPath: 'sounds/games/identify_letters_numbers.ogg',
       onIntroFinished: () async {
         await _loadCharacters();
+        //await _gamesSuperKey.currentState?.levelManager.loadLevel();
         await _applyLevelSettings();
         if (mounted) {
           setState(() => hasChallengeStarted = true);

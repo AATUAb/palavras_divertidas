@@ -70,10 +70,10 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
 
   @override
-  void initState() {
+void initState() {
     super.initState();
+
     levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
-    _visibleLevel = levelManager.level;
     conquestManager = ConquestManager();
 
     _fadeController = AnimationController(
@@ -86,16 +86,27 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
+    // Carrega o nível de cada jogo
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeLevelAndIntro();
+    });
+  }
+
+  Future<void> _initializeLevelAndIntro() async {
+    await levelManager.loadLevel();
+    setState(() {
+      _visibleLevel = levelManager.level;
+    });
+
     if (widget.introImagePath != null && widget.introAudioPath != null) {
-      _playIntroAndStartFade();
+      await _playIntroAndStartFade();
     } else {
       introPlayed = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() => introCompleted = true);
-          widget.onIntroFinished?.call();
-        }
-      });
+      introCompleted = true;
+      if (mounted) {
+        setState(() {});
+        widget.onIntroFinished?.call();
+      }
     }
   }
 

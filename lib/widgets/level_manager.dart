@@ -1,5 +1,8 @@
+import 'package:logger/logger.dart';
 import '../models/user_model.dart';
 import '../services/hive_service.dart';
+
+final logger = Logger();
 
 // Classe para gerir o nível do jogo
 class LevelManager {
@@ -45,6 +48,7 @@ Future<void> loadLevel() async {
       userKey: user.key!.toString(),
       gameName: gameName,
     );
+    logger.i('📥 Nível carregado para ${user.name} no jogo $gameName: $level');
   }
 
 // Regista uma ronda nova do jogo e atualiza o nível
