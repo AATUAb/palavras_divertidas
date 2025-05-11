@@ -180,7 +180,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             Align(
               alignment: const Alignment(0.30, -1.0),
               child: _buildSticker(
-                'assets/images/words/rato.webp',
+                'assets/images/words/alce.webp',
                 unlocked: _localConquest >= 1,
               ),
             ),

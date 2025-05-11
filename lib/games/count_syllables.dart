@@ -31,7 +31,8 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   late int currentTry;
   late int foundCorrect;
 
-  List<WordModel> _words = [];
+  List<WordModel> _allWords = [];
+  List<WordModel> _levelWords = [];
   List<String> _usedWords = [];
   late WordModel targetWord;
   bool showSyllables = false;
@@ -61,9 +62,9 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
   // Carrega as palavras do banco de dados Hive
   Future<void> _loadWords() async {
-    final box = await Hive.openBox<WordModel>('words');
-    _words = box.values.toList();
-  }
+  final box = await Hive.openBox<WordModel>('words');
+  _allWords = box.values.toList();
+}
 
   //  Fecha o player de áudio e cancela os temporizadores
   @override
@@ -91,20 +92,17 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
         levelDifficulty = 'dificil';
         break;
     }
-    final filteredWords = _words
+    _levelWords = _allWords
       .where((w) =>
           (w.difficulty ?? '').trim().toLowerCase() == levelDifficulty &&
           (w.audioPath ?? '').trim().isNotEmpty &&
           (w.imagePath ?? '').trim().isNotEmpty)
       .toList();
 
-  if (filteredWords.isEmpty) {
+  if (_levelWords.isEmpty) {
     debugPrint('⚠️ Sem palavras disponíveis para o nível "$levelDifficulty".');
     return;
   }
-  setState(() {
-    _words = filteredWords;
-  });
 }
 
   // Cancela os temporizadores ativos
@@ -149,7 +147,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
 
       // Lista de palabvras disponíveis para o nível atual
-    final availableWords = _words.where((w) =>
+    final availableWords = _levelWords.where((w) =>
         !_usedWords.contains(w.text) &&
         w.audioPath.trim().isNotEmpty &&
         w.imagePath.trim().isNotEmpty).toList();
@@ -342,7 +340,7 @@ targetWord = availableWords.firstWhere(
 
   // Constrói o tabuleiro do jogo, que contém a imagem, palavra e opções de resposta
 Widget _buildBoard(BuildContext context, _, __) {
-  if (!hasChallengeStarted || _words.isEmpty) {
+  if (!hasChallengeStarted || _levelWords.isEmpty) {
     return const SizedBox();
   }
 

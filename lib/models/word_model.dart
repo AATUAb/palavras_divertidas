@@ -931,14 +931,6 @@ WordModel(
   syllableCount: 2,
 ),
 WordModel(
-  text: 'babete',
-  newLetter: 'b',
-  topic: 'roupa',
-  difficulty: 'baixa',
-  syllables: ['ba', 'be', 'te'],
-  syllableCount: 3,
-),
-WordModel(
   text: 'biquini',
   newLetter: 'b',
   topic: 'roupa',
@@ -1241,14 +1233,6 @@ WordModel(
   syllableCount: 2,
 ),
 WordModel(
-  text: 'ovo',
-  newLetter: 'v',
-  topic: 'comida',
-  difficulty: 'baixa',
-  syllables: ['ovo'],
-  syllableCount: 1,
-),
-WordModel(
   text: 'cocô',
   newLetter: 'c',
   topic: 'comida',
@@ -1307,14 +1291,6 @@ WordModel(
   syllableCount: 3,
 ),
 WordModel(
-  text: 'pepino',
-  newLetter: 'n ',
-  topic: 'comida',
-  difficulty: 'baixa',
-  syllables: ['pe', 'pi', 'no'],
-  syllableCount: 3,
-),
-WordModel(
   text: 'canela',
   newLetter: 'n ',
   topic: 'comida',
@@ -1354,14 +1330,6 @@ WordModel(
   topic: 'comida',
   difficulty: 'baixa',
   syllables: ['ba', 'ta', 'ta'],
-  syllableCount: 3,
-),
-WordModel(
-  text: 'bolota',
-  newLetter: 'b',
-  topic: 'comida',
-  difficulty: 'baixa',
-  syllables: ['bo', 'lo', 'ta'],
   syllableCount: 3,
 ),
 WordModel(
@@ -2519,8 +2487,8 @@ WordModel(
   newLetter: 'nh',
   topic: 'outros',
   difficulty: 'baixa',
-  syllables: ['moi', 'nho'],
-  syllableCount: 2,
+  syllables: ['mo', 'i', 'nho'],
+  syllableCount: 3,
 ),
 WordModel(
   text: 'palha',
