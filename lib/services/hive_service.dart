@@ -186,24 +186,28 @@ class HiveService {
   }
 
   static Future<void> updateGameAccuracy({
-    required int userKey,
-    required String gameName,
-    required List<int> accuracyPerLevel,
-  }) async {
-    final user = _userBox.get(userKey);
-    if (user != null) {
-      final mutableMap = Map<String, List<int>>.from(user.gamesAccuracy);
-      mutableMap[gameName] = accuracyPerLevel;
-      user.gamesAccuracy = mutableMap;
+  required int userKey,
+  required String gameName,
+  required List<int> accuracyPerLevel,
+  int? levelOverride,
+}) async {
+  final user = _userBox.get(userKey);
+  if (user != null) {
+    final levelToStore = levelOverride ?? user.gameLevel;
 
-      await updateUserByKey(userKey, user);
+    // Atualiza o mapa de acurácia
+    final mutableMap = Map<String, List<int>>.from(user.gamesAccuracy);
+    mutableMap[gameName] = accuracyPerLevel;
+    user.gamesAccuracy = mutableMap;
 
-      final accuracy = accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0;
-      logger.i(
-        "🎯 Updated accuracy for $gameName, nível ${user.gameLevel}: $accuracy%",
-      );
-    } else {
-      logger.w("⚠️ User not found with key $userKey for updating accuracy");
-    }
+    await updateUserByKey(userKey, user);
+
+    final accuracy = accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0;
+    logger.i(
+      "🎯 Updated accuracy for $gameName, nível $levelToStore: $accuracy%",
+    );
+  } else {
+    logger.w("⚠️ User not found with key $userKey for updating accuracy");
   }
+}
 }

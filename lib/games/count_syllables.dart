@@ -26,18 +26,19 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   final _random = Random();
   late final AudioPlayer _wordPlayer;
   bool hasChallengeStarted = false;
-  late int currentLevel;
+  //late int currentLevel;
   late Duration levelTime;
   late int currentTry;
   late int foundCorrect;
 
   List<WordModel> _words = [];
   List<String> _usedWords = [];
-  List<GameItem> gamesItems = [];
   late WordModel targetWord;
+  bool showSyllables = false;
 
   bool isRoundActive = true;
   bool isRoundFinished = false;
+  List<GameItem> gamesItems = [];
   Timer? roundTimer, progressTimer;
   double progress = 0.0;
   double progressValue = 1.0;
@@ -101,7 +102,6 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     debugPrint('⚠️ Sem palavras disponíveis para o nível "$levelDifficulty".');
     return;
   }
-
   setState(() {
     _words = filteredWords;
   });
@@ -145,7 +145,6 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
-    _gamesSuperKey.currentState?.registerCompletedRound();
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
     if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
 
@@ -172,6 +171,13 @@ targetWord = availableWords.firstWhere(
   // e adiciona-o à lista de palavras já utilizados
   _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord.text);
     _cancelTimers();
+    setState(() {
+      isRoundActive = true;
+      gamesItems.clear();
+      foundCorrect = 0;
+      currentTry = 0;
+      progressValue = 1.0;
+  });
 
     // Geração das opções de resposta
     final correct = targetWord.syllableCount;
@@ -190,15 +196,15 @@ targetWord = availableWords.firstWhere(
         content: options[i],
         dx: 0,
         dy: 0,
-        fontFamily: _fontForGameItem(),
-        backgroundColor: Colors.teal,
+        fontFamily: '',
+        backgroundColor: Colors.transparent,
         isCorrect: options[i] == correct.toString(),
       );
     });
 
     setState(() {
+      gamesItems = generatedItems; 
       isRoundActive = true;
-      gamesItems = generatedItems;
       currentTry = 0;
       foundCorrect = 0;
       progressValue = 1.0;
@@ -215,7 +221,7 @@ targetWord = availableWords.firstWhere(
     );
     // Solicita ao super widget a reprodução do som do desafio
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 50));
       await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
     });
 
@@ -239,46 +245,37 @@ targetWord = availableWords.firstWhere(
     });
   }
 
+
+
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
-  if (!isRoundActive || item.isTapped) return;
-  final s = _gamesSuperKey.currentState;
-  if (s == null) return;
+    if (!isRoundActive || item.isTapped) return;
+    final s = _gamesSuperKey.currentState;
+    if (s == null) return;
 
-  setState(() {
-    currentTry++;
-    item.isTapped = true;
-  });
+    // Delega validação ao super widget, mas com callback local
+    await s.checkAnswerSingle(
+      selectedItem: item,
+      target: targetWord.syllableCount.toString(),
+      retryId: targetWord.text,
+      currentTry: currentTry,
+      applySettings: _applyLevelSettings,
+      generateNewChallenge: _generateNewChallenge,
+      cancelTimers: _cancelTimers,
+      showExtraFeedback: () async {
+        setState(() {
+          isRoundActive = false;
+          showSyllables = true;
+        });
 
-  final retryId = targetWord.text;
-  final target = targetWord.syllableCount.toString();
-  final isCorrect = item.content == target;
+        await Future.delayed(const Duration(seconds: 2));
+        setState(() => showSyllables = false);
+      },
+    );
 
-  if (!isCorrect) {
-  s.registerFailedRound(retryId);
-  await s.playAnswerFeedback(isCorrect: false);
+    setState(() => currentTry++);
+  }
 
-  _cancelTimers();
-
-  //await Future.delayed(const Duration(seconds: 1));
-  await _applyLevelSettings();
-  _generateNewChallenge();
-  return;
-}
-
-  await s.checkAnswer(
-    selectedItem: item,
-    target: targetWord.syllableCount.toString(),
-    retryId: targetWord.text,
-    correctCount: 1,
-    currentTry: currentTry,
-    foundCorrect: item.isCorrect ? 1 : 0,
-    applySettings: _applyLevelSettings,
-    generateNewChallenge: _generateNewChallenge,
-    updateFoundCorrect: (_) {},
-    cancelTimers: _cancelTimers,
-  );
-}
 
   // Constrói o widget principal do jogo
   @override
@@ -344,7 +341,7 @@ targetWord = availableWords.firstWhere(
   }
 
   // Constrói o tabuleiro do jogo, que contém a imagem, palavra e opções de resposta
- Widget _buildBoard(BuildContext context, _, __) {
+Widget _buildBoard(BuildContext context, _, __) {
   if (!hasChallengeStarted || _words.isEmpty) {
     return const SizedBox();
   }
@@ -355,19 +352,32 @@ targetWord = availableWords.firstWhere(
       children: [
         SizedBox(height: 85.h),
 
-        // Palavra + imagem
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        // Palavra + imagem com possível divisão silábica sobreposta
+        Stack(
+          alignment: Alignment.center,
           children: [
-            WordHighlightBox(word: targetWord.text),
-            SizedBox(width: 50.w),     //espaçamento entre a palavra e a imagem
-            ImageCardBox(imagePath: targetWord.imagePath),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                WordHighlightBox(word: targetWord.text, user: widget.user),
+                SizedBox(width: 50.w),
+                ImageCardBox(imagePath: targetWord.imagePath),
+              ],
+            ),
+            if (showSyllables)
+              Positioned(
+                top: 0,
+                child: WordHighlightBox(
+                  word: targetWord.syllables.join(' - '),
+                  user: widget.user,
+                ),
+              ),
           ],
         ),
 
         const Spacer(),
 
-        // Botões de resposta em linha
+        // Botões de resposta
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: gamesItems.map((item) {
@@ -382,6 +392,7 @@ targetWord = availableWords.firstWhere(
                     : FlexibleAnswerButton(
                         label: item.content,
                         onTap: () => _handleTap(item),
+                        user: widget.user,
                       ),
               ),
             );

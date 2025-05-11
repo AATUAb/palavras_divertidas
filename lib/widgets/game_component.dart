@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'game_item.dart';
+import '../models/user_model.dart';
 
-/// Mostra uma palavra em destaque dentro de uma caixa laranja arredondada.
+/// Mostra uma palavra em destaque dentro de uma caixa verde arredondada.
 class WordHighlightBox extends StatelessWidget {
   final String word;
-  final double width;
-  final double height;
+  final UserModel user;
 
   const WordHighlightBox({
     super.key,
     required this.word,
-    this.width = 100,
-    this.height = 50,
+    required this.user,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isFirstCycle = user.schoolLevel == '1º Ciclo';
+    final fontSize = isFirstCycle ? 26.sp : 22.sp;
+
     return Container(
-      width: width.w,
-      height: height.h,
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: Colors.green,
         borderRadius: BorderRadius.circular(20.r),
@@ -32,22 +33,20 @@ class WordHighlightBox extends StatelessWidget {
         ],
       ),
       alignment: Alignment.center,
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          word,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontFamily: 'Roboto',
-         ),
+      child: Text(
+        word,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          fontFamily: isFirstCycle ? 'Cursive' : null,
         ),
       ),
     );
   }
 }
+
 
 /// Mostra uma imagem dentro de um cartão verde-claro com sombra.
 class ImageCardBox extends StatelessWidget {
@@ -117,15 +116,20 @@ class WordAndImageRow extends StatelessWidget {
 class FlexibleAnswerButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final UserModel user;
 
   const FlexibleAnswerButton({
     super.key,
+    required this.user,
     required this.label,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isFirstCycle = user.schoolLevel == '1º Ciclo';
+    final fontSize = isFirstCycle ? 26.sp : 22.sp;
+
     return ConstrainedBox(
       constraints: BoxConstraints(minWidth: 70.w, maxWidth: 130.w),
       child: ElevatedButton(
@@ -141,7 +145,11 @@ class FlexibleAnswerButton extends StatelessWidget {
           fit: BoxFit.scaleDown,
           child: Text(
             label,
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              fontFamily: isFirstCycle ? 'Cursive' : null,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -151,15 +159,16 @@ class FlexibleAnswerButton extends StatelessWidget {
 }
 
 /// Linha de botões de resposta adaptável
-/// Linha de botões de resposta adaptável com GameItem
 class AnswerButtonsRow extends StatelessWidget {
   final List<GameItem> items;
   final void Function(String) onTap;
+  final UserModel user;
 
   const AnswerButtonsRow({
     super.key,
     required this.items,
     required this.onTap,
+    required this.user,
   });
 
   @override
@@ -172,6 +181,7 @@ class AnswerButtonsRow extends StatelessWidget {
         return FlexibleAnswerButton(
           label: item.content,
           onTap: () => onTap(item.content),
+          user: user,
         );
       }).toList(),
     );

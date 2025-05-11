@@ -179,10 +179,12 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     );
   }
 
+  // Mostra o feedback de resposta correta ou errada
   Future<void> playAnswerFeedback({required bool isCorrect}) async {
     await GameAnimations.playAnswerFeedback(isCorrect: isCorrect);
   }
 
+  // Mostra o feedback de sucesso
   Future<void> showSuccessFeedback() async {
     if (!mounted) return;
     await showDialog(
@@ -206,6 +208,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     await Future.delayed(const Duration(milliseconds: 100));
   }
 
+  // Mostra o feedback de mudança de nível
   Future<void> showLevelChangeFeedback({required int newLevel, required bool increased}) async {
     await GameAnimations.showLevelChangeDialog(
       context,
@@ -220,6 +223,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     await Future.delayed(const Duration(milliseconds: 100));
   }
 
+  // Mostra o feedback de conquista
   Future<void> showConquestFeedback({required VoidCallback onFinished}) async {
     await GameAnimations.showConquestDialog(
       context,
@@ -230,16 +234,17 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     );
   }
 
+  // Mostra o aviso de tempo esgotado e gere a animação de nível se ocorrer em simultâneo
   void showTimeout({
   required Future<void> Function() applySettings,
   required VoidCallback generateNewChallenge,
 }) async {
   if (!mounted) return;
 
-  // Mostra aviso e som em paralelo (sem await)
-  GameAnimations.showTimeoutSnackbar(context); // ← dispara imediatamente
+  // Mostra aviso e som de de tempo esgotado
+  GameAnimations.showTimeoutSnackbar(context); 
 
-  // Aguarda 2s para dar tempo ao som e à barra
+  // Aguarda 2s para dar tempo ao som e à barra informativa
   await Future.delayed(const Duration(seconds: 2));
 
   // Avalia o nível
@@ -260,6 +265,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   generateNewChallenge();
 }
 
+  // Processa a resposta correta e gere o feedback
   Future<void> processCorrectAnswer({
     required GameItem selectedItem,
     required int currentTry,
@@ -319,7 +325,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     }
   }
 
-  Future<void> checkAnswer({
+  /*Future<void> checkAnswer({
     required GameItem selectedItem,
     required String target,
     required String retryId,
@@ -337,7 +343,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       selectedItem.isTapped = true;
       selectedItem.isCorrect = isCorrect;
     });
-
+    registerCompletedRound(retryId);
     await playAnswerFeedback(isCorrect: isCorrect);
 
     if (isCorrect) {
@@ -356,8 +362,150 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     } else {
       registerFailedRound(retryId);
     }
+  }*/
+  // Jogos com várias respostas corretas. Verifica se a resposta está correta e atualiza o estado do item
+  Future<void> checkAnswerMultiple({
+  required GameItem selectedItem,
+  required String target,
+  required String retryId,
+  required int correctCount,
+  required int currentTry,
+  required int foundCorrect,
+  required Future<void> Function() applySettings,
+  required VoidCallback generateNewChallenge,
+  required void Function(int) updateFoundCorrect,
+  required VoidCallback cancelTimers,
+}) async {
+  final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
+
+  setState(() {
+    selectedItem.isTapped = true;
+    selectedItem.isCorrect = isCorrect;
+  });
+
+  registerCompletedRound(retryId);
+  await playAnswerFeedback(isCorrect: isCorrect);
+
+  if (isCorrect) {
+    final newFoundCorrect = foundCorrect + 1;
+    updateFoundCorrect(newFoundCorrect);
+
+    if (newFoundCorrect >= correctCount) {
+      cancelTimers();
+      await showSuccessFeedback();
+      if (!mounted) return;
+
+      final bool firstTry = currentTry == correctCount;
+      final levelAtThisRound = levelManager.level;
+      final levelChanged = await levelManager.registerRoundForLevel(correct: firstTry);
+      await applySettings();
+
+      final shouldConquer = await conquestManager.registerRoundForConquest(
+        context: context,
+        firstTry: firstTry,
+        userKey: widget.user.key!,
+        applySettings: applySettings,
+      );
+
+      Future<void> continueAfterFeedback() async {
+        if (!mounted) return;
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (shouldConquer) {
+          await showConquestFeedback(onFinished: generateNewChallenge);
+        } else {
+          generateNewChallenge();
+        }
+      }
+
+      if (levelChanged) {
+        await showLevelChangeFeedback(
+          newLevel: levelManager.level,
+          increased: levelManager.levelIncreased,
+        );
+        await continueAfterFeedback();
+      } else {
+        await continueAfterFeedback();
+      }
+    }
+  } else {
+    registerFailedRound(retryId);
+  }
+}
+    
+
+  // Jogos com uma única resposta correta. Verifica se a resposta está correta e atualiza o estado do item
+  Future<void> checkAnswerSingle({
+  required GameItem selectedItem,
+  required String target,
+  required String retryId,
+  required int currentTry,
+  required Future<void> Function() applySettings,
+  required VoidCallback generateNewChallenge,
+  required VoidCallback cancelTimers,
+  required Future<void> Function() showExtraFeedback,
+}) async {
+  final isCorrect = selectedItem.content == target;
+
+  setState(() {
+    selectedItem.isTapped = true;
+    selectedItem.isCorrect = isCorrect;
+  });
+
+  cancelTimers();
+  await playAnswerFeedback(isCorrect: isCorrect);
+  
+  if (!isCorrect) {
+  registerFailedRound(retryId);
+  await levelManager.registerRoundForLevel(correct: false);
+  await conquestManager.registerRoundForConquest(
+  context: context,
+  firstTry: false,
+  applySettings: applySettings,
+  userKey: widget.user.key!,
+);
+  await applySettings();
+  generateNewChallenge();
+  return;
+}
+
+// se correto
+  registerCompletedRound(retryId);
+
+  final levelChanged = await levelManager.registerRoundForLevel(correct: true);
+  
+  final shouldConquer = await conquestManager.registerRoundForConquest(
+  context: context,
+  firstTry: true,
+  userKey: widget.user.key!,
+  applySettings: applySettings,
+);
+
+  await applySettings();
+  await showExtraFeedback();
+  await showSuccessFeedback();
+
+  Future<void> continueAfterFeedback() async {
+    if (!mounted) return;
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (shouldConquer) {
+      await showConquestFeedback(onFinished: generateNewChallenge);
+    } else {
+      generateNewChallenge();
+    }
   }
 
+  final levelIncreased = levelManager.levelIncreased;
+
+if (levelChanged) {
+  await showLevelChangeFeedback(
+    newLevel: levelManager.level,
+    increased: levelIncreased, // ✅ mostra mesmo que seja false (descida)
+  );
+}
+
+await continueAfterFeedback();
+  
+  // Verifica se a resposta está correta e atualiza o estado do item
   void registerFailedRound(String retryId) {
   final alreadyExists = _retryQueue.any(
     (entry) => entry.key.toLowerCase() == retryId.toLowerCase(),
@@ -384,6 +532,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     return null;
   }
 
+  // Remove o item da fila de retry se já foi acertado
   void removeFromRetryQueue(String target) {
     _retryQueue.removeWhere((entry) => entry.key.toLowerCase() == target.toLowerCase());
     debugPrint('➖ Removido da fila de retry (já acertou): $target');
@@ -398,11 +547,14 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     return _roundCounter >= retryDelay;
   }
 
-  void registerCompletedRound() {
+  // Regista a ronda concluída
+  void registerCompletedRound(String retryId) {
     _roundCounter++;
     debugPrint('🔄 Ronda concluída. Contador: $_roundCounter');
   }
 
+
+  // Mostra o diálogo de fim de jogo
   void showEndOfGameDialog({required VoidCallback onRestart}) async {
     final player = AudioPlayer();
     await player.play(AssetSource('sounds/animations/end_game_message.ogg'));
@@ -493,6 +645,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     );
   }
 
+  // Mostra a notificação de conquista - ainda não está a funcionar
   void showConquestNotification() {
     if (conquestManager.hasNewConquest) {
       ScaffoldMessenger.of(context).showSnackBar(

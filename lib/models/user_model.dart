@@ -64,18 +64,32 @@ class UserModel extends HiveObject {
     this.gamesAccuracy = const {},
     Map<String, int>? totalCorrectPerGame,
     Map<String, int>? totalAttemptsPerGame,
-  }) : knownLetters = knownLetters ?? [],
-       totalCorrectPerGame = Map.from(totalCorrectPerGame ?? {}),
-       totalAttemptsPerGame = Map.from(totalAttemptsPerGame ?? {});
+  })  : knownLetters = knownLetters ?? [],
+        totalCorrectPerGame = Map.from(totalCorrectPerGame ?? {}),
+        totalAttemptsPerGame = Map.from(totalAttemptsPerGame ?? {});
 
-  void updateAccuracy({required int level, required double accuracy}) {
+  /// Atualiza a precisão por nível e calcula a média geral
+  void updateAccuracy({
+    required int level,
+    required double accuracy,
+    String? gameName,
+  }) {
     accuracyByLevel = {...accuracyByLevel, level: accuracy};
+
     if (accuracyByLevel.isNotEmpty) {
-      overallAccuracy =
-          accuracyByLevel.values.reduce((a, b) => a + b) /
+      overallAccuracy = accuracyByLevel.values.reduce((a, b) => a + b) /
           accuracyByLevel.length;
     } else {
       overallAccuracy = null;
+    }
+
+    // Atualiza também o mapa geral do jogo se fornecido
+    if (gameName != null) {
+      final updatedList = [...(gamesAccuracy[gameName] ?? List.filled(3, 0))];
+      if (level >= 1 && level <= updatedList.length) {
+        updatedList[level - 1] = (accuracy * 100).round();
+        gamesAccuracy = {...gamesAccuracy, gameName: updatedList};
+      }
     }
   }
 

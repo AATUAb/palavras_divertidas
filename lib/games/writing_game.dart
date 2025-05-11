@@ -30,6 +30,7 @@ class _WritingGameState extends State<WritingGame> {
   double progressValue = 1.0;
 
   String currentLetter = '';
+  String targetCharacter = ''; 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
   @override
@@ -112,7 +113,7 @@ void _restartGame() async {
 }
 
   Future<void> _handleTracingFinished(String char) async {
-    _gamesSuperKey.currentState?.registerCompletedRound();
+    _gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
     final levelChanged = await _gamesSuperKey.currentState?.levelManager
         .registerRoundForLevel(correct: true);
 
