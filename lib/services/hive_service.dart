@@ -47,6 +47,7 @@ class HiveService {
     await populateWordsIfNeeded(words); 
 }
 
+  // Função para eliminar utilizadores da box
   static Future<void> deleteUsersBox() async {
     if (Hive.isBoxOpen('users')) {
       await _userBox.clear();
@@ -55,6 +56,7 @@ class HiveService {
     logger.w("⚠️ Box 'users' foi eliminada do disco.");
   }
 
+  // Função para eliminar os caracteres da box
   static Future<void> deleteCharactersBox() async {
     if (Hive.isBoxOpen('characters')) {
       await _characterBox.clear();
@@ -63,6 +65,7 @@ class HiveService {
     logger.w("⚠️ Box 'characters' foi eliminada do disco.");
   }
 
+  // Função para receber os utilizadores da box
   static List<UserModel> getUsers() {
     try {
       if (!Hive.isBoxOpen('users')) {
@@ -77,6 +80,7 @@ class HiveService {
     }
   }
 
+  // Função para adicionar utilizadores à box
   static Future<void> addUser(UserModel user) async {
     try {
       await _userBox.add(user);
@@ -86,6 +90,7 @@ class HiveService {
     }
   }
 
+  // Função para atualizar utilizadores na box
   static Future<void> updateUser(int index, UserModel updatedUser) async {
     try {
       await _userBox.putAt(index, updatedUser);
@@ -95,6 +100,7 @@ class HiveService {
     }
   }
 
+  // Função para atualizar utilizadores na box por chave
   static Future<void> updateUserByKey(int key, UserModel updatedUser) async {
     try {
       await _userBox.put(key, updatedUser);
@@ -104,6 +110,7 @@ class HiveService {
     }
   }
 
+  // Função para eliminar utilizadores da box
   static Future<void> deleteUser(int index) async {
     try {
       await _userBox.deleteAt(index);
@@ -113,6 +120,7 @@ class HiveService {
     }
   }
 
+  // Função para receber um utilizador específico da box
   static UserModel? getUser(int userKey) {
     try {
       final user = _userBox.get(userKey);
@@ -126,6 +134,7 @@ class HiveService {
     }
   }
 
+  // Função para receber um utilizador específico da box
   static int getUserKey(int userID) {
     try {
       final user = _userBox.values.firstWhere(
@@ -139,6 +148,29 @@ class HiveService {
     }
   }
 
+  // Função para obter o nível de um jogo específico
+  static Future<void> saveGameLevel({
+    required String userKey,
+    required String gameName,
+    required int level,
+  }) async {
+    final box = await Hive.openBox('userBox');
+    final levelKey = '${userKey}_${gameName}_level';
+    await box.put(levelKey, level);
+  }
+
+  // Função para ler o nível de um jogo específico
+  static Future<int> getGameLevel({
+    required String userKey,
+    required String gameName,
+  }) async {
+    final box = await Hive.openBox('userBox');
+    final levelKey = '${userKey}_${gameName}_level';
+    return box.get(levelKey, defaultValue: 1);
+  }
+
+
+  // Função para incrementar o número de conquistas do utilizador
   static Future<void> incrementConquests(int userKey) async {
     try {
       final user = _userBox.get(userKey);
@@ -153,6 +185,7 @@ class HiveService {
     }
   }
 
+  // Função para incrementar o número de tentativas corretas
   static Future<void> incrementTryStats({
     required int userKey,
     required bool firstTry,
@@ -167,7 +200,6 @@ class HiveService {
         }
 
         await updateUserByKey(userKey, user);
-
         logger.i(
           "📊 Atualizado stats para user $userKey ➤ "
           "Primeira tentativa: ${user.firstTryCorrectTotal}, "
@@ -185,15 +217,16 @@ class HiveService {
     }
   }
 
+  // Função para atualizar a precisão do jogo
   static Future<void> updateGameAccuracy({
-  required int userKey,
-  required String gameName,
-  required List<int> accuracyPerLevel,
-  int? levelOverride,
-}) async {
-  final user = _userBox.get(userKey);
-  if (user != null) {
-    final levelToStore = levelOverride ?? user.gameLevel;
+    required int userKey,
+    required String gameName,
+    required List<int> accuracyPerLevel,
+    int? levelOverride,
+  }) async {
+    final user = _userBox.get(userKey);
+    if (user != null) {
+      final levelToStore = levelOverride ?? user.gameLevel;
 
     // Atualiza o mapa de acurácia
     final mutableMap = Map<String, List<int>>.from(user.gamesAccuracy);

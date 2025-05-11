@@ -1,6 +1,7 @@
 import '../models/user_model.dart';
 import '../services/hive_service.dart';
 
+// Classe para gerir o nível do jogo
 class LevelManager {
   final UserModel user;
   final String gameName;
@@ -8,6 +9,9 @@ class LevelManager {
   int level;
   int totalRounds = 0;
   int correctAnswers = 0;
+  int recentRounds = 0;
+  int recentCorrect = 0;
+
   bool levelChanged = false;
   bool levelIncreased = false;
 
@@ -27,66 +31,91 @@ class LevelManager {
   int get totalRoundsCount => totalRounds;
   int get evaluationRounds => roundsToEvaluate;
 
-  void registerRound({required bool correct}) {
+// Retorna a precisão atual do jogo, em percentagem
+List<int> get currentAccuracy {
+    final accuracy = totalRounds == 0 ? 0.0 : correctAnswers / totalRounds;
+    final percent = (accuracy * 100).round();
+    return [percent];
+  }
+
+// Carrega o nível do jogo especifico em Hive
+Future<void> loadLevel() async {
+    if (user.key == null) return;
+    level = await HiveService.getGameLevel(
+      userKey: user.key!.toString(),
+      gameName: gameName,
+    );
+  }
+
+// Regista uma ronda nova do jogo e atualiza o nível
+Future<bool> registerRoundForLevel({
+    required bool correct,
+  }) async {
+    // Incrementa contadores globais
     totalRounds++;
     if (correct) correctAnswers++;
+
+    // Incrementa contadores para avaliação de nível
+    recentRounds++;
+    if (correct) recentCorrect++;
+
+    final userKey = user.key?.toString();
+    if (userKey == null) return false;
+
+    bool levelUp = false;
+    bool levelDown = false;
+
+    final int levelAtThisRound = level;
+    final double accuracy = recentRounds == 0 ? 0.0 : recentCorrect / recentRounds;
+    final int accuracyPercent = (accuracy * 100).round();
+
+    // Verifica se deve subir ou descer de nível
+    if (recentRounds >= roundsToEvaluate * 2 &&
+        accuracy >= 0.8 &&
+        level < maxLevel) {
+      level++;
+      levelUp = true;
+    } else if (recentRounds >= roundsToEvaluate &&
+        accuracy <= 0.5 &&
+        level > minLevel) {
+      level--;
+      levelDown = true;
+    }
+
+    levelChanged = levelUp || levelDown;
+    levelIncreased = levelUp;
+
+    // Atualiza precisão no Hive (acertado por nível jogado)
+    await HiveService.updateGameAccuracy(
+      userKey: int.parse(userKey),
+      gameName: gameName,
+      accuracyPerLevel: [accuracyPercent],
+      levelOverride: levelAtThisRound,
+    );
+
+    // Se houver mudança de nível, reinicia só os contadores de avaliação
+    if (levelChanged) {
+      recentRounds = 0;
+      recentCorrect = 0;
+    }
+
+    // Guarda o nível atual no Hive
+    await HiveService.saveGameLevel(
+      userKey: userKey,
+      gameName: gameName,
+      level: level,
+    );
+
+    // Atualiza estatísticas no user e grava
+    user.updateAccuracy(level: levelAtThisRound, accuracy: accuracy);
+    await HiveService.updateUserByKey(int.parse(userKey), user);
+
+    return levelChanged;
   }
 
-List<int> get currentAccuracy {
-  final accuracy = correctAnswers / (totalRounds == 0 ? 1 : totalRounds);
-  final percent = (accuracy * 100).round();
-  return [percent];
-}
-
-Future<bool> registerRoundForLevel({
-  required bool correct,
-}) async {
-  registerRound(correct: correct);
-
-  final userKey = user.key;
-  if (userKey == null) return false;
-
-  bool levelUp = false;
-  bool levelDown = false;
-
-  final int levelAtThisRound = level; 
-  final double accuracy = correctAnswers / totalRounds;
-  final int accuracyPercent = (accuracy * 100).round();
-
-  // Verifica se o nível do utilizador deve ser atualizado
-  if (totalRounds >= roundsToEvaluate * 2 &&
-      accuracy >= 0.8 &&
-      level < maxLevel) {
-    level++;
-    levelUp = true;
-  } else if (totalRounds >= roundsToEvaluate &&
-      accuracy <= 0.5 &&
-      level > minLevel) {
-    level--;
-    levelDown = true;
-  }
-
-  levelChanged = levelUp || levelDown;
-  levelIncreased = levelUp;
-
-  // Atualiza a precisão do jogo no Hive, de acordo com o nível atual
-  await HiveService.updateGameAccuracy(
-    userKey: userKey,
-    gameName: gameName,
-    accuracyPerLevel: [accuracyPercent],
-    levelOverride: levelAtThisRound,
-  );
-
-  if (levelChanged) {
-    totalRounds = 0;
-    correctAnswers = 0;
-  }
-
-  // Atualiza o nível do utilizador e a precisão
-  user.gameLevel = level;
-  user.updateAccuracy(level: levelAtThisRound, accuracy: accuracy);
-  await HiveService.updateUserByKey(userKey, user);
-
-  return levelChanged;
+// Função para fazer o reset do progreso - Sem uso atual, mas pode ser útil se implementarmos o reset de nível no dashboard
+void resetProgress() {
+  totalRounds = 0;
+  correctAnswers = 0;
 }
 }
