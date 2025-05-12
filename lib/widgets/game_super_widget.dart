@@ -300,13 +300,12 @@ void initState() {
       final levelChanged = await levelManager.registerRoundForLevel(correct: firstTry);
       await applySettings();
 
-      // Verifica se o nível do utilizador deve ser atualizado
       final shouldConquer = await conquestManager.registerRoundForConquest(
-        context: context,
-        firstTry: firstTry,
-        userKey: widget.user.key!,
-        applySettings: applySettings,
-      );
+  context: context,
+  firstTry: firstTry,
+  user: widget.user,
+  applySettings: applySettings,
+);
 
       Future<void> continueAfterFeedback() async {
         if (!mounted) return;
@@ -373,11 +372,11 @@ void initState() {
       await applySettings();
 
       final shouldConquer = await conquestManager.registerRoundForConquest(
-        context: context,
-        firstTry: firstTry,
-        userKey: widget.user.key!,
-        applySettings: applySettings,
-      );
+  context: context,
+  firstTry: firstTry,
+  user: widget.user,
+  applySettings: applySettings,
+);
 
       Future<void> continueAfterFeedback() async {
         if (!mounted) return;
@@ -406,8 +405,7 @@ void initState() {
     registerFailedRound(retryId);
   }
 }
-    
-
+  
   // Jogos com uma única resposta correta. Verifica se a resposta está correta e atualiza o estado do item
   Future<void> checkAnswerSingle({
   required GameItem selectedItem,
@@ -434,13 +432,13 @@ void initState() {
   if (!isCorrect) {
   registerFailedRound(retryId);
   await levelManager.registerRoundForLevel(correct: false);
-  await conquestManager.registerRoundForConquest(
-    context: context,
-    firstTry: false,
-    applySettings: applySettings,
-    userKey: widget.user.key!,
-  );
-  await applySettings();
+  
+  final shouldConquer = await conquestManager.registerRoundForConquest(
+  context: context,
+  firstTry: false,
+  user: widget.user,
+  applySettings: applySettings,
+);
 
   final levelIncreased = levelManager.levelIncreased;
   final levelChanged = levelManager.levelChanged;
@@ -463,11 +461,11 @@ void initState() {
   registerCompletedRound(retryId);
   final levelChanged = await levelManager.registerRoundForLevel(correct: true);
   final shouldConquer = await conquestManager.registerRoundForConquest(
-    context: context,
-    firstTry: true,
-    userKey: widget.user.key!,
-    applySettings: applySettings,
-  );
+  context: context,
+  firstTry: true,
+  user: widget.user,
+  applySettings: applySettings,
+);
   await showExtraFeedback();
   await showSuccessFeedback();
   await applySettings();

@@ -41,6 +41,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   bool isRoundFinished = false;
   List<GameItem> gamesItems = [];
   Timer? roundTimer, progressTimer;
+  late DateTime _startTime;
   double progress = 0.0;
   double progressValue = 1.0;
 
@@ -66,7 +67,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   _allWords = box.values.toList();
 }
 
-  //  Fecha o player de áudio e cancela os temporizadores
+  // Fecha o player de áudio e cancela os temporizadores
   @override
   void dispose() {
     _wordPlayer.dispose();
@@ -125,20 +126,17 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
   // Função que controla o comportamento do jogo quando o jogador termina o jogo e que reinicar o mesmo jogo
   void _restartGame() async {
-  // Reinicia o nível manualmente
   _gamesSuperKey.currentState?.levelManager.level = 1;
-  // Reinicia o progresso interno
   setState(() {
     _usedWords.clear();
     hasChallengeStarted = true;
     progressValue = 1.0;
   });
-  // Reaplica definições e inicia primeiro desafio
   await _applyLevelSettings();
   _generateNewChallenge();
 }
 
-  // Verifica se o caractere já foi utilizado na ronda atual, para controlar a repetição
+  // Verifica se a palavra já foi utilizada na ronda atual, para controlar a repetição
   bool retryIsUsed(String value) => _usedWords.contains(value);
 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
@@ -165,9 +163,10 @@ targetWord = availableWords.firstWhere(
   (w) => w.text == targetText,
   orElse: () => availableWords[_random.nextInt(availableWords.length)],
 );
-  // Se a palavra volta a ser apresentado, remove-o da fila de repetição
-  // e adiciona-o à lista de palavras já utilizados
   _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord.text);
+    
+    // Se a palavra volta a ser apresentado, remove-o da fila de repetição
+  // e adiciona-o à lista de palavras já utilizados
     _cancelTimers();
     setState(() {
       isRoundActive = true;
@@ -217,6 +216,7 @@ targetWord = availableWords.firstWhere(
       dy: 0,
       backgroundColor: Colors.transparent,
     );
+
     // Solicita ao super widget a reprodução do som do desafio
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 50));
@@ -224,10 +224,15 @@ targetWord = availableWords.firstWhere(
     });
 
     // Inicia temporizadores
+    _startTime = DateTime.now();
     progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
       if (!mounted) return t.cancel();
+
+      final elapsed = DateTime.now().difference(_startTime);
+      final fraction = elapsed.inMilliseconds / levelTime.inMilliseconds;
+
       setState(() {
-        progressValue -= 0.01;
+        progressValue = 1.0 - fraction;
         if (progressValue <= 0) t.cancel();
       });
     });
@@ -235,6 +240,7 @@ targetWord = availableWords.firstWhere(
     roundTimer = Timer(levelTime, () {
       if (!mounted) return;
       setState(() => isRoundActive = false);
+      _cancelTimers();
       _gamesSuperKey.currentState?.registerFailedRound(targetWord.text);
       _gamesSuperKey.currentState?.showTimeout(
         applySettings: _applyLevelSettings,
@@ -244,12 +250,22 @@ targetWord = availableWords.firstWhere(
   }
 
 
-
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
     if (!isRoundActive || item.isTapped) return;
     final s = _gamesSuperKey.currentState;
     if (s == null) return;
+
+    setState(() {
+      currentTry++;
+      item.isTapped = true;
+    });
+
+    // Marca uma ronda como terminada e cancela os temporizadores
+    void _markRoundAsFinished() {
+      setState(() => isRoundActive = false);
+      _cancelTimers();
+    }
 
     // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(

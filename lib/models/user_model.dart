@@ -105,10 +105,14 @@ class UserModel extends HiveObject {
     }
   }
 
-  void incrementConquest() {
+  /*void incrementConquest() {
     logger.i("Incrementing conquest. Current value: $conquest");
     conquest++;
     logger.i("New conquest value: $conquest");
+  }*/
+
+  void incrementConquest() {
+    conquest++;
   }
 
   UserModel copyWith({

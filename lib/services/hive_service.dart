@@ -93,7 +93,7 @@ class HiveService {
   // Função para atualizar utilizadores na box
   static Future<void> updateUser(int index, UserModel updatedUser) async {
     try {
-      await _userBox.putAt(index, updatedUser);
+      await _userBox.put(index, updatedUser);
       logger.i("🔄 User at index $index updated successfully");
     } catch (e) {
       logger.e("❌ Error updating user at index: $e");
@@ -134,32 +134,7 @@ class HiveService {
     }
   }
 
-  // Função para receber um utilizador específico da box
-  static int getUserKey(int userID) {
-    try {
-      final user = _userBox.values.firstWhere(
-        (user) => user.key == userID,
-        orElse: () => throw Exception('User not found'),
-      );
-      return user.key as int;
-    } catch (e) {
-      logger.e("❌ Error retrieving user key for $userID: $e");
-      return -1;
-    }
-  }
-
-  // Função para obter o nível de um jogo específico
-  static Future<void> saveGameLevel({
-    required String userKey,
-    required String gameName,
-    required int level,
-  }) async {
-    final box = await Hive.openBox('userBox');
-    final levelKey = '${userKey}_${gameName}_level';
-    await box.put(levelKey, level);
-  }
-
-  // Função para ler o nível de um jogo específico
+   // Função para ler o nível de um jogo específico
   static Future<int> getGameLevel({
     required String userKey,
     required String gameName,
@@ -168,53 +143,16 @@ class HiveService {
     final levelKey = '${userKey}_${gameName}_level';
     return box.get(levelKey, defaultValue: 1);
   }
-
-
-  // Função para incrementar o número de conquistas do utilizador
-  static Future<void> incrementConquests(int userKey) async {
-    try {
-      final user = _userBox.get(userKey);
-      if (user != null) {
-        user.incrementConquest();
-        await updateUserByKey(userKey, user);
-      } else {
-        logger.e("❌ User not found with key $userKey");
-      }
-    } catch (e) {
-      logger.e("❌ Error updating user's conquest: $e");
-    }
-  }
-
-  // Função para incrementar o número de tentativas corretas
-  static Future<void> incrementTryStats({
-    required int userKey,
-    required bool firstTry,
+ 
+  // Função para salvar o nível de um jogo específico e garantir a sua persistência entre sessões de jogo
+  static Future<void> saveGameLevel({
+    required String userKey,
+    required String gameName,
+    required int level,
   }) async {
-    try {
-      final user = _userBox.get(userKey);
-      if (user != null) {
-        if (firstTry) {
-          user.firstTryCorrectTotal++;
-        } else {
-          user.correctButNotFirstTryTotal++;
-        }
-
-        await updateUserByKey(userKey, user);
-        logger.i(
-          "📊 Atualizado stats para user $userKey ➤ "
-          "Primeira tentativa: ${user.firstTryCorrectTotal}, "
-          "Outras tentativas: ${user.correctButNotFirstTryTotal}",
-        );
-      } else {
-        logger.w(
-          "⚠️ Utilizador com chave $userKey não encontrado para atualizar estatísticas de tentativa.",
-        );
-      }
-    } catch (e) {
-      logger.e(
-        "❌ Erro ao atualizar estatísticas de tentativa para user $userKey: $e",
-      );
-    }
+    final box = await Hive.openBox('userBox');
+    final levelKey = '${userKey}_${gameName}_level';
+    await box.put(levelKey, level);
   }
 
   // Função para atualizar a precisão do jogo

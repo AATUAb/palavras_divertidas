@@ -36,11 +36,10 @@ class LevelManager {
   int get evaluationRounds => roundsToEvaluate;
 
 // Retorna a precisão atual do jogo, em percentagem
-List<int> get currentAccuracy {
-    final accuracy = totalRounds == 0 ? 0.0 : correctAnswers / totalRounds;
-    final percent = (accuracy * 100).round();
-    return [percent];
-  }
+int get currentAccuracyPercent {
+  final accuracy = totalRounds == 0 ? 0.0 : correctAnswers / totalRounds;
+  return (accuracy * 100).round();
+}
 
 // Carrega o nível do jogo especifico em Hive
 Future<void> loadLevel() async {
