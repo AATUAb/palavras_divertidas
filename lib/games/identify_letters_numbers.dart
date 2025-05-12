@@ -37,6 +37,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   bool isRoundFinished = false;
   List<GameItem> gamesItems = [];
   Timer? roundTimer, progressTimer;
+  late DateTime _startTime;
   double progress = 0.0;
   double progressValue = 1.0;
 
@@ -113,10 +114,9 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   bool retryIsUsed(String value) => _usedCharacters.contains(value);
 
-  Future<void> _generateNewChallenge() async {
+ Future<void> _generateNewChallenge() async {
     _gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
-    if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
 
     final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
     final availableChars = allChars.where((c) => !_usedCharacters.contains(c)).toList();
@@ -180,18 +180,24 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
 
-    setState(() {});
-    progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-      if (!mounted) return t.cancel();
-      setState(() {
-        progressValue -= 0.01;
-        if (progressValue <= 0) t.cancel();
-      });
-    });
+    _startTime = DateTime.now(); // adiciona esta linha ANTES do Timer
+progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+  if (!mounted) return t.cancel();
+
+  final elapsed = DateTime.now().difference(_startTime);
+  final fraction = elapsed.inMilliseconds / levelTime.inMilliseconds;
+
+  setState(() {
+    progressValue = 1.0 - fraction;
+    if (progressValue <= 0) t.cancel();
+  });
+});
+
 
     roundTimer = Timer(levelTime, () {
       if (!mounted) return;
       setState(() => isRoundActive = false);
+      _cancelTimers();
       _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
       _gamesSuperKey.currentState?.showTimeout(
         applySettings: _applyLevelSettings,
@@ -199,6 +205,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       );
     });
   }
+
 
   void _handleTap(GameItem item) async {
     if (!isRoundActive || item.isTapped) return;
@@ -209,6 +216,11 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       currentTry++;
       item.isTapped = true;
     });
+
+    void _markRoundAsFinished() {
+      setState(() => isRoundActive = false);
+      _cancelTimers();
+    }
 
     s.checkAnswerMultiple(
       selectedItem: item,
@@ -221,6 +233,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       generateNewChallenge: _generateNewChallenge,
       updateFoundCorrect: (v) => setState(() => foundCorrect = v),
       cancelTimers: _cancelTimers,
+       markRoundFinished: _markRoundAsFinished,
     );
   }
 
@@ -242,7 +255,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       introAudioPath: 'sounds/games/identify_letters_numbers.ogg',
       onIntroFinished: () async {
         await _loadCharacters();
-        //await _gamesSuperKey.currentState?.levelManager.loadLevel();
         await _applyLevelSettings();
         if (mounted) {
           setState(() => hasChallengeStarted = true);
@@ -257,7 +269,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     return Padding(
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
       child: hasChallengeStarted ? _buildChallengeText() : Text(
-        'Vamos encontrar todas as letras e números.',
+        'Vamos encontrar todas as letras e números',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: font,
@@ -297,7 +309,8 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
   }
 
-  Widget _buildBoard(BuildContext _, __, ___) => Expanded(
+  Widget _buildBoard(BuildContext _, __, ___) {
+  return SizedBox.expand( // ou um Container com height
     child: Stack(
       children: gamesItems.map((item) {
         final safeDx = item.dx.clamp(0.05, 0.95);
@@ -340,4 +353,5 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       }).toList(),
     ),
   );
+}
 }

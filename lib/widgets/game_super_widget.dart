@@ -248,7 +248,7 @@ void initState() {
   }
 
   // Mostra o aviso de tempo esgotado e gere a animação de nível se ocorrer em simultâneo
-  void showTimeout({
+ void showTimeout({
   required Future<void> Function() applySettings,
   required VoidCallback generateNewChallenge,
 }) async {
@@ -345,6 +345,7 @@ void initState() {
   required VoidCallback generateNewChallenge,
   required void Function(int) updateFoundCorrect,
   required VoidCallback cancelTimers,
+  required VoidCallback markRoundFinished,
 }) async {
   final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
 
@@ -361,8 +362,9 @@ void initState() {
     updateFoundCorrect(newFoundCorrect);
 
     if (newFoundCorrect >= correctCount) {
-      cancelTimers();
-      await showSuccessFeedback();
+        cancelTimers();
+        markRoundFinished();
+        await showSuccessFeedback();
       if (!mounted) return;
 
       final bool firstTry = currentTry == correctCount;
@@ -525,7 +527,6 @@ void initState() {
   // Se o item da fila retry for respondido de forma correta, remove-o
   void removeFromRetryQueue(String target) {
     _retryQueue.removeWhere((entry) => entry.key.toLowerCase() == target.toLowerCase());
-    debugPrint('➖ Removido da fila de retry (já acertou): $target');
     debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
   }
   List<String> retryQueueContents() {
@@ -539,7 +540,6 @@ void initState() {
   // Regista a ronda concluída
   void registerCompletedRound(String retryId) {
     _roundCounter++;
-    debugPrint('🔄 Ronda concluída. Contador: $_roundCounter');
   }
   
 
