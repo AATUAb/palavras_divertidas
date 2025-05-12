@@ -153,16 +153,16 @@ static Future<void> showConquestDialog(
   );
 }
 
-// animação de tempo esgotado, com barra ingerior com mensagem
-  static void showTimeoutSnackbar(BuildContext context) async {
-  final player = AudioPlayer();
-  await player.play(AssetSource('sounds/animations/time_out.ogg'));
+ // animação de tempo esgotado, com barra inferior com mensagem
+  static Future<void> showTimeoutSnackbar(BuildContext context) async {
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/animations/time_out.ogg'));
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           '⏰ Vamos tentar outro desafio!',
-          style: TextStyle(
+            style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.bold,
             color: Colors.white,

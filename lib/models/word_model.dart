@@ -13,7 +13,7 @@ class WordModel extends HiveObject {
   String topic;
 
   @HiveField(3)
-  String difficulty; // "baixa", "media", "elevada"
+  String difficulty;
 
   @HiveField(4)
   List<String> syllables;
@@ -839,14 +839,6 @@ WordModel(
   syllableCount: 3,
 ),
 WordModel(
-  text: 'frigorifico',
-  newLetter: 'br, cr, dr, fr, gr, pr, tr, vr',
-  topic: 'casa',
-  difficulty: 'baixa',
-  syllables: ['fri', 'go', 'ri', 'fi', 'co'],
-  syllableCount: 5,
-),
-WordModel(
   text: 'livro',
   newLetter: 'br, cr, dr, fr, gr, pr, tr, vr',
   topic: 'casa',
@@ -1205,16 +1197,6 @@ WordModel(
   syllableCount: 2,
 ),
 WordModel(
-  text: 'melão',
-  newLetter: 'm',
-  topic: 'comida',
-  difficulty: 'baixa',
-  syllables: ['me', 'lão'],
-  syllableCount: 2,
-  audioFileName: 'melao',
-  imageFileName: 'melao',
-),
-WordModel(
   text: 'limão',
   newLetter: 'm',
   topic: 'comida',
@@ -1230,24 +1212,6 @@ WordModel(
   topic: 'comida',
   difficulty: 'baixa',
   syllables: ['me', 'loa'],
-  syllableCount: 2,
-),
-WordModel(
-  text: 'cocô',
-  newLetter: 'c',
-  topic: 'comida',
-  difficulty: 'baixa',
-  syllables: ['co','cô'],
-  syllableCount: 2,
-  audioFileName: 'coco',
-  imageFileName: 'coco',
-),
-WordModel(
-  text: 'couve',
-  newLetter: 'c',
-  topic: 'comida',
-  difficulty: 'baixa',
-  syllables: ['cou', 've'],
   syllableCount: 2,
 ),
 WordModel(
@@ -1419,14 +1383,6 @@ WordModel(
   syllableCount: 2,
 ),
 WordModel(
-  text: 'sumo',
-  newLetter: 's',
-  topic: 'comida',
-  difficulty: 'baixa',
-  syllables: ['su', 'mo'],
-  syllableCount: 2,
-),
-WordModel(
   text: 'salada',
   newLetter: 's',
   topic: 'comida',
@@ -1459,16 +1415,6 @@ WordModel(
   syllableCount: 3,
 ),
 WordModel(
-  text: 'chá',
-  newLetter: 'ch',
-  topic: 'comida',
-  difficulty: 'baixa',
-  syllables: ['chá'],
-  syllableCount: 1,
-  audioFileName: 'cha',
-  imageFileName: 'cha',
-),
-WordModel(
   text: 'bolacha',
   newLetter: 'ch',
   topic: 'comida',
@@ -1483,14 +1429,6 @@ WordModel(
   difficulty: 'baixa',
   syllables: ['cho', 'co', 'la', 'te'],
   syllableCount: 4,
-),
-WordModel(
-  text: 'milho',
-  newLetter: 'lh',
-  topic: 'comida',
-  difficulty: 'baixa',
-  syllables: ['mi', 'lho'],
-  syllableCount: 2,
 ),
 WordModel(
   text: 'fiambre',
@@ -1585,14 +1523,6 @@ WordModel(
   imageFileName: 'policia',
 ),
 WordModel(
-  text: 'noiva',
-  newLetter: 'n ',
-  topic: 'pessoas',
-  difficulty: 'baixa',
-  syllables: ['noi', 'va'],
-  syllableCount: 2,
-),
-WordModel(
   text: 'rei',
   newLetter: 'r',
   topic: 'pessoas',
@@ -1609,14 +1539,6 @@ WordModel(
   syllableCount: 2,
   audioFileName: 'bebe',
   imageFileName: 'bebe',
-),
-WordModel(
-  text: 'fada',
-  newLetter: 'f',
-  topic: 'pessoas',
-  difficulty: 'baixa',
-  syllables: ['fa', 'da'],
-  syllableCount: 2,
 ),
 WordModel(
   text: 'herói',
@@ -1666,14 +1588,6 @@ WordModel(
   topic: 'pessoas',
   difficulty: 'baixa',
   syllables: ['prin', 'ce', 'sa'],
-  syllableCount: 3,
-),
-WordModel(
-  text: 'atleta',
-  newLetter: 'bl, cl, fl, gl, pl, tl',
-  topic: 'pessoas',
-  difficulty: 'baixa',
-  syllables: ['a', 'tle', 'ta'],
   syllableCount: 3,
 ),
 WordModel(
@@ -1756,14 +1670,6 @@ WordModel(
   topic: 'natureza',
   difficulty: 'baixa',
   syllables: ['on', 'da'],
-  syllableCount: 2,
-),
-WordModel(
-  text: 'noite',
-  newLetter: 'n ',
-  topic: 'natureza',
-  difficulty: 'baixa',
-  syllables: ['noi', 'te'],
   syllableCount: 2,
 ),
 WordModel(
@@ -2015,14 +1921,6 @@ WordModel(
   syllableCount: 2,
 ),
 WordModel(
-  text: 'dia',
-  newLetter: 'd',
-  topic: 'outros',
-  difficulty: 'baixa',
-  syllables: ['dia'],
-  syllableCount: 1,
-),
-WordModel(
   text: 'data',
   newLetter: 'd',
   topic: 'outros',
@@ -2263,14 +2161,6 @@ WordModel(
   syllableCount: 3,
 ),
 WordModel(
-  text: 'gota',
-  newLetter: 'g',
-  topic: 'outros',
-  difficulty: 'baixa',
-  syllables: ['go', 'ta'],
-  syllableCount: 2,
-),
-WordModel(
   text: 'régua',
   newLetter: 'g',
   topic: 'outros',
@@ -2279,14 +2169,6 @@ WordModel(
   syllableCount: 2,
   audioFileName: 'regua',
   imageFileName: 'regua',
-),
-WordModel(
-  text: 'jogo',
-  newLetter: 'j',
-  topic: 'outros',
-  difficulty: 'baixa',
-  syllables: ['jo', 'go'],
-  syllableCount: 2,
 ),
 WordModel(
   text: 'jipe',
@@ -3271,7 +3153,7 @@ WordModel(
   syllableCount: 2,
 ),
 WordModel(
-  text: 'quatorze',
+  text: 'catorze',
   newLetter: 'z',
   topic: 'numeros',
   difficulty: 'media',
@@ -3669,14 +3551,6 @@ WordModel(
   difficulty: 'media',
   syllables: ['pro', 'fes', 'sor'],
   syllableCount: 3,
-),
-WordModel(
-  text: 'vento',
-  newLetter: 'n ',
-  topic: 'natureza',
-  difficulty: 'media',
-  syllables: ['ven', 'to'],
-  syllableCount: 2,
 ),
 WordModel(
   text: 'erva',

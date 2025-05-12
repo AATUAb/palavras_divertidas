@@ -252,33 +252,25 @@ void initState() {
   required Future<void> Function() applySettings,
   required VoidCallback generateNewChallenge,
 }) async {
-  if (!mounted) return;
-
-  // Mostra aviso e som de de tempo esgotado
-  GameAnimations.showTimeoutSnackbar(context); 
-
-  // Aguarda 2s para dar tempo ao som e à barra informativa
-  await Future.delayed(const Duration(seconds: 2));
-
-  // Avalia o nível
   final levelChanged = await levelManager.registerRoundForLevel(correct: false);
   await applySettings();
 
   if (!mounted) return;
 
-  // Animação de alteração de nível, se necessário
   if (levelChanged) {
     await showLevelChangeFeedback(
       newLevel: levelManager.level,
       increased: levelManager.levelIncreased,
     );
-    setState(() {
-      _visibleLevel = levelManager.level;
-    });
+    if (mounted) {
+      setState(() => _visibleLevel = levelManager.level);
+      generateNewChallenge();
+    }
+  } else {
+    await GameAnimations.showTimeoutSnackbar(context);
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) generateNewChallenge();
   }
-
-  if (!mounted) return;
-  generateNewChallenge();
 }
 
   // Processa a resposta correta e gere o feedback
@@ -341,44 +333,6 @@ void initState() {
     }
   }
 
-  /*Future<void> checkAnswer({
-    required GameItem selectedItem,
-    required String target,
-    required String retryId,
-    required int correctCount,
-    required int currentTry,
-    required int foundCorrect,
-    required Future<void> Function() applySettings,
-    required VoidCallback generateNewChallenge,
-    required void Function(int) updateFoundCorrect,
-    required VoidCallback cancelTimers,
-  }) async {
-    final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
-
-    setState(() {
-      selectedItem.isTapped = true;
-      selectedItem.isCorrect = isCorrect;
-    });
-    registerCompletedRound(retryId);
-    await playAnswerFeedback(isCorrect: isCorrect);
-
-    if (isCorrect) {
-      await processCorrectAnswer(
-        selectedItem: selectedItem,
-        currentTry: currentTry,
-        correctCount: correctCount,
-        foundCorrect: foundCorrect,
-        cancelTimers: cancelTimers,
-        applySettings: applySettings,
-        generateNewChallenge: generateNewChallenge,
-        conquestManager: conquestManager,
-        updateFoundCorrect: updateFoundCorrect,
-        target: target,
-      );
-    } else {
-      registerFailedRound(retryId);
-    }
-  }*/
   // Jogos com várias respostas corretas. Verifica se a resposta está correta e atualiza o estado do item
   Future<void> checkAnswerMultiple({
   required GameItem selectedItem,
