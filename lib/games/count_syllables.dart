@@ -113,15 +113,9 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   }
 
   // Reproduz a instrução de áudio para o jogador
+  late GameItem referenceItem;
   Future<void> _reproduzirInstrucao() async {
-    final file = 'sounds/words_characters/${targetWord.audioFileName ?? targetWord.text}.ogg';
-    try {
-      await _wordPlayer.stop();
-      await _wordPlayer.release();
-      await _wordPlayer.play(AssetSource(file));
-    } catch (e) {
-      debugPrint('❌ Erro ao reproduzir som: $file — $e');
-    }
+    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
   // Função que controla o comportamento do jogo quando o jogador termina o jogo e que reinicar o mesmo jogo
@@ -208,7 +202,7 @@ targetWord = availableWords.firstWhere(
     });
 
     // Identifica o item correto para tocar o som
-    final referenceItem = GameItem(
+    referenceItem = GameItem(
       id: 'preview',
       type: GameItemType.text,
       content: targetWord.audioFileName ?? targetWord.text,

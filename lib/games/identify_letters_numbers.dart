@@ -9,6 +9,7 @@ import '../models/user_model.dart';
 import '../models/character_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
+import '../widgets/sound_manager.dart';
 
 // Classe principal do jogo, que recebe o utilizador como argumento
 class IdentifyLettersNumbers extends StatefulWidget {
@@ -102,12 +103,10 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   }
 
   // Reproduz a instrução de áudio para o jogador
+  late GameItem referenceItem;
   Future<void> _reproduzirInstrucao() async {
-    final file = 'sounds/words_characters/${targetCharacter.toUpperCase()}.ogg';
-    await _letterPlayer.stop();
-    await _letterPlayer.release();
-    await _letterPlayer.play(AssetSource(file));
-  }
+   await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+}
 
   // Função que controla o comportamento do jogo quando o jogador termina o jogo e que reinicar o mesmo jogo
   void _restartGame() async {
@@ -180,7 +179,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       );
     });
 
-    final referenceItem = gamesItems.firstWhere(
+    referenceItem = gamesItems.firstWhere(
       (item) => item.isCorrect,
       orElse: () => GameItem(
         id: 'preview',
