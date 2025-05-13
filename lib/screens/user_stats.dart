@@ -17,7 +17,7 @@ class UserStats extends StatelessWidget {
     final allGames =
         isFirstCycle
             ? [
-              'Detetive de letras e números',
+              'Identificar letras e números',
               'Escrever',
               'Contar sílabas',
               'Ouvir e procurar',
@@ -25,29 +25,19 @@ class UserStats extends StatelessWidget {
               'Sílabas perdidas',
             ]
             : [
-              'Detetive de letras e números',
+              'Identificar letras e números',
               'Escrever',
               'Contar sílabas',
               'Ouvir e procurar',
             ];
 
     final gameIcons = <String, IconData>{
-      'Detetive de letras e números': Icons.search,
+      'Identificar letras e números': Icons.search,
       'Escrever': Icons.edit,
       'Contar sílabas': Icons.format_list_numbered,
       'Ouvir e procurar': Icons.hearing,
       'Detetive de palavras': Icons.find_in_page,
       'Sílabas perdidas': Icons.extension,
-    };
-
-    // Dados simulados para teste
-    final mockedData = {
-      'Detetive de letras e números': [0.8, 0.5, 0.6],
-      'Escrever': [0.3, 0.7, 0.4],
-      'Contar sílabas': [0.6, 0.2, 0.5],
-      'Ouvir e procurar': [0.4, 0.9, 0.3],
-      'Detetive de palavras': [0.7, 0.6, 0.8],
-      'Sílabas perdidas': [0.5, 0.4, 0.7],
     };
 
     Widget buildCustomRadarChart(int levelIndex, double size) {
@@ -57,8 +47,14 @@ class UserStats extends StatelessWidget {
 
       final scores =
           allGames.map((game) {
-            final values = mockedData[game] ?? [];
-            return values.length >= levelIndex ? values[levelIndex - 1] : 0.0;
+            // obtém lista real ou vazia
+            final raw = user.gamesAccuracy[game] ?? <int>[];
+            // converte para percentagens 0.0–1.0
+            final percents = raw.map((i) => i / 100).toList();
+            // se não existir aquele nível, usa 0.0
+            return levelIndex <= percents.length
+                ? percents[levelIndex - 1]
+                : 0.0;
           }).toList();
 
       return SizedBox(
@@ -120,12 +116,19 @@ class UserStats extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Legenda com percentagens
+                // Legenda com percentagens reais
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children:
                       allGames.map((game) {
-                        final values = mockedData[game] ?? [0.0, 0.0, 0.0];
+                        // lista real ou vazia
+                        final raw = user.gamesAccuracy[game] ?? <int>[];
+                        // garante sempre 3 valores
+                        final ints = <int>[
+                          raw.isNotEmpty ? raw[0] : 0,
+                          raw.length > 1 ? raw[1] : 0,
+                          raw.length > 2 ? raw[2] : 0,
+                        ];
                         return Padding(
                           padding: EdgeInsets.symmetric(vertical: 3.h),
                           child: Column(
@@ -153,7 +156,9 @@ class UserStats extends StatelessWidget {
                               Padding(
                                 padding: EdgeInsets.only(left: 25.w),
                                 child: Text(
-                                  'Nível 1: ${(values[0] * 100).toInt()}%; Nível 2: ${(values[1] * 100).toInt()}%; Nível 3: ${(values[2] * 100).toInt()}%',
+                                  'Nível 1: ${ints[0]}%; '
+                                  'Nível 2: ${ints[1]}%; '
+                                  'Nível 3: ${ints[2]}%',
                                   style: TextStyle(
                                     fontSize: 6.sp,
                                     color: Colors.grey[500],
@@ -166,8 +171,10 @@ class UserStats extends StatelessWidget {
                         );
                       }).toList(),
                 ),
+
                 SizedBox(width: 0.w),
-                // Radares
+
+                // Radares para cada nível
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -201,6 +208,7 @@ class UserStats extends StatelessWidget {
   }
 }
 
+/// Desenha o radar — ficou igual à tua implementação original
 class RadarPainter extends CustomPainter {
   final List<double> scores;
   final Offset center;
@@ -224,49 +232,41 @@ class RadarPainter extends CustomPainter {
         Paint()
           ..color = Colors.grey.withOpacity(0.5)
           ..style = PaintingStyle.stroke;
-
     final paintRadar =
         Paint()
           ..color = color.withOpacity(0.5)
           ..style = PaintingStyle.fill;
-
     final paintBorder =
         Paint()
           ..color = color
           ..strokeWidth = 2
           ..style = PaintingStyle.stroke;
-
     final textStyle = TextStyle(color: Colors.grey[600], fontSize: 5);
 
-    // Desenhar a grade com rótulos de percentagem
+    // grade
     for (int s = 1; s <= segments; s++) {
       final path = Path();
-
       for (int i = 0; i < sides; i++) {
         final angle = 2 * pi * i / sides - pi / 2;
         final point = Offset(
           center.dx + radius * s / segments * cos(angle),
           center.dy + radius * s / segments * sin(angle),
         );
-        if (i == 0) {
+        if (i == 0)
           path.moveTo(point.dx, point.dy);
-        } else {
+        else
           path.lineTo(point.dx, point.dy);
-        }
       }
-
       path.close();
       canvas.drawPath(path, paintGrid);
 
-      // Rótulo de percentagem
+      // rótulo
       final labelOffset = Offset(
         center.dx - 12,
         center.dy - radius * s / segments - 3,
       );
-
-      final textSpan = TextSpan(text: '${s * 25}%', style: textStyle);
       final tp = TextPainter(
-        text: textSpan,
+        text: TextSpan(text: '${s * 25}%', style: textStyle),
         textAlign: TextAlign.center,
         textDirection: TextDirection.ltr,
       );
@@ -274,7 +274,7 @@ class RadarPainter extends CustomPainter {
       tp.paint(canvas, labelOffset);
     }
 
-    // Desenhar a área do radar
+    // área
     final path = Path();
     final points = <Offset>[];
     for (int i = 0; i < sides; i++) {
@@ -284,28 +284,23 @@ class RadarPainter extends CustomPainter {
         center.dx + radius * value * cos(angle),
         center.dy + radius * value * sin(angle),
       );
-      points.add(point);
-      if (i == 0) {
+      if (i == 0)
         path.moveTo(point.dx, point.dy);
-      } else {
+      else
         path.lineTo(point.dx, point.dy);
-      }
+      points.add(point);
     }
     path.close();
     canvas.drawPath(path, paintRadar);
     canvas.drawPath(path, paintBorder);
 
-    // Círculo central
+    // círculos
     final centerCircle =
         Paint()
           ..color = color
           ..style = PaintingStyle.fill;
     canvas.drawCircle(center, 3, centerCircle);
-
-    // Círculos nos vértices
-    for (final point in points) {
-      canvas.drawCircle(point, 2, centerCircle);
-    }
+    for (final p in points) canvas.drawCircle(p, 2, centerCircle);
   }
 
   @override

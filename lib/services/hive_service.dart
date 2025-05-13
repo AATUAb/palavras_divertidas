@@ -3,14 +3,15 @@ import 'package:logger/logger.dart';
 
 import '../models/user_model.dart';
 import '../models/character_model.dart';
-import '../models/word_model.dart' show WordModel, WordModelAdapter, populateWordsIfNeeded, words;
-
+import '../models/word_model.dart'
+    show WordModel, WordModelAdapter, populateWordsIfNeeded, words;
 
 class HiveService {
   // Boxes principais
   static late Box<UserModel> _userBox;
   static late Box<CharacterModel> _characterBox;
   static late Box<WordModel> _wordBox;
+  static late Box<dynamic> _progressBox; // ← nova box para níveis
 
   static final Logger logger = Logger();
 
@@ -29,133 +30,94 @@ class HiveService {
     }
 
     try {
-  _userBox = await Hive.openBox<UserModel>('users');
-  logger.i("✅ Box 'users' opened successfully");
+      _userBox = await Hive.openBox<UserModel>('users');
+      logger.i("✅ Box 'users' opened successfully");
 
-  _characterBox = await Hive.openBox<CharacterModel>('characters');
-  logger.i("✅ Box 'characters' opened successfully");
+      _characterBox = await Hive.openBox<CharacterModel>('characters');
+      logger.i("✅ Box 'characters' opened successfully");
 
-  _wordBox = await Hive.openBox<WordModel>('words');
-  logger.i("✅ Box 'words' opened successfully");
+      _wordBox = await Hive.openBox<WordModel>('words');
+      logger.i("✅ Box 'words' opened successfully");
 
-  logger.i('✅ Hive inicializado com sucesso.');
-} catch (e) {
-  logger.e('❌ Erro ao abrir boxes Hive: $e');
-  rethrow;
-}
-    await populateCharactersIfNeeded();
-    await populateWordsIfNeeded(words); 
-}
+      // Abre a box de níveis/progresso só uma vez
+      _progressBox = await Hive.openBox('userBox');
+      logger.i("✅ Box 'userBox' opened successfully");
 
-  // Função para eliminar utilizadores da box
-  static Future<void> deleteUsersBox() async {
-    if (Hive.isBoxOpen('users')) {
-      await _userBox.clear();
-    }
-    await Hive.deleteBoxFromDisk('users');
-    logger.w("⚠️ Box 'users' foi eliminada do disco.");
-  }
-
-  // Função para eliminar os caracteres da box
-  static Future<void> deleteCharactersBox() async {
-    if (Hive.isBoxOpen('characters')) {
-      await _characterBox.clear();
-    }
-    await Hive.deleteBoxFromDisk('characters');
-    logger.w("⚠️ Box 'characters' foi eliminada do disco.");
-  }
-
-  // Função para receber os utilizadores da box
-  static List<UserModel> getUsers() {
-    try {
-      if (!Hive.isBoxOpen('users')) {
-        throw Exception('Hive box "users" not opened!');
-      }
-      final users = _userBox.values.toList();
-      logger.i("🔍 Retrieved ${users.length} users from Hive");
-      return users;
+      logger.i('✅ Hive inicializado com sucesso.');
     } catch (e) {
-      logger.e("❌ Error retrieving users: $e");
+      logger.e('❌ Erro ao abrir boxes Hive: $e');
+      rethrow;
+    }
+
+    await populateCharactersIfNeeded();
+    await populateWordsIfNeeded(words);
+  }
+
+  /// Lê todos os utilizadores
+  static List<UserModel> getUsers() {
+    if (!Hive.isBoxOpen('users')) {
+      logger.e('❌ Hive box "users" not opened!');
       return [];
     }
+    final users = _userBox.values.toList();
+    logger.i("🔍 Retrieved ${users.length} users from Hive");
+    return users;
   }
 
-  // Função para adicionar utilizadores à box
+  /// Adiciona um novo utilizador
   static Future<void> addUser(UserModel user) async {
-    try {
-      await _userBox.add(user);
-      logger.i("✅ User ${user.name} added successfully");
-    } catch (e) {
-      logger.e("❌ Error adding user: $e");
-    }
+    await _userBox.add(user);
+    logger.i("✅ User ${user.name} added successfully");
   }
 
-  // Função para atualizar utilizadores na box
+  /// Atualiza utilizador por posição
   static Future<void> updateUser(int index, UserModel updatedUser) async {
-    try {
-      await _userBox.put(index, updatedUser);
-      logger.i("🔄 User at index $index updated successfully");
-    } catch (e) {
-      logger.e("❌ Error updating user at index: $e");
-    }
+    await _userBox.put(index, updatedUser);
+    logger.i("🔄 User at index $index updated successfully");
   }
 
-  // Função para atualizar utilizadores na box por chave
+  /// Atualiza utilizador por chave
   static Future<void> updateUserByKey(int key, UserModel updatedUser) async {
-    try {
-      await _userBox.put(key, updatedUser);
-      logger.i("✅ User with key $key updated successfully");
-    } catch (e) {
-      logger.e("❌ Error updating user by key: $e");
-    }
+    await _userBox.put(key, updatedUser);
+    logger.i("✅ User with key $key updated successfully");
   }
 
-  // Função para eliminar utilizadores da box
+  /// Elimina utilizador por posição
   static Future<void> deleteUser(int index) async {
-    try {
-      await _userBox.deleteAt(index);
-      logger.i("🗑️ User at index $index deleted successfully");
-    } catch (e) {
-      logger.e("❌ Error deleting user: $e");
-    }
+    await _userBox.deleteAt(index);
+    logger.i("🗑️ User at index $index deleted successfully");
   }
 
-  // Função para receber um utilizador específico da box
+  /// Obtém um utilizador específico
   static UserModel? getUser(int userKey) {
-    try {
-      final user = _userBox.get(userKey);
-      if (user == null) {
-        logger.e("❌ No user found with key $userKey");
-      }
-      return user;
-    } catch (e) {
-      logger.e("❌ Error retrieving user by key: $e");
-      return null;
+    final user = _userBox.get(userKey);
+    if (user == null) {
+      logger.e("❌ No user found with key $userKey");
     }
+    return user;
   }
 
-   // Função para ler o nível de um jogo específico
+  /// Lê o nível de um jogo específico (usa a box já aberta)
   static Future<int> getGameLevel({
     required String userKey,
     required String gameName,
   }) async {
-    final box = await Hive.openBox('userBox');
     final levelKey = '${userKey}_${gameName}_level';
-    return box.get(levelKey, defaultValue: 1);
+    return (_progressBox.get(levelKey, defaultValue: 1) as int);
   }
- 
-  // Função para salvar o nível de um jogo específico e garantir a sua persistência entre sessões de jogo
+
+  /// Salva o nível de um jogo específico (usa a box já aberta)
   static Future<void> saveGameLevel({
     required String userKey,
     required String gameName,
     required int level,
   }) async {
-    final box = await Hive.openBox('userBox');
     final levelKey = '${userKey}_${gameName}_level';
-    await box.put(levelKey, level);
+    await _progressBox.put(levelKey, level);
+    logger.i("💾 Saved level $level for $gameName");
   }
 
-  // Função para atualizar a precisão do jogo
+  /// Atualiza a precisão do jogo, fundindo no array existente
   static Future<void> updateGameAccuracy({
     required int userKey,
     required String gameName,
@@ -163,22 +125,29 @@ class HiveService {
     int? levelOverride,
   }) async {
     final user = _userBox.get(userKey);
-    if (user != null) {
-      final levelToStore = levelOverride ?? user.gameLevel;
+    if (user == null) {
+      logger.w("⚠️ User not found with key $userKey for updating accuracy");
+      return;
+    }
 
-    // Atualiza o mapa de acurácia
-    final mutableMap = Map<String, List<int>>.from(user.gamesAccuracy);
-    mutableMap[gameName] = accuracyPerLevel;
+    final idx = (levelOverride ?? user.gameLevel) - 1;
+    if (idx < 0 || idx > 2) {
+      logger.w("⚠️ Nível inválido ${idx + 1} para gameName=$gameName");
+      return;
+    }
+
+    // Clona o array atual ou cria novo
+    final existing = List<int>.from(user.gamesAccuracy[gameName] ?? [0, 0, 0]);
+    existing[idx] = accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0;
+
+    final mutableMap = Map<String, List<int>>.from(user.gamesAccuracy)
+      ..[gameName] = existing;
     user.gamesAccuracy = mutableMap;
 
     await updateUserByKey(userKey, user);
 
-    final accuracy = accuracyPerLevel.isNotEmpty ? accuracyPerLevel.first : 0;
     logger.i(
-      "🎯 Updated accuracy for $gameName, nível $levelToStore: $accuracy%",
+      "🎯 Updated accuracy for $gameName, nível ${idx + 1}: ${existing[idx]}%",
     );
-  } else {
-    logger.w("⚠️ User not found with key $userKey for updating accuracy");
   }
-}
 }
