@@ -11,6 +11,8 @@ import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
 import '../widgets/sound_manager.dart';
 
+import 'package:flutter/foundation.dart'; // necessário para kDebugMode
+
 // Classe principal do jogo, que recebe o utilizador como argumento
 class IdentifyLettersNumbers extends StatefulWidget {
   final UserModel user;
