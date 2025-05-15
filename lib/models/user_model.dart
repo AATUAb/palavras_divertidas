@@ -38,13 +38,16 @@ class UserModel extends HiveObject {
   @HiveField(10)
   int correctButNotFirstTryTotal;
 
-  @HiveField(11)
-  Map<String, List<int>> gamesAccuracy;
+   @HiveField(11)
+  int persistenceCountTotal;
 
   @HiveField(12)
-  Map<String, int> totalCorrectPerGame;
+  Map<String, List<int>> gamesAccuracy;
 
   @HiveField(13)
+  Map<String, int> totalCorrectPerGame;
+
+  @HiveField(14)
   Map<String, int> totalAttemptsPerGame;
 
   final Logger logger = Logger();
@@ -61,6 +64,7 @@ class UserModel extends HiveObject {
     this.otherSuccesses = 0,
     this.firstTryCorrectTotal = 0,
     this.correctButNotFirstTryTotal = 0,
+    this.persistenceCountTotal = 0,
     this.gamesAccuracy = const {},
     Map<String, int>? totalCorrectPerGame,
     Map<String, int>? totalAttemptsPerGame,
@@ -68,28 +72,14 @@ class UserModel extends HiveObject {
         totalCorrectPerGame = Map.from(totalCorrectPerGame ?? {}),
         totalAttemptsPerGame = Map.from(totalAttemptsPerGame ?? {});
 
-  /// Atualiza a precisão por nível e calcula a média geral
-  void updateAccuracy({
-    required int level,
-    required double accuracy,
-    String? gameName,
-  }) {
+  void updateAccuracy({required int level, required double accuracy}) {
     accuracyByLevel = {...accuracyByLevel, level: accuracy};
-
     if (accuracyByLevel.isNotEmpty) {
-      overallAccuracy = accuracyByLevel.values.reduce((a, b) => a + b) /
+      overallAccuracy =
+          accuracyByLevel.values.reduce((a, b) => a + b) /
           accuracyByLevel.length;
     } else {
       overallAccuracy = null;
-    }
-
-    // Atualiza também o mapa geral do jogo se fornecido
-    if (gameName != null) {
-      final updatedList = [...(gamesAccuracy[gameName] ?? List.filled(3, 0))];
-      if (level >= 1 && level <= updatedList.length) {
-        updatedList[level - 1] = (accuracy * 100).round();
-        gamesAccuracy = {...gamesAccuracy, gameName: updatedList};
-      }
     }
   }
 
@@ -105,14 +95,10 @@ class UserModel extends HiveObject {
     }
   }
 
-  /*void incrementConquest() {
+  void incrementConquest() {
     logger.i("Incrementing conquest. Current value: $conquest");
     conquest++;
     logger.i("New conquest value: $conquest");
-  }*/
-
-  void incrementConquest() {
-    conquest++;
   }
 
   UserModel copyWith({
@@ -127,6 +113,7 @@ class UserModel extends HiveObject {
     int? otherSuccesses,
     int? firstTryCorrectTotal,
     int? correctButNotFirstTryTotal,
+    int? persistenceCountTotal,
     Map<String, List<int>>? gamesAccuracy,
     Map<String, int>? totalCorrectPerGame,
     Map<String, int>? totalAttemptsPerGame,
@@ -135,15 +122,17 @@ class UserModel extends HiveObject {
       name: name ?? this.name,
       schoolLevel: schoolLevel ?? this.schoolLevel,
       knownLetters: knownLetters ?? this.knownLetters,
-      gameLevel: gameLevel ?? this.gameLevel,
       accuracyByLevel: accuracyByLevel ?? this.accuracyByLevel,
       overallAccuracy: overallAccuracy ?? this.overallAccuracy,
+      gameLevel: gameLevel ?? this.gameLevel,
       conquest: conquest ?? this.conquest,
       firstTrySuccesses: firstTrySuccesses ?? this.firstTrySuccesses,
       otherSuccesses: otherSuccesses ?? this.otherSuccesses,
       firstTryCorrectTotal: firstTryCorrectTotal ?? this.firstTryCorrectTotal,
       correctButNotFirstTryTotal:
           correctButNotFirstTryTotal ?? this.correctButNotFirstTryTotal,
+      persistenceCountTotal:
+          persistenceCountTotal ?? this.persistenceCountTotal,
       gamesAccuracy: gamesAccuracy ?? this.gamesAccuracy,
       totalCorrectPerGame: totalCorrectPerGame ?? this.totalCorrectPerGame,
       totalAttemptsPerGame: totalAttemptsPerGame ?? this.totalAttemptsPerGame,

@@ -299,7 +299,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     );
   }
 
-  Widget _buildBoard(BuildContext context, _, __) {
+ /* Widget _buildBoard(BuildContext context, _, __) {
     if (!hasChallengeStarted || _levelWords.isEmpty) {
       return const SizedBox();
     }
@@ -320,7 +320,8 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
                   WordHighlightBox(word: targetWord.text, user: widget.user),
                   SizedBox(width: 50.w),
 
-                  // ** Inline: carrega a imagem com errorBuilder **
+               // Tiago, para usar emulador
+                /*  // ** Inline: carrega a imagem com errorBuilder **
                   if (targetWord.imagePath.trim().isNotEmpty)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
@@ -336,7 +337,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
                     )
                   else
                     // ignora por agora (não crasha)
-                    SizedBox(width: 120.w, height: 120.w),
+                    SizedBox(width: 120.w, height: 120.w),*/
                 ],
               ),
               if (showSyllables)
@@ -350,7 +351,48 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
             ],
           ),
 
-          const Spacer(),
+          const Spacer(),*/
+
+          Widget _buildBoard(BuildContext context, _, __) {
+  if (!hasChallengeStarted || _levelWords.isEmpty) {
+    return const SizedBox();
+  }
+
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 20.w),
+    child: Column(
+      children: [
+        SizedBox(height: 85.h),
+
+        // Palavra + imagem
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                WordHighlightBox(word: targetWord.text, user: widget.user),
+                SizedBox(width: 50.w),
+
+                // ** Aqui entra o cartão **
+                if (targetWord.imagePath.trim().isNotEmpty)
+                  ImageCardBox(
+                    imagePath: targetWord.imagePath,
+                  )
+              ],
+            ),
+            if (showSyllables)
+              Positioned(
+                top: 0,
+                child: WordHighlightBox(
+                  word: targetWord.syllables.join(' - '),
+                  user: widget.user,
+                ),
+              ),
+          ],
+        ),
+
+        const Spacer(),
 
           // Botões de resposta
           Row(
