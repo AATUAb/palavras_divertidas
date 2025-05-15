@@ -81,6 +81,10 @@ flutter:
       fonts:
         - asset: assets/fonts/Cursive-Regular.ttf
 
+    - family: CursiveDotted
+      fonts:
+        - asset: assets/fonts/Cursive-Dotted.ttf
+
     - family: Slabo
       fonts:
         - asset: assets/fonts/Slabo-Regular.ttf

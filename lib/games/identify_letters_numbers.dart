@@ -9,9 +9,7 @@ import '../models/user_model.dart';
 import '../models/character_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
-import '../widgets/sound_manager.dart';
-
-import 'package:flutter/foundation.dart'; // necessário para kDebugMode
+import '../widgets/game_component.dart';
 
 // Classe principal do jogo, que recebe o utilizador como argumento
 class IdentifyLettersNumbers extends StatefulWidget {
@@ -137,8 +135,64 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   bool retryIsUsed(String value) => _usedCharacters.contains(value);
 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
+  List<String> _generateWrongOptions({
+  required int count,
+  required List<CharacterModel> pool,
+  required String target,
+}) {
+  final bad = <String>{};
+  final rand = Random();
+
+  while (bad.length < count) {
+    final c = pool[rand.nextInt(pool.length)].character;
+    final opt = rand.nextBool() ? c.toUpperCase() : c.toLowerCase();
+    if (opt.toLowerCase() != target.toLowerCase()) {
+      bad.add(opt);
+    }
+  }
+
+  return bad.toList();
+}
+
+List<String> _generateCorrectOptions({
+  required int count,
+  required String target,
+}) {
+  final rand = Random();
+  return List.generate(
+    count,
+    (_) => rand.nextBool() ? target.toUpperCase() : target.toLowerCase(),
+  );
+}
+
+  GameItem buildGameItem({
+    required int index,
+    required String content,
+    required String target,
+    required double dx,
+    required double dy,
+    required bool isFirstCycle,
+    required String? fontFamily,
+    required Color backgroundColor,
+  }) {
+    final isCorrect = content.toLowerCase() == target.toLowerCase();
+
+    return GameItem(
+      id: '$index',
+      type: GameItemType.character,
+      content: content,
+      dx: dx,
+      dy: dy,
+      fontFamily: isFirstCycle ? fontFamily : null,
+      backgroundColor: backgroundColor,
+      isCorrect: isCorrect,
+    );
+  }
+
+  // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
-    _gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
+    // 1) descobre se há retry pronto para usar
+  _gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
     final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
     final availableChars =
@@ -164,83 +218,71 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       currentTry = 0;
       progressValue = 1.0;
       targetCharacter = target;
-    });
+        });
 
-    // Geração das opções de resposta
-    final bad = <String>{};
-    while (bad.length < wrongCount) {
-      final c = _characters[_random.nextInt(_characters.length)].character;
-      final opt = _random.nextBool() ? c.toUpperCase() : c.toLowerCase();
-      if (opt.toLowerCase() != target.toLowerCase()) bad.add(opt);
-    }
+  // 6) gera bad/good, mistura, etc...
+  final bad  = _generateWrongOptions(count: wrongCount, pool: _characters, target: target);
+  final good = _generateCorrectOptions(count: correctCount, target: target);
+  final all  = [...bad, ...good]..shuffle();
 
-    final good = List.generate(
-      correctCount,
-      (_) => _random.nextBool() ? target.toUpperCase() : target.toLowerCase(),
+  final cols = (all.length / 3).ceil();
+  final sx = 1 / (cols + 1);
+  final sy = 0.18;
+
+  gamesItems = List.generate(all.length, (i) {
+    final col = i % cols;
+    final row = i ~/ cols;
+    return buildGameItem(
+      index: i,
+      content: all[i],
+      target: target,
+      dx: sx * (col + 1),
+      dy: 0.45 + sy * row,
+      isFirstCycle: isFirstCycle,
+      fontFamily: _randFont(),
+      backgroundColor: _randColor(),
     );
-    final all = [...bad, ...good]..shuffle();
-    final cols = (all.length / 3).ceil(), sx = 1 / (cols + 1), sy = 0.18;
+  });
 
-    gamesItems = List.generate(all.length, (i) {
-      final col = i % cols, row = i ~/ cols;
-      final content = all[i];
-      final isCorrect = content.toLowerCase() == target.toLowerCase();
-      return GameItem(
-        id: '$i',
-        type: GameItemType.character,
-        content: content,
-        dx: sx * (col + 1),
-        dy: 0.45 + sy * row,
-        fontFamily: isFirstCycle ? _randFont() : null,
-        backgroundColor: _randColor(),
-        isCorrect: isCorrect,
-      );
+  referenceItem = gamesItems.firstWhere(
+    (item) => item.isCorrect,
+    orElse: () => GameItem(
+      id: 'preview',
+      type: GameItemType.character,
+      content: target,
+      dx: 0,
+      dy: 0,
+      backgroundColor: Colors.transparent,
+    ),
+  );
+
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await Future.delayed(const Duration(milliseconds: 50));
+    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+  });
+
+  _startTime = DateTime.now();
+  progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+    if (!mounted) return t.cancel();
+    final elapsed = DateTime.now().difference(_startTime);
+    final fraction = elapsed.inMilliseconds / levelTime.inMilliseconds;
+    setState(() {
+      progressValue = 1.0 - fraction;
+      if (progressValue <= 0) t.cancel();
     });
+  });
 
-    referenceItem = gamesItems.firstWhere(
-      (item) => item.isCorrect,
-      orElse:
-          () => GameItem(
-            id: 'preview',
-            type: GameItemType.character,
-            content: target,
-            dx: 0,
-            dy: 0,
-            backgroundColor: Colors.transparent,
-          ),
+  roundTimer = Timer(levelTime, () {
+    if (!mounted) return;
+    setState(() => isRoundActive = false);
+    _cancelTimers();
+    _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
+    _gamesSuperKey.currentState?.showTimeout(
+      applySettings: _applyLevelSettings,
+      generateNewChallenge: _generateNewChallenge,
     );
-
-    // Solicita ao super widget a reprodução do som do desafio
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 50));
-      await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
-    });
-
-    // Inicia temporizadores
-    _startTime = DateTime.now();
-    progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-      if (!mounted) return t.cancel();
-
-      final elapsed = DateTime.now().difference(_startTime);
-      final fraction = elapsed.inMilliseconds / levelTime.inMilliseconds;
-
-      setState(() {
-        progressValue = 1.0 - fraction;
-        if (progressValue <= 0) t.cancel();
-      });
-    });
-
-    roundTimer = Timer(levelTime, () {
-      if (!mounted) return;
-      setState(() => isRoundActive = false);
-      _cancelTimers();
-      _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
-      _gamesSuperKey.currentState?.showTimeout(
-        applySettings: _applyLevelSettings,
-        generateNewChallenge: _generateNewChallenge,
-      );
-    });
-  }
+  });
+}
 
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
@@ -263,7 +305,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     s.checkAnswerMultiple(
       selectedItem: item,
       target: targetCharacter,
-      retryId: item.id,
+      retryId: targetCharacter,
       correctCount: correctCount,
       currentTry: currentTry,
       foundCorrect: foundCorrect,
@@ -303,68 +345,71 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
-  // Constrói o texto superior do jogo, que é apresenado quando o jogo arranca
+  // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
-    final font = getFontFamily(
-      isFirstCycle ? FontStrategy.slabo : FontStrategy.none,
-    );
-    return Padding(
-      padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
-      child:
-          hasChallengeStarted
-              ? _buildChallengeText()
-              : Text(
-                'Vamos encontrar todas as letras e números',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: font,
-                  fontSize: 25.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-    );
-  }
+    final isPreschool = widget.user.schoolLevel == 'Pré-Escolar';
 
-  // Constrói o texto do desafio, que apresenta o palavra alvo a encontrar
-  Widget _buildChallengeText() {
-    final font = getFontFamily(
-      isFirstCycle ? FontStrategy.slabo : FontStrategy.none,
-    );
+    // Mensagem inicial antes de carregar
+    if (!hasChallengeStarted || targetCharacter.isEmpty) {
+      return _buildSimpleText('Vamos encontrar todas as letras e números');
+    }
+
+    // Pré-escolar: apenas letras simples, sem estilos diferentes
+    if (isPreschool) {
+      final label = _isNumber(targetCharacter)
+          ? 'Encontra os números ${targetCharacter.toUpperCase()}'
+          : 'Encontra as letras ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}';
+      return _buildSimpleText(label);
+    }
+
+    // 1º ciclo com letras → mostra as 4 variações (Slabo e Cursive)
     if (isFirstCycle && _isLetter(targetCharacter)) {
       return Text.rich(
         TextSpan(
           children: [
             const TextSpan(text: 'Encontra as letras '),
-            TextSpan(
-              text:
-                  '${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-              style: TextStyle(fontFamily: font, fontSize: 22.sp),
-            ),
-            const TextSpan(text: ', '),
-            TextSpan(
-              text:
-                  '${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-              style: TextStyle(fontFamily: font, fontSize: 23.sp),
-            ),
+            for (final entry in [
+              TextSpan(text: targetCharacter.toUpperCase(), style: _slaboStyle()),
+              const TextSpan(text: ', '),
+              TextSpan(text: targetCharacter.toLowerCase(), style: _slaboStyle()),
+              const TextSpan(text: ', '),
+              TextSpan(text: targetCharacter.toUpperCase(), style: _cursiveStyle()),
+              const TextSpan(text: ', '),
+              TextSpan(text: targetCharacter.toLowerCase(), style: _cursiveStyle()),
+            ])
+              entry,
           ],
         ),
         textAlign: TextAlign.center,
       );
-    } else {
-      return Text(
-        _isNumber(targetCharacter)
-            ? 'Encontra os números $targetCharacter'
-            : 'Encontra as letras ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}',
-        textAlign: TextAlign.center,
-      );
     }
+
+    // Caso geral
+    final label = _isNumber(targetCharacter)
+        ? 'Encontra os números $targetCharacter'
+        : 'Encontra as letras ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}';
+    return _buildSimpleText(label);
   }
 
-  // Constrói o tabuleiro do jogo
+  // Helpers
+  Text _buildSimpleText(String text) => Text(
+    text,
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      fontSize: 22.sp,
+      fontWeight: FontWeight.bold,
+      fontFamily: getFontFamily(FontStrategy.none),
+    ),
+  );
+
+  TextStyle _slaboStyle() => TextStyle(fontFamily: 'Slabo', fontSize: 22.sp);
+  TextStyle _cursiveStyle() => TextStyle(fontFamily: 'Cursive', fontSize: 25.sp);
+
+
+
+  // Constrói o tabuleiro do jogo, com base CharacterCircleBox do game_component.dart 
   Widget _buildBoard(BuildContext _, __, ___) {
     return SizedBox.expand(
-      // ou um Container com height
       child: Stack(
         children:
             gamesItems.map((item) {
@@ -374,36 +419,16 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
                 alignment: Alignment(safeDx * 2 - 1, safeDy * 2 - 1),
                 child: GestureDetector(
                   onTap: () => _handleTap(item),
-                  child:
-                      item.isTapped
-                          ? (item.isCorrect
-                              ? _gamesSuperKey.currentState!.correctIcon
-                              : _gamesSuperKey.currentState!.wrongIcon)
-                          : Container(
-                            width: 60.w,
-                            height: 60.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: item.backgroundColor,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  offset: const Offset(2, 2),
-                                  blurRadius: 4.r,
-                                ),
-                              ],
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              item.content,
-                              style: TextStyle(
-                                fontSize: 24.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                fontFamily: item.fontFamily,
-                              ),
-                            ),
-                          ),
+                  child: item.isTapped
+                    ? (item.isCorrect
+                        ? _gamesSuperKey.currentState!.correctIcon
+                        : _gamesSuperKey.currentState!.wrongIcon)
+                    : CharacterCircleBox(
+                        character: item.content,
+                        color: item.backgroundColor,
+                        user: widget.user,
+                        fontFamily: item.fontFamily,
+                      ),
                 ),
               );
             }).toList(),

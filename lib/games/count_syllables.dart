@@ -299,6 +299,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     );
   }
 
+// Tiago para Emulador
  /* Widget _buildBoard(BuildContext context, _, __) {
     if (!hasChallengeStarted || _levelWords.isEmpty) {
       return const SizedBox();
@@ -320,7 +321,6 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
                   WordHighlightBox(word: targetWord.text, user: widget.user),
                   SizedBox(width: 50.w),
 
-               // Tiago, para usar emulador
                 /*  // ** Inline: carrega a imagem com errorBuilder **
                   if (targetWord.imagePath.trim().isNotEmpty)
                     ClipRRect(
@@ -353,7 +353,8 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
           const Spacer(),*/
 
-          Widget _buildBoard(BuildContext context, _, __) {
+  // Para versão web
+  Widget _buildBoard(BuildContext context, _, __) {
   if (!hasChallengeStarted || _levelWords.isEmpty) {
     return const SizedBox();
   }

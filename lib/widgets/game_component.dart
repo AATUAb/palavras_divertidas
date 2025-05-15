@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'game_item.dart';
 import '../models/user_model.dart';
+import 'game_item.dart';
 
 /// Mostra uma palavra em destaque dentro de uma caixa verde arredondada.
 class WordHighlightBox extends StatelessWidget {
@@ -161,7 +162,7 @@ class FlexibleAnswerButton extends StatelessWidget {
 /// Linha de botões de resposta adaptável
 class AnswerButtonsRow extends StatelessWidget {
   final List<GameItem> items;
-  final void Function(String) onTap;
+  final void Function(GameItem) onTap;
   final UserModel user;
 
   const AnswerButtonsRow({
@@ -180,10 +181,55 @@ class AnswerButtonsRow extends StatelessWidget {
       children: items.map((item) {
         return FlexibleAnswerButton(
           label: item.content,
-          onTap: () => onTap(item.content),
+          onTap: () => onTap(item),
           user: user,
         );
       }).toList(),
+    );
+  }
+}
+
+// Circulo com um caractere no interior
+class CharacterCircleBox extends StatelessWidget {
+  final String character;
+  final Color color;
+  final UserModel user;
+  final String? fontFamily;
+
+  const CharacterCircleBox({
+    super.key,
+    required this.character,
+    required this.color,
+    required this.user,
+    required this.fontFamily,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 60.w,
+      height: 60.w,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            offset: const Offset(2, 2),
+            blurRadius: 4.r,
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        character,
+        style: TextStyle(
+          fontSize: 26.sp,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          fontFamily: fontFamily,
+        ),
+      ),
     );
   }
 }

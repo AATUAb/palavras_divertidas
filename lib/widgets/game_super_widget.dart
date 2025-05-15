@@ -354,9 +354,6 @@ void initState() {
     selectedItem.isCorrect = isCorrect;
   });
 
-  //Conta esta tentativa para o retry logic
-  registerCompletedRound(retryId);
-
   //Feedback sonoro/visual imediato
   await playAnswerFeedback(isCorrect: isCorrect);
 
@@ -444,9 +441,6 @@ Future<void> checkAnswerSingle({
     selectedItem.isCorrect = isCorrect;
   });
 
-  // 3) Conta esta tentativa para o retry logic
-  registerCompletedRound(retryId);
-
   // 4) Cancela timer e toca feedback
   cancelTimers();
   await playAnswerFeedback(isCorrect: isCorrect);
@@ -523,9 +517,6 @@ Future<void> checkAnswerSingle({
   );
   if (!alreadyExists) {
     _retryQueue.add(MapEntry(retryId, _roundCounter));
-    debugPrint('➕ Adicionado à fila de retry: $retryId');
-  } else {
-    debugPrint('🔁 Já na fila de retry: $retryId');
   }
   debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
 }
