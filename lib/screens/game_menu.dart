@@ -40,8 +40,35 @@ class _GameMenuState extends State<GameMenu> {
   void initState() {
     super.initState();
     conquestManager = ConquestManager();
-    //checkForNewConquests();
     resumeMenuMusic(); // Garante que a música toca ao voltar ao menu
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkNewConquests());
+  }
+
+  Future<void> _checkNewConquests() async {
+    final newUnlocks = widget.user.conquest - widget.user.lastSeenConquests;
+    if (newUnlocks > 0) {
+      await showDialog(
+        context: context,
+        builder:
+            (_) => AlertDialog(
+              title: const Text('Parabéns! 🎉'),
+              content: Text(
+                'Desbloqueaste $newUnlocks conquista${newUnlocks > 1 ? 's' : ''}!\n'
+                'Vai até à caderneta para saber quais.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    widget.user.lastSeenConquests = widget.user.conquest;
+                    await widget.user.save();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+      );
+    }
   }
 
   @override
@@ -62,7 +89,7 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Contar sílabas",
         icon: Icons.format_list_numbered,
-        onTap: () =>  _countSyllablesGame(),
+        onTap: _countSyllablesGame,
         backgroundColor: AppColors.yellow,
       ),
       GameCardData(
@@ -88,7 +115,7 @@ class _GameMenuState extends State<GameMenu> {
       ),
     ];
 
-    final List<GameCardData> jogosDisponiveis =
+    final jogosDisponiveis =
         widget.user.schoolLevel == "1º Ciclo"
             ? [...jogosBase, ...jogosExtras]
             : jogosBase;
@@ -202,25 +229,21 @@ class _GameMenuState extends State<GameMenu> {
       context,
       MaterialPageRoute(
         builder: (_) => IdentifyLettersNumbers(user: widget.user),
-      ), // MaterialPageRoute
-    );
-  }
-
-    void _writingGame() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => WritingGame(user: widget.user),
       ),
     );
   }
 
-  void   _countSyllablesGame() {
+  void _writingGame() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => CountSyllablesGame(user: widget.user),
-      ),
+      MaterialPageRoute(builder: (_) => WritingGame(user: widget.user)),
+    );
+  }
+
+  void _countSyllablesGame() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => CountSyllablesGame(user: widget.user)),
     );
   }
 
