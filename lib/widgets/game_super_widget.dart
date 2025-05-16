@@ -58,7 +58,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   final Queue<MapEntry<String, int>> _retryQueue = Queue();
   int _roundCounter = 0;
   final int retryDelay = 3;
-  bool introPlayed = false;
+  //bool introPlayed = false;
   bool introCompleted = false;
   late AnimationController _fadeController;
   late Animation<double> _rotationAnimation;
@@ -101,7 +101,6 @@ void initState() {
     if (widget.introImagePath != null && widget.introAudioPath != null) {
       await _playIntroAndStartFade();
     } else {
-      introPlayed = true;
       introCompleted = true;
       if (mounted) {
         setState(() {});
@@ -122,7 +121,6 @@ void initState() {
 
     if (!mounted) return;
     setState(() {
-      introPlayed = true;
       introCompleted = true;
     });
     widget.onIntroFinished?.call();
@@ -562,7 +560,7 @@ Future<void> checkAnswerSingle({
       context: context,
       builder: (context) => AlertDialog(
         contentPadding: const EdgeInsets.all(20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         content: SizedBox(
           width: 400,
           child: Row(
@@ -589,7 +587,7 @@ Future<void> checkAnswerSingle({
                         color: Colors.blueAccent,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                     Row(
                       children: [
                         Container(
@@ -606,7 +604,7 @@ Future<void> checkAnswerSingle({
                             label: const Text('Sim', style: TextStyle(color: Colors.white)),
                           ),
                         ),
-                        SizedBox(width: 12),
+                        SizedBox(width: 12.w),
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.red,
@@ -626,7 +624,7 @@ Future<void> checkAnswerSingle({
                   ],
                 ),
               ),
-              SizedBox(width: 20),
+              SizedBox(width: 20.w),
               ConstrainedBox(
                 constraints: const BoxConstraints(
                   maxWidth: 150,

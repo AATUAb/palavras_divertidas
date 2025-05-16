@@ -73,7 +73,9 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   // Carrega as palavras do banco de dados Hive
   Future<void> _loadCharacters() async {
     final box = await Hive.openBox<CharacterModel>('characters');
-    _characters = box.values.toList();
+      _characters = box.values
+      .where((c) => c.character.trim().isNotEmpty)
+      .toList();
   }
 
   // Fecha o player de áudio e cancela os temporizadores
@@ -194,9 +196,10 @@ List<String> _generateCorrectOptions({
     // 1) descobre se há retry pronto para usar
   _gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
-    final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
-    final availableChars =
-        allChars.where((c) => !_usedCharacters.contains(c)).toList();
+    final availableChars = _characters
+      .map((e) => e.character)
+      .where((c) => !_usedCharacters.contains(c))
+      .toList();
     if (availableChars.isEmpty && retry == null) {
       _gamesSuperKey.currentState?.showEndOfGameDialog(onRestart: _restartGame);
       return;
@@ -257,9 +260,10 @@ List<String> _generateCorrectOptions({
   );
 
   WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await Future.delayed(const Duration(milliseconds: 50));
-    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
-  });
+    if (!mounted) return;
+      await Future.delayed(const Duration(milliseconds: 50));
+      await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+    });
 
   _startTime = DateTime.now();
   progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {

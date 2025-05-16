@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'game_item.dart';
 import '../models/user_model.dart';
-import 'game_item.dart';
 
 /// Mostra uma palavra em destaque dentro de uma caixa verde arredondada.
 class WordHighlightBox extends StatelessWidget {
@@ -52,21 +51,23 @@ class WordHighlightBox extends StatelessWidget {
 /// Mostra uma imagem dentro de um cartão verde-claro com sombra.
 class ImageCardBox extends StatelessWidget {
   final String imagePath;
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
 
   const ImageCardBox({
     super.key,
     required this.imagePath,
-    this.width = 150,
-    this.height = 80,
+    this.width,
+    this.height,
   });
 
   @override
   Widget build(BuildContext context) {
+    final double scaledWidth = (width ?? 150).w;
+    final double scaledHeight = (height ?? 80).h;
     return Container(
-      width: width.w,
-      height: height.h,
+      width: scaledWidth,
+      height: scaledHeight,
       decoration: BoxDecoration(
         color: Colors.green.shade100,
         borderRadius: BorderRadius.circular(16.r),
