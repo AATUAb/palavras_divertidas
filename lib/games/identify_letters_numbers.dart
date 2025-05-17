@@ -260,10 +260,10 @@ List<String> _generateCorrectOptions({
   );
 
   WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await Future.delayed(const Duration(milliseconds: 50));
     if (!mounted) return;
-      await Future.delayed(const Duration(milliseconds: 50));
-      await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
-    });
+    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+        });
 
   _startTime = DateTime.now();
   progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
