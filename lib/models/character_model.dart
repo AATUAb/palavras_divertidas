@@ -27,7 +27,7 @@ Future<void> populateCharactersIfNeeded() async {
 
     for (var char in characters) {
       final fileName = '$char.ogg';
-      final soundPath = 'assets/sounds/words_characters/$fileName';
+      final soundPath = 'assets/sounds/characters/$fileName';
 
       final model = CharacterModel(
         character: char,

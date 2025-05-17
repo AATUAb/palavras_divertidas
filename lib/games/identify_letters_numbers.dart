@@ -49,20 +49,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   bool _isNumber(String c) => RegExp(r'[0-9]').hasMatch(c);
   String _randFont() => _random.nextBool() ? 'Slabo' : 'Cursive';
 
-  Color _randColor() =>
-      [
-        Colors.red,
-        Colors.blue,
-        Colors.green,
-        Colors.purple,
-        Colors.orange,
-        Colors.pink,
-        Colors.teal,
-        Colors.indigo,
-        Colors.deepPurple,
-        Colors.cyan,
-      ][_random.nextInt(10)];
-
   // Inicializa o estado do jogo
   @override
   void initState() {
@@ -156,6 +142,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   return bad.toList();
 }
 
+// Gera as opções corretas, com base no caractere alvo
 List<String> _generateCorrectOptions({
   required int count,
   required String target,
@@ -167,6 +154,7 @@ List<String> _generateCorrectOptions({
   );
 }
 
+  // Constrói um novo item de jogo, com base no caractere e na posição
   GameItem buildGameItem({
     required int index,
     required String content,
@@ -191,25 +179,52 @@ List<String> _generateCorrectOptions({
     );
   }
 
+    // Cores a aplicar aos itens do jogo
+  Color _randColor() =>
+      [
+        Colors.red,
+        Colors.blue,
+        Colors.green,
+        Colors.purple,
+        Colors.orange,
+        Colors.pink,
+        Colors.teal,
+        Colors.indigo,
+        Colors.deepPurple,
+        Colors.cyan,
+      ][_random.nextInt(10)];
+
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
-    // 1) descobre se há retry pronto para usar
-  _gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
+    // Verifica se há retry a usar
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
-    final availableChars = _characters
-      .map((e) => e.character)
-      .where((c) => !_usedCharacters.contains(c))
-      .toList();
-    if (availableChars.isEmpty && retry == null) {
+
+    final availableCharacters = _characters
+        .map((e) => e.character)
+        .where((c) => !_usedCharacters.contains(c))
+        .toList();
+
+    if (_gamesSuperKey.currentState?.isEndOfGame(availableItems: availableCharacters) ?? false) {
       _gamesSuperKey.currentState?.showEndOfGameDialog(onRestart: _restartGame);
       return;
     }
 
-    // Seleciona o caracter-alvo aleatoriamente ou da fila de repetição
-    final target =
-        retry ?? availableChars[_random.nextInt(availableChars.length)];
-    if (!retryIsUsed(target)) _usedCharacters.add(target);
-    _gamesSuperKey.currentState?.removeFromRetryQueue(target);
+    final selected = retry != null
+        ? _gamesSuperKey.currentState!.safeRetry<String>(
+            list: _characters.map((e) => e.character).toList(),
+            retryId: retry,
+            matcher: (c) => c == retry,
+            fallback: () => availableCharacters[_random.nextInt(availableCharacters.length)],
+          )
+        : availableCharacters[_random.nextInt(availableCharacters.length)];
+
+    setState(() {
+      targetCharacter = selected;
+      _usedCharacters.add(selected);
+    });
+
+    _gamesSuperKey.currentState?.removeFromRetryQueue(selected);
+    _gamesSuperKey.currentState?.registerCompletedRound(selected);
 
     // Se a palavra volta a ser apresentado, remove-o da fila de repetição
     // e adiciona-o à lista de palavras já utilizados
@@ -220,12 +235,12 @@ List<String> _generateCorrectOptions({
       foundCorrect = 0;
       currentTry = 0;
       progressValue = 1.0;
-      targetCharacter = target;
+      targetCharacter = targetCharacter;
         });
 
-  // 6) gera bad/good, mistura, etc...
-  final bad  = _generateWrongOptions(count: wrongCount, pool: _characters, target: target);
-  final good = _generateCorrectOptions(count: correctCount, target: target);
+  // Gera lista de opções corretas e erradas e miustura
+  final bad  = _generateWrongOptions(count: wrongCount, pool: _characters, target: targetCharacter);
+  final good = _generateCorrectOptions(count: correctCount, target: targetCharacter);
   final all  = [...bad, ...good]..shuffle();
 
   final cols = (all.length / 3).ceil();
@@ -238,7 +253,7 @@ List<String> _generateCorrectOptions({
     return buildGameItem(
       index: i,
       content: all[i],
-      target: target,
+      target: targetCharacter,
       dx: sx * (col + 1),
       dy: 0.45 + sy * row,
       isFirstCycle: isFirstCycle,
@@ -252,19 +267,21 @@ List<String> _generateCorrectOptions({
     orElse: () => GameItem(
       id: 'preview',
       type: GameItemType.character,
-      content: target,
+      content: targetCharacter,
       dx: 0,
       dy: 0,
       backgroundColor: Colors.transparent,
     ),
   );
 
+  // Reproduz o som do caractere alvo
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     await Future.delayed(const Duration(milliseconds: 50));
     if (!mounted) return;
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
         });
 
+  // Sincroniza temporizadores com o tempo de nível
   _startTime = DateTime.now();
   progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
     if (!mounted) return t.cancel();
@@ -286,7 +303,8 @@ List<String> _generateCorrectOptions({
       generateNewChallenge: _generateNewChallenge,
     );
   });
-}
+  }
+
 
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {

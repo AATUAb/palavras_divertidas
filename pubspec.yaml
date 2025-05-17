@@ -57,7 +57,8 @@ flutter:
     # Sons gerais
     - assets/sounds/
     - assets/sounds/animations/
-    - assets/sounds/words_characters/
+    - assets/sounds/characters/
+    - assets/sounds/words/
     - assets/sounds/games/
     # Imagens gerais
     - assets/images/

@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:audioplayers/audioplayers.dart';
-
 import '../models/user_model.dart';
 import '../models/word_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
 import '../widgets/game_component.dart';
 
+// Classe principal do jogo, que recebe o utilizador como argumento
 class CountSyllablesGame extends StatefulWidget {
   final UserModel user;
   const CountSyllablesGame({super.key, required this.user});
@@ -20,6 +20,7 @@ class CountSyllablesGame extends StatefulWidget {
   State<CountSyllablesGame> createState() => _CountSyllablesGame();
 }
 
+// Classe que controla o estado do jogo
 class _CountSyllablesGame extends State<CountSyllablesGame> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
   final _random = Random();
@@ -43,17 +44,20 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
+    // Inicializa o estado do jogo
   @override
   void initState() {
     super.initState();
     _wordPlayer = AudioPlayer();
   }
 
+  // Carrega as palavras do banco de dados Hive
   Future<void> _loadWords() async {
     final box = await Hive.openBox<WordModel>('words');
     _allWords = box.values.toList();
   }
 
+  // Fecha o player de áudio e cancela os temporizadores
   @override
   void dispose() {
     _wordPlayer.dispose();
@@ -61,6 +65,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     super.dispose();
   }
 
+  // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
     late String levelDifficulty;
@@ -93,16 +98,19 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     }
   }
 
+  // Cancela os temporizadores ativos
   void _cancelTimers() {
     roundTimer?.cancel();
     progressTimer?.cancel();
   }
 
+  // Reproduz a instrução de áudio para o jogador
   late GameItem referenceItem;
   Future<void> _reproduzirInstrucao() async {
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
+  // Função que controla o comportamento do jogo quando o jogador termina o jogo e que reinicar o mesmo jogo
   void _restartGame() async {
     _gamesSuperKey.currentState?.levelManager.level = 1;
     setState(() {
@@ -114,42 +122,55 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     _generateNewChallenge();
   }
 
+  // Recupera um item de retryQuery, se existir
+  T safeRetry<T>({
+  required List<T> list,
+  required String retryId,
+  required bool Function(T) matcher,
+  required T Function() fallback,
+  required void Function() onInvalidRetry,
+}) {
+  try {
+    final item = list.firstWhere(matcher);
+    return item;
+  } catch (_) {
+    onInvalidRetry();
+    return fallback();
+  }
+}
+
+  // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
+    // Verifica se há retry a usar
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
-    if (retry != null) debugPrint('🔁 Retry queue: $retry');
 
-    final availableWords =
-        _levelWords
-            .where(
-              (w) =>
-                  !_usedWords.contains(w.text) &&
-                  w.audioPath.trim().isNotEmpty &&
-                  w.imagePath.trim().isNotEmpty,
-            )
-            .toList();
+    targetWord = retry != null
+      ? safeRetry<WordModel>(
+          list: _levelWords,
+          retryId: retry,
+          matcher: (w) => w.text == retry,
+          fallback: () => _levelWords[_random.nextInt(_levelWords.length)],
+          onInvalidRetry: () {
+            _gamesSuperKey.currentState?.removeFromRetryQueue(retry);
+          },
+        )
+      : _levelWords[_random.nextInt(_levelWords.length)];
 
-    if (availableWords.isEmpty && retry == null) {
-      _gamesSuperKey.currentState?.showEndOfGameDialog(onRestart: _restartGame);
-      return;
-    }
+  _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord.text);
+  _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
 
-    final targetText =
-        retry ?? availableWords[_random.nextInt(availableWords.length)].text;
-    targetWord = availableWords.firstWhere(
-      (w) => w.text == targetText,
-      orElse: () => availableWords[_random.nextInt(availableWords.length)],
-    );
-    _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord.text);
+// Se o caracter volta a ser apresentado, remove-o da fila de repetição
+// e adiciona-o à lista de palavras já utilizados
+  _cancelTimers();
+      setState(() {
+        isRoundActive = true;
+        gamesItems.clear();
+        currentTry = 0;
+        foundCorrect = 0;
+        progressValue = 1.0;
+      });
 
-    _cancelTimers();
-    setState(() {
-      isRoundActive = true;
-      gamesItems.clear();
-      currentTry = 0;
-      foundCorrect = 0;
-      progressValue = 1.0;
-    });
-
+    // Gera as opções de resposta multiplas
     final correct = targetWord.syllableCount;
     final options =
         correct == 1
@@ -182,11 +203,13 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       backgroundColor: Colors.transparent,
     );
 
+    // Reproduz o som da palavra alvo
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 50));
       await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
     });
 
+  // Sincroniza temporizadores com o tempo de nível
     _startTime = DateTime.now();
     progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
       if (!mounted) return t.cancel();
@@ -210,6 +233,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     });
   }
 
+  // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
     if (!isRoundActive || item.isTapped) return;
     final s = _gamesSuperKey.currentState;
@@ -220,6 +244,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       item.isTapped = true;
     });
 
+    // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(
       selectedItem: item,
       target: targetWord.syllableCount.toString(),
@@ -241,6 +266,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     setState(() => currentTry++);
   }
 
+  // Constrói o widget principal do jogo
   @override
   Widget build(BuildContext context) {
     return GamesSuperWidget(
@@ -268,6 +294,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     );
   }
 
+  // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
     final font = getFontFamily(
       isFirstCycle ? FontStrategy.slabo : FontStrategy.none,
@@ -298,62 +325,8 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
               ),
     );
   }
+  // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart 
 
-// Tiago para Emulador
- /* Widget _buildBoard(BuildContext context, _, __) {
-    if (!hasChallengeStarted || _levelWords.isEmpty) {
-      return const SizedBox();
-    }
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Column(
-        children: [
-          SizedBox(height: 85.h),
-
-          // Palavra + imagem
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  WordHighlightBox(word: targetWord.text, user: widget.user),
-                  SizedBox(width: 50.w),
-
-                /*  // ** Inline: carrega a imagem com errorBuilder **
-                  if (targetWord.imagePath.trim().isNotEmpty)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        targetWord.imagePath,
-                        width: 120.w,
-                        height: 120.w,
-                        fit: BoxFit.cover,
-                        errorBuilder:
-                            (_, __, ___) =>
-                                SizedBox(width: 120.w, height: 120.w),
-                      ),
-                    )
-                  else
-                    // ignora por agora (não crasha)
-                    SizedBox(width: 120.w, height: 120.w),*/
-                ],
-              ),
-              if (showSyllables)
-                Positioned(
-                  top: 0,
-                  child: WordHighlightBox(
-                    word: targetWord.syllables.join(' - '),
-                    user: widget.user,
-                  ),
-                ),
-            ],
-          ),
-
-          const Spacer(),*/
-
-  // Para versão web
   Widget _buildBoard(BuildContext context, _, __) {
   if (!hasChallengeStarted || _levelWords.isEmpty) {
     return const SizedBox();
@@ -395,7 +368,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
         const Spacer(),
 
-          // Botões de resposta
+          // Botões de resposta, com base no FlexibleAnswerButton do game_component.dart
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children:

@@ -10,9 +10,13 @@ class SoundManager {
   /// Toca o som de um carácter (letra ou número isolado)
   static Future<void> playCharacter(String character) async {
     final box = await Hive.openBox<CharacterModel>('characters');
+    
     final model = box.values.firstWhere(
       (m) => m.character.toLowerCase() == character.toLowerCase(),
-      orElse: () => CharacterModel(character: character, soundPath: ''),
+      orElse: () => CharacterModel(
+        character: character, 
+        soundPath: ''
+        ),
     );
 
     if (model.soundPath.isNotEmpty) {
@@ -46,7 +50,7 @@ static Future<void> playWord(String word) async {
   );
 
   final filename = model.audioFileName ?? model.text;
-  final rawPath = 'assets/sounds/words_characters/$filename.ogg';
+  final rawPath = 'assets/sounds/words/$filename.ogg';
   final assetPath = rawPath.replaceFirst(RegExp(r'^assets/'), '');
 
   try {

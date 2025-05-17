@@ -131,6 +131,32 @@ void initState() {
     await SoundManager.playGameItem(item);
   }
 
+   T safeRetry<T>({
+    required List<T> list,
+    required String retryId,
+    required bool Function(T) matcher,
+    required T Function() fallback,
+  }) {
+    try {
+      final item = list.firstWhere(matcher);
+      removeFromRetryQueue(retryId);
+      registerCompletedRound(retryId);
+      return item;
+    } catch (_) {
+      removeFromRetryQueue(retryId);
+      final fallbackItem = fallback();
+      registerCompletedRound(fallbackItem is String ? fallbackItem : retryId);
+      return fallbackItem;
+    }
+  }
+
+  bool isEndOfGame<T>({
+    required List<T> availableItems,
+  }) {
+    final retry = peekNextRetryTarget();
+    return availableItems.isEmpty && retry == null;
+  }
+
   @override
   void dispose() {
     _fadeController.dispose();
@@ -443,7 +469,7 @@ Future<void> checkAnswerSingle({
   cancelTimers();
   await playAnswerFeedback(isCorrect: isCorrect);
 
-  // 5) Calcula se foi primeira tentativa
+  // 5) Verifica se acertou à primeira tentativa
   final bool firstTry = isCorrect;
 
   // 6) Regista nível
@@ -642,7 +668,7 @@ Future<void> checkAnswerSingle({
     );
   }
 
-  // Mostra a notificação de conquista - ainda não está a funcionar
+  /*// Mostra a notificação de conquista - ainda não está a funcionar
   void showConquestNotification() {
     if (conquestManager.hasNewConquest) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -653,5 +679,5 @@ Future<void> checkAnswerSingle({
         ),
       );
     }
-  }
+  }*/
 }
