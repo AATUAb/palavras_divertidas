@@ -190,6 +190,20 @@ void initState() {
     }
   }
 
+  // Reincia o jogo e o seu progresso
+  Future<void> restartGame() async {
+  // Reinicia o nível e progresso no LevelManager e grava em Hive
+  await levelManager.resetLevelToOne();
+
+  // Reinicia o estado visual do SuperWidget
+  setState(() {
+    _visibleLevel = 1;
+    _retryQueue.clear();
+    _roundCounter = 0;
+  });
+}
+  
+  // Verifica se ainda existem itens disponíveis, para determinar se o jogo terminou
   bool isEndOfGame<T>({
     required List<T> availableItems,
   }) {
@@ -197,11 +211,14 @@ void initState() {
     return availableItems.isEmpty && retry == null;
   }
 
+
+
   @override
   void dispose() {
     _fadeController.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {

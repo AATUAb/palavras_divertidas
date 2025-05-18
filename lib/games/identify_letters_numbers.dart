@@ -112,18 +112,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
-  // Função que controla o comportamento do jogo quando o jogador termina o jogo e que reinicar o mesmo jogo
-  void _restartGame() async {
-    _gamesSuperKey.currentState?.levelManager.level = 1;
-    setState(() {
-      _usedCharacters.clear();
-      hasChallengeStarted = true;
-      progressValue = 1.0;
-    });
-    await _applyLevelSettings();
-    _generateNewChallenge();
-  }
-
   // Verifica se o caractere já foi utilizado na ronda atual, para controlar a repetição
   bool retryIsUsed(String value) => _usedCharacters.contains(value);
 
@@ -201,42 +189,56 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
-    // Verifica se há retry a usar
-    final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
+  if (!mounted || _isDisposed) return;
 
-    final availableCharacters = _characters
-        .map((e) => e.character)
-        .where((c) => !_usedCharacters.contains(c))
-        .toList();
+  final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
 
-    if (_gamesSuperKey.currentState?.isEndOfGame(availableItems: availableCharacters) ?? false) {
-      if (!mounted || _isDisposed) return;
-      _gamesSuperKey.currentState?.showEndOfGameDialog(onRestart: _restartGame);
-      return;
-    }
+  targetCharacter = retryId != null
+    ? _gamesSuperKey.currentState!.safeRetry<String>(
+        list: _characters.map((e) => e.character).toList(),
+        retryId: retryId,
+        matcher: (c) => c.toLowerCase() == retryId.toLowerCase(),
+        fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
+          availableItems: _characters.map((e) => e.character)
+            .where((c) => !_usedCharacters.contains(c))
+            .toList(),
+        ),
+      )
+    : _gamesSuperKey.currentState!.safeSelectItem(
+        availableItems: _characters.map((e) => e.character)
+          .where((c) => !_usedCharacters.contains(c))
+          .toList(),
+      );
 
-    final selected = retry ?? _gamesSuperKey.currentState!.safeSelectItem<String>(
-      availableItems: availableCharacters,
+  if (!_usedCharacters.contains(targetCharacter)) {
+    _usedCharacters.add(targetCharacter);
+  }
+
+  final available = _characters.map((e) => e.character)
+      .where((c) => !_usedCharacters.contains(c))
+      .toList();
+  final hasRetry = _gamesSuperKey.currentState?.peekNextRetryTarget() != null;
+
+  if (available.isEmpty && !hasRetry) {
+    _gamesSuperKey.currentState?.showEndOfGameDialog(
+      onRestart: () async {
+        await _gamesSuperKey.currentState?.restartGame();
+        await _applyLevelSettings();
+        if (mounted) _generateNewChallenge();
+      },
     );
+    return;
+  }
 
-    setState(() {
-      targetCharacter = selected;
-      _usedCharacters.add(selected);
-    });
-
-    _gamesSuperKey.currentState?.removeFromRetryQueue(selected);
-    _gamesSuperKey.currentState?.registerCompletedRound(selected);
-
-    // Se a palavra volta a ser apresentado, remove-o da fila de repetição
-    // e adiciona-o à lista de palavras já utilizados
-    _cancelTimers();
-    setState(() {
-      isRoundActive = true;
-      gamesItems.clear();
-      foundCorrect = 0;
-      currentTry = 0;
-      progressValue = 1.0;
-        });
+  // Reproduz som após pequena espera
+  _cancelTimers();
+  setState(() {
+    isRoundActive = true;
+    gamesItems.clear();
+    foundCorrect = 0;
+    currentTry = 0;
+    progressValue = 1.0;
+  });
 
   // Gera lista de opções corretas e erradas e miustura
   final bad  = _generateWrongOptions(count: wrongCount, pool: _characters, target: targetCharacter);
@@ -279,7 +281,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     await Future.delayed(const Duration(milliseconds: 50));
     if (!mounted || _isDisposed) return;
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
-        });
+  });
 
   // Sincroniza temporizadores com o tempo de nível
   _startTime = DateTime.now();
@@ -298,14 +300,12 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     setState(() => isRoundActive = false);
     _cancelTimers();
     _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
-    if (!mounted || _isDisposed) return;
     _gamesSuperKey.currentState?.showTimeout(
       applySettings: _applyLevelSettings,
       generateNewChallenge: _generateNewChallenge,
     );
   });
-  }
-
+}
 
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {

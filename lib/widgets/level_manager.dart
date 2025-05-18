@@ -52,7 +52,6 @@ class LevelManager {
   }
 
   // Regista uma ronda nova do jogo e atualiza o nível
-
   Future<bool> registerRoundForLevel({required bool correct}) async {
     // Incrementa contadores globais
     totalRounds++;
@@ -105,6 +104,7 @@ class LevelManager {
         recentCorrect = 0;
       }
 
+      // Só grava o nível novo se houver mudança
       unawaited(
         HiveService.saveGameLevel(
           userKey: userKey,
@@ -120,9 +120,27 @@ class LevelManager {
     return levelChanged;
   }
 
-  // Função para fazer o reset do progreso - Sem uso atual, mas pode ser útil se implementarmos o reset de nível no dashboard
+  // Função para fazer o reset do progreso atual
+  Future<void> resetLevelToOne() async {
+  level = 1;
+  resetProgress();
+  final userKey = user.key?.toString();
+  if (userKey != null) {
+    await HiveService.saveGameLevel(
+      userKey: userKey,
+      gameName: gameName,
+      level: level,
+    );
+    user.updateAccuracy(level: 1, accuracy: 0);
+    await HiveService.updateUserByKey(int.parse(userKey), user);
+  }
+}
+
+  // Função para fazer o reset do progreso
   void resetProgress() {
     totalRounds = 0;
     correctAnswers = 0;
+    recentRounds = 0;
+    recentCorrect = 0;
   }
 }

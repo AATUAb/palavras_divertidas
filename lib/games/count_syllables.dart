@@ -119,7 +119,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
-  // Função que controla o comportamento do jogo quando o jogador termina o jogo e que reinicar o mesmo jogo
+ /* // Função que controla o comportamento do jogo quando o jogador termina o jogo e que reinicar o mesmo jogo
   void _restartGame() async {
     _gamesSuperKey.currentState?.levelManager.level = 1;
     _gamesSuperKey.currentState?.levelManager.resetProgress();
@@ -130,7 +130,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     });
     await _applyLevelSettings();
     _generateNewChallenge();
-  }
+  }*/
 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
@@ -166,7 +166,13 @@ final availableWords = _levelWords
 
   if (availableWords.isEmpty && !hasRetry) {
     if (!mounted || _isDisposed) return;
-    _gamesSuperKey.currentState?.showEndOfGameDialog(onRestart: _restartGame);
+    _gamesSuperKey.currentState?.showEndOfGameDialog(
+      onRestart: () async {
+        await _gamesSuperKey.currentState?.restartGame();
+        await _applyLevelSettings();
+        if (mounted) _generateNewChallenge();
+      },
+    );
     return;
   }
 
