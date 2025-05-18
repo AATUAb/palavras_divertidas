@@ -41,6 +41,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   Timer? roundTimer, progressTimer;
   late DateTime _startTime;
   double progressValue = 1.0;
+  bool _isDisposed = false;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
@@ -60,6 +61,8 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   // Fecha o player de áudio e cancela os temporizadores
   @override
   void dispose() {
+    _isDisposed = true;
+    _wordPlayer.stop();
     _wordPlayer.dispose();
     _cancelTimers();
     super.dispose();
@@ -83,19 +86,24 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
         levelDifficulty = 'dificil';
     }
 
-    _levelWords =
-        _allWords.where((w) {
-          final diff = (w.difficulty ?? '').trim().toLowerCase();
-          return diff == levelDifficulty &&
-              (w.audioPath ?? '').trim().isNotEmpty &&
-              (w.imagePath ?? '').trim().isNotEmpty;
-        }).toList();
+  // Garante que palavras da fila de retry continuam acessíveis
+  final filtered = _allWords.where((w) {
+  final diff = (w.difficulty ?? '').trim().toLowerCase();
+  return diff == levelDifficulty &&
+         !_usedWords.contains(w.text) && // ← evita repetir palavras já usadas
+         (w.audioPath ?? '').trim().isNotEmpty &&
+         (w.imagePath ?? '').trim().isNotEmpty;
+}).toList();
 
-    if (_levelWords.isEmpty) {
-      debugPrint(
-        '⚠️ Sem palavras disponíveis para o nível "$levelDifficulty".',
-      );
-    }
+    // Garante que palavras da fila de retry continuam acessíveis
+    final retryIds = _gamesSuperKey.currentState?.retryQueueContents() ?? [];
+    final retryWords = _allWords.where((w) => retryIds.contains(w.text)).toList();
+
+    // Junta os dois, evitando duplicações
+    _levelWords = {
+      ...filtered,
+      ...retryWords,
+    }.toList();
   }
 
   // Cancela os temporizadores ativos
@@ -106,13 +114,15 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
   // Reproduz a instrução de áudio para o jogador
   late GameItem referenceItem;
-  Future<void> _reproduzirInstrucao() async {
+  Future<void> _playInstruction() async {
+    if (!mounted || _isDisposed) return;
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
   // Função que controla o comportamento do jogo quando o jogador termina o jogo e que reinicar o mesmo jogo
   void _restartGame() async {
     _gamesSuperKey.currentState?.levelManager.level = 1;
+    _gamesSuperKey.currentState?.levelManager.resetProgress();
     setState(() {
       _usedWords.clear();
       hasChallengeStarted = true;
@@ -122,44 +132,45 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     _generateNewChallenge();
   }
 
-  // Recupera um item de retryQuery, se existir
-  T safeRetry<T>({
-  required List<T> list,
-  required String retryId,
-  required bool Function(T) matcher,
-  required T Function() fallback,
-  required void Function() onInvalidRetry,
-}) {
-  try {
-    final item = list.firstWhere(matcher);
-    return item;
-  } catch (_) {
-    onInvalidRetry();
-    return fallback();
-  }
-}
-
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
     // Verifica se há retry a usar
+   if (!mounted || _isDisposed) return;
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
 
     targetWord = retry != null
-      ? safeRetry<WordModel>(
+      ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
           list: _levelWords,
           retryId: retry,
           matcher: (w) => w.text == retry,
-          fallback: () => _levelWords[_random.nextInt(_levelWords.length)],
-          onInvalidRetry: () {
-            _gamesSuperKey.currentState?.removeFromRetryQueue(retry);
-          },
+          fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
+            availableItems: _levelWords.where((w) => !_usedWords.contains(w.text)).toList(),
+
+          ),
         )
-      : _levelWords[_random.nextInt(_levelWords.length)];
+      : _gamesSuperKey.currentState!.safeSelectItem(
+          availableItems: _levelWords,
+        );
 
-  _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord.text);
-  _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
+    final wordText = targetWord!.text;
+    if (!_usedWords.contains(wordText)) {
+      _usedWords.add(wordText);
+    }
 
-// Se o caracter volta a ser apresentado, remove-o da fila de repetição
+final availableWords = _levelWords
+    .where((w) => !_usedWords.contains(w.text))
+    .map((w) => w.text)
+    .toList();
+
+  final hasRetry = _gamesSuperKey.currentState?.peekNextRetryTarget() != null;
+
+  if (availableWords.isEmpty && !hasRetry) {
+    if (!mounted || _isDisposed) return;
+    _gamesSuperKey.currentState?.showEndOfGameDialog(onRestart: _restartGame);
+    return;
+  }
+
+// Se a palavra volta a ser apresentado, remove-a da fila de repetição
 // e adiciona-o à lista de palavras já utilizados
   _cancelTimers();
       setState(() {
@@ -206,13 +217,14 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     // Reproduz o som da palavra alvo
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 50));
+      if (!mounted || _isDisposed) return;
       await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
     });
 
   // Sincroniza temporizadores com o tempo de nível
     _startTime = DateTime.now();
     progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-      if (!mounted) return t.cancel();
+      if (!mounted || _isDisposed) return t.cancel();
       final elapsed = DateTime.now().difference(_startTime);
       final frac = elapsed.inMilliseconds / levelTime.inMilliseconds;
       setState(() {
@@ -222,7 +234,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     });
 
     roundTimer = Timer(levelTime, () {
-      if (!mounted) return;
+      if (!mounted || _isDisposed) return;
       setState(() => isRoundActive = false);
       _cancelTimers();
       _gamesSuperKey.currentState?.registerFailedRound(targetWord.text);
@@ -280,7 +292,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       isFirstCycle: isFirstCycle,
       topTextContent: _buildTopText,
       builder: _buildBoard,
-      onRepeatInstruction: _reproduzirInstrucao,
+      onRepeatInstruction: _playInstruction,
       introImagePath: 'assets/images/games/count_syllables.webp',
       introAudioPath: 'sounds/games/count_syllables.ogg',
       onIntroFinished: () async {

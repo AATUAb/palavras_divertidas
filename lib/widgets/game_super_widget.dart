@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:collection';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:math';
 import '../models/user_model.dart';
+import '../models/character_model.dart';
+import '../models/word_model.dart';
 import 'level_manager.dart';
 import 'game_item.dart';
 import 'conquest_manager.dart';
@@ -131,7 +134,28 @@ void initState() {
     await SoundManager.playGameItem(item);
   }
 
-   T safeRetry<T>({
+   T safeSelectItem<T>({
+    required List<T> availableItems,
+  }) {
+    if (availableItems.isEmpty) {
+      throw Exception('No items available');
+    }
+
+    final rand = Random();
+    final item = availableItems[rand.nextInt(availableItems.length)];
+
+    if (item is String) {
+      registerCompletedRound(item);
+    } else if (item is WordModel) {
+      registerCompletedRound(item.text);
+    } else if (item is CharacterModel) {
+      registerCompletedRound(item.character);
+    }
+
+    return item;
+  }
+
+    T safeRetry<T>({
     required List<T> list,
     required String retryId,
     required bool Function(T) matcher,
@@ -140,12 +164,28 @@ void initState() {
     try {
       final item = list.firstWhere(matcher);
       removeFromRetryQueue(retryId);
-      registerCompletedRound(retryId);
+
+      if (item is String) {
+        registerCompletedRound(item);
+      } else if (item is WordModel) {
+        registerCompletedRound(item.text);
+      } else if (item is CharacterModel) {
+        registerCompletedRound(item.character);
+      }
+
       return item;
     } catch (_) {
       removeFromRetryQueue(retryId);
       final fallbackItem = fallback();
-      registerCompletedRound(fallbackItem is String ? fallbackItem : retryId);
+
+      if (fallbackItem is String) {
+        registerCompletedRound(fallbackItem);
+      } else if (fallbackItem is WordModel) {
+        registerCompletedRound(fallbackItem.text);
+      } else if (fallbackItem is CharacterModel) {
+        registerCompletedRound(fallbackItem.character);
+      }
+
       return fallbackItem;
     }
   }
@@ -446,53 +486,82 @@ void initState() {
 
   
   // Jogos com uma única resposta correta. Verifica se a resposta está correta e atualiza o estado do item
-Future<void> checkAnswerSingle({
-  required GameItem selectedItem,
-  required String target,
-  required String retryId,
-  required int currentTry,
-  required Future<void> Function() applySettings,
-  required VoidCallback generateNewChallenge,
-  required VoidCallback cancelTimers,
-  required Future<void> Function() showExtraFeedback,
-}) async {
-  // 1) Determina se acertou
-  final isCorrect = selectedItem.content == target;
+  Future<void> checkAnswerSingle({
+    required GameItem selectedItem,
+    required String target,
+    required String retryId,
+    required int currentTry,
+    required Future<void> Function() applySettings,
+    required VoidCallback generateNewChallenge,
+    required VoidCallback cancelTimers,
+    required Future<void> Function() showExtraFeedback,
+  }) async {
+    // 1) Determina se acertou
+    final isCorrect = selectedItem.content == target;
 
-  // 2) Atualiza estado visual
-  setState(() {
-    selectedItem.isTapped = true;
-    selectedItem.isCorrect = isCorrect;
-  });
+    // 2) Atualiza estado visual
+    setState(() {
+      selectedItem.isTapped = true;
+      selectedItem.isCorrect = isCorrect;
+    });
 
-  // 4) Cancela timer e toca feedback
-  cancelTimers();
-  await playAnswerFeedback(isCorrect: isCorrect);
+    // 4) Cancela timer e toca feedback
+    cancelTimers();
+    await playAnswerFeedback(isCorrect: isCorrect);
 
-  // 5) Verifica se acertou à primeira tentativa
-  final bool firstTry = isCorrect;
+    // 5) Verifica se acertou à primeira tentativa
+    final bool firstTry = isCorrect;
 
-  // 6) Regista nível
-  final levelChanged =
-      await levelManager.registerRoundForLevel(correct: isCorrect);
-  await applySettings();
+    // 6) Regista nível
+    final levelChanged =
+        await levelManager.registerRoundForLevel(correct: isCorrect);
+    await applySettings();
 
-  // 7) Regista conquista (conta persistência ou firstTry)
-  final shouldConquer = await conquestManager.registerRoundForConquest(
-    context: context,
-    firstTry: firstTry,
-    user: widget.user,
-    applySettings: applySettings,
-  );
+    // 7) Regista conquista (conta persistência ou firstTry)
+    final shouldConquer = await conquestManager.registerRoundForConquest(
+      context: context,
+      firstTry: firstTry,
+      user: widget.user,
+      applySettings: applySettings,
+    );
 
-  // 8) Em caso de erro, regista retry, possivelmente mostra conquista e sai
-  if (!isCorrect) {
-    registerFailedRound(retryId);
+    // 8) Em caso de erro, regista retry, possivelmente mostra conquista e sai
+    if (!isCorrect) {
+      registerFailedRound(retryId);
 
-    // Se disparou conquista com esse erro, mostra feedback e termina
-    if (shouldConquer) {
-      await showConquestFeedback(onFinished: generateNewChallenge);
+      // Se disparou conquista com esse erro, mostra feedback e termina
+      if (shouldConquer) {
+        await showConquestFeedback(onFinished: generateNewChallenge);
+        return;
+      }
+
+      if (levelChanged) {
+        await showLevelChangeFeedback(
+          newLevel: levelManager.level,
+          increased: levelManager.levelIncreased,
+        );
+        setState(() => _visibleLevel = levelManager.level);
+      }
+
+      generateNewChallenge();
       return;
+    }
+
+    // 9) Em caso de sucesso
+    await showExtraFeedback();
+    await showSuccessFeedback();
+
+    // 10) Geração de próximo desafio após feedbacks de nível/conquista
+    Future<void> continueAfterFeedback() async {
+      if (!mounted) return;
+      await Future.delayed(const Duration(milliseconds: 300));
+      setState(() => _visibleLevel = levelManager.level);
+
+      if (shouldConquer) {
+        await showConquestFeedback(onFinished: generateNewChallenge);
+      } else {
+        generateNewChallenge();
+      }
     }
 
     if (levelChanged) {
@@ -500,38 +569,9 @@ Future<void> checkAnswerSingle({
         newLevel: levelManager.level,
         increased: levelManager.levelIncreased,
       );
-      setState(() => _visibleLevel = levelManager.level);
     }
-
-    generateNewChallenge();
-    return;
+    await continueAfterFeedback();
   }
-
-  // 9) Em caso de sucesso
-  await showExtraFeedback();
-  await showSuccessFeedback();
-
-  // 10) Geração de próximo desafio após feedbacks de nível/conquista
-  Future<void> continueAfterFeedback() async {
-    if (!mounted) return;
-    await Future.delayed(const Duration(milliseconds: 300));
-    setState(() => _visibleLevel = levelManager.level);
-
-    if (shouldConquer) {
-      await showConquestFeedback(onFinished: generateNewChallenge);
-    } else {
-      generateNewChallenge();
-    }
-  }
-
-  if (levelChanged) {
-    await showLevelChangeFeedback(
-      newLevel: levelManager.level,
-      increased: levelManager.levelIncreased,
-    );
-  }
-  await continueAfterFeedback();
-}
 
   
   // Se a resposta estiver errada, regista o item na fila de retry, sem repetição e gere a sua exibição

@@ -215,14 +215,9 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       return;
     }
 
-    final selected = retry != null
-        ? _gamesSuperKey.currentState!.safeRetry<String>(
-            list: _characters.map((e) => e.character).toList(),
-            retryId: retry,
-            matcher: (c) => c == retry,
-            fallback: () => availableCharacters[_random.nextInt(availableCharacters.length)],
-          )
-        : availableCharacters[_random.nextInt(availableCharacters.length)];
+    final selected = retry ?? _gamesSuperKey.currentState!.safeSelectItem<String>(
+      availableItems: availableCharacters,
+    );
 
     setState(() {
       targetCharacter = selected;
