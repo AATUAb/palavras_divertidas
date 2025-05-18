@@ -43,6 +43,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   late DateTime _startTime;
   double progress = 0.0;
   double progressValue = 1.0;
+  bool _isDisposed = false;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
   bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);
@@ -67,8 +68,10 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   // Fecha o player de áudio e cancela os temporizadores
   @override
   void dispose() {
-    _letterPlayer.dispose();
+    _isDisposed = true;
     _cancelTimers();
+    _letterPlayer.stop();
+    _letterPlayer.dispose();
     super.dispose();
   }
 
@@ -92,6 +95,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
         levelTime = const Duration(seconds: 20);
         break;
     }
+    if (!mounted || _isDisposed) return;
     setState(() {});
   }
 
@@ -103,7 +107,8 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   // Reproduz a instrução de áudio para o jogador
   late GameItem referenceItem;
-  Future<void> _reproduzirInstrucao() async {
+  Future<void> _playInstruction() async {
+     if (!mounted || _isDisposed) return;
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
@@ -143,16 +148,16 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 }
 
 // Gera as opções corretas, com base no caractere alvo
-List<String> _generateCorrectOptions({
-  required int count,
-  required String target,
-}) {
-  final rand = Random();
-  return List.generate(
-    count,
-    (_) => rand.nextBool() ? target.toUpperCase() : target.toLowerCase(),
-  );
-}
+  List<String> _generateCorrectOptions({
+    required int count,
+    required String target,
+  }) {
+    final rand = Random();
+    return List.generate(
+      count,
+      (_) => rand.nextBool() ? target.toUpperCase() : target.toLowerCase(),
+    );
+  }
 
   // Constrói um novo item de jogo, com base no caractere e na posição
   GameItem buildGameItem({
@@ -205,6 +210,7 @@ List<String> _generateCorrectOptions({
         .toList();
 
     if (_gamesSuperKey.currentState?.isEndOfGame(availableItems: availableCharacters) ?? false) {
+      if (!mounted || _isDisposed) return;
       _gamesSuperKey.currentState?.showEndOfGameDialog(onRestart: _restartGame);
       return;
     }
@@ -235,7 +241,6 @@ List<String> _generateCorrectOptions({
       foundCorrect = 0;
       currentTry = 0;
       progressValue = 1.0;
-      targetCharacter = targetCharacter;
         });
 
   // Gera lista de opções corretas e erradas e miustura
@@ -277,14 +282,14 @@ List<String> _generateCorrectOptions({
   // Reproduz o som do caractere alvo
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     await Future.delayed(const Duration(milliseconds: 50));
-    if (!mounted) return;
+    if (!mounted || _isDisposed) return;
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
         });
 
   // Sincroniza temporizadores com o tempo de nível
   _startTime = DateTime.now();
   progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-    if (!mounted) return t.cancel();
+    if (!mounted || _isDisposed) return t.cancel();
     final elapsed = DateTime.now().difference(_startTime);
     final fraction = elapsed.inMilliseconds / levelTime.inMilliseconds;
     setState(() {
@@ -294,10 +299,11 @@ List<String> _generateCorrectOptions({
   });
 
   roundTimer = Timer(levelTime, () {
-    if (!mounted) return;
+    if (!mounted || _isDisposed) return;
     setState(() => isRoundActive = false);
     _cancelTimers();
     _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
+    if (!mounted || _isDisposed) return;
     _gamesSuperKey.currentState?.showTimeout(
       applySettings: _applyLevelSettings,
       generateNewChallenge: _generateNewChallenge,
@@ -353,17 +359,17 @@ List<String> _generateCorrectOptions({
       isFirstCycle: isFirstCycle,
       topTextContent: _buildTopText,
       builder: _buildBoard,
-      onRepeatInstruction: _reproduzirInstrucao,
+      onRepeatInstruction: _playInstruction,
       introImagePath: 'assets/images/games/identify_letters_numbers.webp',
       introAudioPath: 'sounds/games/identify_letters_numbers.ogg',
       onIntroFinished: () async {
         await _loadCharacters();
         await _applyLevelSettings();
-        if (mounted) {
+        if (!mounted || _isDisposed) return;
           setState(() => hasChallengeStarted = true);
+          if (!mounted || _isDisposed) return;
           _generateNewChallenge();
-        }
-      },
+      },  
     );
   }
 
