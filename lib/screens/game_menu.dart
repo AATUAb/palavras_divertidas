@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/menu_design.dart';
@@ -35,6 +36,7 @@ class GameMenu extends StatefulWidget {
 
 class _GameMenuState extends State<GameMenu> {
   late ConquestManager conquestManager;
+  final AudioPlayer _conquestPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -47,23 +49,45 @@ class _GameMenuState extends State<GameMenu> {
   Future<void> _checkNewConquests() async {
     final newUnlocks = widget.user.conquest - widget.user.lastSeenConquests;
     if (newUnlocks > 0) {
+    // Seleciona o ficheiro de som consoante o número de desbloqueios
+    final soundFile = newUnlocks == 1
+        ? 'sounds/animations/one_conquest.ogg'
+        : 'sounds/animations/more_conquests.ogg';
+      await _conquestPlayer.play(AssetSource(soundFile), volume: 1.0);
       await showDialog(
         context: context,
         builder:
             (_) => AlertDialog(
               title: const Text('Parabéns! 🎉'),
               content: Text(
-                'Desbloqueaste $newUnlocks conquista${newUnlocks > 1 ? 's' : ''}!\n'
-                'Vai até à caderneta para saber quais.',
+                'Tens $newUnlocks conquista${newUnlocks > 1 ? 's' : ''} nova${newUnlocks > 1 ? 's' : ''}!\n'
+                'Entra na caderneta para a${newUnlocks > 1 ? 's' : ''} encontrar${newUnlocks > 1 ? 'es' : ''}.',
               ),
               actions: [
-                TextButton(
-                  onPressed: () async {
-                    widget.user.lastSeenConquests = widget.user.conquest;
-                    await widget.user.save();
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
+                Container(
+                  margin: const EdgeInsets.only(right: 12, bottom: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: TextButton.icon(
+                    onPressed: () async {
+                      widget.user.lastSeenConquests = widget.user.conquest;
+                      await widget.user.save();
+                      Navigator.of(context).pop();
+                      await Future.delayed(const Duration(milliseconds: 100));
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => StickerBookScreen(user: widget.user),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.check, color: Colors.white),
+                    label: const Text(
+                      'Ok',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ),
               ],
             ),
