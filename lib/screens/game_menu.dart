@@ -1,12 +1,16 @@
+// lib/screens/game_menu.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audioplayers/audioplayers.dart';
+
 import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/menu_design.dart';
 import '../games/identify_letters_numbers.dart';
 import '../games/writing_game.dart';
 import '../games/count_syllables.dart';
+import '../games/listen_look.dart'; // ← import atualizado para listen_look.dart
 import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
@@ -42,17 +46,17 @@ class _GameMenuState extends State<GameMenu> {
   void initState() {
     super.initState();
     conquestManager = ConquestManager();
-    resumeMenuMusic(); // Garante que a música toca ao voltar ao menu
+    resumeMenuMusic();
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkNewConquests());
   }
 
   Future<void> _checkNewConquests() async {
     final newUnlocks = widget.user.conquest - widget.user.lastSeenConquests;
     if (newUnlocks > 0) {
-    // Seleciona o ficheiro de som consoante o número de desbloqueios
-    final soundFile = newUnlocks == 1
-        ? 'sounds/animations/one_conquest.ogg'
-        : 'sounds/animations/more_conquests.ogg';
+      final soundFile =
+          newUnlocks == 1
+              ? 'sounds/animations/one_conquest.ogg'
+              : 'sounds/animations/more_conquests.ogg';
       await _conquestPlayer.play(AssetSource(soundFile), volume: 1.0);
       await showDialog(
         context: context,
@@ -119,7 +123,7 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Ouvir e procurar",
         icon: Icons.hearing,
-        onTap: () => _navigateToGame("Ouvir e procurar"),
+        onTap: _listenLook, // ← chama o novo jogo
         backgroundColor: AppColors.green,
       ),
     ];
@@ -268,6 +272,13 @@ class _GameMenuState extends State<GameMenu> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => CountSyllablesGame(user: widget.user)),
+    );
+  }
+
+  void _listenLook() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => ListenLookGame(user: widget.user)),
     );
   }
 
