@@ -343,76 +343,78 @@ final availableWords = _levelWords
               ),
     );
   }
-  // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart 
 
+  // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart 
   Widget _buildBoard(BuildContext context, _, __) {
   if (!hasChallengeStarted || _levelWords.isEmpty) {
     return const SizedBox();
   }
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(height: 30.h),
 
-  return Padding(
-    padding: EdgeInsets.symmetric(horizontal: 20.w),
-    child: Column(
-      children: [
-        SizedBox(height: 85.h),
-
-        // Palavra + imagem
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          // Palavra e imagem com flexibilidade
+          Flexible(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                WordHighlightBox(word: targetWord.text, user: widget.user),
-                SizedBox(width: 50.w),
-
-                // ** Aqui entra o cartão **
-                if (targetWord.imagePath.trim().isNotEmpty)
-                  ImageCardBox(
-                    imagePath: targetWord.imagePath,
-                  )
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        WordHighlightBox(word: targetWord.text, user: widget.user),
+                        SizedBox(width: 50.w),
+                        if (targetWord.imagePath.trim().isNotEmpty)
+                          ImageCardBox(imagePath: targetWord.imagePath),
+                      ],
+                    ),
+                    if (showSyllables)
+                      Positioned(
+                        top: 0,
+                        child: WordHighlightBox(
+                          word: targetWord.syllables.join(' - '),
+                          user: widget.user,
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
-            if (showSyllables)
-              Positioned(
-                top: 0,
-                child: WordHighlightBox(
-                  word: targetWord.syllables.join(' - '),
-                  user: widget.user,
-                ),
-              ),
-          ],
-        ),
-
-        const Spacer(),
-
-          // Botões de resposta, com base no FlexibleAnswerButton do game_component.dart
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children:
-                gamesItems.map((item) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w),
-                    child: GestureDetector(
-                      onTap: () => _handleTap(item),
-                      child:
-                          item.isTapped
-                              ? (item.isCorrect
-                                  ? _gamesSuperKey.currentState!.correctIcon
-                                  : _gamesSuperKey.currentState!.wrongIcon)
-                              : FlexibleAnswerButton(
-                                label: item.content,
-                                onTap: () => _handleTap(item),
-                                user: widget.user,
-                              ),
-                    ),
-                  );
-                }).toList(),
           ),
 
-          SizedBox(height: 30.h),
+      // Botões de resposta no fundo
+      Column(
+        children: [
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12.w,
+            runSpacing: 10.h,
+            children: gamesItems.map((item) {
+              return GestureDetector(
+                onTap: () => _handleTap(item),
+                child: item.isTapped
+                    ? (item.isCorrect
+                        ? _gamesSuperKey.currentState!.correctIcon
+                        : _gamesSuperKey.currentState!.wrongIcon)
+                    : FlexibleAnswerButton(
+                        label: item.content,
+                        onTap: () => _handleTap(item),
+                        user: widget.user,
+                      ),
+              );
+            }).toList(),
+          ),
+          SizedBox(height: 20.h),
         ],
       ),
-    );
+    ],
+  ),
+);
+
   }
 }
