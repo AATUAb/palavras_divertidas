@@ -13,6 +13,7 @@ import '../models/word_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
 import '../widgets/game_component.dart';
+import '../widgets/level_manager.dart';
 
 class ListenLookGame extends StatefulWidget {
   final UserModel user;
@@ -41,12 +42,14 @@ class _ListenLookGameState extends State<ListenLookGame> {
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
+  // Inicializa o estado do jogo
   @override
   void initState() {
     super.initState();
     _player = AudioPlayer();
   }
 
+  // Fecha o player e cancela os timers
   @override
   void dispose() {
     _isDisposed = true;
@@ -56,11 +59,13 @@ class _ListenLookGameState extends State<ListenLookGame> {
     super.dispose();
   }
 
+  // Carrega as palavras do Hive
   Future<void> _loadWords() async {
     final box = await Hive.openBox<WordModel>('words');
     _allWords = box.values.toList();
   }
 
+  // Aplica as configurações de nível
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
     switch (lvl) {
@@ -74,14 +79,18 @@ class _ListenLookGameState extends State<ListenLookGame> {
         levelTime = const Duration(seconds: 25);
     }
     final label = ['baixa', 'media', 'dificil'][lvl - 1];
+
+    // filtra e adiciona retry queue
     final filtered =
-        _allWords.where((w) {
-          final diff = (w.difficulty ?? '').toLowerCase().trim();
-          return diff == label &&
-              !_usedWords.contains(w.text) &&
-              (w.audioPath.isNotEmpty) &&
-              (w.imagePath.isNotEmpty);
-        }).toList();
+        _allWords
+            .where(
+              (w) =>
+                  w.difficulty.toLowerCase().trim() == label &&
+                  !_usedWords.contains(w.text) &&
+                  w.audioPath.isNotEmpty &&
+                  w.imagePath.isNotEmpty,
+            )
+            .toList();
 
     final retryIds = _gamesSuperKey.currentState?.retryQueueContents() ?? [];
     final retryWords =
@@ -95,14 +104,18 @@ class _ListenLookGameState extends State<ListenLookGame> {
     _progressTimer?.cancel();
   }
 
+  // Reproduz a instrução de áudio para o jogador
+  late GameItem referenceItem;
   Future<void> _playInstruction() async {
     if (!mounted || _isDisposed) return;
-    await _player.play(AssetSource(targetWord.audioPath));
+    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
+  // Gera um novo desafio
   Future<void> _generateNewChallenge() async {
     if (!mounted || _isDisposed) return;
 
+    // pick retry ou novo
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
     targetWord =
         retry != null
@@ -126,6 +139,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
       _usedWords.add(targetWord.text);
     }
 
+    // distrações
     final distractors =
         (_levelWords.where((w) => w.text != targetWord.text).toList()
               ..shuffle())
@@ -148,7 +162,12 @@ class _ListenLookGameState extends State<ListenLookGame> {
             .toList()
           ..shuffle();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _playInstruction());
+    // dispara o áudio logo depois do build
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (!mounted || _isDisposed) return;
+      await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+    });
 
     _cancelTimers();
     isRoundActive = true;
@@ -157,15 +176,11 @@ class _ListenLookGameState extends State<ListenLookGame> {
     _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
       if (!mounted || _isDisposed) return t.cancel();
       final elapsed = DateTime.now().difference(_startTime);
-      setState(
-        () =>
-            progressValue =
-                1.0 -
-                (elapsed.inMilliseconds / levelTime.inMilliseconds).clamp(
-                  0.0,
-                  1.0,
-                ),
-      );
+      setState(() {
+        progressValue =
+            1.0 -
+            (elapsed.inMilliseconds / levelTime.inMilliseconds).clamp(0.0, 1.0);
+      });
     });
     _roundTimer = Timer(levelTime, () {
       if (!mounted || _isDisposed) return;
@@ -197,6 +212,47 @@ class _ListenLookGameState extends State<ListenLookGame> {
     );
   }
 
+  Widget _buildTopText() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
+      child: Text(
+        hasChallengeStarted
+            ? 'Qual das imagens corresponde ao que ouviu?'
+            : 'Vamos ouvir a palavra e identificar a imagem correta.',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildBoard(BuildContext ctx, LevelManager lm, UserModel user) {
+    if (!hasChallengeStarted || gamesItems.isEmpty) {
+      return const SizedBox();
+    }
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 12.w,
+          runSpacing: 12.h,
+          children:
+              gamesItems.map((item) {
+                return GestureDetector(
+                  onTap: () => _handleTap(item),
+                  child:
+                      item.isTapped
+                          ? (item.isCorrect
+                              ? _gamesSuperKey.currentState!.correctIcon
+                              : _gamesSuperKey.currentState!.wrongIcon)
+                          : ImageCardBox(imagePath: item.content!),
+                );
+              }).toList(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GamesSuperWidget(
@@ -208,43 +264,13 @@ class _ListenLookGameState extends State<ListenLookGame> {
       currentRound: (_) => 1,
       totalRounds: (_) => 3,
       isFirstCycle: isFirstCycle,
-      topTextContent:
-          () => Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
-            child: Text(
-              hasChallengeStarted
-                  ? 'Qual das imagens corresponde ao que ouviu?'
-                  : 'Vamos ouvir a palavra e identificar a imagem correta.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
-      builder: (ctx, _, __) {
-        if (!hasChallengeStarted || gamesItems.isEmpty) return const SizedBox();
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 12.w,
-            runSpacing: 12.h,
-            children:
-                gamesItems.map((item) {
-                  return GestureDetector(
-                    onTap: () => _handleTap(item),
-                    child:
-                        item.isTapped
-                            ? (item.isCorrect
-                                ? _gamesSuperKey.currentState!.correctIcon
-                                : _gamesSuperKey.currentState!.wrongIcon)
-                            : ImageCardBox(imagePath: item.content!),
-                  );
-                }).toList(),
-          ),
-        );
-      },
+      topTextContent: _buildTopText,
+      builder: _buildBoard,
       onRepeatInstruction: _playInstruction,
-      introImagePath: 'assets/images/games/listening_search.webp',
-      introAudioPath: 'assets/sounds/games/listening_search_intro.ogg',
+
+      // **intro** idêntica aos outros jogos agora
+      introImagePath: 'assets/images/games/listen_look.webp',
+      introAudioPath: 'assets/sounds/games/listen_look.ogg',
       onIntroFinished: () async {
         await _loadWords();
         await _applyLevelSettings();

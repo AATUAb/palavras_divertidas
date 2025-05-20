@@ -26,7 +26,8 @@ class GamesSuperWidget extends StatefulWidget {
     BuildContext context,
     LevelManager levelManager,
     UserModel user,
-  ) builder;
+  )
+  builder;
   final VoidCallback? onRepeatInstruction;
   final String? introImagePath;
   final String? introAudioPath;
@@ -73,7 +74,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
 
   @override
-void initState() {
+  void initState() {
     super.initState();
 
     levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
@@ -114,15 +115,22 @@ void initState() {
 
   Future<void> _playIntroAndStartFade() async {
     final player = AudioPlayer();
-    await player.play(AssetSource(widget.introAudioPath!), volume: 1);
-    await player.onPlayerComplete.first;
+    try {
+      await player.play(AssetSource(widget.introAudioPath!), volume: 1);
+      await player.onPlayerComplete.first;
+    } catch (e) {
+      // No web user interaction yet – swallow the error and continue
+    }
 
     if (!mounted) return;
 
     _fadeController.forward();
-    await Future.delayed(_fadeController.duration ?? Duration(milliseconds: 500));
+    await Future.delayed(
+      _fadeController.duration ?? const Duration(milliseconds: 500),
+    );
 
     if (!mounted) return;
+
     setState(() {
       introCompleted = true;
     });
@@ -134,9 +142,7 @@ void initState() {
     await SoundManager.playGameItem(item);
   }
 
-   T safeSelectItem<T>({
-    required List<T> availableItems,
-  }) {
+  T safeSelectItem<T>({required List<T> availableItems}) {
     if (availableItems.isEmpty) {
       throw Exception('No items available');
     }
@@ -155,7 +161,7 @@ void initState() {
     return item;
   }
 
-    T safeRetry<T>({
+  T safeRetry<T>({
     required List<T> list,
     required String retryId,
     required bool Function(T) matcher,
@@ -192,33 +198,28 @@ void initState() {
 
   // Reincia o jogo e o seu progresso
   Future<void> restartGame() async {
-  // Reinicia o nível e progresso no LevelManager e grava em Hive
-  await levelManager.resetLevelToOne();
+    // Reinicia o nível e progresso no LevelManager e grava em Hive
+    await levelManager.resetLevelToOne();
 
-  // Reinicia o estado visual do SuperWidget
-  setState(() {
-    _visibleLevel = 1;
-    _retryQueue.clear();
-    _roundCounter = 0;
-  });
-}
-  
+    // Reinicia o estado visual do SuperWidget
+    setState(() {
+      _visibleLevel = 1;
+      _retryQueue.clear();
+      _roundCounter = 0;
+    });
+  }
+
   // Verifica se ainda existem itens disponíveis, para determinar se o jogo terminou
-  bool isEndOfGame<T>({
-    required List<T> availableItems,
-  }) {
+  bool isEndOfGame<T>({required List<T> availableItems}) {
     final retry = peekNextRetryTarget();
     return availableItems.isEmpty && retry == null;
   }
-
-
 
   @override
   void dispose() {
     _fadeController.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -260,12 +261,18 @@ void initState() {
               top: 100,
               left: 10,
               child: IconButton(
-                icon: Icon(Icons.play_circle_fill, color: Colors.red, size: 70.sp),
-                onPressed: widget.onRepeatInstruction ?? () async {
-                  if (_currentChallengeItem != null) {
-                    await SoundManager.playGameItem(_currentChallengeItem!);
-                  }
-                },
+                icon: Icon(
+                  Icons.play_circle_fill,
+                  color: Colors.red,
+                  size: 70.sp,
+                ),
+                onPressed:
+                    widget.onRepeatInstruction ??
+                    () async {
+                      if (_currentChallengeItem != null) {
+                        await SoundManager.playGameItem(_currentChallengeItem!);
+                      }
+                    },
               ),
             ),
         ],
@@ -284,26 +291,30 @@ void initState() {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: SizedBox(
-          width: 0.9.sw,
-          height: 0.6.sh,
-          child: GameAnimations.showSuccessAnimation(
-            onFinished: () {
-              if (mounted && Navigator.of(context).canPop()) {
-                Navigator.of(context, rootNavigator: true).maybePop();
-              }
-            },
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: SizedBox(
+              width: 0.9.sw,
+              height: 0.6.sh,
+              child: GameAnimations.showSuccessAnimation(
+                onFinished: () {
+                  if (mounted && Navigator.of(context).canPop()) {
+                    Navigator.of(context, rootNavigator: true).maybePop();
+                  }
+                },
+              ),
+            ),
           ),
-        ),
-      ),
     );
     await Future.delayed(const Duration(milliseconds: 100));
   }
 
   // Mostra o feedback de mudança de nível
-  Future<void> showLevelChangeFeedback({required int newLevel, required bool increased}) async {
+  Future<void> showLevelChangeFeedback({
+    required int newLevel,
+    required bool increased,
+  }) async {
     await GameAnimations.showLevelChangeDialog(
       context,
       level: newLevel,
@@ -329,30 +340,32 @@ void initState() {
   }
 
   // Mostra o aviso de tempo esgotado e gere a animação de nível se ocorrer em simultâneo
- void showTimeout({
-  required Future<void> Function() applySettings,
-  required VoidCallback generateNewChallenge,
-}) async {
-  final levelChanged = await levelManager.registerRoundForLevel(correct: false);
-  await applySettings();
-
-  if (!mounted) return;
-
-  if (levelChanged) {
-    await showLevelChangeFeedback(
-      newLevel: levelManager.level,
-      increased: levelManager.levelIncreased,
+  void showTimeout({
+    required Future<void> Function() applySettings,
+    required VoidCallback generateNewChallenge,
+  }) async {
+    final levelChanged = await levelManager.registerRoundForLevel(
+      correct: false,
     );
-    if (mounted) {
-      setState(() => _visibleLevel = levelManager.level);
-      generateNewChallenge();
+    await applySettings();
+
+    if (!mounted) return;
+
+    if (levelChanged) {
+      await showLevelChangeFeedback(
+        newLevel: levelManager.level,
+        increased: levelManager.levelIncreased,
+      );
+      if (mounted) {
+        setState(() => _visibleLevel = levelManager.level);
+        generateNewChallenge();
+      }
+    } else {
+      await GameAnimations.showTimeoutSnackbar(context);
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted) generateNewChallenge();
     }
-  } else {
-    await GameAnimations.showTimeoutSnackbar(context);
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) generateNewChallenge();
   }
-}
 
   // Processa a resposta correta e gere o feedback
   Future<void> processCorrectAnswer({
@@ -378,15 +391,17 @@ void initState() {
 
       final bool firstTry = currentTry == correctCount;
 
-      final levelChanged = await levelManager.registerRoundForLevel(correct: firstTry);
+      final levelChanged = await levelManager.registerRoundForLevel(
+        correct: firstTry,
+      );
       await applySettings();
 
       final shouldConquer = await conquestManager.registerRoundForConquest(
-  context: context,
-  firstTry: firstTry,
-  user: widget.user,
-  applySettings: applySettings,
-);
+        context: context,
+        firstTry: firstTry,
+        user: widget.user,
+        applySettings: applySettings,
+      );
 
       Future<void> continueAfterFeedback() async {
         if (!mounted) return;
@@ -401,6 +416,7 @@ void initState() {
           if (mounted) generateNewChallenge();
         }
       }
+
       if (levelChanged) {
         await showLevelChangeFeedback(
           newLevel: levelManager.level,
@@ -415,93 +431,95 @@ void initState() {
 
   // Jogos com várias respostas corretas. Verifica se a resposta está correta e atualiza o estado do item
   Future<void> checkAnswerMultiple({
-  required GameItem selectedItem,
-  required String target,
-  required String retryId,
-  required int correctCount,
-  required int currentTry,
-  required int foundCorrect,
-  required Future<void> Function() applySettings,
-  required VoidCallback generateNewChallenge,
-  required void Function(int) updateFoundCorrect,
-  required VoidCallback cancelTimers,
-  required VoidCallback markRoundFinished,
-}) async {
-  final isCorrect = selectedItem.content.toLowerCase() == target.toLowerCase();
+    required GameItem selectedItem,
+    required String target,
+    required String retryId,
+    required int correctCount,
+    required int currentTry,
+    required int foundCorrect,
+    required Future<void> Function() applySettings,
+    required VoidCallback generateNewChallenge,
+    required void Function(int) updateFoundCorrect,
+    required VoidCallback cancelTimers,
+    required VoidCallback markRoundFinished,
+  }) async {
+    final isCorrect =
+        selectedItem.content.toLowerCase() == target.toLowerCase();
 
-  //Marca o estado visual do item
-  setState(() {
-    selectedItem.isTapped = true;
-    selectedItem.isCorrect = isCorrect;
-  });
-
-  //Feedback sonoro/visual imediato
-  await playAnswerFeedback(isCorrect: isCorrect);
-
-  //Se errou, registra no retry e sai
-  if (!isCorrect) {
-    registerFailedRound(retryId);
-    return;
-  }
-
-  //Se acertou, incrementa o contador parcial
-  final newFoundCorrect = foundCorrect + 1;
-  updateFoundCorrect(newFoundCorrect);
-
-  // Se ainda não completou todas as respostas, espera próxima tentativa
-  if (newFoundCorrect < correctCount) {
-    return;
-  }
-
-  // Ronda completadoacom sucesso
-  cancelTimers();
-  markRoundFinished();
-
-  await showSuccessFeedback();
-  if (!mounted) return;
-
-  // Determina se foi "first try" (nenhum erro antes)
-  final bool firstTry = currentTry == correctCount;
-
-  // Regista nível
-  final levelChanged = await levelManager.registerRoundForLevel(correct: firstTry);
-  await applySettings();
-
-  // Regista conquista (inclui persistência via ConquestManager)
-  final shouldConquer = await conquestManager.registerRoundForConquest(
-    context: context,
-    firstTry: firstTry,
-    user: widget.user,
-    applySettings: applySettings,
-  );
-
-  // Callback para gerar próximo desafio após todos os feedbacks
-  Future<void> continueAfterFeedback() async {
-    if (!mounted) return;
-    await Future.delayed(const Duration(milliseconds: 300));
+    //Marca o estado visual do item
     setState(() {
-      _visibleLevel = levelManager.level;
+      selectedItem.isTapped = true;
+      selectedItem.isCorrect = isCorrect;
     });
-    if (shouldConquer) {
-      await showConquestFeedback(onFinished: generateNewChallenge);
-    } else {
-      generateNewChallenge();
+
+    //Feedback sonoro/visual imediato
+    await playAnswerFeedback(isCorrect: isCorrect);
+
+    //Se errou, registra no retry e sai
+    if (!isCorrect) {
+      registerFailedRound(retryId);
+      return;
     }
-  }
 
-  // Exibe a mudança de nível, caso hava
-  if (levelChanged) {
-    await showLevelChangeFeedback(
-      newLevel: levelManager.level,
-      increased: levelManager.levelIncreased,
+    //Se acertou, incrementa o contador parcial
+    final newFoundCorrect = foundCorrect + 1;
+    updateFoundCorrect(newFoundCorrect);
+
+    // Se ainda não completou todas as respostas, espera próxima tentativa
+    if (newFoundCorrect < correctCount) {
+      return;
+    }
+
+    // Ronda completadoacom sucesso
+    cancelTimers();
+    markRoundFinished();
+
+    await showSuccessFeedback();
+    if (!mounted) return;
+
+    // Determina se foi "first try" (nenhum erro antes)
+    final bool firstTry = currentTry == correctCount;
+
+    // Regista nível
+    final levelChanged = await levelManager.registerRoundForLevel(
+      correct: firstTry,
     );
+    await applySettings();
+
+    // Regista conquista (inclui persistência via ConquestManager)
+    final shouldConquer = await conquestManager.registerRoundForConquest(
+      context: context,
+      firstTry: firstTry,
+      user: widget.user,
+      applySettings: applySettings,
+    );
+
+    // Callback para gerar próximo desafio após todos os feedbacks
+    Future<void> continueAfterFeedback() async {
+      if (!mounted) return;
+      await Future.delayed(const Duration(milliseconds: 300));
+      setState(() {
+        _visibleLevel = levelManager.level;
+      });
+      if (shouldConquer) {
+        await showConquestFeedback(onFinished: generateNewChallenge);
+      } else {
+        generateNewChallenge();
+      }
+    }
+
+    // Exibe a mudança de nível, caso hava
+    if (levelChanged) {
+      await showLevelChangeFeedback(
+        newLevel: levelManager.level,
+        increased: levelManager.levelIncreased,
+      );
+    }
+
+    // Continua para o próximo desafio
+    await continueAfterFeedback();
   }
 
-  // Continua para o próximo desafio
-  await continueAfterFeedback();
-}
-
-  
   // Jogos com uma única resposta correta. Verifica se a resposta está correta e atualiza o estado do item
   Future<void> checkAnswerSingle({
     required GameItem selectedItem,
@@ -530,8 +548,9 @@ void initState() {
     final bool firstTry = isCorrect;
 
     // 6) Regista nível
-    final levelChanged =
-        await levelManager.registerRoundForLevel(correct: isCorrect);
+    final levelChanged = await levelManager.registerRoundForLevel(
+      correct: isCorrect,
+    );
     await applySettings();
 
     // 7) Regista conquista (conta persistência ou firstTry)
@@ -590,17 +609,16 @@ void initState() {
     await continueAfterFeedback();
   }
 
-  
   // Se a resposta estiver errada, regista o item na fila de retry, sem repetição e gere a sua exibição
   void registerFailedRound(String retryId) {
-  final alreadyExists = _retryQueue.any(
-    (entry) => entry.key.toLowerCase() == retryId.toLowerCase(),
-  );
-  if (!alreadyExists) {
-    _retryQueue.add(MapEntry(retryId, _roundCounter));
+    final alreadyExists = _retryQueue.any(
+      (entry) => entry.key.toLowerCase() == retryId.toLowerCase(),
+    );
+    if (!alreadyExists) {
+      _retryQueue.add(MapEntry(retryId, _roundCounter));
+    }
+    debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
   }
-  debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
-}
 
   // Se a fila de retry não estiver vazia, verifica se o item mais antigo pode ser usado
   String? peekNextRetryTarget() {
@@ -614,25 +632,26 @@ void initState() {
     return null;
   }
 
-
   // Se o item da fila retry for respondido de forma correta, remove-o
   void removeFromRetryQueue(String target) {
-    _retryQueue.removeWhere((entry) => entry.key.toLowerCase() == target.toLowerCase());
+    _retryQueue.removeWhere(
+      (entry) => entry.key.toLowerCase() == target.toLowerCase(),
+    );
     debugPrint('📋 Retry atual: ${_retryQueue.map((e) => e.key).toList()}');
   }
+
   List<String> retryQueueContents() {
     return _retryQueue.map((e) => e.key).toList();
   }
+
   bool canUseRetry() {
     return _roundCounter >= retryDelay;
   }
-
 
   // Regista a ronda concluída
   void registerCompletedRound(String retryId) {
     _roundCounter++;
   }
-  
 
   // Mostra o diálogo de fim de jogo
   void showEndOfGameDialog({required VoidCallback onRestart}) async {
@@ -641,87 +660,102 @@ void initState() {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        contentPadding: const EdgeInsets.all(20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-        content: SizedBox(
-          width: 400,
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Parabéns, chegaste ao fim do jogo!',
-                      style: getInstructionFont(
-                        isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      'Queres jogar novamente?',
-                      style: getInstructionFont(
-                        isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
-                      ).copyWith(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.blueAccent,
-                      ),
-                    ),
-                    SizedBox(height: 20.h),
-                    Row(
+      builder:
+          (context) => AlertDialog(
+            contentPadding: const EdgeInsets.all(20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.r),
+            ),
+            content: SizedBox(
+              width: 400,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: TextButton.icon(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              onRestart();
-                            },
-                            icon: const Icon(Icons.check, color: Colors.white),
-                            label: const Text('Sim', style: TextStyle(color: Colors.white)),
+                        Text(
+                          'Parabéns, chegaste ao fim do jogo!',
+                          style: getInstructionFont(
+                            isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
                           ),
                         ),
-                        SizedBox(width: 12.w),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(30),
+                        SizedBox(height: 12),
+                        Text(
+                          'Queres jogar novamente?',
+                          style: getInstructionFont(
+                            isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
+                          ).copyWith(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.blueAccent,
                           ),
-                          child: TextButton.icon(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Navigator.of(context).maybePop();
-                            },
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            label: const Text('Não', style: TextStyle(color: Colors.white)),
-                          ),
+                        ),
+                        SizedBox(height: 20.h),
+                        Row(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: TextButton.icon(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  onRestart();
+                                },
+                                icon: const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                ),
+                                label: const Text(
+                                  'Sim',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: TextButton.icon(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).maybePop();
+                                },
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                                label: const Text(
+                                  'Não',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(width: 20.w),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 150,
+                      maxHeight: 150,
+                    ),
+                    child: Image.asset(
+                      'assets/images/games/end_game.webp',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: 20.w),
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 150,
-                  maxHeight: 150,
-                ),
-                child: Image.asset(
-                  'assets/images/games/end_game.webp',
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
