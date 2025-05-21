@@ -33,7 +33,6 @@ class GamesSuperWidget extends StatefulWidget {
   final String? introAudioPath;
   final VoidCallback? onIntroFinished;
 
-
   const GamesSuperWidget({
     super.key,
     required this.user,
@@ -73,7 +72,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   Widget get correctIcon => GameAnimations.correctAnswerIcon();
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
 
-   late AnimationController _highlightController;
+  late AnimationController _highlightController;
   late Animation<double> _highlightOpacity;
   late Animation<double> _highlightScale;
 
@@ -94,7 +93,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    
+
     _rotationAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -109,8 +108,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       CurvedAnimation(parent: _highlightController, curve: Curves.easeOut),
     );
 
-
-   @override
+    @override
     void dispose() {
       _fadeController.dispose();
       _highlightController.dispose();
@@ -241,10 +239,10 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   }
 
   Future<void> playChallengeHighlight() async {
-  try {
-    await _highlightController.forward(from: 0);
-  } catch (_) {}
-}
+    try {
+      await _highlightController.forward(from: 0);
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -789,5 +787,4 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
           ),
     );
   }
-
 }

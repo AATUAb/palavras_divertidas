@@ -20,7 +20,7 @@ class UserStats extends StatelessWidget {
               'Identificar letras e números',
               'Escrever',
               'Contar sílabas',
-              'Ouvir e procurar',
+              'Ouvir e procurar', // acho que temos de mudar aqui o nome do jogo!!!!
               'Detetive de palavras',
               'Sílabas perdidas',
             ]
