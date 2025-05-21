@@ -12,7 +12,11 @@ import 'package:mundodaspalavras/games/writing_game/tracing/writing_page.dart';
 
 class WritingGame extends StatefulWidget {
   final UserModel user;
-  const WritingGame({super.key, required this.user});
+
+  // tire o 'const' daqui:
+  WritingGame({super.key, required this.user}) {
+    debugPrint('📦 WritingGame widget constructed with user=${user.name}');
+  }
 
   @override
   State<WritingGame> createState() => _WritingGameState();
@@ -30,31 +34,40 @@ class _WritingGameState extends State<WritingGame> {
   double progressValue = 1.0;
 
   String currentLetter = '';
-  String targetCharacter = ''; 
-  bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
+  String targetCharacter = '';
+  bool get isFirstCycle {
+    debugPrint('⚙️ isFirstCycle getter called → ${widget.user.schoolLevel == '1º Ciclo'}');
+    return widget.user.schoolLevel == '1º Ciclo';
+  }
 
   @override
   void initState() {
     super.initState();
+    debugPrint('🚀 initState called');
     _audioPlayer = AudioPlayer();
     _loadCharacters();
   }
 
   Future<void> _loadCharacters() async {
+    debugPrint('🔄 _loadCharacters start');
     final box = await Hive.openBox<CharacterModel>('characters');
     _characters = box.values.toList();
+    debugPrint('📥 Loaded ${_characters.length} characters from Hive');
     await _applyLevelSettings();
     _generateNextLetter();
   }
 
   @override
   void dispose() {
+    debugPrint('🧹 dispose called');
     _audioPlayer.dispose();
     super.dispose();
   }
 
   Future<void> _applyLevelSettings() async {
+    debugPrint('⚙️ _applyLevelSettings start');
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    debugPrint('   current level from LevelManager: $lvl');
     switch (lvl) {
       case 1:
         correctCount = 1;
@@ -66,62 +79,75 @@ class _WritingGameState extends State<WritingGame> {
         correctCount = 3;
         break;
     }
+    debugPrint('   correctCount set to $correctCount');
     setState(() {});
   }
 
   Future<void> _playInstruction() async {
-    await _audioPlayer.stop();
-    await _audioPlayer.release();
-    await _audioPlayer.play(
-      AssetSource('sounds/words_characters/${currentLetter.toUpperCase()}.ogg'),
-    );
+    debugPrint('🔊 _playInstruction start for letter="$currentLetter"');
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.release();
+      final assetPath = 'sounds/characters/${currentLetter.toUpperCase()}.ogg';
+      debugPrint('   🎵 Tocar asset: $assetPath');
+      await _audioPlayer.play(AssetSource(assetPath));
+    } catch (err) {
+      debugPrint('   ⚠️ Erro ao tocar áudio de $currentLetter: $err');
+    }
   }
 
   void _generateNextLetter() {
+    debugPrint('🔁 _generateNextLetter start (used so far: $_usedCharacters)');
     final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
     final availableChars = allChars.where((c) => !_usedCharacters.contains(c)).toList();
 
     if (availableChars.isEmpty) {
-      _gamesSuperKey.currentState?.showEndOfGameDialog(onRestart: _restartGame);
+      debugPrint('   🎉 Nenhum caracter disponível: fim do jogo');
+      _gamesSuperKey.currentState
+          ?.showEndOfGameDialog(onRestart: _restartGame);
       return;
     }
 
     final next = availableChars[_random.nextInt(availableChars.length)];
     _usedCharacters.add(next);
+    debugPrint('   Próxima letra: $next');
 
     setState(() {
       currentLetter = next;
+      targetCharacter = next;
     });
 
     _playInstruction();
   }
 
-void _restartGame() async {
-  // Reinicia o nível manualmente
-  _gamesSuperKey.currentState?.levelManager.level = 1;
-
-  // Reinicia o progresso interno
-  setState(() {
-    _usedCharacters.clear();
-    hasChallengeStarted = true;
-    progressValue = 1.0;
-  });
-
-  // Reaplica definições e inicia primeiro desafio
-  await _applyLevelSettings();
-  _generateNextLetter();
-}
+  void _restartGame() async {
+    debugPrint('🔄 _restartGame called');
+    _gamesSuperKey.currentState?.levelManager.level = 1;
+    setState(() {
+      _usedCharacters.clear();
+      hasChallengeStarted = true;
+      progressValue = 1.0;
+    });
+    debugPrint('   Estado reiniciado: usedCharacters cleared, hasChallengeStarted=true');
+    await _applyLevelSettings();
+    _generateNextLetter();
+  }
 
   Future<void> _handleTracingFinished(String char) async {
+    debugPrint('✅ _handleTracingFinished start for char="$char"');
     _gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
     final levelChanged = await _gamesSuperKey.currentState?.levelManager
         .registerRoundForLevel(correct: true);
-
+    debugPrint('   levelChanged? $levelChanged');
     await _applyLevelSettings();
 
-    if (!mounted) return;
+    if (!mounted) {
+      debugPrint('   Widget unmounted antes de continuar');
+      return;
+    }
 
     if (levelChanged == true) {
+      debugPrint('   Nível mudou, mostrando feedback');
       await _gamesSuperKey.currentState?.showLevelChangeFeedback(
         newLevel: _gamesSuperKey.currentState!.levelManager.level,
         increased: _gamesSuperKey.currentState!.levelManager.levelIncreased,
@@ -132,6 +158,7 @@ void _restartGame() async {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('🖼️ build() called: hasChallengeStarted=$hasChallengeStarted, currentLetter=$currentLetter');
     return GamesSuperWidget(
       key: _gamesSuperKey,
       user: widget.user,
@@ -148,7 +175,10 @@ void _restartGame() async {
       onIntroFinished: () async {
         await Future.delayed(const Duration(seconds: 2));
         if (mounted) {
-          setState(() => hasChallengeStarted = true);
+          setState(() {
+            hasChallengeStarted = true;
+            debugPrint('✅ hasChallengeStarted agora = $hasChallengeStarted');
+          });
           _playInstruction();
         }
       },
@@ -157,10 +187,13 @@ void _restartGame() async {
   }
 
   Widget _buildTopText() {
+    debugPrint('📝 _buildTopText called (hasChallengeStarted=$hasChallengeStarted)');
     return Padding(
       padding: EdgeInsets.only(top: 20.h),
       child: Text(
-        hasChallengeStarted ? 'Escreve a letra $currentLetter' : 'Vamos praticar a escrita!',
+        hasChallengeStarted
+            ? 'Escreve a letra $currentLetter'
+            : 'Vamos praticar a escrita!',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 24.sp,
@@ -172,7 +205,9 @@ void _restartGame() async {
   }
 
   Widget _buildBoard(BuildContext context, _, __) {
+    debugPrint('🔲 _buildBoard called (hasChallengeStarted=$hasChallengeStarted, currentLetter=$currentLetter)');
     if (!hasChallengeStarted || currentLetter.isEmpty) {
+      debugPrint('   Retornando SizedBox.shrink()');
       return const SizedBox.shrink();
     }
 
@@ -193,9 +228,16 @@ void _restartGame() async {
               ),
             ]),
           ],
-          onTracingUpdated: (_) async {},
-          onGameFinished: (_) async => _handleTracingFinished(currentLetter),
-          onCurrentTracingScreenFinished: (_) async {},
+          onTracingUpdated: (_) async {
+            debugPrint('✏️ onTracingUpdated callback');
+          },
+          onGameFinished: (_) async {
+            debugPrint('🏁 onGameFinished callback');
+            await _handleTracingFinished(currentLetter);
+          },
+          onCurrentTracingScreenFinished: (_) async {
+            debugPrint('➡️ onCurrentTracingScreenFinished callback');
+          },
         ),
       ),
     );

@@ -2,7 +2,7 @@
 
 class ShapePointsManger {
   static const base = 'assets/phontics_assets_points';
-  static const ptBase = '$base/pt_phontics';
+  static const ptBase = '$base/pt_phonetics';
   static const ptUpperBase = '$base/pt_upper_phonetics';
   static const nLowerShape = '$ptBase/n_lower_PointsInfo.json';
   static const nUpperShape = '$ptBase/N_PointsInfo.json';

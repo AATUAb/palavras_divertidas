@@ -69,7 +69,7 @@ flutter:
     - assets/phontics_assets_points/
 
     # Jogo 2 
-    - assets/phontics_assets_points/pt_phontics/
+    - assets/phontics_assets_points/pt_phonetics/
     - assets/phontics_assets_points/pt_upper_phonetics/
     - assets/phontics_assets_points/numbers_phontics/
     
