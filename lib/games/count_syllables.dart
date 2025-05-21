@@ -112,8 +112,11 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
+ 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
+    _gamesSuperKey.currentState?.playChallengeHighlight();
+
     // Verifica se há retry a usar
    if (!mounted || _isDisposed) return;
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();

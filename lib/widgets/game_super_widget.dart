@@ -33,6 +33,7 @@ class GamesSuperWidget extends StatefulWidget {
   final String? introAudioPath;
   final VoidCallback? onIntroFinished;
 
+
   const GamesSuperWidget({
     super.key,
     required this.user,
@@ -55,14 +56,13 @@ class GamesSuperWidget extends StatefulWidget {
 }
 
 class GamesSuperWidgetState extends State<GamesSuperWidget>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late LevelManager levelManager;
   int _visibleLevel = 1;
   late ConquestManager conquestManager;
   final Queue<MapEntry<String, int>> _retryQueue = Queue();
   int _roundCounter = 0;
   final int retryDelay = 3;
-  //bool introPlayed = false;
   bool introCompleted = false;
   late AnimationController _fadeController;
   late Animation<double> _rotationAnimation;
@@ -73,6 +73,10 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   Widget get correctIcon => GameAnimations.correctAnswerIcon();
   Widget get wrongIcon => GameAnimations.wrongAnswerIcon();
 
+   late AnimationController _highlightController;
+  late Animation<double> _highlightOpacity;
+  late Animation<double> _highlightScale;
+
   @override
   void initState() {
     super.initState();
@@ -80,15 +84,38 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
     conquestManager = ConquestManager();
 
+    // animação para a imagem incial de jogo
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
 
+    _highlightController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    
     _rotationAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+
+    // animação para cada desafio novo
+    _highlightOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _highlightController, curve: Curves.easeOut),
+    );
+
+    _highlightScale = Tween<double>(begin: 1.5, end: 1.0).animate(
+      CurvedAnimation(parent: _highlightController, curve: Curves.easeOut),
+    );
+
+
+   @override
+    void dispose() {
+      _fadeController.dispose();
+      _highlightController.dispose();
+      super.dispose();
+    }
 
     // Carrega o nível de cada jogo
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -96,6 +123,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     });
   }
 
+  // Inicializa o nível e a introdução do jogo
   Future<void> _initializeLevelAndIntro() async {
     await levelManager.loadLevel();
     setState(() {
@@ -198,10 +226,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
 
   // Reincia o jogo e o seu progresso
   Future<void> restartGame() async {
-    // Reinicia o nível e progresso no LevelManager e grava em Hive
     await levelManager.resetLevelToOne();
-
-    // Reinicia o estado visual do SuperWidget
     setState(() {
       _visibleLevel = 1;
       _retryQueue.clear();
@@ -215,11 +240,11 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     return availableItems.isEmpty && retry == null;
   }
 
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
-  }
+  Future<void> playChallengeHighlight() async {
+  try {
+    await _highlightController.forward(from: 0);
+  } catch (_) {}
+}
 
   @override
   Widget build(BuildContext context) {
@@ -255,7 +280,13 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
               ),
             )
           else
-            widget.builder(context, levelManager, widget.user),
+            FadeTransition(
+              opacity: _highlightOpacity,
+              child: ScaleTransition(
+                scale: _highlightScale,
+                child: widget.builder(context, levelManager, widget.user),
+              ),
+            ),
           if (introCompleted)
             Positioned(
               top: 100,
@@ -759,16 +790,4 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     );
   }
 
-  /*// Mostra a notificação de conquista - ainda não está a funcionar
-  void showConquestNotification() {
-    if (conquestManager.hasNewConquest) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Nova conquista desbloqueada!"),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
-        ),
-      );
-    }
-  }*/
 }

@@ -128,7 +128,7 @@ class ConquestManager {
       user.persistenceCountTotal++;
     }
 
-    if (firstTry && streakFirstTry >= 1) {
+    if (firstTry && streakFirstTry >= 5) {
       conquest++;
       hasNewConquest = true;
     }

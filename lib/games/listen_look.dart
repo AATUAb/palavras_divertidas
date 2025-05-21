@@ -111,6 +111,8 @@ class _ListenLookGameState extends State<ListenLookGame> {
 
   /// 2) Gera um novo desafio
   Future<void> _generateNewChallenge() async {
+    _gamesSuperKey.currentState?.playChallengeHighlight();   // Novo para dar efeito especial a iniciar um desafio
+
     if (!mounted || _isDisposed) return;
 
     // 2.1) escolhe retry ou novo

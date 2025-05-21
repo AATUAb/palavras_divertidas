@@ -184,6 +184,8 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
+  _gamesSuperKey.currentState?.playChallengeHighlight();
+
   if (!mounted || _isDisposed) return;
 
   final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
