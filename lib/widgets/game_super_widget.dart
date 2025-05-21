@@ -108,18 +108,19 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       CurvedAnimation(parent: _highlightController, curve: Curves.easeOut),
     );
 
-    @override
-    void dispose() {
-      _fadeController.dispose();
-      _highlightController.dispose();
-      super.dispose();
-    }
 
     // Carrega o nível de cada jogo
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeLevelAndIntro();
     });
   }
+
+   @override
+    void dispose() {
+      _fadeController.dispose();
+      _highlightController.dispose();
+      super.dispose();
+    }
 
   // Inicializa o nível e a introdução do jogo
   Future<void> _initializeLevelAndIntro() async {

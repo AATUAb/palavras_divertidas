@@ -20,7 +20,7 @@ class UserStats extends StatelessWidget {
               'Identificar letras e números',
               'Escrever',
               'Contar sílabas',
-              'Ouvir e procurar', // acho que temos de mudar aqui o nome do jogo!!!!
+              'Ouvir e Procurar Imagem',
               'Detetive de palavras',
               'Sílabas perdidas',
             ]
@@ -28,14 +28,14 @@ class UserStats extends StatelessWidget {
               'Identificar letras e números',
               'Escrever',
               'Contar sílabas',
-              'Ouvir e procurar',
+              'Ouvir e Procurar Imagem',
             ];
 
     final gameIcons = <String, IconData>{
       'Identificar letras e números': Icons.search,
       'Escrever': Icons.edit,
       'Contar sílabas': Icons.format_list_numbered,
-      'Ouvir e procurar': Icons.hearing,
+      'Ouvir e Procurar Imagem': Icons.hearing,
       'Detetive de palavras': Icons.find_in_page,
       'Sílabas perdidas': Icons.extension,
     };
