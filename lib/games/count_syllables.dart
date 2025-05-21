@@ -246,7 +246,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     if (s == null) return;
 
     setState(() {
-      currentTry++;
+      //currentTry++;
       item.isTapped = true;
     });
 

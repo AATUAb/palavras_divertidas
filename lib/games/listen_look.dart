@@ -81,13 +81,10 @@ class _ListenLookGameState extends State<ListenLookGame> {
     }
 
     // Garante que palavras da fila de retry continuam acessíveis
-    final filtered =
-        _allWords.where((w) {
+    final filtered = _allWords.where((w) {
           final diff = (w.difficulty).trim().toLowerCase();
           return diff == levelDifficulty &&
-              !_usedWords.contains(
-                w.text,
-              ) && // ← evita repetir palavras já usadas
+              ! _usedWords.contains(w.text) && // ← evita repetir palavras já usadas
               (w.audioPath).trim().isNotEmpty &&
               (w.imagePath).trim().isNotEmpty;
         }).toList();
@@ -162,25 +159,18 @@ class _ListenLookGameState extends State<ListenLookGame> {
             .take(2)
             .toList();
 
-    pathByText = <String, String>{
-      for (final w in [targetWord, ...distractors]) w.text: w.imagePath,
-    };
     // monta 3 GameItem de tipo image
-    gamesItems =
-        [targetWord, ...distractors]
-            .map(
-              (w) => GameItem(
-                id: w.text,
-                type: GameItemType.image,
-                content: w.text, // caminho da imagem
-                dx: 0,
-                dy: 0,
-                backgroundColor: Colors.transparent,
-                isCorrect: w.text == targetWord.text,
-              ),
-            )
-            .toList()
-          ..shuffle();
+    gamesItems = [targetWord, ...distractors]
+      .map((w) => GameItem(
+        id: w.text,
+        type: GameItemType.image,
+        content: w.imagePath,       
+        dx: 0, dy: 0,
+        backgroundColor: Colors.transparent,
+        isCorrect: w.text == targetWord.text,
+      ))
+      .toList()
+    ..shuffle();
 
     // 2.4) Toca o áudio logo após o build
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -226,13 +216,12 @@ class _ListenLookGameState extends State<ListenLookGame> {
     if (s == null) return;
 
     setState(() {
-      currentTry++;
       item.isTapped = true;
     });
 
     await s.checkAnswerSingle(
       selectedItem: item,
-      target: targetWord.text,
+      target: targetWord.imagePath,
       retryId: targetWord.text,
       currentTry: currentTry,
       applySettings: _applyLevelSettings,
@@ -299,41 +288,67 @@ class _ListenLookGameState extends State<ListenLookGame> {
     );
   }
 
-  Widget _buildBoard(BuildContext ctx, _, __) {
-    if (!hasChallengeStarted || gamesItems.isEmpty) return const SizedBox();
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 50.w,
-          runSpacing: 50.h,
-          children:
-              gamesItems.map((item) {
-                return GestureDetector(
-                  onTap: () => _handleTap(item),
-                  child: SizedBox(
-                    // aqui use as mesmas dimensões do ImageCardBox
-                    width: 160.w,
-                    height: 100.h,
-                    child:
-                        item.isTapped
-                            // se já foi tocado, mostra só o ícone, sem o quadrado verde
-                            ? Center(
-                              child:
-                                  item.isCorrect
-                                      ? _gamesSuperKey.currentState!.correctIcon
-                                      : _gamesSuperKey.currentState!.wrongIcon,
-                            )
-                            // senão, mostra o card normal com a imagem
-                            : ImageCardBox(
-                              imagePath: pathByText[item.content]!,
-                            ),
+    // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart
+  Widget _buildBoard(BuildContext context, _, __) {
+    if (!hasChallengeStarted || gamesItems.isEmpty) {
+      return const SizedBox();
+    }
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(height: 30.h),
+
+          // Área central com imagens e palavra sobreposta, quando correto
+          Flexible(
+            child: Center(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Linha com 3 imagens
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: gamesItems.map((item) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => _handleTap(item),
+                          child: item.isTapped
+                              ? SizedBox(
+                                  width: 160.w,
+                                  height: 100.h,
+                                  child: Center(
+                                    child: item.isCorrect
+                                        ? _gamesSuperKey.currentState!.correctIcon
+                                        : _gamesSuperKey.currentState!.wrongIcon,
+                                  ),
+                                )
+                              : ImageCardBox(imagePath: item.content),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
+
+                  // Palavra escrita, quando correta
+                   if (showWord)
+                    Positioned(
+                            top: 0,
+                            child: WordHighlightBox(
+                        word: targetWord.text,
+                        user: widget.user,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            SizedBox(height: 20.h),
+          ],
         ),
-      ),
-    );
+      );
+    }
   }
-}

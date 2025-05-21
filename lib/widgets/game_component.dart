@@ -19,28 +19,30 @@ class WordHighlightBox extends StatelessWidget {
     final isFirstCycle = user.schoolLevel == '1º Ciclo';
     final fontSize = isFirstCycle ? 26.sp : 22.sp;
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-      decoration: BoxDecoration(
-        color: Colors.green,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4.r,
-            offset: Offset(2, 2),
+    return IntrinsicWidth(      // <<<<<< aqui
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.green,
+          borderRadius: BorderRadius.circular(20.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4.r,
+              offset: Offset(2, 2),
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          word,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontFamily: isFirstCycle ? 'Cursive' : null,
           ),
-        ],
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        word,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          fontFamily: isFirstCycle ? 'Cursive' : null,
         ),
       ),
     );
