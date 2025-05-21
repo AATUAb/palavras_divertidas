@@ -1,11 +1,16 @@
+// lib/screens/game_menu.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:audioplayers/audioplayers.dart';
+
 import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/menu_design.dart';
 import '../games/identify_letters_numbers.dart';
 import '../games/writing_game.dart';
 import '../games/count_syllables.dart';
+import '../games/listen_look.dart';
 import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
@@ -35,15 +40,70 @@ class GameMenu extends StatefulWidget {
 
 class _GameMenuState extends State<GameMenu> {
   late ConquestManager conquestManager;
+  final AudioPlayer _conquestPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
     conquestManager = ConquestManager();
-    //checkForNewConquests();
-    resumeMenuMusic(); // Garante que a música toca ao voltar ao menu
+    resumeMenuMusic();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkNewConquests());
   }
 
+  // Verifica se há conquistas novas. Se sim mostra um diálogo com a conquista
+  Future<void> _checkNewConquests() async {
+    final newUnlocks = widget.user.conquest - widget.user.lastSeenConquests;
+    if (newUnlocks > 0) {
+      await pauseMenuMusic();
+      final soundFile = newUnlocks == 1
+              ? 'sounds/animations/one_conquest.ogg'
+              : 'sounds/animations/more_conquests.ogg';
+      await _conquestPlayer.play(AssetSource(soundFile), volume: 1.0);
+      await showDialog(
+        context: context,
+        builder:
+            (_) => AlertDialog(
+              title: const Text('Parabéns! 🎉'),
+              content: Text(
+                'Tens $newUnlocks conquista${newUnlocks > 1 ? 's' : ''} nova${newUnlocks > 1 ? 's' : ''}!\n'
+                'Entra na caderneta para a${newUnlocks > 1 ? 's' : ''} encontrar${newUnlocks > 1 ? 'es' : ''}.',
+              ),
+              actions: [
+                Container(
+                  margin: const EdgeInsets.only(right: 12, bottom: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: TextButton.icon(
+                    onPressed: () async {
+                      await pauseMenuMusic();
+                      widget.user.lastSeenConquests = widget.user.conquest;
+                      await widget.user.save();
+                      Navigator.of(context).pop();
+                      await Future.delayed(const Duration(milliseconds: 100));
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => StickerBookScreen(user: widget.user),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.check, color: Colors.white),
+                    label: const Text(
+                      'Ok',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+      );
+    }
+    await resumeMenuMusic();
+  }
+
+
+  // Jogos principais disponíveis para todos os ciclos
   @override
   Widget build(BuildContext context) {
     final List<GameCardData> jogosBase = [
@@ -62,17 +122,18 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Contar sílabas",
         icon: Icons.format_list_numbered,
-        onTap: () =>  _countSyllablesGame(),
+        onTap: _countSyllablesGame,
         backgroundColor: AppColors.yellow,
       ),
       GameCardData(
         title: "Ouvir e procurar",
         icon: Icons.hearing,
-        onTap: () => _navigateToGame("Ouvir e procurar"),
+        onTap: _listenLook,
         backgroundColor: AppColors.green,
       ),
     ];
 
+    // Jogos extras disponíveis apenas para o 1º ciclo
     final List<GameCardData> jogosExtras = [
       GameCardData(
         title: "Detetive de palavras",
@@ -88,15 +149,17 @@ class _GameMenuState extends State<GameMenu> {
       ),
     ];
 
-    final List<GameCardData> jogosDisponiveis =
+    final jogosDisponiveis =
         widget.user.schoolLevel == "1º Ciclo"
             ? [...jogosBase, ...jogosExtras]
             : jogosBase;
 
+    // Menu principal de escolha de jogos
     return Scaffold(
       body: MenuDesign(
         titleText: "Mundo das Palavras",
         headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
+        pauseIntroMusic: true,
         showHomeButton: true,
         onHomePressed: () {
           Navigator.pushReplacement(
@@ -106,6 +169,7 @@ class _GameMenuState extends State<GameMenu> {
             ),
           );
         },
+        // Barra lateral com ícones de conquistas e estatísticas
         topLeftWidget: Padding(
           padding: EdgeInsets.only(top: 170.h),
           child: Column(
@@ -197,30 +261,37 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
+  // Abre o jogo de identificação de letras e números
   void _identifyLettersNumbers() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (_) => IdentifyLettersNumbers(user: widget.user),
-      ), // MaterialPageRoute
-    );
-  }
-
-    void _writingGame() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => WritingGame(user: widget.user),
       ),
     );
   }
 
-  void   _countSyllablesGame() {
+  // Abre o jogo de escrita
+  void _writingGame() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => CountSyllablesGame(user: widget.user),
-      ),
+      MaterialPageRoute(builder: (_) => WritingGame(user: widget.user)),
+    );
+  }
+
+  // Abre o jogo de contar sílabas
+  void _countSyllablesGame() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => CountSyllablesGame(user: widget.user)),
+    );
+  }
+
+  // Abre o jogo de ouvir e procurar imagens
+  void _listenLook() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => ListenLookGame(user: widget.user)),
     );
   }
 

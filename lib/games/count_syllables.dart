@@ -1,10 +1,8 @@
 // Estrutura do jogo "Contar Sílabas"
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../models/user_model.dart';
 import '../models/word_model.dart';
 import '../widgets/game_item.dart';
@@ -23,54 +21,44 @@ class CountSyllablesGame extends StatefulWidget {
 // Classe que controla o estado do jogo
 class _CountSyllablesGame extends State<CountSyllablesGame> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
-  final _random = Random();
-  late final AudioPlayer _wordPlayer;
   bool hasChallengeStarted = false;
-  //late int currentLevel;
   late Duration levelTime;
   late int currentTry;
   late int foundCorrect;
 
-  List<WordModel> _words = [];
+  List<WordModel> _allWords = [];
+  List<WordModel> _levelWords = [];
   List<String> _usedWords = [];
   late WordModel targetWord;
   bool showSyllables = false;
 
   bool isRoundActive = true;
-  bool isRoundFinished = false;
   List<GameItem> gamesItems = [];
   Timer? roundTimer, progressTimer;
-  double progress = 0.0;
+  late DateTime _startTime;
   double progressValue = 1.0;
+  bool _isDisposed = false;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
-
-  String? _fontForGameItem({bool isTargetWord = false}) {
-    if (isFirstCycle) {
-      return isTargetWord ? 'Cursive' : null;
-    }
-    return null;
-  }
 
   // Inicializa o estado do jogo
   @override
   void initState() {
     super.initState();
-    _wordPlayer = AudioPlayer();
+  }
+
+  // Fecha o player de áudio e cancela os temporizadores
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _cancelTimers();
+    super.dispose();
   }
 
   // Carrega as palavras do banco de dados Hive
   Future<void> _loadWords() async {
     final box = await Hive.openBox<WordModel>('words');
-    _words = box.values.toList();
-  }
-
-  //  Fecha o player de áudio e cancela os temporizadores
-  @override
-  void dispose() {
-    _wordPlayer.dispose();
-    _cancelTimers();
-    super.dispose();
+    _allWords = box.values.toList();
   }
 
   // Aplica as definições de nível com base no nível atual do jogador
@@ -80,32 +68,36 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     switch (lvl) {
       case 1:
         levelTime = const Duration(seconds: 15);
-        levelDifficulty ='baixa';
+        levelDifficulty = 'baixa';
         break;
       case 2:
         levelTime = const Duration(seconds: 20);
         levelDifficulty = 'media';
         break;
-      case 3:
+      default:
         levelTime = const Duration(seconds: 25);
         levelDifficulty = 'dificil';
-        break;
     }
-    final filteredWords = _words
-      .where((w) =>
-          (w.difficulty ?? '').trim().toLowerCase() == levelDifficulty &&
-          (w.audioPath ?? '').trim().isNotEmpty &&
-          (w.imagePath ?? '').trim().isNotEmpty)
-      .toList();
 
-  if (filteredWords.isEmpty) {
-    debugPrint('⚠️ Sem palavras disponíveis para o nível "$levelDifficulty".');
-    return;
+  // Garante que palavras da fila de retry continuam acessíveis
+  final filtered = _allWords.where((w) {
+  final diff = (w.difficulty ?? '').trim().toLowerCase();
+  return diff == levelDifficulty &&
+         !_usedWords.contains(w.text) && // ← evita repetir palavras já usadas
+         (w.audioPath ?? '').trim().isNotEmpty &&
+         (w.imagePath ?? '').trim().isNotEmpty;
+}).toList();
+
+    // Garante que palavras da fila de retry continuam acessíveis
+    final retryIds = _gamesSuperKey.currentState?.retryQueueContents() ?? [];
+    final retryWords = _allWords.where((w) => retryIds.contains(w.text)).toList();
+
+    // Junta os dois, evitando duplicações
+    _levelWords = {
+      ...filtered,
+      ...retryWords,
+    }.toList();
   }
-  setState(() {
-    _words = filteredWords;
-  });
-}
 
   // Cancela os temporizadores ativos
   void _cancelTimers() {
@@ -114,104 +106,95 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   }
 
   // Reproduz a instrução de áudio para o jogador
-  Future<void> _reproduzirInstrucao() async {
-    final file = 'sounds/words_characters/${targetWord.audioFileName ?? targetWord.text}.ogg';
-    try {
-      await _wordPlayer.stop();
-      await _wordPlayer.release();
-      await _wordPlayer.play(AssetSource(file));
-    } catch (e) {
-      debugPrint('❌ Erro ao reproduzir som: $file — $e');
-    }
+  late GameItem referenceItem;
+  Future<void> _playInstruction() async {
+    if (!mounted || _isDisposed) return;
+    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
-  // Função que controla o comportamento do jogo quando o jogador termina o jogo e que reinicar o mesmo jogo
-  void _restartGame() async {
-  // Reinicia o nível manualmente
-  _gamesSuperKey.currentState?.levelManager.level = 1;
-  // Reinicia o progresso interno
-  setState(() {
-    _usedWords.clear();
-    hasChallengeStarted = true;
-    progressValue = 1.0;
-  });
-  // Reaplica definições e inicia primeiro desafio
-  await _applyLevelSettings();
-  _generateNewChallenge();
-}
-
-  // Verifica se o caractere já foi utilizado na ronda atual, para controlar a repetição
-  bool retryIsUsed(String value) => _usedWords.contains(value);
-
+ 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
+    _gamesSuperKey.currentState?.playChallengeHighlight();
+
+    // Verifica se há retry a usar
+   if (!mounted || _isDisposed) return;
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
-    if (retry != null) debugPrint('🔁 Apresentado item da retry queue: $retry');
 
-      // Lista de palabvras disponíveis para o nível atual
-    final availableWords = _words.where((w) =>
-        !_usedWords.contains(w.text) &&
-        w.audioPath.trim().isNotEmpty &&
-        w.imagePath.trim().isNotEmpty).toList();
+    targetWord = retry != null
+      ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
+          list: _levelWords,
+          retryId: retry,
+          matcher: (w) => w.text == retry,
+          fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
+            availableItems: _levelWords.where((w) => !_usedWords.contains(w.text)).toList(),
 
-    if (availableWords.isEmpty && retry == null) {
-      _gamesSuperKey.currentState?.showEndOfGameDialog(
-        onRestart: _restartGame,
-      );
-      return;
+          ),
+        )
+      : _gamesSuperKey.currentState!.safeSelectItem(
+          availableItems: _levelWords,
+        );
+
+    final wordText = targetWord!.text;
+    if (!_usedWords.contains(wordText)) {
+      _usedWords.add(wordText);
     }
 
-    // Seleciona a palavra-alvo aleatoriamente ou da fila de repetição
-  final targetText = retry ?? availableWords[_random.nextInt(availableWords.length)].text;
-targetWord = availableWords.firstWhere(
-  (w) => w.text == targetText,
-  orElse: () => availableWords[_random.nextInt(availableWords.length)],
-);
-  // Se a palavra volta a ser apresentado, remove-o da fila de repetição
-  // e adiciona-o à lista de palavras já utilizados
-  _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord.text);
-    _cancelTimers();
-    setState(() {
-      isRoundActive = true;
-      gamesItems.clear();
-      foundCorrect = 0;
-      currentTry = 0;
-      progressValue = 1.0;
-  });
+final availableWords = _levelWords
+    .where((w) => !_usedWords.contains(w.text))
+    .map((w) => w.text)
+    .toList();
 
-    // Geração das opções de resposta
+  final hasRetry = _gamesSuperKey.currentState?.peekNextRetryTarget() != null;
+
+  if (availableWords.isEmpty && !hasRetry) {
+    if (!mounted || _isDisposed) return;
+    _gamesSuperKey.currentState?.showEndOfGameDialog(
+      onRestart: () async {
+        await _gamesSuperKey.currentState?.restartGame();
+        await _applyLevelSettings();
+        if (mounted) _generateNewChallenge();
+      },
+    );
+    return;
+  }
+
+// Se a palavra volta a ser apresentado, remove-a da fila de repetição
+// e adiciona-o à lista de palavras já utilizados
+  _cancelTimers();
+      setState(() {
+        isRoundActive = true;
+        gamesItems.clear();
+        currentTry = 0;
+        foundCorrect = 0;
+        progressValue = 1.0;
+      });
+
+    // Gera as opções de resposta multiplas
     final correct = targetWord.syllableCount;
-    final options = correct == 1
-        ? ['1', '2', '3']
-        : [correct - 1, correct, correct + 1]
-            .map((e) => e.toString())
-            .toList()
+    final options =
+        correct == 1
+              ? ['1', '2', '3']
+              : [
+                correct - 1,
+                correct,
+                correct + 1,
+              ].map((e) => e.toString()).toList()
           ..shuffle();
 
-    // Gera GameItems com as respostas
-    final generatedItems = List<GameItem>.generate(options.length, (i) {
+    gamesItems = List.generate(options.length, (i) {
       return GameItem(
         id: '$i',
         type: GameItemType.number,
         content: options[i],
         dx: 0,
         dy: 0,
-        fontFamily: '',
         backgroundColor: Colors.transparent,
         isCorrect: options[i] == correct.toString(),
       );
     });
 
-    setState(() {
-      gamesItems = generatedItems; 
-      isRoundActive = true;
-      currentTry = 0;
-      foundCorrect = 0;
-      progressValue = 1.0;
-    });
-
-    // Identifica o item correto para tocar o som
-    final referenceItem = GameItem(
+    referenceItem = GameItem(
       id: 'preview',
       type: GameItemType.text,
       content: targetWord.audioFileName ?? targetWord.text,
@@ -219,24 +202,30 @@ targetWord = availableWords.firstWhere(
       dy: 0,
       backgroundColor: Colors.transparent,
     );
-    // Solicita ao super widget a reprodução do som do desafio
+
+    // Reproduz o som da palavra alvo
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 50));
+      if (!mounted || _isDisposed) return;
       await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
     });
 
-    // Inicia temporizadores
+  // Sincroniza temporizadores com o tempo de nível
+    _startTime = DateTime.now();
     progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-      if (!mounted) return t.cancel();
+      if (!mounted || _isDisposed) return t.cancel();
+      final elapsed = DateTime.now().difference(_startTime);
+      final frac = elapsed.inMilliseconds / levelTime.inMilliseconds;
       setState(() {
-        progressValue -= 0.01;
+        progressValue = 1.0 - frac;
         if (progressValue <= 0) t.cancel();
       });
     });
 
     roundTimer = Timer(levelTime, () {
-      if (!mounted) return;
+      if (!mounted || _isDisposed) return;
       setState(() => isRoundActive = false);
+      _cancelTimers();
       _gamesSuperKey.currentState?.registerFailedRound(targetWord.text);
       _gamesSuperKey.currentState?.showTimeout(
         applySettings: _applyLevelSettings,
@@ -245,13 +234,16 @@ targetWord = availableWords.firstWhere(
     });
   }
 
-
-
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
     if (!isRoundActive || item.isTapped) return;
     final s = _gamesSuperKey.currentState;
     if (s == null) return;
+
+    setState(() {
+      currentTry++;
+      item.isTapped = true;
+    });
 
     // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(
@@ -267,7 +259,6 @@ targetWord = availableWords.firstWhere(
           isRoundActive = false;
           showSyllables = true;
         });
-
         await Future.delayed(const Duration(seconds: 2));
         setState(() => showSyllables = false);
       },
@@ -275,7 +266,6 @@ targetWord = availableWords.firstWhere(
 
     setState(() => currentTry++);
   }
-
 
   // Constrói o widget principal do jogo
   @override
@@ -291,7 +281,7 @@ targetWord = availableWords.firstWhere(
       isFirstCycle: isFirstCycle,
       topTextContent: _buildTopText,
       builder: _buildBoard,
-      onRepeatInstruction: _reproduzirInstrucao,
+      onRepeatInstruction: _playInstruction,
       introImagePath: 'assets/images/games/count_syllables.webp',
       introAudioPath: 'sounds/games/count_syllables.ogg',
       onIntroFinished: () async {
@@ -305,85 +295,90 @@ targetWord = availableWords.firstWhere(
     );
   }
 
-    // Constrói o texto superior do jogo, que é apresenado quando o jogo arranca
+  // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
-    final font = getFontFamily(isFirstCycle ? FontStrategy.slabo : FontStrategy.none);
+    final font = getFontFamily(
+      isFirstCycle ? FontStrategy.slabo : FontStrategy.none,
+    );
     return Padding(
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
-      child: hasChallengeStarted
-          ? _buildChallengeText()
-          : Text(
-              'Vamos contar as sílabas das palavras.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: font,
-                fontSize: 25.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-    );
-  }
-
-    // Constrói o texto do desafio, que apresenta o palavra alvo a encontrar
-  Widget _buildChallengeText() {
-    final font = getFontFamily(isFirstCycle ? FontStrategy.slabo : FontStrategy.none);
-    return Text(
-      'Quantas sílabas tem a palavra ${targetWord.text}?',
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontFamily: font,
-        fontSize: 25.sp,
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
-      ),
-    );
-  }
-
-  // Constrói o tabuleiro do jogo, que contém a imagem, palavra e opções de resposta
-Widget _buildBoard(BuildContext context, _, __) {
-  if (!hasChallengeStarted || _words.isEmpty) {
-    return const SizedBox();
-  }
-
-  return Padding(
-    padding: EdgeInsets.symmetric(horizontal: 20.w),
-    child: Column(
-      children: [
-        SizedBox(height: 85.h),
-
-        // Palavra + imagem com possível divisão silábica sobreposta
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                WordHighlightBox(word: targetWord.text, user: widget.user),
-                SizedBox(width: 50.w),
-                ImageCardBox(imagePath: targetWord.imagePath),
-              ],
-            ),
-            if (showSyllables)
-              Positioned(
-                top: 0,
-                child: WordHighlightBox(
-                  word: targetWord.syllables.join(' - '),
-                  user: widget.user,
+      child:
+          hasChallengeStarted
+              ? Text(
+                'Quantas sílabas tem a palavra ${targetWord.text}?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: font,
+                  fontSize: 25.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              )
+              : Text(
+                'Vamos contar as sílabas das palavras',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: font,
+                  fontSize: 25.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
-          ],
-        ),
+    );
+  }
 
-        const Spacer(),
+  // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart 
+  Widget _buildBoard(BuildContext context, _, __) {
+  if (!hasChallengeStarted || _levelWords.isEmpty) {
+    return const SizedBox();
+  }
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(height: 30.h),
 
-        // Botões de resposta
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: gamesItems.map((item) {
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 6.w),
-              child: GestureDetector(
+          // Palavra e imagem com flexibilidade
+          Flexible(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        WordHighlightBox(word: targetWord.text, user: widget.user),
+                        SizedBox(width: 50.w),
+                        if (targetWord.imagePath.trim().isNotEmpty)
+                          ImageCardBox(imagePath: targetWord.imagePath),
+                      ],
+                    ),
+                    if (showSyllables)
+                      Positioned(
+                        top: 0,
+                        child: WordHighlightBox(
+                          word: targetWord.syllables.join(' - '),
+                          user: widget.user,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+      // Botões de resposta no fundo
+      Column(
+        children: [
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12.w,
+            runSpacing: 10.h,
+            children: gamesItems.map((item) {
+              return GestureDetector(
                 onTap: () => _handleTap(item),
                 child: item.isTapped
                     ? (item.isCorrect
@@ -394,13 +389,15 @@ Widget _buildBoard(BuildContext context, _, __) {
                         onTap: () => _handleTap(item),
                         user: widget.user,
                       ),
-              ),
-            );
-          }).toList(),
-        ),
-        SizedBox(height: 30.h),
-      ],
-    ),
-  );
-}
+              );
+            }).toList(),
+          ),
+          SizedBox(height: 20.h),
+        ],
+      ),
+    ],
+  ),
+);
+
+  }
 }

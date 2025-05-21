@@ -51,21 +51,23 @@ class WordHighlightBox extends StatelessWidget {
 /// Mostra uma imagem dentro de um cartão verde-claro com sombra.
 class ImageCardBox extends StatelessWidget {
   final String imagePath;
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
 
   const ImageCardBox({
     super.key,
     required this.imagePath,
-    this.width = 150,
-    this.height = 80,
+    this.width,
+    this.height,
   });
 
   @override
   Widget build(BuildContext context) {
+    final double scaledWidth = (width ?? 150).w;
+    final double scaledHeight = (height ?? 80).h;
     return Container(
-      width: width.w,
-      height: height.h,
+      width: scaledWidth,
+      height: scaledHeight,
       decoration: BoxDecoration(
         color: Colors.green.shade100,
         borderRadius: BorderRadius.circular(16.r),
@@ -161,7 +163,7 @@ class FlexibleAnswerButton extends StatelessWidget {
 /// Linha de botões de resposta adaptável
 class AnswerButtonsRow extends StatelessWidget {
   final List<GameItem> items;
-  final void Function(String) onTap;
+  final void Function(GameItem) onTap;
   final UserModel user;
 
   const AnswerButtonsRow({
@@ -180,10 +182,55 @@ class AnswerButtonsRow extends StatelessWidget {
       children: items.map((item) {
         return FlexibleAnswerButton(
           label: item.content,
-          onTap: () => onTap(item.content),
+          onTap: () => onTap(item),
           user: user,
         );
       }).toList(),
+    );
+  }
+}
+
+// Circulo com um caractere no interior
+class CharacterCircleBox extends StatelessWidget {
+  final String character;
+  final Color color;
+  final UserModel user;
+  final String? fontFamily;
+
+  const CharacterCircleBox({
+    super.key,
+    required this.character,
+    required this.color,
+    required this.user,
+    required this.fontFamily,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 60.w,
+      height: 60.w,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            offset: const Offset(2, 2),
+            blurRadius: 4.r,
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        character,
+        style: TextStyle(
+          fontSize: 26.sp,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          fontFamily: fontFamily,
+        ),
+      ),
     );
   }
 }

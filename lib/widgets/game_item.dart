@@ -28,7 +28,7 @@ String? getFontFamily(FontStrategy strategy) {
     case FontStrategy.slabo:
       return 'Slabo';
     case FontStrategy.cursive:
-      return 'Cursive';
+      return 'Cursive-Regular';
     case FontStrategy.random:
       return _random.nextBool() ? 'Slabo' : 'Cursive';
   }
@@ -42,6 +42,7 @@ class GameItem {
   final double dx;
   final double dy;
   final String? fontFamily;
+  final double? fontSize;
   final Color backgroundColor;
 
   bool isCorrect;
@@ -57,6 +58,7 @@ class GameItem {
     required this.dy,
     required this.backgroundColor,
     this.fontFamily,
+    this.fontSize,
     this.isCorrect = false,
     this.isTapped = false,
   });
@@ -86,10 +88,10 @@ class GameItem {
           child: Text(
             content,
             style: TextStyle(
-              fontSize: 28.sp,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: fontFamily,
+              fontSize: fontSize ?? 22.sp,
               decoration: TextDecoration.none,
             ),
           ),

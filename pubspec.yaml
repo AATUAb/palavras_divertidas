@@ -57,7 +57,8 @@ flutter:
     # Sons gerais
     - assets/sounds/
     - assets/sounds/animations/
-    - assets/sounds/words_characters/
+    - assets/sounds/characters/
+    - assets/sounds/words/
     - assets/sounds/games/
     # Imagens gerais
     - assets/images/
@@ -80,6 +81,10 @@ flutter:
     - family: Cursive
       fonts:
         - asset: assets/fonts/Cursive-Regular.ttf
+
+    - family: CursiveDotted
+      fonts:
+        - asset: assets/fonts/Cursive-Dotted.ttf
 
     - family: Slabo
       fonts:

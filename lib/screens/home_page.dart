@@ -193,8 +193,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           children: [
                             if (user.schoolLevel == "1º Ciclo")
                               ElevatedButton(
-                                onPressed: () {
-                                  showLettersDialog(
+                                onPressed: () async {
+                                  await pauseMenuMusic();
+                                  await showLettersDialog(
                                     context: context,
                                     initialSelection: user.knownLetters,
                                     onSaved: (selectedLetters) {
@@ -208,6 +209,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       _loadUsers();
                                     },
                                   );
+                                  await resumeMenuMusic();
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.green,
