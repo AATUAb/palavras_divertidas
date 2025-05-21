@@ -28,7 +28,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
   List<WordModel> _allWords = [];
   List<WordModel> _levelWords = [];
-  List<String> _usedWords = [];
+  List<String> usedWords = [];
   late WordModel targetWord;
   bool showSyllables = false;
 
@@ -83,13 +83,13 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     // Garante que palavras da fila de retry continuam acessíveis
     final filtered =
         _allWords.where((w) {
-          final diff = (w.difficulty ?? '').trim().toLowerCase();
+          final diff = (w.difficulty).trim().toLowerCase();
           return diff == levelDifficulty &&
-              !_usedWords.contains(
+              !usedWords.contains(
                 w.text,
               ) && // ← evita repetir palavras já usadas
-              (w.audioPath ?? '').trim().isNotEmpty &&
-              (w.imagePath ?? '').trim().isNotEmpty;
+              (w.audioPath).trim().isNotEmpty &&
+              (w.imagePath).trim().isNotEmpty;
         }).toList();
 
     // Garante que palavras da fila de retry continuam acessíveis
@@ -131,7 +131,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
                   () => _gamesSuperKey.currentState!.safeSelectItem(
                     availableItems:
                         _levelWords
-                            .where((w) => !_usedWords.contains(w.text))
+                            .where((w) => !usedWords.contains(w.text))
                             .toList(),
                   ),
             )
@@ -139,14 +139,14 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
               availableItems: _levelWords,
             );
 
-    final wordText = targetWord!.text;
-    if (!_usedWords.contains(wordText)) {
-      _usedWords.add(wordText);
+    final wordText = targetWord.text;
+    if (!usedWords.contains(wordText)) {
+      usedWords.add(wordText);
     }
 
     final availableWords =
         _levelWords
-            .where((w) => !_usedWords.contains(w.text))
+            .where((w) => !usedWords.contains(w.text))
             .map((w) => w.text)
             .toList();
 

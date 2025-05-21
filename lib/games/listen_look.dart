@@ -82,13 +82,13 @@ class _ListenLookGameState extends State<ListenLookGame> {
     // Garante que palavras da fila de retry continuam acessíveis
     final filtered =
         _allWords.where((w) {
-          final diff = (w.difficulty ?? '').trim().toLowerCase();
+          final diff = (w.difficulty).trim().toLowerCase();
           return diff == levelDifficulty &&
               !_usedWords.contains(
                 w.text,
               ) && // ← evita repetir palavras já usadas
-              (w.audioPath ?? '').trim().isNotEmpty &&
-              (w.imagePath ?? '').trim().isNotEmpty;
+              (w.audioPath).trim().isNotEmpty &&
+              (w.imagePath).trim().isNotEmpty;
         }).toList();
 
     // Garante que palavras da fila de retry continuam acessíveis
@@ -228,7 +228,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
 
     await s.checkAnswerSingle(
       selectedItem: item,
-      target: targetWord.text,
+      target: targetWord.imagePath,
       retryId: targetWord.text,
       currentTry: currentTry,
       applySettings: _applyLevelSettings,
@@ -239,7 +239,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
           isRoundActive = false;
           showWord = true;
         });
-        await Future.delayed(const Duration(seconds: 2));
+        await Future.delayed(const Duration(seconds: 1));
         setState(() => showWord = false);
       },
     );

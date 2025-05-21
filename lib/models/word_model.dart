@@ -38,7 +38,7 @@ class WordModel extends HiveObject {
     this.imageFileName,
   });
 
-  String get audioPath => '${audioFileName ?? text}';
+  String get audioPath => audioFileName ?? text;
   String get imagePath => 'assets/images/words/${imageFileName ?? text}.webp';
 }
 
