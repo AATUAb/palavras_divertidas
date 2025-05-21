@@ -239,7 +239,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
           isRoundActive = false;
           showWord = true;
         });
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(seconds: 2));
         setState(() => showWord = false);
       },
     );
@@ -302,18 +302,28 @@ class _ListenLookGameState extends State<ListenLookGame> {
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Wrap(
           alignment: WrapAlignment.center,
-          spacing: 12.w,
-          runSpacing: 12.h,
+          spacing: 50.w,
+          runSpacing: 50.h,
           children:
               gamesItems.map((item) {
                 return GestureDetector(
                   onTap: () => _handleTap(item),
-                  child:
-                      item.isTapped
-                          ? (item.isCorrect
-                              ? _gamesSuperKey.currentState!.correctIcon
-                              : _gamesSuperKey.currentState!.wrongIcon)
-                          : ImageCardBox(imagePath: item.content),
+                  child: SizedBox(
+                    // aqui use as mesmas dimensões do ImageCardBox
+                    width: 160.w,
+                    height: 100.h,
+                    child:
+                        item.isTapped
+                            // se já foi tocado, mostra só o ícone, sem o quadrado verde
+                            ? Center(
+                              child:
+                                  item.isCorrect
+                                      ? _gamesSuperKey.currentState!.correctIcon
+                                      : _gamesSuperKey.currentState!.wrongIcon,
+                            )
+                            // senão, mostra o card normal com a imagem
+                            : ImageCardBox(imagePath: item.content),
+                  ),
                 );
               }).toList(),
         ),
