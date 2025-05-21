@@ -38,6 +38,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
   double progressValue = 1.0;
   bool _isDisposed = false;
   late GameItem referenceItem;
+  Map<String, String> pathByText = {};
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
@@ -161,6 +162,9 @@ class _ListenLookGameState extends State<ListenLookGame> {
             .take(2)
             .toList();
 
+    pathByText = <String, String>{
+      for (final w in [targetWord, ...distractors]) w.text: w.imagePath,
+    };
     // monta 3 GameItem de tipo image
     gamesItems =
         [targetWord, ...distractors]
@@ -168,7 +172,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
               (w) => GameItem(
                 id: w.text,
                 type: GameItemType.image,
-                content: w.imagePath, // caminho da imagem
+                content: w.text, // caminho da imagem
                 dx: 0,
                 dy: 0,
                 backgroundColor: Colors.transparent,
@@ -228,7 +232,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
 
     await s.checkAnswerSingle(
       selectedItem: item,
-      target: targetWord.imagePath,
+      target: targetWord.text,
       retryId: targetWord.text,
       currentTry: currentTry,
       applySettings: _applyLevelSettings,
@@ -322,7 +326,9 @@ class _ListenLookGameState extends State<ListenLookGame> {
                                       : _gamesSuperKey.currentState!.wrongIcon,
                             )
                             // senão, mostra o card normal com a imagem
-                            : ImageCardBox(imagePath: item.content),
+                            : ImageCardBox(
+                              imagePath: pathByText[item.content]!,
+                            ),
                   ),
                 );
               }).toList(),
