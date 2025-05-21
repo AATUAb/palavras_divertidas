@@ -1,4 +1,3 @@
-// Estrutura do jogo "Ouvir e identficar imagens"
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,16 +9,11 @@ import '../models/word_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
 import '../widgets/game_component.dart';
-import '../widgets/level_manager.dart';
-
-/*class ListenLookGame extends StatefulWidget {
-  final UserModel user;
-  const ListenLookGame({Key? key, required this.user}) : super(key: key);*/
 
 class ListenLookGame extends StatefulWidget {
   final UserModel user;
   const ListenLookGame({Key? key, required this.user});
- 
+
   @override
   State<ListenLookGame> createState() => _ListenLookGameState();
 }
@@ -27,31 +21,31 @@ class ListenLookGame extends StatefulWidget {
 class _ListenLookGameState extends State<ListenLookGame> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
   bool hasChallengeStarted = false;
+  late Duration levelTime;
+  late int currentTry;
+  late int foundCorrect;
 
-
-  Duration levelTime = const Duration(seconds: 15);
   List<WordModel> _allWords = [];
   List<WordModel> _levelWords = [];
   List<String> _usedWords = [];
   late WordModel targetWord;
-  late GameItem referenceItem; // → audio preview
-  List<GameItem> gamesItems = [];
+  bool showWord = false;
 
   bool isRoundActive = true;
-  Timer? _roundTimer, _progressTimer;
+  List<GameItem> gamesItems = [];
+  Timer? roundTimer, progressTimer;
   late DateTime _startTime;
   double progressValue = 1.0;
   bool _isDisposed = false;
+  late GameItem referenceItem;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
- //////////////// Em Falta /////////////////
   // Inicializa o estado do jogo
   @override
   void initState() {
     super.initState();
   }
-////////////// Fiim do em falta /////////////
 
   // Fecha o player de áudio e cancela os temporizadores
   @override
@@ -70,37 +64,46 @@ class _ListenLookGameState extends State<ListenLookGame> {
   // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    late String levelDifficulty;
     switch (lvl) {
       case 1:
         levelTime = const Duration(seconds: 15);
+        levelDifficulty = 'baixa';
         break;
       case 2:
         levelTime = const Duration(seconds: 20);
+        levelDifficulty = 'media';
         break;
       default:
         levelTime = const Duration(seconds: 25);
+        levelDifficulty = 'dificil';
     }
-    final label = ['baixa', 'media', 'dificil'][lvl - 1];
 
+    // Garante que palavras da fila de retry continuam acessíveis
     final filtered =
         _allWords.where((w) {
-          return w.difficulty.toLowerCase().trim() == label &&
-              !_usedWords.contains(w.text) &&
-              w.audioPath.isNotEmpty &&
-              w.imagePath.isNotEmpty;
+          final diff = (w.difficulty ?? '').trim().toLowerCase();
+          return diff == levelDifficulty &&
+              !_usedWords.contains(
+                w.text,
+              ) && // ← evita repetir palavras já usadas
+              (w.audioPath ?? '').trim().isNotEmpty &&
+              (w.imagePath ?? '').trim().isNotEmpty;
         }).toList();
 
+    // Garante que palavras da fila de retry continuam acessíveis
     final retryIds = _gamesSuperKey.currentState?.retryQueueContents() ?? [];
     final retryWords =
         _allWords.where((w) => retryIds.contains(w.text)).toList();
 
+    // Junta os dois, evitando duplicações
     _levelWords = {...filtered, ...retryWords}.toList();
   }
 
   // Cancela os temporizadores ativos
   void _cancelTimers() {
-    _roundTimer?.cancel();
-    _progressTimer?.cancel();
+    roundTimer?.cancel();
+    progressTimer?.cancel();
   }
 
   /// 1) Chamado pelo super-widget (ícone de repetir áudio)
@@ -109,14 +112,15 @@ class _ListenLookGameState extends State<ListenLookGame> {
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
-  /// 2) Gera um novo desafio
+  /// 2) Gera cada novo desafio: agora com 3 imagens
   Future<void> _generateNewChallenge() async {
-    _gamesSuperKey.currentState?.playChallengeHighlight();   // Novo para dar efeito especial a iniciar um desafio
+    // sinal visual de início
+    _gamesSuperKey.currentState?.playChallengeHighlight();
 
     if (!mounted || _isDisposed) return;
-
-    // 2.1) escolhe retry ou novo
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
+
+    // 2.1) Escolhe o WordModel atual (retry ou novo aleatório)
     targetWord =
         retry != null
             ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
@@ -131,7 +135,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
                             .toList(),
                   ),
             )
-            : _gamesSuperKey.currentState!.safeSelectItem(
+            : _gamesSuperKey.currentState!.safeSelectItem<WordModel>(
               availableItems: _levelWords,
             );
 
@@ -139,34 +143,32 @@ class _ListenLookGameState extends State<ListenLookGame> {
       _usedWords.add(targetWord.text);
     }
 
-    // 2.2) prepara o GameItem de áudio (só o path “sounds/words/xxx” sem “assets/” e sem “.ogg”)
-    final raw = targetWord.audioPath; // ex: “assets/sounds/words/pena.ogg”
-    final sanitized = raw
-        .replaceFirst(RegExp(r'^assets/'), '') // -> “sounds/words/pena.ogg”
-        .replaceFirst(RegExp(r'\.ogg$'), ''); // -> “sounds/words/pena”
+    // 2.2) Prepara o GameItem que vai tocar o áudio
     referenceItem = GameItem(
       id: targetWord.text,
       type: GameItemType.text,
-      content: sanitized,
+      content: targetWord.audioPath,
       dx: 0,
       dy: 0,
       backgroundColor: Colors.transparent,
       isCorrect: true,
     );
 
-    // 2.3) distractors visuais
+    // 2.3) Escolhe 2 distractors e monta a lista de 3 imagens
     final distractors =
         (_levelWords.where((w) => w.text != targetWord.text).toList()
               ..shuffle())
             .take(2)
             .toList();
+
+    // monta 3 GameItem de tipo image
     gamesItems =
         [targetWord, ...distractors]
             .map(
               (w) => GameItem(
                 id: w.text,
                 type: GameItemType.image,
-                content: w.imagePath,
+                content: w.imagePath, // caminho da imagem
                 dx: 0,
                 dy: 0,
                 backgroundColor: Colors.transparent,
@@ -176,20 +178,24 @@ class _ListenLookGameState extends State<ListenLookGame> {
             .toList()
           ..shuffle();
 
-    // 2.4) dispara o áudio logo após o próximo build
+    // 2.4) Toca o áudio logo após o build
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 50));
       if (!mounted || _isDisposed) return;
       await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
     });
 
-    // 2.5) reinicia timers e progress bar
+    // 2.5) Reinicia timers e progress bar (igual antes)
     _cancelTimers();
-    isRoundActive = true;
-    setState(() => progressValue = 1.0);
-    _startTime = DateTime.now();
+    setState(() {
+      isRoundActive = true;
+      progressValue = 1.0;
+      currentTry = 0;
+      foundCorrect = 0;
+    });
 
-    _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+    _startTime = DateTime.now();
+    progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
       if (!mounted || _isDisposed) return t.cancel();
       final elapsed = DateTime.now().difference(_startTime);
       setState(() {
@@ -199,7 +205,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
       });
     });
 
-    _roundTimer = Timer(levelTime, () {
+    roundTimer = Timer(levelTime, () {
       if (!mounted || _isDisposed) return;
       setState(() => isRoundActive = false);
       _gamesSuperKey.currentState?.registerFailedRound(targetWord.text);
@@ -215,17 +221,57 @@ class _ListenLookGameState extends State<ListenLookGame> {
     final s = _gamesSuperKey.currentState;
     if (s == null) return;
 
-    setState(() => item.isTapped = true);
+    setState(() {
+      currentTry++;
+      item.isTapped = true;
+    });
 
     await s.checkAnswerSingle(
       selectedItem: item,
       target: targetWord.text,
       retryId: targetWord.text,
-      currentTry: 1,
+      currentTry: currentTry,
       applySettings: _applyLevelSettings,
       generateNewChallenge: _generateNewChallenge,
       cancelTimers: _cancelTimers,
-      showExtraFeedback: () async {},
+      showExtraFeedback: () async {
+        setState(() {
+          isRoundActive = false;
+          showWord = true;
+        });
+        await Future.delayed(const Duration(seconds: 2));
+        setState(() => showWord = false);
+      },
+    );
+
+    setState(() => currentTry++);
+  }
+
+  // Constrói o widget principal do jogo
+  @override
+  Widget build(BuildContext context) {
+    return GamesSuperWidget(
+      key: _gamesSuperKey,
+      user: widget.user,
+      gameName: 'Ouvir e Procurar Imagem',
+      progressValue: progressValue,
+      level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
+      currentRound: (_) => 1,
+      totalRounds: (_) => 3,
+      isFirstCycle: isFirstCycle,
+      topTextContent: _buildTopText,
+      builder: _buildBoard,
+      onRepeatInstruction: _playInstruction,
+      introImagePath: 'assets/images/games/listen_look.webp',
+      introAudioPath: 'sounds/games/listen_look.ogg',
+      onIntroFinished: () async {
+        await _loadWords();
+        await _applyLevelSettings();
+        if (mounted) {
+          setState(() => hasChallengeStarted = true);
+          _generateNewChallenge();
+        }
+      },
     );
   }
 
@@ -249,7 +295,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
     );
   }
 
-  Widget _buildBoard(BuildContext ctx, LevelManager lm, UserModel user) {
+  Widget _buildBoard(BuildContext ctx, _, __) {
     if (!hasChallengeStarted || gamesItems.isEmpty) return const SizedBox();
     return Center(
       child: Padding(
@@ -267,36 +313,11 @@ class _ListenLookGameState extends State<ListenLookGame> {
                           ? (item.isCorrect
                               ? _gamesSuperKey.currentState!.correctIcon
                               : _gamesSuperKey.currentState!.wrongIcon)
-                          : ImageCardBox(imagePath: item.content!),
+                          : ImageCardBox(imagePath: item.content),
                 );
               }).toList(),
         ),
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GamesSuperWidget(
-      key: _gamesSuperKey,
-      user: widget.user,
-      gameName: 'Ouvir e procurar imagem',
-      progressValue: progressValue,
-      level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
-      currentRound: (_) => 1,
-      totalRounds: (_) => 3,
-      isFirstCycle: isFirstCycle,
-      topTextContent: _buildTopText,
-      builder: _buildBoard,
-      onRepeatInstruction: _playInstruction,
-      introImagePath: 'assets/images/games/listen_look.webp',
-      introAudioPath: 'sounds/games/listen_look.ogg',
-      onIntroFinished: () async {
-        await _loadWords();
-        await _applyLevelSettings();
-        setState(() => hasChallengeStarted = true);
-        _generateNewChallenge();
-      },
     );
   }
 }

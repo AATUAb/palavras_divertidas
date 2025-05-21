@@ -38,6 +38,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   late DateTime _startTime;
   double progressValue = 1.0;
   bool _isDisposed = false;
+  late GameItem referenceItem;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
@@ -79,24 +80,25 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
         levelDifficulty = 'dificil';
     }
 
-  // Garante que palavras da fila de retry continuam acessíveis
-  final filtered = _allWords.where((w) {
-  final diff = (w.difficulty ?? '').trim().toLowerCase();
-  return diff == levelDifficulty &&
-         !_usedWords.contains(w.text) && // ← evita repetir palavras já usadas
-         (w.audioPath ?? '').trim().isNotEmpty &&
-         (w.imagePath ?? '').trim().isNotEmpty;
-}).toList();
+    // Garante que palavras da fila de retry continuam acessíveis
+    final filtered =
+        _allWords.where((w) {
+          final diff = (w.difficulty ?? '').trim().toLowerCase();
+          return diff == levelDifficulty &&
+              !_usedWords.contains(
+                w.text,
+              ) && // ← evita repetir palavras já usadas
+              (w.audioPath ?? '').trim().isNotEmpty &&
+              (w.imagePath ?? '').trim().isNotEmpty;
+        }).toList();
 
     // Garante que palavras da fila de retry continuam acessíveis
     final retryIds = _gamesSuperKey.currentState?.retryQueueContents() ?? [];
-    final retryWords = _allWords.where((w) => retryIds.contains(w.text)).toList();
+    final retryWords =
+        _allWords.where((w) => retryIds.contains(w.text)).toList();
 
     // Junta os dois, evitando duplicações
-    _levelWords = {
-      ...filtered,
-      ...retryWords,
-    }.toList();
+    _levelWords = {...filtered, ...retryWords}.toList();
   }
 
   // Cancela os temporizadores ativos
@@ -106,69 +108,72 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   }
 
   // Reproduz a instrução de áudio para o jogador
-  late GameItem referenceItem;
   Future<void> _playInstruction() async {
     if (!mounted || _isDisposed) return;
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
- 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
     _gamesSuperKey.currentState?.playChallengeHighlight();
 
     // Verifica se há retry a usar
-   if (!mounted || _isDisposed) return;
+    if (!mounted || _isDisposed) return;
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
 
-    targetWord = retry != null
-      ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
-          list: _levelWords,
-          retryId: retry,
-          matcher: (w) => w.text == retry,
-          fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
-            availableItems: _levelWords.where((w) => !_usedWords.contains(w.text)).toList(),
-
-          ),
-        )
-      : _gamesSuperKey.currentState!.safeSelectItem(
-          availableItems: _levelWords,
-        );
+    targetWord =
+        retry != null
+            ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
+              list: _levelWords,
+              retryId: retry,
+              matcher: (w) => w.text == retry,
+              fallback:
+                  () => _gamesSuperKey.currentState!.safeSelectItem(
+                    availableItems:
+                        _levelWords
+                            .where((w) => !_usedWords.contains(w.text))
+                            .toList(),
+                  ),
+            )
+            : _gamesSuperKey.currentState!.safeSelectItem(
+              availableItems: _levelWords,
+            );
 
     final wordText = targetWord!.text;
     if (!_usedWords.contains(wordText)) {
       _usedWords.add(wordText);
     }
 
-final availableWords = _levelWords
-    .where((w) => !_usedWords.contains(w.text))
-    .map((w) => w.text)
-    .toList();
+    final availableWords =
+        _levelWords
+            .where((w) => !_usedWords.contains(w.text))
+            .map((w) => w.text)
+            .toList();
 
-  final hasRetry = _gamesSuperKey.currentState?.peekNextRetryTarget() != null;
+    final hasRetry = _gamesSuperKey.currentState?.peekNextRetryTarget() != null;
 
-  if (availableWords.isEmpty && !hasRetry) {
-    if (!mounted || _isDisposed) return;
-    _gamesSuperKey.currentState?.showEndOfGameDialog(
-      onRestart: () async {
-        await _gamesSuperKey.currentState?.restartGame();
-        await _applyLevelSettings();
-        if (mounted) _generateNewChallenge();
-      },
-    );
-    return;
-  }
+    if (availableWords.isEmpty && !hasRetry) {
+      if (!mounted || _isDisposed) return;
+      _gamesSuperKey.currentState?.showEndOfGameDialog(
+        onRestart: () async {
+          await _gamesSuperKey.currentState?.restartGame();
+          await _applyLevelSettings();
+          if (mounted) _generateNewChallenge();
+        },
+      );
+      return;
+    }
 
-// Se a palavra volta a ser apresentado, remove-a da fila de repetição
-// e adiciona-o à lista de palavras já utilizados
-  _cancelTimers();
-      setState(() {
-        isRoundActive = true;
-        gamesItems.clear();
-        currentTry = 0;
-        foundCorrect = 0;
-        progressValue = 1.0;
-      });
+    // Se a palavra volta a ser apresentado, remove-a da fila de repetição
+    // e adiciona-o à lista de palavras já utilizados
+    _cancelTimers();
+    setState(() {
+      isRoundActive = true;
+      gamesItems.clear();
+      currentTry = 0;
+      foundCorrect = 0;
+      progressValue = 1.0;
+    });
 
     // Gera as opções de resposta multiplas
     final correct = targetWord.syllableCount;
@@ -210,7 +215,7 @@ final availableWords = _levelWords
       await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
     });
 
-  // Sincroniza temporizadores com o tempo de nível
+    // Sincroniza temporizadores com o tempo de nível
     _startTime = DateTime.now();
     progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
       if (!mounted || _isDisposed) return t.cancel();
@@ -302,36 +307,26 @@ final availableWords = _levelWords
     );
     return Padding(
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
-      child:
-          hasChallengeStarted
-              ? Text(
-                'Quantas sílabas tem a palavra ${targetWord.text}?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: font,
-                  fontSize: 25.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              )
-              : Text(
-                'Vamos contar as sílabas das palavras',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: font,
-                  fontSize: 25.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+      child: Text(
+        hasChallengeStarted
+            ? 'Quantas sílabas tem a palavra ${targetWord.text}?'
+            : 'Vamos contar as sílabas das palavras',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontFamily: font,
+          fontSize: 25.sp,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+      ),
     );
   }
 
-  // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart 
+  // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart
   Widget _buildBoard(BuildContext context, _, __) {
-  if (!hasChallengeStarted || _levelWords.isEmpty) {
-    return const SizedBox();
-  }
+    if (!hasChallengeStarted || _levelWords.isEmpty) {
+      return const SizedBox();
+    }
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
@@ -350,7 +345,10 @@ final availableWords = _levelWords
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        WordHighlightBox(word: targetWord.text, user: widget.user),
+                        WordHighlightBox(
+                          word: targetWord.text,
+                          user: widget.user,
+                        ),
                         SizedBox(width: 50.w),
                         if (targetWord.imagePath.trim().isNotEmpty)
                           ImageCardBox(imagePath: targetWord.imagePath),
@@ -370,34 +368,35 @@ final availableWords = _levelWords
             ),
           ),
 
-      // Botões de resposta no fundo
-      Column(
-        children: [
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 12.w,
-            runSpacing: 10.h,
-            children: gamesItems.map((item) {
-              return GestureDetector(
-                onTap: () => _handleTap(item),
-                child: item.isTapped
-                    ? (item.isCorrect
-                        ? _gamesSuperKey.currentState!.correctIcon
-                        : _gamesSuperKey.currentState!.wrongIcon)
-                    : FlexibleAnswerButton(
-                        label: item.content,
+          // Botões de resposta no fundo
+          Column(
+            children: [
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 12.w,
+                runSpacing: 10.h,
+                children:
+                    gamesItems.map((item) {
+                      return GestureDetector(
                         onTap: () => _handleTap(item),
-                        user: widget.user,
-                      ),
-              );
-            }).toList(),
+                        child:
+                            item.isTapped
+                                ? (item.isCorrect
+                                    ? _gamesSuperKey.currentState!.correctIcon
+                                    : _gamesSuperKey.currentState!.wrongIcon)
+                                : FlexibleAnswerButton(
+                                  label: item.content,
+                                  onTap: () => _handleTap(item),
+                                  user: widget.user,
+                                ),
+                      );
+                    }).toList(),
+              ),
+              SizedBox(height: 20.h),
+            ],
           ),
-          SizedBox(height: 20.h),
         ],
       ),
-    ],
-  ),
-);
-
+    );
   }
 }
