@@ -10,8 +10,9 @@ bool globalSoundPaused = false;
 bool isMenuMuted = false;
 
 Future<void> pauseMenuMusic() async {
-  await globalMenuPlayer.pause();
+  await globalMenuPlayer.stop();
   globalSoundPaused = true;
+  globalSoundStarted = false;
 }
 
 Future<void> resumeMenuMusic() async {
@@ -35,6 +36,7 @@ class MenuDesign extends StatefulWidget {
   final bool showTutorial; // Mostra botão de tutorial
   final bool showMuteButton; // Mostra botão de som
   final bool showWhiteBackground; // Mostra fundo branco por trás de tudo
+  final bool pauseIntroMusic;
 
   const MenuDesign({
     Key? key,
@@ -51,6 +53,7 @@ class MenuDesign extends StatefulWidget {
     this.showTutorial = true,
     this.showMuteButton = true,
     this.showWhiteBackground = true,
+      this.pauseIntroMusic = false,
   }) : super(key: key);
 
   @override
@@ -68,12 +71,19 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
   Future<void> _initAudio() async {
     await globalMenuPlayer.setReleaseMode(ReleaseMode.loop);
     await globalMenuPlayer.setVolume(0.4);
-    if (!isMenuMuted && !globalSoundStarted) {
+
+    // 🔇 Se estiver silenciado ou foi pedido para pausar o som de entrada, não faz play agora
+    if (isMenuMuted || widget.pauseIntroMusic) {
+      return; // não toca som se estiver silenciado ou se for para esperar
+    }
+
+    if (!globalSoundStarted) {
       await globalMenuPlayer.play(AssetSource('sounds/intro_music.ogg'));
       globalSoundStarted = true;
       globalSoundPaused = false;
     }
   }
+
 
   Future<void> _toggleMute() async {
     setState(() => isMenuMuted = !isMenuMuted);

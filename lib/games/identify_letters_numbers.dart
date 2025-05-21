@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../models/user_model.dart';
 import '../models/character_model.dart';
 import '../widgets/game_item.dart';
@@ -24,7 +23,6 @@ class IdentifyLettersNumbers extends StatefulWidget {
 class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
   final _random = Random();
-  late final AudioPlayer _letterPlayer;
   bool hasChallengeStarted = false;
   late int correctCount;
   late int wrongCount;
@@ -54,7 +52,14 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   @override
   void initState() {
     super.initState();
-    _letterPlayer = AudioPlayer();
+  }
+
+    // Fecha o player de áudio e cancela os temporizadores
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _cancelTimers();
+    super.dispose();
   }
 
   // Carrega as palavras do banco de dados Hive
@@ -63,16 +68,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       _characters = box.values
       .where((c) => c.character.trim().isNotEmpty)
       .toList();
-  }
-
-  // Fecha o player de áudio e cancela os temporizadores
-  @override
-  void dispose() {
-    _isDisposed = true;
-    _cancelTimers();
-    _letterPlayer.stop();
-    _letterPlayer.dispose();
-    super.dispose();
   }
 
   // Aplica as definições de nível com base no nível atual do jogador

@@ -10,7 +10,7 @@ import '../widgets/menu_design.dart';
 import '../games/identify_letters_numbers.dart';
 import '../games/writing_game.dart';
 import '../games/count_syllables.dart';
-import '../games/listen_look.dart'; // ← import atualizado para listen_look.dart
+import '../games/listen_look.dart';
 import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
@@ -50,11 +50,12 @@ class _GameMenuState extends State<GameMenu> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkNewConquests());
   }
 
+  // Verifica se há conquistas novas. Se sim mostra um diálogo com a conquista
   Future<void> _checkNewConquests() async {
     final newUnlocks = widget.user.conquest - widget.user.lastSeenConquests;
     if (newUnlocks > 0) {
-      final soundFile =
-          newUnlocks == 1
+      await pauseMenuMusic();
+      final soundFile = newUnlocks == 1
               ? 'sounds/animations/one_conquest.ogg'
               : 'sounds/animations/more_conquests.ogg';
       await _conquestPlayer.play(AssetSource(soundFile), volume: 1.0);
@@ -76,6 +77,7 @@ class _GameMenuState extends State<GameMenu> {
                   ),
                   child: TextButton.icon(
                     onPressed: () async {
+                      await pauseMenuMusic();
                       widget.user.lastSeenConquests = widget.user.conquest;
                       await widget.user.save();
                       Navigator.of(context).pop();
@@ -97,8 +99,11 @@ class _GameMenuState extends State<GameMenu> {
             ),
       );
     }
+    await resumeMenuMusic();
   }
 
+
+  // Jogos principais disponíveis para todos os ciclos
   @override
   Widget build(BuildContext context) {
     final List<GameCardData> jogosBase = [
@@ -123,11 +128,12 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Ouvir e procurar",
         icon: Icons.hearing,
-        onTap: _listenLook, // ← chama o novo jogo
+        onTap: _listenLook,
         backgroundColor: AppColors.green,
       ),
     ];
 
+    // Jogos extras disponíveis apenas para o 1º ciclo
     final List<GameCardData> jogosExtras = [
       GameCardData(
         title: "Detetive de palavras",
@@ -148,10 +154,12 @@ class _GameMenuState extends State<GameMenu> {
             ? [...jogosBase, ...jogosExtras]
             : jogosBase;
 
+    // Menu principal de escolha de jogos
     return Scaffold(
       body: MenuDesign(
         titleText: "Mundo das Palavras",
         headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
+        pauseIntroMusic: true,
         showHomeButton: true,
         onHomePressed: () {
           Navigator.pushReplacement(
@@ -161,6 +169,7 @@ class _GameMenuState extends State<GameMenu> {
             ),
           );
         },
+        // Barra lateral com ícones de conquistas e estatísticas
         topLeftWidget: Padding(
           padding: EdgeInsets.only(top: 170.h),
           child: Column(
@@ -252,6 +261,7 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
+  // Abre o jogo de identificação de letras e números
   void _identifyLettersNumbers() {
     Navigator.pushReplacement(
       context,
@@ -261,6 +271,7 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
+  // Abre o jogo de escrita
   void _writingGame() {
     Navigator.pushReplacement(
       context,
@@ -268,6 +279,7 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
+  // Abre o jogo de contar sílabas
   void _countSyllablesGame() {
     Navigator.pushReplacement(
       context,
@@ -275,6 +287,7 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
+  // Abre o jogo de ouvir e procurar imagens
   void _listenLook() {
     Navigator.pushReplacement(
       context,

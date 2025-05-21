@@ -1,7 +1,5 @@
-// lib/games/listen_look.dart
-
+// Estrutura do jogo "Ouvir e identficar imagens"
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,10 +12,14 @@ import '../widgets/game_super_widget.dart';
 import '../widgets/game_component.dart';
 import '../widgets/level_manager.dart';
 
+/*class ListenLookGame extends StatefulWidget {
+  final UserModel user;
+  const ListenLookGame({Key? key, required this.user}) : super(key: key);*/
+
 class ListenLookGame extends StatefulWidget {
   final UserModel user;
-  const ListenLookGame({Key? key, required this.user}) : super(key: key);
-
+  const ListenLookGame({Key? key, required this.user});
+ 
   @override
   State<ListenLookGame> createState() => _ListenLookGameState();
 }
@@ -25,6 +27,7 @@ class ListenLookGame extends StatefulWidget {
 class _ListenLookGameState extends State<ListenLookGame> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
   bool hasChallengeStarted = false;
+
 
   Duration levelTime = const Duration(seconds: 15);
   List<WordModel> _allWords = [];
@@ -42,6 +45,15 @@ class _ListenLookGameState extends State<ListenLookGame> {
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
+ //////////////// Em Falta /////////////////
+  // Inicializa o estado do jogo
+  @override
+  void initState() {
+    super.initState();
+  }
+////////////// Fiim do em falta /////////////
+
+  // Fecha o player de áudio e cancela os temporizadores
   @override
   void dispose() {
     _isDisposed = true;
@@ -49,11 +61,13 @@ class _ListenLookGameState extends State<ListenLookGame> {
     super.dispose();
   }
 
+  // Carrega as palavras do banco de dados Hive
   Future<void> _loadWords() async {
     final box = await Hive.openBox<WordModel>('words');
     _allWords = box.values.toList();
   }
 
+  // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
     switch (lvl) {
@@ -83,6 +97,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
     _levelWords = {...filtered, ...retryWords}.toList();
   }
 
+  // Cancela os temporizadores ativos
   void _cancelTimers() {
     _roundTimer?.cancel();
     _progressTimer?.cancel();
@@ -220,8 +235,8 @@ class _ListenLookGameState extends State<ListenLookGame> {
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
       child: Text(
         hasChallengeStarted
-            ? 'Qual a imagem que ouviste?'
-            : 'Vamos ouvir com atenção para encontrar a imagem correta',
+            ? 'Escolhe a imagem correta para a palavra que ouviste'
+            : 'Vamos ouvir com atenção, para encontrar a imagem correta',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: font,
@@ -263,7 +278,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
     return GamesSuperWidget(
       key: _gamesSuperKey,
       user: widget.user,
-      gameName: 'Ouvir e procurar',
+      gameName: 'Ouvir e procurar imagem',
       progressValue: progressValue,
       level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
       currentRound: (_) => 1,

@@ -1,10 +1,8 @@
 // Estrutura do jogo "Contar Sílabas"
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../models/user_model.dart';
 import '../models/word_model.dart';
 import '../widgets/game_item.dart';
@@ -23,8 +21,6 @@ class CountSyllablesGame extends StatefulWidget {
 // Classe que controla o estado do jogo
 class _CountSyllablesGame extends State<CountSyllablesGame> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
-  final _random = Random();
-  late final AudioPlayer _wordPlayer;
   bool hasChallengeStarted = false;
   late Duration levelTime;
   late int currentTry;
@@ -45,27 +41,24 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
-    // Inicializa o estado do jogo
+  // Inicializa o estado do jogo
   @override
   void initState() {
     super.initState();
-    _wordPlayer = AudioPlayer();
-  }
-
-  // Carrega as palavras do banco de dados Hive
-  Future<void> _loadWords() async {
-    final box = await Hive.openBox<WordModel>('words');
-    _allWords = box.values.toList();
   }
 
   // Fecha o player de áudio e cancela os temporizadores
   @override
   void dispose() {
     _isDisposed = true;
-    _wordPlayer.stop();
-    _wordPlayer.dispose();
     _cancelTimers();
     super.dispose();
+  }
+
+  // Carrega as palavras do banco de dados Hive
+  Future<void> _loadWords() async {
+    final box = await Hive.openBox<WordModel>('words');
+    _allWords = box.values.toList();
   }
 
   // Aplica as definições de nível com base no nível atual do jogador
@@ -319,7 +312,7 @@ final availableWords = _levelWords
                 ),
               )
               : Text(
-                'Vamos contar as sílabas das palavras.',
+                'Vamos contar as sílabas das palavras',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: font,
