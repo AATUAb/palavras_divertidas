@@ -7,7 +7,6 @@ import 'services/hive_service.dart';
 import 'screens/loading_screen.dart';
 import 'themes/app_theme.dart';
 
-// 1️⃣ Importa o modelo (que inclui o adapter gerado)
 import 'models/character_model.dart';
 import 'models/word_model.dart';
 
@@ -20,21 +19,22 @@ Future<void> main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
+  // ► Modo fullscreen (oculta barra de status e navegação)
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
   // ► Inicialização básica do Hive
   await Hive.initFlutter();
 
-  // ─────────── Registro de Adapters ───────────
+  // ─ Registro de Adapters
   Hive.registerAdapter(CharacterModelAdapter());
   Hive.registerAdapter(WordModelAdapter());
-  // Se tiveres outros modelos, regista aqui também:
-  // Hive.registerAdapter(UserModelAdapter());
-  // ──────────────────────────────────────────────
 
-  // ► Agora inicializa com adapters e seed
+  // Inicializa com adapters e seed
   await HiveService.init();
 
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

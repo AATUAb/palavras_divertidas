@@ -1,9 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
 import '../models/user_model.dart';
 import '../models/word_model.dart';
 import '../widgets/game_item.dart';
@@ -247,7 +245,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
     return GamesSuperWidget(
       key: _gamesSuperKey,
       user: widget.user,
-      gameName: 'Ouvir e Procurar Imagem',
+      gameName: 'Ouvir e Procurar Palavra',
       progressValue: progressValue,
       level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
       currentRound: (_) => 1,
@@ -355,6 +353,4 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
     ),
   );
 }
-
-
 }

@@ -21,7 +21,7 @@ class UserStats extends StatelessWidget {
               'Escrever',
               'Contar sílabas',
               'Ouvir e Procurar Imagem',
-              'Detetive de palavras',
+              'Ouvir e Procurar Palavra',
               'Sílabas perdidas',
             ]
             : [
@@ -36,7 +36,7 @@ class UserStats extends StatelessWidget {
       'Escrever': Icons.edit,
       'Contar sílabas': Icons.format_list_numbered,
       'Ouvir e Procurar Imagem': Icons.hearing,
-      'Detetive de palavras': Icons.find_in_page,
+      'Ouvir e Procurar Palavra': Icons.find_in_page,
       'Sílabas perdidas': Icons.extension,
     };
 
