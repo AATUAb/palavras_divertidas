@@ -16,6 +16,8 @@ import 'home_page.dart';
 import 'sticker_book.dart';
 import 'user_stats.dart';
 
+import '../games/write_game.dart';
+
 class GameCardData {
   final String title;
   final IconData icon;
@@ -108,7 +110,7 @@ class _GameMenuState extends State<GameMenu> {
   Widget build(BuildContext context) {
     final List<GameCardData> jogosBase = [
       GameCardData(
-        title: "Detetive de letras e números",
+        title: "Identificar letras e números",
         icon: Icons.search,
         onTap: _identifyLettersNumbers,
         backgroundColor: AppColors.green,
@@ -126,7 +128,7 @@ class _GameMenuState extends State<GameMenu> {
         backgroundColor: AppColors.yellow,
       ),
       GameCardData(
-        title: "Ouvir e procurar",
+        title: "Ouvir e procurar imagens",
         icon: Icons.hearing,
         onTap: _listenLook,
         backgroundColor: AppColors.green,
@@ -136,15 +138,22 @@ class _GameMenuState extends State<GameMenu> {
     // Jogos extras disponíveis apenas para o 1º ciclo
     final List<GameCardData> jogosExtras = [
       GameCardData(
-        title: "Detetive de palavras",
+        title: "Ouvir e procurar palavras",
         icon: Icons.find_in_page,
         onTap: () => _navigateToGame("Detetive de palavras"),
         backgroundColor: AppColors.orange,
       ),
-      GameCardData(
+    /*  GameCardData(
         title: "Sílabas perdidas",
         icon: Icons.extension,
         onTap: () => _navigateToGame("Sílabas perdidas"),
+        backgroundColor: AppColors.yellow,
+      ),*/
+
+        GameCardData(
+        title: "Sílabas perdidas",
+        icon: Icons.extension,
+        onTap: () => _writeGame(),
         backgroundColor: AppColors.yellow,
       ),
     ];
@@ -276,6 +285,14 @@ class _GameMenuState extends State<GameMenu> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => WritingGame(user: widget.user)),
+    );
+  }
+
+    // Abre o jogo de escrita
+  void _writeGame() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => WriteGame(user: widget.user)),
     );
   }
 
