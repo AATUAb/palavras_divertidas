@@ -11,6 +11,7 @@ import '../games/identify_letters_numbers.dart';
 import '../games/writing_game.dart';
 import '../games/count_syllables.dart';
 import '../games/listen_look.dart';
+import '../games/identify_words.dart';
 import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
@@ -140,7 +141,7 @@ class _GameMenuState extends State<GameMenu> {
       GameCardData(
         title: "Ouvir e procurar palavras",
         icon: Icons.find_in_page,
-        onTap: () => _navigateToGame("Detetive de palavras"),
+        onTap: () =>_identifyword(),
         backgroundColor: AppColors.orange,
       ),
     /*  GameCardData(
@@ -309,6 +310,14 @@ class _GameMenuState extends State<GameMenu> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => ListenLookGame(user: widget.user)),
+    );
+  }
+
+    // Abre o jogo de ouvir e procurar palavrar
+  void _identifyword() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => IdentifyWordGame(user: widget.user)),
     );
   }
 

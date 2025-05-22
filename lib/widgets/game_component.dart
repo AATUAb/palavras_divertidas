@@ -19,7 +19,7 @@ class WordHighlightBox extends StatelessWidget {
     final isFirstCycle = user.schoolLevel == '1º Ciclo';
     final fontSize = isFirstCycle ? 26.sp : 22.sp;
 
-    return IntrinsicWidth(      // <<<<<< aqui
+    return IntrinsicWidth(     
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
         decoration: BoxDecoration(
@@ -38,10 +38,10 @@ class WordHighlightBox extends StatelessWidget {
           word,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: fontSize,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             fontFamily: isFirstCycle ? 'Cursive' : null,
+            fontSize: isFirstCycle ? 30.sp : 22.sp,
           ),
         ),
       ),
