@@ -153,24 +153,41 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             MaterialPageRoute(builder: (_) => GameMenu(user: widget.user)),
           );
         },
-        background: Positioned.fill(
-          child: Image.asset(
-            'assets/images/world.webp',
-            width: 960.w,
-            height: 540.h,
-          ),
-        ),
-        child: Stack(
+        child: Column(
           children: [
-            for (var entry in _stickers.asMap().entries)
-              Align(
-                alignment: entry.value['alignment'] as Alignment,
-                child: _buildSticker(
-                  entry.value['asset'] as String,
-                  // Desbloqueia progressivamente: 1 sticker a cada conquista
-                  unlocked: _localConquest >= entry.key + 1,
+            // Espaço para evitar sobreposição do título (ajuste se necessário)
+            SizedBox(
+              height: 48.h,
+            ), // ajuste este valor conforme o espaço do seu título
+            Expanded(
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.asset(
+                            'assets/images/world.webp',
+                            fit: BoxFit.contain,
+                          ),
+                          ..._stickers.asMap().entries.map((entry) {
+                            return Align(
+                              alignment: entry.value['alignment'] as Alignment,
+                              child: _buildSticker(
+                                entry.value['asset'] as String,
+                                unlocked: _localConquest >= entry.key + 1,
+                              ),
+                            );
+                          }).toList(),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
+            ),
           ],
         ),
       ),

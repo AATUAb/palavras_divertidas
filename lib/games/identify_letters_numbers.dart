@@ -54,7 +54,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     super.initState();
   }
 
-    // Fecha o player de áudio e cancela os temporizadores
+  // Fecha o player de áudio e cancela os temporizadores
   @override
   void dispose() {
     _isDisposed = true;
@@ -65,9 +65,8 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   // Carrega as palavras do banco de dados Hive
   Future<void> _loadCharacters() async {
     final box = await Hive.openBox<CharacterModel>('characters');
-      _characters = box.values
-      .where((c) => c.character.trim().isNotEmpty)
-      .toList();
+    _characters =
+        box.values.where((c) => c.character.trim().isNotEmpty).toList();
   }
 
   // Aplica as definições de nível com base no nível atual do jogador
@@ -103,7 +102,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   // Reproduz a instrução de áudio para o jogador
   late GameItem referenceItem;
   Future<void> _playInstruction() async {
-     if (!mounted || _isDisposed) return;
+    if (!mounted || _isDisposed) return;
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
@@ -112,25 +111,25 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   List<String> _generateWrongOptions({
-  required int count,
-  required List<CharacterModel> pool,
-  required String target,
-}) {
-  final bad = <String>{};
-  final rand = Random();
+    required int count,
+    required List<CharacterModel> pool,
+    required String target,
+  }) {
+    final bad = <String>{};
+    final rand = Random();
 
-  while (bad.length < count) {
-    final c = pool[rand.nextInt(pool.length)].character;
-    final opt = rand.nextBool() ? c.toUpperCase() : c.toLowerCase();
-    if (opt.toLowerCase() != target.toLowerCase()) {
-      bad.add(opt);
+    while (bad.length < count) {
+      final c = pool[rand.nextInt(pool.length)].character;
+      final opt = rand.nextBool() ? c.toUpperCase() : c.toLowerCase();
+      if (opt.toLowerCase() != target.toLowerCase()) {
+        bad.add(opt);
+      }
     }
+
+    return bad.toList();
   }
 
-  return bad.toList();
-}
-
-// Gera as opções corretas, com base no caractere alvo
+  // Gera as opções corretas, com base no caractere alvo
   List<String> _generateCorrectOptions({
     required int count,
     required String target,
@@ -167,7 +166,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
-    // Cores a aplicar aos itens do jogo
+  // Cores a aplicar aos itens do jogo
   Color _randColor() =>
       [
         Colors.red,
@@ -184,125 +183,141 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
-  _gamesSuperKey.currentState?.playChallengeHighlight();
+    _gamesSuperKey.currentState?.playChallengeHighlight();
 
-  if (!mounted || _isDisposed) return;
+    if (!mounted || _isDisposed) return;
 
-  final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
+    final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
 
-  targetCharacter = retryId != null
-    ? _gamesSuperKey.currentState!.safeRetry<String>(
-        list: _characters.map((e) => e.character).toList(),
-        retryId: retryId,
-        matcher: (c) => c.toLowerCase() == retryId.toLowerCase(),
-        fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
-          availableItems: _characters.map((e) => e.character)
+    targetCharacter =
+        retryId != null
+            ? _gamesSuperKey.currentState!.safeRetry<String>(
+              list: _characters.map((e) => e.character).toList(),
+              retryId: retryId,
+              matcher: (c) => c.toLowerCase() == retryId.toLowerCase(),
+              fallback:
+                  () => _gamesSuperKey.currentState!.safeSelectItem(
+                    availableItems:
+                        _characters
+                            .map((e) => e.character)
+                            .where((c) => !_usedCharacters.contains(c))
+                            .toList(),
+                  ),
+            )
+            : _gamesSuperKey.currentState!.safeSelectItem(
+              availableItems:
+                  _characters
+                      .map((e) => e.character)
+                      .where((c) => !_usedCharacters.contains(c))
+                      .toList(),
+            );
+
+    if (!_usedCharacters.contains(targetCharacter)) {
+      _usedCharacters.add(targetCharacter);
+    }
+
+    final available =
+        _characters
+            .map((e) => e.character)
             .where((c) => !_usedCharacters.contains(c))
-            .toList(),
-        ),
-      )
-    : _gamesSuperKey.currentState!.safeSelectItem(
-        availableItems: _characters.map((e) => e.character)
-          .where((c) => !_usedCharacters.contains(c))
-          .toList(),
+            .toList();
+    final hasRetry = _gamesSuperKey.currentState?.peekNextRetryTarget() != null;
+
+    if (available.isEmpty && !hasRetry) {
+      _gamesSuperKey.currentState?.showEndOfGameDialog(
+        onRestart: () async {
+          await _gamesSuperKey.currentState?.restartGame();
+          await _applyLevelSettings();
+          if (mounted) _generateNewChallenge();
+        },
       );
+      return;
+    }
 
-  if (!_usedCharacters.contains(targetCharacter)) {
-    _usedCharacters.add(targetCharacter);
-  }
-
-  final available = _characters.map((e) => e.character)
-      .where((c) => !_usedCharacters.contains(c))
-      .toList();
-  final hasRetry = _gamesSuperKey.currentState?.peekNextRetryTarget() != null;
-
-  if (available.isEmpty && !hasRetry) {
-    _gamesSuperKey.currentState?.showEndOfGameDialog(
-      onRestart: () async {
-        await _gamesSuperKey.currentState?.restartGame();
-        await _applyLevelSettings();
-        if (mounted) _generateNewChallenge();
-      },
-    );
-    return;
-  }
-
-  // Reproduz som após pequena espera
-  _cancelTimers();
-  setState(() {
-    isRoundActive = true;
-    gamesItems.clear();
-    foundCorrect = 0;
-    currentTry = 0;
-    progressValue = 1.0;
-  });
-
-  // Gera lista de opções corretas e erradas e miustura
-  final bad  = _generateWrongOptions(count: wrongCount, pool: _characters, target: targetCharacter);
-  final good = _generateCorrectOptions(count: correctCount, target: targetCharacter);
-  final all  = [...bad, ...good]..shuffle();
-
-  final cols = (all.length / 3).ceil();
-  final sx = 1 / (cols + 1);
-  final sy = 0.18;
-
-  gamesItems = List.generate(all.length, (i) {
-    final col = i % cols;
-    final row = i ~/ cols;
-    return buildGameItem(
-      index: i,
-      content: all[i],
-      target: targetCharacter,
-      dx: sx * (col + 1),
-      dy: 0.45 + sy * row,
-      isFirstCycle: isFirstCycle,
-      fontFamily: _randFont(),
-      backgroundColor: _randColor(),
-    );
-  });
-
-  referenceItem = gamesItems.firstWhere(
-    (item) => item.isCorrect,
-    orElse: () => GameItem(
-      id: 'preview',
-      type: GameItemType.character,
-      content: targetCharacter,
-      dx: 0,
-      dy: 0,
-      backgroundColor: Colors.transparent,
-    ),
-  );
-
-  // Reproduz o som do caractere alvo
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await Future.delayed(const Duration(milliseconds: 50));
-    if (!mounted || _isDisposed) return;
-    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
-  });
-
-  // Sincroniza temporizadores com o tempo de nível
-  _startTime = DateTime.now();
-  progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-    if (!mounted || _isDisposed) return t.cancel();
-    final elapsed = DateTime.now().difference(_startTime);
-    final fraction = elapsed.inMilliseconds / levelTime.inMilliseconds;
-    setState(() {
-      progressValue = 1.0 - fraction;
-      if (progressValue <= 0) t.cancel();
-    });
-  });
-
-  roundTimer = Timer(levelTime, () {
-    if (!mounted || _isDisposed) return;
-    setState(() => isRoundActive = false);
+    // Reproduz som após pequena espera
     _cancelTimers();
-    _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
-    _gamesSuperKey.currentState?.showTimeout(
-      applySettings: _applyLevelSettings,
-      generateNewChallenge: _generateNewChallenge,
+    setState(() {
+      isRoundActive = true;
+      gamesItems.clear();
+      foundCorrect = 0;
+      currentTry = 0;
+      progressValue = 1.0;
+    });
+
+    // Gera lista de opções corretas e erradas e miustura
+    final bad = _generateWrongOptions(
+      count: wrongCount,
+      pool: _characters,
+      target: targetCharacter,
     );
-  });
-}
+    final good = _generateCorrectOptions(
+      count: correctCount,
+      target: targetCharacter,
+    );
+    final all = [...bad, ...good]..shuffle();
+
+    final cols = (all.length / 3).ceil();
+    final sx = 1 / (cols + 1);
+    final sy = 0.18;
+
+    gamesItems = List.generate(all.length, (i) {
+      final col = i % cols;
+      final row = i ~/ cols;
+      return buildGameItem(
+        index: i,
+        content: all[i],
+        target: targetCharacter,
+        dx: sx * (col + 1),
+        dy: 0.45 + sy * row,
+        isFirstCycle: isFirstCycle,
+        fontFamily: _randFont(),
+        backgroundColor: _randColor(),
+      );
+    });
+
+    referenceItem = gamesItems.firstWhere(
+      (item) => item.isCorrect,
+      orElse:
+          () => GameItem(
+            id: 'preview',
+            type: GameItemType.character,
+            content: targetCharacter,
+            dx: 0,
+            dy: 0,
+            backgroundColor: Colors.transparent,
+          ),
+    );
+
+    // Reproduz o som do caractere alvo
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (!mounted || _isDisposed) return;
+      await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+    });
+
+    // Sincroniza temporizadores com o tempo de nível
+    _startTime = DateTime.now();
+    progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+      if (!mounted || _isDisposed) return t.cancel();
+      final elapsed = DateTime.now().difference(_startTime);
+      final fraction = elapsed.inMilliseconds / levelTime.inMilliseconds;
+      setState(() {
+        progressValue = 1.0 - fraction;
+        if (progressValue <= 0) t.cancel();
+      });
+    });
+
+    roundTimer = Timer(levelTime, () {
+      if (!mounted || _isDisposed) return;
+      setState(() => isRoundActive = false);
+      _cancelTimers();
+      _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
+      _gamesSuperKey.currentState?.showTimeout(
+        applySettings: _applyLevelSettings,
+        generateNewChallenge: _generateNewChallenge,
+      );
+    });
+  }
 
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
@@ -358,10 +373,10 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
         await _loadCharacters();
         await _applyLevelSettings();
         if (!mounted || _isDisposed) return;
-          setState(() => hasChallengeStarted = true);
-          if (!mounted || _isDisposed) return;
-          _generateNewChallenge();
-      },  
+        setState(() => hasChallengeStarted = true);
+        if (!mounted || _isDisposed) return;
+        _generateNewChallenge();
+      },
     );
   }
 
@@ -376,9 +391,10 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
     // Pré-escolar: apenas letras simples, sem estilos diferentes
     if (isPreschool) {
-      final label = _isNumber(targetCharacter)
-          ? 'Encontra os números ${targetCharacter.toUpperCase()}'
-          : 'Encontra as letras ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}';
+      final label =
+          _isNumber(targetCharacter)
+              ? 'Encontra os números ${targetCharacter.toUpperCase()}'
+              : 'Encontra as letras ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}';
       return _buildSimpleText(label);
     }
 
@@ -389,13 +405,25 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
           children: [
             const TextSpan(text: 'Encontra as letras '),
             for (final entry in [
-              TextSpan(text: targetCharacter.toUpperCase(), style: _slaboStyle()),
+              TextSpan(
+                text: targetCharacter.toUpperCase(),
+                style: _slaboStyle(),
+              ),
               const TextSpan(text: ', '),
-              TextSpan(text: targetCharacter.toLowerCase(), style: _slaboStyle()),
+              TextSpan(
+                text: targetCharacter.toLowerCase(),
+                style: _slaboStyle(),
+              ),
               const TextSpan(text: ', '),
-              TextSpan(text: targetCharacter.toUpperCase(), style: _cursiveStyle()),
+              TextSpan(
+                text: targetCharacter.toUpperCase(),
+                style: _cursiveStyle(),
+              ),
               const TextSpan(text: ', '),
-              TextSpan(text: targetCharacter.toLowerCase(), style: _cursiveStyle()),
+              TextSpan(
+                text: targetCharacter.toLowerCase(),
+                style: _cursiveStyle(),
+              ),
             ])
               entry,
           ],
@@ -405,29 +433,32 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
 
     // Caso geral
-    final label = _isNumber(targetCharacter)
-        ? 'Encontra os números $targetCharacter'
-        : 'Encontra as letras ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}';
+    final label =
+        _isNumber(targetCharacter)
+            ? 'Encontra os números $targetCharacter'
+            : 'Encontra as letras ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}';
     return _buildSimpleText(label);
   }
 
   // Helpers
-  Text _buildSimpleText(String text) => Text(
-    text,
-    textAlign: TextAlign.center,
-    style: TextStyle(
-      fontSize: 22.sp,
-      fontWeight: FontWeight.bold,
-      fontFamily: getFontFamily(FontStrategy.none),
+  Widget _buildSimpleText(String text) => Padding(
+    padding: EdgeInsets.symmetric(horizontal: 40.w),
+    child: Text(
+      text,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 22.sp,
+        fontWeight: FontWeight.bold,
+        fontFamily: getFontFamily(FontStrategy.none),
+      ),
     ),
   );
 
   TextStyle _slaboStyle() => TextStyle(fontFamily: 'Slabo', fontSize: 22.sp);
-  TextStyle _cursiveStyle() => TextStyle(fontFamily: 'Cursive', fontSize: 25.sp);
+  TextStyle _cursiveStyle() =>
+      TextStyle(fontFamily: 'Cursive', fontSize: 25.sp);
 
-
-
-  // Constrói o tabuleiro do jogo, com base CharacterCircleBox do game_component.dart 
+  // Constrói o tabuleiro do jogo, com base CharacterCircleBox do game_component.dart
   Widget _buildBoard(BuildContext _, __, ___) {
     return SizedBox.expand(
       child: Stack(
@@ -439,16 +470,17 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
                 alignment: Alignment(safeDx * 2 - 1, safeDy * 2 - 1),
                 child: GestureDetector(
                   onTap: () => _handleTap(item),
-                  child: item.isTapped
-                    ? (item.isCorrect
-                        ? _gamesSuperKey.currentState!.correctIcon
-                        : _gamesSuperKey.currentState!.wrongIcon)
-                    : CharacterCircleBox(
-                        character: item.content,
-                        color: item.backgroundColor,
-                        user: widget.user,
-                        fontFamily: item.fontFamily,
-                      ),
+                  child:
+                      item.isTapped
+                          ? (item.isCorrect
+                              ? _gamesSuperKey.currentState!.correctIcon
+                              : _gamesSuperKey.currentState!.wrongIcon)
+                          : CharacterCircleBox(
+                            character: item.content,
+                            color: item.backgroundColor,
+                            user: widget.user,
+                            fontFamily: item.fontFamily,
+                          ),
                 ),
               );
             }).toList(),
