@@ -17,7 +17,6 @@ import 'home_page.dart';
 import 'sticker_book.dart';
 import 'user_stats.dart';
 
-import '../games/write_game.dart';
 
 class GameCardData {
   final String title;
@@ -118,8 +117,8 @@ class _GameMenuState extends State<GameMenu> {
       ),
       GameCardData(
         title: "Escrever",
-        icon: Icons.edit,
-        onTap: _writingGame,
+        icon: Icons.extension,
+        onTap: () => _writeGame(),
         backgroundColor: AppColors.orange,
       ),
       GameCardData(
@@ -144,19 +143,19 @@ class _GameMenuState extends State<GameMenu> {
         onTap: () =>_identifyword(),
         backgroundColor: AppColors.orange,
       ),
-    /*  GameCardData(
+      GameCardData(
         title: "Sílabas perdidas",
         icon: Icons.extension,
         onTap: () => _navigateToGame("Sílabas perdidas"),
         backgroundColor: AppColors.yellow,
-      ),*/
+      ),
 
-        GameCardData(
+      /*  GameCardData(
         title: "Sílabas perdidas",
         icon: Icons.extension,
         onTap: () => _writeGame(),
         backgroundColor: AppColors.yellow,
-      ),
+      ),*/
     ];
 
     final jogosDisponiveis =
@@ -281,14 +280,6 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
-  // Abre o jogo de escrita
-  void _writingGame() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => WritingGame(user: widget.user)),
-    );
-  }
-
     // Abre o jogo de escrita
   void _writeGame() {
     Navigator.pushReplacement(
@@ -313,7 +304,7 @@ class _GameMenuState extends State<GameMenu> {
     );
   }
 
-    // Abre o jogo de ouvir e procurar palavrar
+    // Abre o jogo de ouvir e procurar palavras
   void _identifyword() {
     Navigator.pushReplacement(
       context,

@@ -400,7 +400,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
     // 1º ciclo com letras → mostra as 4 variações (Slabo e Cursive)
     if (isFirstCycle && _isLetter(targetCharacter)) {
-      return Text.rich(
+      return _buildRichText(
         TextSpan(
           children: [
             const TextSpan(text: 'Encontra as letras '),
@@ -428,7 +428,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
               entry,
           ],
         ),
-        textAlign: TextAlign.center,
       );
     }
 
@@ -442,7 +441,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   // Helpers
   Widget _buildSimpleText(String text) => Padding(
-    padding: EdgeInsets.symmetric(horizontal: 40.w),
+    padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w), 
     child: Text(
       text,
       textAlign: TextAlign.center,
@@ -453,6 +452,15 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       ),
     ),
   );
+
+    Widget _buildRichText(TextSpan textSpan) => Padding(
+    padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w),
+    child: Text.rich(
+      textSpan,
+      textAlign: TextAlign.center,
+    ),
+  );
+
 
   TextStyle _slaboStyle() => TextStyle(fontFamily: 'Slabo', fontSize: 22.sp);
   TextStyle _cursiveStyle() =>

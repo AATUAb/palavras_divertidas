@@ -316,31 +316,37 @@ class _ListenLookGameState extends State<ListenLookGame> {
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () => _handleTap(item),
+                          // Dentro do seu Row, no lugar daquele child antigo:
                           child: item.isTapped
-                              ? SizedBox(
-                                  width: 160.w,
-                                  height: 100.h,
-                                  child: Center(
-                                    child: item.isCorrect
-                                        ? _gamesSuperKey.currentState!.correctIcon
-                                        : _gamesSuperKey.currentState!.wrongIcon,
-                                  ),
-                                )
-                              : ImageCardBox(imagePath: item.content),
+                            ? SizedBox(
+                                width: 160.w,
+                                // Remova o height fixo se quiser crescer para caber o texto
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // ícone de certo ou errado
+                                    Center(
+                                      child: item.isCorrect
+                                          ? _gamesSuperKey.currentState!.correctIcon
+                                          : _gamesSuperKey.currentState!.wrongIcon,
+                                    ),
+                                    // somente se for o correto E showWord estiver true
+                                    if (item.isCorrect && showWord)
+                                      Padding(
+                                        padding: EdgeInsets.only(top: 8.h),
+                                        child: WordHighlightBox(
+                                          word: targetWord.text,
+                                          user: widget.user,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              )
+                            : ImageCardBox(imagePath: item.content),
                         ),
                       );
                     }).toList(),
                   ),
-
-                  // Palavra escrita, quando correta
-                   if (showWord)
-                    Positioned(
-                            top: 0,
-                            child: WordHighlightBox(
-                        word: targetWord.text,
-                        user: widget.user,
-                      ),
-                    ),
                   ],
                 ),
               ),

@@ -259,6 +259,36 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
       onIntroFinished: () async {
         await _loadWords();
         await _applyLevelSettings();
+        /* Para quando estiver a questão do word_model pronta. depois pode-se apagar o que está em baixo nesta função
+        if (_levelWords.isEmpty) {
+          // Mostra um alerta e sai do jogo
+          showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: Text('Ainda sem palavras!'),
+              content: Text(
+                'Não existem palavras que possa formar com as letras que conhece.\n'
+                'Volte ao painel de letras para aprender novas antes de jogar este jogo.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => GameMenu(user: widget.user)),
+                    );
+                  },
+                  child: Text('Ok'),
+                ),
+              ],
+            ),
+          );
+          return;
+        }
+
+        setState(() => hasChallengeStarted = true);
+        _generateNewChallenge();
+      }*/ 
         if (mounted) {
           setState(() => hasChallengeStarted = true);
           _generateNewChallenge();
@@ -314,35 +344,42 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
                         behavior: HitTestBehavior.opaque,
                         onTap: () => _handleTap(item),
                         child: item.isTapped
-                            ? SizedBox(
-                                width: 160.w,
-                                height: 80.h,
-                                child: Center(
-                                  child: item.isCorrect
-                                      ? _gamesSuperKey.currentState!.correctIcon
-                                      : _gamesSuperKey.currentState!.wrongIcon,
-                                ),
-                              )
-                            : SizedBox(
-                                width: 160.w,
-                                height: 50.h,
-                                child: WordHighlightBox(
-                                  word: item.content,
-                                  user: widget.user,
-                                ),
+                          ? SizedBox(
+                              width: 160.w,
+                              // remova o height fixo se quiser que o Column ajuste automaticamente
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // primeiro o ícone de certo/errado
+                                  Center(
+                                    child: item.isCorrect
+                                        ? _gamesSuperKey.currentState!.correctIcon
+                                        : _gamesSuperKey.currentState!.wrongIcon,
+                                  ),
+                                  // só se for o correto E showWord estiver true
+                                  if (item.isCorrect && showWord)
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 8.h),
+                                      child: ImageCardBox(
+                                        imagePath: targetWord.imagePath,
+                                      ),
+                                    ),
+                                ],
                               ),
+                            )
+                          : SizedBox(
+                              width: 160.w,
+                              height: 50.h,
+                              child: WordHighlightBox(
+                                word: item.content,
+                                user: widget.user,
+                              ),
+                            ),
+
                       ),
                     );
                   }).toList(),
                 ),
-
-                if (showWord)
-                  Positioned(
-                    bottom: 0,
-                    child: ImageCardBox(
-                      imagePath: targetWord.imagePath,
-                    ),
-                  ),
               ],
             ),
           ),

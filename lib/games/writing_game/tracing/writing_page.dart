@@ -156,12 +156,12 @@ class TracingGameScaffold extends StatelessWidget {
             child: FittedBox(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: List.generate(state.letterPathsModels.length, (index) {
                   final model = state.letterPathsModels[index];
                   return Container(
-                    height: model.viewSize.width,
-                    width: model.viewSize.height,
+                    height: model.viewSize.height,
+                    width: model.viewSize.width,
                     margin: model.isSpace ? const EdgeInsets.only(right: 150) : EdgeInsets.zero,
                     child: FittedBox(
                       fit: BoxFit.contain,
@@ -205,16 +205,17 @@ class TracingGameScaffold extends StatelessWidget {
                                 top: model.anchorPos!.dy,
                                 left: model.anchorPos!.dx,
                                 child: Image.asset(
-                                  'assets/images/position_2_finger.png',
+                                  'assets/images/position_2_finger.webp',
                                   height: 50,
                                 ),
                               ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }
+                ),
               ),
             ),
           );
