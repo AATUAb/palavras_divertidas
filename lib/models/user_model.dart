@@ -51,7 +51,10 @@ class UserModel extends HiveObject {
   Map<String, int> totalAttemptsPerGame;
 
   @HiveField(15)
-  int lastSeenConquests; // ← novo campo
+  int lastSeenConquests;
+
+  @HiveField(16)
+  String? lastLettersHash;
 
   final Logger logger = Logger();
 
@@ -71,11 +74,13 @@ class UserModel extends HiveObject {
     this.gamesAccuracy = const {},
     Map<String, int>? totalCorrectPerGame,
     Map<String, int>? totalAttemptsPerGame,
+    this.lastLettersHash,
     this.lastSeenConquests = 0, // valor inicial
   }) : knownLetters = knownLetters ?? [],
        totalCorrectPerGame = Map.from(totalCorrectPerGame ?? {}),
        totalAttemptsPerGame = Map.from(totalAttemptsPerGame ?? {});
 
+  
   void updateAccuracy({required int level, required double accuracy}) {
     accuracyByLevel = {...accuracyByLevel, level: accuracy};
     if (accuracyByLevel.isNotEmpty) {
@@ -121,7 +126,8 @@ class UserModel extends HiveObject {
     Map<String, List<int>>? gamesAccuracy,
     Map<String, int>? totalCorrectPerGame,
     Map<String, int>? totalAttemptsPerGame,
-    int? lastSeenConquests, // ← incluído no copyWith
+    int? lastSeenConquests, 
+    String? lastLettersHash,
   }) {
     return UserModel(
       name: name ?? this.name,
@@ -142,6 +148,7 @@ class UserModel extends HiveObject {
       totalCorrectPerGame: totalCorrectPerGame ?? this.totalCorrectPerGame,
       totalAttemptsPerGame: totalAttemptsPerGame ?? this.totalAttemptsPerGame,
       lastSeenConquests: lastSeenConquests ?? this.lastSeenConquests,
+      lastLettersHash: lastLettersHash ?? this.lastLettersHash, 
     );
   }
 

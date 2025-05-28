@@ -12,6 +12,7 @@ import 'conquest_manager.dart';
 import 'game_animations.dart';
 import 'game_design.dart';
 import 'sound_manager.dart';
+import '../services/hive_service.dart';
 
 class GamesSuperWidget extends StatefulWidget {
   final UserModel user;
@@ -788,4 +789,31 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
           ),
     );
   }
+  Future<void> resetLevelIfNewLetter(UserModel user, {required bool isLetterDependent}) async {
+  if (!isLetterDependent) return;
+
+  final currentLetters = List.from(user.knownLetters ?? [])..sort();
+  final currentHash = currentLetters.join(',').toLowerCase();
+  final previousHash = user.lastLettersHash ?? '';
+
+  if (currentHash != previousHash) {
+    user
+      ..gameLevel = 1
+      ..lastLettersHash = currentHash;
+    await user.save();
+
+    if (user.key != null) {
+      await HiveService.saveGameLevel(
+        userKey: user.key.toString(),
+        gameName: widget.gameName,
+        level: 1,
+      );
+    }
+
+    print("🟢 Reinício de nível: letras aprendidas foram alteradas. Novo nível -> 1");
+  } else {
+    print("🟡 Letras mantiveram-se. Nível inalterado.");
+  }
+}
+
 }

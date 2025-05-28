@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audioplayers/audioplayers.dart';
-
 import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/menu_design.dart';
@@ -16,6 +15,7 @@ import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
 import 'user_stats.dart';
+import 'letters_selection.dart';
 
 
 class GameCardData {
@@ -23,12 +23,14 @@ class GameCardData {
   final IconData icon;
   final VoidCallback onTap;
   final Color backgroundColor;
+  final bool showNewFlag;
 
   GameCardData({
     required this.title,
     required this.icon,
     required this.onTap,
     required this.backgroundColor,
+    this.showNewFlag = false,
   });
 }
 
@@ -54,55 +56,153 @@ class _GameMenuState extends State<GameMenu> {
 
   // Verifica se há conquistas novas. Se sim mostra um diálogo com a conquista
   Future<void> _checkNewConquests() async {
-    final newUnlocks = widget.user.conquest - widget.user.lastSeenConquests;
-    if (newUnlocks > 0) {
-      await pauseMenuMusic();
-      final soundFile = newUnlocks == 1
-              ? 'sounds/animations/one_conquest.ogg'
-              : 'sounds/animations/more_conquests.ogg';
-      await _conquestPlayer.play(AssetSource(soundFile), volume: 1.0);
-      await showDialog(
-        context: context,
-        builder:
-            (_) => AlertDialog(
-              title: const Text('Parabéns! 🎉'),
-              content: Text(
-                'Tens $newUnlocks conquista${newUnlocks > 1 ? 's' : ''} nova${newUnlocks > 1 ? 's' : ''}!\n'
-                'Entra na caderneta para a${newUnlocks > 1 ? 's' : ''} encontrar${newUnlocks > 1 ? 'es' : ''}.',
-              ),
-              actions: [
-                Container(
-                  margin: const EdgeInsets.only(right: 12, bottom: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: TextButton.icon(
-                    onPressed: () async {
-                      await pauseMenuMusic();
-                      widget.user.lastSeenConquests = widget.user.conquest;
-                      await widget.user.save();
-                      Navigator.of(context).pop();
-                      await Future.delayed(const Duration(milliseconds: 100));
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => StickerBookScreen(user: widget.user),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.check, color: Colors.white),
-                    label: const Text(
-                      'Ok',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
+  final newUnlocks = widget.user.conquest - widget.user.lastSeenConquests;
+  if (newUnlocks > 0) {
+    await pauseMenuMusic();
+
+    final soundFile = newUnlocks == 1
+        ? 'sounds/animations/one_conquest.ogg'
+        : 'sounds/animations/more_conquests.ogg';
+    await _conquestPlayer.play(AssetSource(soundFile), volume: 1.0);
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Parabéns! 🎉'),
+        content: Text(
+          'Tens $newUnlocks conquista${newUnlocks > 1 ? 's' : ''} nova${newUnlocks > 1 ? 's' : ''}!\n'
+          'Entra na caderneta para a${newUnlocks > 1 ? 's' : ''} encontrar${newUnlocks > 1 ? 'es' : ''}.',
+        ),
+        actions: [
+          // Botão Cancelar → volta ao menu de jogos
+          Container(
+            margin: const EdgeInsets.only(right: 8, bottom: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade400,
+              borderRadius: BorderRadius.circular(30),
             ),
-      );
-    }
-    await resumeMenuMusic();
+            child: TextButton.icon(
+              onPressed: () async {
+                // ⚠️ MARCAR AS CONQUISTAS COMO VISTAS
+                widget.user.lastSeenConquests = widget.user.conquest;
+                await widget.user.save();
+
+                Navigator.of(context).pop(); // fecha diálogo
+                // Não é necessário pushReplacement para GameMenu, já lá estás
+              },
+              icon: const Icon(Icons.cancel, color: Colors.white),
+              label: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+            ),
+          ),
+          // Botão OK → vai para a caderneta
+          Container(
+            margin: const EdgeInsets.only(right: 12, bottom: 10),
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: TextButton.icon(
+              onPressed: () async {
+                await pauseMenuMusic();
+                widget.user.lastSeenConquests = widget.user.conquest;
+                await widget.user.save();
+                Navigator.of(context).pop();
+                await Future.delayed(const Duration(milliseconds: 100));
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => StickerBookScreen(user: widget.user),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.check, color: Colors.white),
+              label: const Text('Ver Caderneta', style: TextStyle(color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
+  await resumeMenuMusic();
+}
+
+void handleLetterDependentGame({
+  required BuildContext context,
+  required UserModel user,
+  required Widget Function() gameBuilder,
+}) async {
+  final knownLettersRaw = user.knownLetters ?? [];
+final knownLetters = expandKnownLetters(knownLettersRaw);
+
+// Se só sabe vogais OU nenhuma letra → bloquear
+final onlyVowels = knownLetters.toSet().difference({'a','e','i','o','u'}).isEmpty;
+
+if (knownLetters.isEmpty || onlyVowels) {
+  final player = AudioPlayer();
+  await player.play(AssetSource('sounds/update_letters.ogg'));
+
+  return await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xffe8f4fe),
+        title: Text(
+          'Ainda sem palavras!',
+          style: TextStyle(
+            color: Colors.blue.shade800,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Atualiza as letras aprendidas para poderes jogar.',
+          style: TextStyle(color: Colors.blue.shade700),
+        ),
+        actions: [
+          // Botão para painel de letras
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.green,
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await showLettersDialog(
+                context: context,
+                user: user,
+                initialSelection: user.knownLetters,
+                onSaved: (selected) async {
+                  user.knownLetters = selected;
+                  await user.save();
+                },
+              );
+              await Future.delayed(const Duration(milliseconds: 100));
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => gameBuilder()),
+              );
+            },
+            child: Text('Letras novas?'),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              resumeMenuMusic();
+            },
+            icon: Icon(Icons.cancel, size: 20, color: Colors.grey),
+            label: Text("Voltar", style: TextStyle(color: Colors.grey)),
+          ),
+        ],
+      ),
+    );
+  } else {
+    pauseMenuMusic();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => gameBuilder()),
+    );
+  }
+}
 
 
   // Jogos principais disponíveis para todos os ciclos
@@ -120,6 +220,7 @@ class _GameMenuState extends State<GameMenu> {
         icon: Icons.extension,
         onTap: () => _writeGame(),
         backgroundColor: AppColors.orange,
+        showNewFlag: widget.user.schoolLevel == '1º Ciclo',
       ),
       GameCardData(
         title: "Contar sílabas",
@@ -135,140 +236,199 @@ class _GameMenuState extends State<GameMenu> {
       ),
     ];
 
-    // Jogos extras disponíveis apenas para o 1º ciclo
     final List<GameCardData> jogosExtras = [
-      GameCardData(
-        title: "Ouvir e procurar palavras",
-        icon: Icons.find_in_page,
-        onTap: () =>_identifyword(),
-        backgroundColor: AppColors.orange,
-      ),
-      GameCardData(
-        title: "Sílabas perdidas",
-        icon: Icons.extension,
-        onTap: () => _navigateToGame("Sílabas perdidas"),
-        backgroundColor: AppColors.yellow,
-      ),
-
-      /*  GameCardData(
-        title: "Sílabas perdidas",
-        icon: Icons.extension,
-        onTap: () => _writeGame(),
-        backgroundColor: AppColors.yellow,
-      ),*/
-    ];
-
+  /*GameCardData(
+    title: "Ouvir e procurar palavras",
+    icon: Icons.find_in_page,
+    onTap: () => handleLetterDependentGame(
+      context: context,
+      user: widget.user,
+      gameBuilder: () => IdentifyWordGame(user: widget.user),
+    ),
+    backgroundColor: AppColors.orange,
+    showNewFlag: true,
+  ),*/
+ /* GameCardData(
+  title: "Ouvir e procurar palavras",
+  icon: Icons.find_in_page,
+  onTap: _identifyword, // agora usa o método centralizado
+  backgroundColor: AppColors.orange,
+  showNewFlag: true,
+),*/
+GameCardData(
+  title: "Ouvir e procurar palavras",
+  icon: Icons.find_in_page,
+  onTap: () => handleLetterDependentGame(
+    context: context,
+    user: widget.user,
+    gameBuilder: () => IdentifyWordGame(user: widget.user),
+  ),
+  backgroundColor: AppColors.orange,
+  showNewFlag: true,
+),
+  GameCardData(
+  title: "Sílabas perdidas",
+  icon: Icons.extension,
+  onTap: () => _navigateToGame("Sílabas perdidas"),
+  backgroundColor: AppColors.yellow,
+  showNewFlag: true,
+),
+];
     final jogosDisponiveis =
         widget.user.schoolLevel == "1º Ciclo"
             ? [...jogosBase, ...jogosExtras]
             : jogosBase;
 
+
     // Menu principal de escolha de jogos
-    return Scaffold(
-      body: MenuDesign(
-        titleText: "Mundo das Palavras",
-        headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
-        pauseIntroMusic: true,
-        showHomeButton: true,
-        onHomePressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const MyHomePage(title: 'Mundo das Palavras'),
-            ),
-          );
-        },
-        // Barra lateral com ícones de conquistas e estatísticas
-        topLeftWidget: Padding(
-          padding: EdgeInsets.only(top: 170.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(Icons.emoji_events, size: 25.sp),
-                tooltip: 'Conquistas',
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => StickerBookScreen(user: widget.user),
-                    ),
-                  );
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.bar_chart, size: 25.sp),
-                tooltip: 'Estatísticas',
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => UserStats(user: widget.user),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+return Scaffold(
+  body: MenuDesign(
+    titleText: "Mundo das Palavras",
+    headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
+    pauseIntroMusic: true,
+    showHomeButton: true,
+    onHomePressed: () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const MyHomePage(title: 'Mundo das Palavras'),
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w),
-            child: Column(
-              children: [
-                SizedBox(height: 100.h),
-                Expanded(
-                  child: Center(
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 15.w,
-                      runSpacing: 12.h,
-                      children:
-                          jogosDisponiveis.map((jogo) {
-                            return GestureDetector(
-                              onTap: jogo.onTap,
-                              child: SizedBox(
-                                width: 100.w,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 70.r,
-                                      height: 70.r,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: jogo.backgroundColor,
-                                      ),
-                                      child: Icon(
-                                        jogo.icon,
-                                        size: 30.sp,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4.h),
-                                    Text(
-                                      jogo.title,
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                    ),
-                  ),
+      );
+    },
+    // Barra lateral com ícones de conquistas e estatísticas
+    topLeftWidget: Padding(
+      padding: EdgeInsets.only(top: 170.h),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(Icons.emoji_events, size: 25.sp),
+            tooltip: 'Conquistas',
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StickerBookScreen(user: widget.user),
                 ),
-              ],
-            ),
+              );
+            },
           ),
+          IconButton(
+            icon: Icon(Icons.bar_chart, size: 25.sp),
+            tooltip: 'Estatísticas',
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => UserStats(user: widget.user),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ),
+    child: SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        child: Column(
+          children: [
+            SizedBox(height: 100.h),
+            Expanded(
+              child: Center(
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 15.w,
+                  runSpacing: 12.h,
+                  children: jogosDisponiveis.map((jogo) {
+                    return GestureDetector(
+                      onTap: jogo.onTap,
+                      child: SizedBox(
+                        width: 100.w,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  width: 70.r,
+                                  height: 70.r,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: jogo.backgroundColor,
+                                  ),
+                                  child: Icon(
+                                    jogo.icon,
+                                    size: 30.sp,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                if (jogo.showNewFlag)
+                                  Positioned(
+                                    top: -6.h,
+                                    right: -6.w,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        showLettersDialog(
+                                          context: context,
+                                          user: widget.user,
+                                          initialSelection: widget.user.knownLetters ?? [],
+                                          onSaved: (List<String> selectedLetters) async {
+                                            widget.user.knownLetters = selectedLetters;
+                                            await widget.user.save();
+                                          },
+                                        );
+                                      },
+
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 6.w,
+                                          vertical: 2.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.green,
+                                          borderRadius:
+                                              BorderRadius.circular(12.r),
+                                        ),
+                                        child: Text(
+                                          'Letras novas?',
+                                          style: TextStyle(
+                                            fontSize: 8.sp,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              jogo.title,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
+
 
   // Abre o jogo de identificação de letras e números
   void _identifyLettersNumbers() {
@@ -305,12 +465,13 @@ class _GameMenuState extends State<GameMenu> {
   }
 
     // Abre o jogo de ouvir e procurar palavras
-  void _identifyword() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => IdentifyWordGame(user: widget.user)),
+  /*void _identifyword() {
+    handleLetterDependentGame(
+      context: context,
+      user: widget.user,
+      gameBuilder: () => IdentifyWordGame(user: widget.user),
     );
-  }
+  }*/
 
   void _navigateToGame(String gameName) {
     ScaffoldMessenger.of(context).showSnackBar(

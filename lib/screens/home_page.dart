@@ -197,6 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   await pauseMenuMusic();
                                   await showLettersDialog(
                                     context: context,
+                                    user: user,
                                     initialSelection: user.knownLetters,
                                     onSaved: (selectedLetters) {
                                       final updatedUser = user.copyWith(

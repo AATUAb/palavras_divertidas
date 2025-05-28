@@ -3,14 +3,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../themes/colors.dart';
+import '../models/user_model.dart';
+
+// Expande letras combinadas para uso no jogo (ex: "Vogais" → "a", "e", "i", "o", "u")
+List<String> expandKnownLetters(List<String> knownSelections) {
+  final expanded = <String>[];
+
+  for (final item in knownSelections) {
+    final normalized = item.trim().toLowerCase();
+
+    if (normalized.startsWith('vogais')) {
+      expanded.addAll(['a', 'e', 'i', 'o', 'u']);
+    } else if (normalized == 'br, cr, dr, fr, gr, pr, tr, vr') {
+      expanded.addAll(['br', 'cr', 'dr', 'fr', 'gr', 'pr', 'tr', 'vr']);
+    } else if (normalized == 'bl, cl, fl, gl, pl, tl') {
+      expanded.addAll(['bl', 'cl', 'fl', 'gl', 'pl', 'tl']);
+    } else if (normalized.contains(',')) {
+      final parts = normalized.split(',');
+      for (final part in parts) {
+        final clean = part.trim();
+        if (clean.isNotEmpty) expanded.add(clean);
+      }
+    } else {
+      expanded.add(normalized);
+    }
+  }
+
+  return expanded;
+}
 
 // Classe geral para mostrar uma caixa de diálogo com letras
 Future<void> showLettersDialog({
   required BuildContext context,
+  required UserModel user,
   required List<String> initialSelection,
   required void Function(List<String> selectedLetters) onSaved,
 }) async {
-  // Lista de letras e sons disponíveis para seleção
   final List<String> letters = [
     "Vogais: A,E, I, O, U", "P", "T", "L", "D", "M", "V",
     "C", "Q", "N", "R", "B", "G", "J", "F", "S", "Z", "H", "X",
@@ -19,7 +47,6 @@ Future<void> showLettersDialog({
     "BL, CL, FL, GL, PL, TL",
   ];
 
-  // Mapeia as letras com base na seleção inicial do utilizador
   Map<String, bool> selectedMap = {
     for (var l in letters) l: initialSelection.contains(l),
   };
@@ -30,39 +57,36 @@ Future<void> showLettersDialog({
   final player = AudioPlayer();
   final ValueNotifier<bool> introPlayed = ValueNotifier(false);
 
- // Toca o som de instrução uma única vez ao abrir a caixa de diálogo
- void playIntroSoundOnce(AudioPlayer player, bool hasPlayed, void Function() markAsPlayed) {
-  if (!hasPlayed) {
-    markAsPlayed();
-    player.stop().then((_) {
-      player.play(AssetSource('sounds/select_letters.ogg'));
-    });
-  }
-}
- 
- // Controla a exibição e interações da caixa de diálogo
-  await showDialog(
-  context: context,
-  builder: (context) => StatefulBuilder(
-    builder: (context, setState) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        playIntroSoundOnce(player, introPlayed.value, () => introPlayed.value = true);
+  void playIntroSoundOnce(AudioPlayer player, bool hasPlayed, void Function() markAsPlayed) {
+    if (!hasPlayed) {
+      markAsPlayed();
+      player.stop().then((_) {
+        player.play(AssetSource('sounds/select_letters.ogg'));
       });
+    }
+  }
 
-      return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Center(
-          child: Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 500.h),
-              child: Padding(
-                padding: EdgeInsets.all(20.w),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                        // Título principal da caixa de diálogo
-                        Text(
+  await showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          playIntroSoundOnce(player, introPlayed.value, () => introPlayed.value = true);
+        });
+
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(
+            child: Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 500.h),
+                child: Padding(
+                  padding: EdgeInsets.all(20.w),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
                         "Escolhe as letras ou sons que já aprendeste na escola",
                         style: TextStyle(
                           fontSize: 20.sp,
@@ -83,7 +107,6 @@ Future<void> showLettersDialog({
                                 selectedMap.updateAll((key, _) => selectAll);
                                 setState(() {});
                               },
-                              // Botão para selecionar todas as letras
                               icon: Icon(
                                 selectAll ? Icons.check_box : Icons.check_box_outline_blank,
                                 size: 20.sp,
@@ -94,7 +117,6 @@ Future<void> showLettersDialog({
                                 style: TextStyle(fontSize: 20.sp, color: AppColors.green),
                               ),
                             ),
-                            // Botão para limpar todas as seleções
                             TextButton.icon(
                               onPressed: () {
                                 selectedMap.updateAll((key, _) => false);
@@ -125,7 +147,6 @@ Future<void> showLettersDialog({
                               final lastSelectedIndex = letters.lastIndexWhere((l) => selectedMap[l] == true);
                               final canTap = index == 0 || index == lastSelectedIndex + 1 || isSelected;
 
-                              // Se todas as letras estiverem selecionadas, impede mais seleções e mostra aviso com som
                               return GestureDetector(
                                 onTap: () async {
                                   if (allSelectedMode) {
@@ -142,18 +163,13 @@ Future<void> showLettersDialog({
                                     return;
                                   }
 
-                                  // Verifica se a letra anterior foi selecionada. Se não, bloqueia a ação e dá texto e som com informação
                                   if (canTap) {
                                     selectedMap[letter] = !isSelected;
                                     selectAll = selectedMap.values.every((v) => v);
                                     setState(() {});
                                   } else {
-                                    try {
                                     await player.stop();
                                     await player.play(AssetSource('sounds/before_letter.ogg'));
-                                    } catch (e) {
-                                      debugPrint('Erro ao reproduzir som: $e');
-                                    }
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text("Ainda não clicaste na opção anterior."),
@@ -163,7 +179,6 @@ Future<void> showLettersDialog({
                                     );
                                   }
                                 },
-                                // Ajusta a opacidade da letra com base no estado de seleção
                                 child: Opacity(
                                   opacity: canTap ? 1.0 : 0.4,
                                   child: Container(
@@ -194,7 +209,6 @@ Future<void> showLettersDialog({
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          /// Botões "Cancelar" e "OK" no final da caixa de diálogo
                           TextButton.icon(
                             onPressed: () => Navigator.pop(context),
                             icon: Icon(Icons.cancel, size: 20.sp, color: AppColors.grey),
@@ -203,12 +217,15 @@ Future<void> showLettersDialog({
                           ElevatedButton.icon(
                             icon: Icon(Icons.check, size: 20.sp),
                             label: Text("Ok"),
-                            onPressed: () {
+                            onPressed: () async {
                               final selected = selectedMap.entries
                                   .where((e) => e.value)
                                   .map((e) => e.key)
                                   .toList();
+                              user.knownLetters = selected;
+                              await user.save(); 
                               onSaved(selected);
+                              print('🔠 Letras atualizadas: $selected');
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
@@ -228,5 +245,3 @@ Future<void> showLettersDialog({
     ),
   );
 }
-
-
