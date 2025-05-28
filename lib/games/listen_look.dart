@@ -1,15 +1,19 @@
-import 'dart:async';
+// Jogo "Ouvir e Procurar Imagem":
+// O jogador ouve uma palavra e escolhe entre 3 imagens.
+// A dificuldade e tempo variam com o nível.
+// A resposta correta mostra o texto da palavra correspondente.
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
 import '../models/user_model.dart';
 import '../models/word_model.dart';
 import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
 import '../widgets/game_component.dart';
 
+// Classe principal do jogo, que recebe o utilizador como argumento
 class ListenLookGame extends StatefulWidget {
   final UserModel user;
   const ListenLookGame({Key? key, required this.user});
@@ -18,6 +22,7 @@ class ListenLookGame extends StatefulWidget {
   State<ListenLookGame> createState() => _ListenLookGameState();
 }
 
+// Classe que controla o estado do jogo
 class _ListenLookGameState extends State<ListenLookGame> {
   final _gamesSuperKey = GlobalKey<GamesSuperWidgetState>();
   bool hasChallengeStarted = false;
@@ -104,23 +109,56 @@ class _ListenLookGameState extends State<ListenLookGame> {
     progressTimer?.cancel();
   }
 
-  /// 1) Chamado pelo super-widget (ícone de repetir áudio)
+  // Chamado pelo super-widget (ícone de repetir áudio)
   Future<void> _playInstruction() async {
     if (!mounted || _isDisposed) return;
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
-  /// 2) Gera cada novo desafio: agora com 3 imagens
+  // Gera um novo desafio com 3 imagens, baseando-se no áudio do item correto
   Future<void> _generateNewChallenge() async {
-    // sinal visual de início
     _gamesSuperKey.currentState?.playChallengeHighlight();
 
-    if (!mounted || _isDisposed) return;
+      // Verifica se há retry a usar
+      if (!mounted || _isDisposed) return;
+
+      final availableWords = _levelWords
+      .where((w) => !_usedWords.contains(w.text))
+      .map((w) => w.text)
+      .toList();
+    
+    final hasRetry = _gamesSuperKey.currentState?.peekNextRetryTarget() != null;
+
+    if (availableWords.isEmpty && !hasRetry) {
+      _gamesSuperKey.currentState?.showEndOfGameDialog(
+        onRestart: () async {
+          await _gamesSuperKey.currentState?.restartGame();
+          _usedWords.clear();
+          await _applyLevelSettings();
+          if (mounted) _generateNewChallenge();
+        },
+      );
+      return;
+    }
+
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
 
-    // 2.1) Escolhe o WordModel atual (retry ou novo aleatório)
-    targetWord =
-        retry != null
+// Verifica se o jogo terminou antes de gerar desafio
+final available = _levelWords.where((w) => !_usedWords.contains(w.text)).toList();
+
+if (available.isEmpty && !hasRetry) {
+  _gamesSuperKey.currentState?.showEndOfGameDialog(
+    onRestart: () async {
+      await _gamesSuperKey.currentState?.restartGame();
+      await _applyLevelSettings();
+      if (mounted) _generateNewChallenge();
+    },
+  );
+  return;
+}
+
+    // Escolhe o WordModel atual (retry ou novo aleatório)
+    targetWord = retry != null
             ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
               list: _levelWords,
               retryId: retry,
@@ -141,7 +179,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
       _usedWords.add(targetWord.text);
     }
 
-    // 2.2) Prepara o GameItem que vai tocar o áudio
+    // Prepara o GameItem que vai tocar o áudio
     referenceItem = GameItem(
       id: targetWord.text,
       type: GameItemType.text,
@@ -152,14 +190,33 @@ class _ListenLookGameState extends State<ListenLookGame> {
       isCorrect: true,
     );
 
-    // 2.3) Escolhe 2 distractors e monta a lista de 3 imagens
-    final distractors =
-        (_levelWords.where((w) => w.text != targetWord.text).toList()
-              ..shuffle())
-            .take(2)
-            .toList();
+    // Escolhe 2 distractors e monta a lista de 3 imagens, do mesmo tópico
+    final correctTopic = targetWord.topic.trim().toLowerCase();
 
-    // monta 3 GameItem de tipo image
+    final sameTopicDistractors = _allWords.where((w) =>
+      w.text != targetWord.text &&
+      w.topic.trim().toLowerCase() == correctTopic &&
+      w.imagePath.trim().isNotEmpty &&
+      w.audioPath.trim().isNotEmpty
+    ).toList();
+
+    // Distratores do mesmo nível e tópico
+    List<WordModel> distractors;
+    if (sameTopicDistractors.length >= 2) {
+      distractors = (sameTopicDistractors..shuffle()).take(2).toList();
+    } else {
+      final fallbackDistractors = _allWords.where((w) =>
+        w.text != targetWord.text &&
+        w.imagePath.trim().isNotEmpty &&
+        w.audioPath.trim().isNotEmpty
+      ).toList();
+      distractors = (sameTopicDistractors + (fallbackDistractors..shuffle()))
+          .where((w) => w.text != targetWord.text)
+          .take(2)
+          .toList();
+    }
+
+    // Cria 3 GameItem de tipo imagem. 1 correto e 2 distratores
     gamesItems = [targetWord, ...distractors]
       .map((w) => GameItem(
         id: w.text,
@@ -172,14 +229,14 @@ class _ListenLookGameState extends State<ListenLookGame> {
       .toList()
     ..shuffle();
 
-    // 2.4) Toca o áudio logo após o build
+    // Toca o áudio logo após o build
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 50));
       if (!mounted || _isDisposed) return;
       await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
     });
 
-    // 2.5) Reinicia timers e progress bar (igual antes)
+    // Reinicia timers e progress bar 
     _cancelTimers();
     setState(() {
       isRoundActive = true;
@@ -188,6 +245,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
       foundCorrect = 0;
     });
 
+    // Sincroniza temporizadores com o tempo de nív
     _startTime = DateTime.now();
     progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
       if (!mounted || _isDisposed) return t.cancel();
@@ -210,6 +268,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
     });
   }
 
+  // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
     if (!isRoundActive || item.isTapped) return;
     final s = _gamesSuperKey.currentState;
@@ -219,6 +278,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
       item.isTapped = true;
     });
 
+    // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(
       selectedItem: item,
       target: targetWord.imagePath,
@@ -237,7 +297,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
       },
     );
 
-    setState(() => currentTry++);
+    setState(() => currentTry++);    // Incrementa o número de tentativas feitas nesta ronda
   }
 
   // Constrói o widget principal do jogo
@@ -260,14 +320,14 @@ class _ListenLookGameState extends State<ListenLookGame> {
       onIntroFinished: () async {
         await _loadWords();
         await _applyLevelSettings();
-        if (mounted) {
-          setState(() => hasChallengeStarted = true);
-          _generateNewChallenge();
-        }
+        if (!mounted || _isDisposed) return;
+        _generateNewChallenge();
+        setState(() => hasChallengeStarted = true);
       },
     );
   }
 
+  // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
     final font = getFontFamily(
       isFirstCycle ? FontStrategy.slabo : FontStrategy.none,

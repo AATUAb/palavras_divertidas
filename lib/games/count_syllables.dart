@@ -1,4 +1,8 @@
-// Estrutura do jogo "Contar Sílabas"
+// Jogo "Contar sílabas":
+// O jogador ouve uma palavra e visualiza a sua imagem e escolhe entre 3 opções numéricas.
+// A dificuldade e tempo variam com o nível.
+// A resposta correta mostra o texto da palavra com a divisão silábica correspondente.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -150,6 +154,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
             .map((w) => w.text)
             .toList();
 
+    // Verifica se o jogo terminou antes de gerar desafio
     final hasRetry = _gamesSuperKey.currentState?.peekNextRetryTarget() != null;
 
     if (availableWords.isEmpty && !hasRetry) {
@@ -246,7 +251,6 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     if (s == null) return;
 
     setState(() {
-      //currentTry++;
       item.isTapped = true;
     });
 

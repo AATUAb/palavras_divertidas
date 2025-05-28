@@ -1,4 +1,9 @@
-// Estrutura do jogo "Identifica letras e números"
+
+// Jogo "Identificar letras e números":
+// O jogador ouve uma letra ou número e tem de clicar sobre vários circulos com essa letra ou número.
+// A quantidade de elementos corretos e errados e tempo variam com o nível.
+// Cada resposta correta mostra um ícone de correto e som correspondente. Ao terminar a jogada e seleciionar todos os elementos, há uma animação de coffeties.
+
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -380,7 +385,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
-  // Constrói o texto superior que é apresenado quando o jogo arranca
+ // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
     final isPreschool = widget.user.schoolLevel == 'Pré-Escolar';
 
@@ -463,8 +468,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
 
   TextStyle _slaboStyle() => TextStyle(fontFamily: 'Slabo', fontSize: 22.sp);
-  TextStyle _cursiveStyle() =>
-      TextStyle(fontFamily: 'Cursive', fontSize: 25.sp);
+  TextStyle _cursiveStyle() =>TextStyle(fontFamily: 'Cursive', fontSize: 25.sp);
 
   // Constrói o tabuleiro do jogo, com base CharacterCircleBox do game_component.dart
   Widget _buildBoard(BuildContext _, __, ___) {
