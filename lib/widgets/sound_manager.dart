@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter/foundation.dart';
 import '../models/character_model.dart';
 import '../models/word_model.dart';
 import '../widgets/game_item.dart';
@@ -24,12 +25,12 @@ class SoundManager {
       try {
         await _player.play(AssetSource(assetPath));
       } catch (e) {
-        print("🔇 Erro ao tocar som do carácter '$character': $e");
+        debugPrint("🔇 Erro ao tocar som do carácter '$character': $e");
       }
-    } else {
-      print("🔇 Som não encontrado para o carácter '$character'");
+      } else {
+        debugPrint("🔇 Som não encontrado para o carácter '$character'");
+      }
     }
-  }
 
   /// Toca o som de uma palavra, procurando pelo texto ou pelo audioFileName
   static Box<WordModel>? _wordBox;
@@ -56,7 +57,7 @@ static Future<void> playWord(String word) async {
   try {
     await _player.play(AssetSource(assetPath));
   } catch (e) {
-    print("🔇 Erro ao tocar som da palavra '$word': $e");
+    debugPrint("🔇 Erro ao tocar som da palavra '$word': $e");
   }
 }
 
@@ -74,7 +75,7 @@ static Future<void> playWord(String word) async {
              item.type == GameItemType.text) {
     await playWord(text);
   } else {
-    print("🔇 Tipo de item não suportado: ${item.type} — $text");
+    debugPrint("🔇 Tipo de item não suportado: ${item.type} — $text");
   }
 }
 

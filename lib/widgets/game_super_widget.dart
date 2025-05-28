@@ -810,9 +810,9 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       );
     }
 
-    print("🟢 Reinício de nível: letras aprendidas foram alteradas. Novo nível -> 1");
+    debugPrint("🟢 Reinício de nível: letras aprendidas foram alteradas. Novo nível -> 1");
   } else {
-    print("🟡 Letras mantiveram-se. Nível inalterado.");
+    debugPrint("🟡 Letras mantiveram-se. Nível inalterado.");
   }
 }
 

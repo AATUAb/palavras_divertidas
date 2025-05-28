@@ -28,7 +28,6 @@ List<String> expandKnownLetters(List<String> knownSelections) {
       expanded.add(normalized);
     }
   }
-
   return expanded;
 }
 
@@ -149,10 +148,12 @@ Future<void> showLettersDialog({
 
                               return GestureDetector(
                                 onTap: () async {
+                                  final currentContext = context;
                                   if (allSelectedMode) {
                                     await player.stop();
                                     await player.play(AssetSource('sounds/clean_letters.ogg'));
 
+                                    if (!currentContext.mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text("Já clicaste em todas as letras. Clica em Limpar para desmarcar."),
@@ -170,6 +171,7 @@ Future<void> showLettersDialog({
                                   } else {
                                     await player.stop();
                                     await player.play(AssetSource('sounds/before_letter.ogg'));
+                                    if (!currentContext.mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text("Ainda não clicaste na opção anterior."),
@@ -225,8 +227,10 @@ Future<void> showLettersDialog({
                               user.knownLetters = selected;
                               await user.save(); 
                               onSaved(selected);
-                              print('🔠 Letras atualizadas: $selected');
-                              Navigator.pop(context);
+                              debugPrint('🔠 Letras atualizadas: $selected');
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.green,

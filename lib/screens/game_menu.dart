@@ -140,7 +140,7 @@ if (knownLetters.isEmpty || onlyVowels) {
   final player = AudioPlayer();
   await player.play(AssetSource('sounds/update_letters.ogg'));
 
-  return await showDialog(
+  showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xffe8f4fe),
@@ -237,7 +237,7 @@ if (knownLetters.isEmpty || onlyVowels) {
     ];
 
     final List<GameCardData> jogosExtras = [
-  /*GameCardData(
+  GameCardData(
     title: "Ouvir e procurar palavras",
     icon: Icons.find_in_page,
     onTap: () => handleLetterDependentGame(
@@ -247,25 +247,7 @@ if (knownLetters.isEmpty || onlyVowels) {
     ),
     backgroundColor: AppColors.orange,
     showNewFlag: true,
-  ),*/
- /* GameCardData(
-  title: "Ouvir e procurar palavras",
-  icon: Icons.find_in_page,
-  onTap: _identifyword, // agora usa o método centralizado
-  backgroundColor: AppColors.orange,
-  showNewFlag: true,
-),*/
-GameCardData(
-  title: "Ouvir e procurar palavras",
-  icon: Icons.find_in_page,
-  onTap: () => handleLetterDependentGame(
-    context: context,
-    user: widget.user,
-    gameBuilder: () => IdentifyWordGame(user: widget.user),
   ),
-  backgroundColor: AppColors.orange,
-  showNewFlag: true,
-),
   GameCardData(
   title: "Sílabas perdidas",
   icon: Icons.extension,
@@ -281,7 +263,7 @@ GameCardData(
 
 
     // Menu principal de escolha de jogos
-return Scaffold(
+/*return Scaffold(
   body: MenuDesign(
     titleText: "Mundo das Palavras",
     headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
@@ -427,6 +409,157 @@ return Scaffold(
     ),
   ),
 );
+  }*/
+
+  return Scaffold(
+  body: MenuDesign(
+    titleText: "Mundo das Palavras",
+    headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
+    pauseIntroMusic: true,
+    showHomeButton: true,
+    onHomePressed: () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const MyHomePage(title: 'Mundo das Palavras'),
+        ),
+      );
+    },
+    topLeftWidget: Padding(
+      padding: EdgeInsets.only(top: 170.h),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(Icons.emoji_events, size: 25.sp),
+            tooltip: 'Conquistas',
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StickerBookScreen(user: widget.user),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.bar_chart, size: 25.sp),
+            tooltip: 'Estatísticas',
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => UserStats(user: widget.user),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ),
+    child: SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        child: Column(
+          children: [
+            SizedBox(height: 100.h),
+            Expanded(
+              child: Center(
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 15.w,
+                  runSpacing: 12.h,
+                  children: jogosDisponiveis.map((jogo) {
+                    return Builder(
+                      builder: (localContext) {
+                        return GestureDetector(
+                          onTap: () {
+                            jogo.onTap(); // jogo.onTap já deve capturar o context correto na sua definição
+                          },
+                          child: SizedBox(
+                            width: 100.w,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Container(
+                                      width: 70.r,
+                                      height: 70.r,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: jogo.backgroundColor,
+                                      ),
+                                      child: Icon(
+                                        jogo.icon,
+                                        size: 30.sp,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    if (jogo.showNewFlag)
+                                      Positioned(
+                                        top: -6.h,
+                                        right: -6.w,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            showLettersDialog(
+                                              context: localContext,
+                                              user: widget.user,
+                                              initialSelection: widget.user.knownLetters ?? [],
+                                              onSaved: (List<String> selectedLetters) async {
+                                                widget.user.knownLetters = selectedLetters;
+                                                await widget.user.save();
+                                              },
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 6.w,
+                                              vertical: 2.h,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.green,
+                                              borderRadius: BorderRadius.circular(12.r),
+                                            ),
+                                            child: Text(
+                                              'Letras novas?',
+                                              style: TextStyle(
+                                                fontSize: 8.sp,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  jogo.title,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  ),
+);
   }
 
 
@@ -465,13 +598,12 @@ return Scaffold(
   }
 
     // Abre o jogo de ouvir e procurar palavras
-  /*void _identifyword() {
-    handleLetterDependentGame(
-      context: context,
-      user: widget.user,
-      gameBuilder: () => IdentifyWordGame(user: widget.user),
+  void _identifyword() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => IdentifyWordGame(user: widget.user)),
     );
-  }*/
+  }
 
   void _navigateToGame(String gameName) {
     ScaffoldMessenger.of(context).showSnackBar(

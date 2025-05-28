@@ -194,9 +194,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             if (user.schoolLevel == "1º Ciclo")
                               ElevatedButton(
                                 onPressed: () async {
+                                  final currentContext = context;
                                   await pauseMenuMusic();
+                                  if (!currentContext.mounted) return;
                                   await showLettersDialog(
-                                    context: context,
+                                    context: currentContext,
                                     user: user,
                                     initialSelection: user.knownLetters,
                                     onSaved: (selectedLetters) {

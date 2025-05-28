@@ -17,7 +17,7 @@ class WordHighlightBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFirstCycle = user.schoolLevel == '1º Ciclo';
-    final fontSize = isFirstCycle ? 26.sp : 22.sp;
+    //final fontSize = isFirstCycle ? 26.sp : 22.sp;
 
     return IntrinsicWidth(     
       child: Container(

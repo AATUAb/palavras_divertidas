@@ -18,111 +18,111 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
   final List<Map<String, dynamic>> _stickers = [
     {
       'asset': 'assets/images/words/urso_polar.webp',
-      'alignment': const Alignment(-0.25, -1),
+      'alignment': const Alignment(-0.3, -0.8),
     },
     {
       'asset': 'assets/images/words/crocodilo.webp',
-      'alignment': const Alignment(-0.45, -0.4),
+      'alignment': const Alignment(-0.6, -0.20),
     },
     {
       'asset': 'assets/images/words/aguia.webp',
-      'alignment': const Alignment(-0.52, -0.7),
+      'alignment': const Alignment(-0.65, -0.5),
     },
     {
       'asset': 'assets/images/words/bisonte.webp',
-      'alignment': const Alignment(-0.65, -0.9),
+      'alignment': const Alignment(-0.8, -0.7),
     },
     {
       'asset': 'assets/images/words/iguana.webp',
-      'alignment': const Alignment(-0.55, -0.25),
+      'alignment': const Alignment(-0.70, 0),
     },
     {
       'asset': 'assets/images/words/macaco.webp',
-      'alignment': const Alignment(-0.40, 0.20),
+      'alignment': const Alignment(-0.50, 0.30),
     },
     {
       'asset': 'assets/images/words/tucano.webp',
-      'alignment': const Alignment(-0.35, 0.55),
+      'alignment': const Alignment(-0.45, 0.55),
     },
     {
       'asset': 'assets/images/words/golfinho.webp',
-      'alignment': const Alignment(-0.2, -0.4),
+      'alignment': const Alignment(-0.3, -0.2),
     },
     {
       'asset': 'assets/images/words/coelho.webp',
-      'alignment': const Alignment(-0.03, -0.7),
+      'alignment': const Alignment(-0.04, -0.4),
     },
     {
       'asset': 'assets/images/words/raposa.webp',
-      'alignment': const Alignment(0.1, -0.8),
+      'alignment': const Alignment(0.1, -0.55),
     },
     {
       'asset': 'assets/images/words/alce.webp',
-      'alignment': const Alignment(0.30, -1.0),
+      'alignment': const Alignment(0.35, -0.65),
     },
     {
       'asset': 'assets/images/words/elefante.webp',
-      'alignment': const Alignment(0.40, -0.55),
+      'alignment': const Alignment(0.50, -0.40),
     },
     {
       'asset': 'assets/images/words/cobra.webp',
-      'alignment': const Alignment(0.38, -0.2),
+      'alignment': const Alignment(0.45, 0),
     },
     {
       'asset': 'assets/images/words/tigre.webp',
-      'alignment': const Alignment(0.25, -0.40),
+      'alignment': const Alignment(0.27, -0.20),
     },
     {
       'asset': 'assets/images/words/panda.webp',
-      'alignment': const Alignment(0.55, -0.40),
+      'alignment': const Alignment(0.67, -0.15),
     },
     {
       'asset': 'assets/images/words/urso.webp',
-      'alignment': const Alignment(0.50, -0.85),
+      'alignment': const Alignment(0.65, -0.70),
     },
     {
       'asset': 'assets/images/words/leao.webp',
-      'alignment': const Alignment(-0.1, -0.1),
+      'alignment': const Alignment(-0.1, 0.1),
     },
     {
       'asset': 'assets/images/words/girafa.webp',
-      'alignment': const Alignment(0.07, 0.5),
+      'alignment': const Alignment(0.08, 0.55),
     },
     {
       'asset': 'assets/images/words/camelo.webp',
-      'alignment': const Alignment(0.05, -0.25),
+      'alignment': const Alignment(0.08, -0.15),
     },
     {
       'asset': 'assets/images/words/hipopotamo.webp',
-      'alignment': const Alignment(0.15, 0),
+      'alignment': const Alignment(0.2, 0.2),
     },
     {
       'asset': 'assets/images/words/tubarao.webp',
-      'alignment': const Alignment(0.25, 0.5),
+      'alignment': const Alignment(0.45, 0.5),
     },
     {
       'asset': 'assets/images/words/baleia.webp',
-      'alignment': const Alignment(-0.75, 0.1),
+      'alignment': const Alignment(-0.9, 0.3),
     },
     {
       'asset': 'assets/images/words/orca.webp',
-      'alignment': const Alignment(0.4, 0.95),
+      'alignment': const Alignment(0.2, 0.95),
     },
     {
       'asset': 'assets/images/words/tartaruga.webp',
-      'alignment': const Alignment(-0.5, 0.6),
+      'alignment': const Alignment(-0.65, 0.75),
     },
     {
       'asset': 'assets/images/words/polvo.webp',
-      'alignment': const Alignment(-0.15, 0.4),
+      'alignment': const Alignment(-0.15, 0.65),
     },
     {
       'asset': 'assets/images/words/canguru.webp',
-      'alignment': const Alignment(0.70, 0.60),
+      'alignment': const Alignment(0.87, 0.68),
     },
     {
       'asset': 'assets/images/words/kuala.webp',
-      'alignment': const Alignment(0.58, 0.50),
+      'alignment': const Alignment(0.72, 0.60),
     },
   ];
 
@@ -156,10 +156,13 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
         child: Column(
           children: [
             // Espaço para evitar sobreposição do título (ajuste se necessário)
-            SizedBox(
+            /*SizedBox(
               height: 48.h,
-            ), // ajuste este valor conforme o espaço do seu título
-            Expanded(
+            ),*/
+            SizedBox(
+              height: (ScreenUtil().screenHeight * 0.03).clamp(16.h, 40.h),
+            ),
+            /* Expanded(
               child: Center(
                 child: AspectRatio(
                   aspectRatio: 16 / 9,
@@ -178,6 +181,63 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
                               child: _buildSticker(
                                 entry.value['asset'] as String,
                                 unlocked: _localConquest >= entry.key + 1,
+                                maxWidth: constraints.maxWidth,
+                              ),
+                            );
+                          }).toList(),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );*/
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                child: AspectRatio(
+                  aspectRatio:
+                      16 / 9, // ou ajusta se tiveres o valor real do mapa
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final double stickerSize = constraints.maxWidth * 0.06;
+
+                      return Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.asset(
+                            'assets/images/world.webp',
+                            fit: BoxFit.contain,
+                          ),
+                          ..._stickers.asMap().entries.map((entry) {
+                            final bool unlocked =
+                                _localConquest >= entry.key + 1;
+                            return Align(
+                              alignment: entry.value['alignment'] as Alignment,
+                              child: Opacity(
+                                opacity: unlocked ? 1.0 : 0.5,
+                                child: ColorFiltered(
+                                  colorFilter:
+                                      unlocked
+                                          ? const ColorFilter.mode(
+                                            Colors.transparent,
+                                            BlendMode.dst,
+                                          )
+                                          : const ColorFilter.mode(
+                                            Colors.black,
+                                            BlendMode.srcIn,
+                                          ),
+                                  child: Image.asset(
+                                    entry.value['asset'] as String,
+                                    width: stickerSize,
+                                    height: stickerSize,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
                               ),
                             );
                           }).toList(),
@@ -194,7 +254,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
     );
   }
 
-  Widget _buildSticker(String assetPath, {required bool unlocked}) {
+  /*Widget _buildSticker(String assetPath, {required bool unlocked}) {
     return Opacity(
       opacity: unlocked ? 1.0 : 0.5,
       child: ColorFiltered(
@@ -206,6 +266,29 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
           assetPath,
           width: 45.w,
           height: 45.h,
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }*/
+
+  Widget _buildSticker(
+    String assetPath, {
+    required bool unlocked,
+    required double maxWidth,
+  }) {
+    final double size = maxWidth * 0.06; // 6% da largura do mapa
+    return Opacity(
+      opacity: unlocked ? 1.0 : 0.5,
+      child: ColorFiltered(
+        colorFilter:
+            unlocked
+                ? const ColorFilter.mode(Colors.transparent, BlendMode.dst)
+                : const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+        child: Image.asset(
+          assetPath,
+          width: size,
+          height: size,
           fit: BoxFit.contain,
         ),
       ),

@@ -134,9 +134,10 @@ class GameAnimations {
 
   // Animação e som de tempo esgotado
   static Future<void> showTimeoutSnackbar(BuildContext context) async {
+    final currentContext = context;
     final player = AudioPlayer();
     await player.play(AssetSource('sounds/animations/time_out.ogg'));
-
+    if (!currentContext.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

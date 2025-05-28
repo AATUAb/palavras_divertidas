@@ -120,21 +120,26 @@ class LevelManager {
     return levelChanged;
   }
 
-  // Função para fazer o reset do progreso atual
-  Future<void> resetLevelToOne() async {
-  level = 1;
-  resetProgress();
-  final userKey = user.key?.toString();
-  if (userKey != null) {
-    await HiveService.saveGameLevel(
-      userKey: userKey,
-      gameName: gameName,
-      level: level,
-    );
-    user.updateAccuracy(level: 1, accuracy: 0);
-    await HiveService.updateUserByKey(int.parse(userKey), user);
+    // Função para fazer o reset do progreso atual, aplicável quando há letras novas conhecidas
+    Future<void> resetLevelToOne() async {
+    level = 1;
+    resetProgress();
+    final userKey = user.key?.toString();
+    if (userKey != null) {
+      await HiveService.saveGameLevel(
+        userKey: userKey,
+        gameName: gameName,
+        level: level,
+      );
+      user.updateAccuracy(level: 1, accuracy: 0);
+      await HiveService.updateUserByKey(int.parse(userKey), user);
+    }
   }
-}
+
+  // Função para sincronizar o nível do utilizador
+  void syncLevelWithUser() {
+    level = user.gameLevel;
+  }
 
   // Função para fazer o reset do progreso
   void resetProgress() {

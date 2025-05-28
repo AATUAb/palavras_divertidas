@@ -162,11 +162,9 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
     _levelWords = {...priorityWords, ...fallbackWords, ...retryWords}.toList();
 
     // DEBUG:
-    print('Letras conhecidas: $expandedLetters');
-    print(
-      'Palavras prioritárias: ${priorityWords.map((w) => w.text).toList()}',
-    );
-    print('Palavras filtradas: ${_levelWords.map((w) => w.text).toList()}');
+    debugPrint('Letras conhecidas: $expandedLetters');
+    debugPrint('Palavras prioritárias: ${priorityWords.map((w) => w.text).toList()}');
+    debugPrint('Palavras filtradas: ${_levelWords.map((w) => w.text).toList()}');
   }
 
   // Cancela os temporizadores ativos
@@ -241,9 +239,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
     if (!_usedWords.contains(targetWord.text)) {
       _usedWords.add(targetWord.text);
     }
-    print(
-      '⚠️ Palavra escolhida: ${targetWord.text} (letra nova: ${targetWord.newLetter})',
-    );
+    debugPrint('⚠️ Palavra escolhida: ${targetWord.text} (letra nova: ${targetWord.newLetter})');
 
     // Prepara o GameItem que vai tocar o áudio
     referenceItem = GameItem(
