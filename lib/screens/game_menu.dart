@@ -194,7 +194,10 @@ void handleLetterDependentGame({
                 );
               }
             },
-            child: const Text('Letras novas?'),
+            child: Text(
+              "Letras Novas?",
+              style: TextStyle(fontSize: 15.sp),
+            ),
           ),
           TextButton.icon(
             onPressed: () {

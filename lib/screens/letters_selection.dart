@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../themes/colors.dart';
 import '../models/user_model.dart';
+import '../services/hive_service.dart';
 
 // Expande letras combinadas para uso no jogo (ex: "Vogais" → "a", "e", "i", "o", "u")
 List<String> expandKnownLetters(List<String> knownSelections) {
@@ -224,8 +225,20 @@ Future<void> showLettersDialog({
                                   .where((e) => e.value)
                                   .map((e) => e.key)
                                   .toList();
+
                               user.knownLetters = selected;
-                              await user.save(); 
+                              await user.save();
+
+                              await handleLetterUpdateAndResetLevel(
+                                user: user,
+                                gameNames: [
+                                  'Ouvir e Procurar Palavra',
+                                  'Sílabas perdidas',
+                                  'Escrever',
+                                ],
+                                isLetterDependent: true,
+                              );
+
                               onSaved(selected);
                               debugPrint('🔠 Letras atualizadas: $selected');
                               if (context.mounted) {
@@ -248,4 +261,32 @@ Future<void> showLettersDialog({
       },
     ),
   );
+}
+
+  Future<void> handleLetterUpdateAndResetLevel({
+  required UserModel user,
+  required List<String> gameNames, 
+  bool isLetterDependent = true,
+}) async {
+  if (!isLetterDependent || user.schoolLevel != '1º Ciclo') return;
+
+  final expanded = expandKnownLetters(user.knownLetters)..sort();
+  final currentHash = expanded.join(',').toLowerCase();
+  final previousHash = user.lastLettersHash ?? '';
+
+  if (currentHash != previousHash) {
+    user
+      ..gameLevel = 1
+      ..lastLettersHash = currentHash;
+
+    await user.save();
+
+    for (final game in gameNames) {
+      await HiveService.saveGameLevel(
+        userKey: user.key.toString(),
+        gameName: game,
+        level: 1,
+      );
+    }
+  }
 }

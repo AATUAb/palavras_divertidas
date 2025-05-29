@@ -198,18 +198,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                   await pauseMenuMusic();
                                   if (!currentContext.mounted) return;
                                   await showLettersDialog(
-                                    context: currentContext,
+                                    context: context,
                                     user: user,
                                     initialSelection: user.knownLetters,
-                                    onSaved: (selectedLetters) {
-                                      final updatedUser = user.copyWith(
-                                        knownLetters: selectedLetters,
-                                      );
-                                      HiveService.updateUser(
-                                        index,
-                                        updatedUser,
-                                      );
-                                      _loadUsers();
+                                    onSaved: (selected) async {
+                                      user.knownLetters = selected;
+                                      await user.save();
                                     },
                                   );
                                   await resumeMenuMusic();

@@ -790,9 +790,10 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     );
   }
   Future<void> resetLevelIfNewLetter(UserModel user, {required bool isLetterDependent}) async {
+  debugPrint("📚 Letras conhecidas no início: ${user.knownLetters}");
   if (!isLetterDependent) return;
 
-  final currentLetters = List.from(user.knownLetters ?? [])..sort();
+  final currentLetters = List.from(user.knownLetters)..sort();
   final currentHash = currentLetters.join(',').toLowerCase();
   final previousHash = user.lastLettersHash ?? '';
 
@@ -815,5 +816,4 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     debugPrint("🟡 Letras mantiveram-se. Nível inalterado.");
   }
 }
-
 }

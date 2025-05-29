@@ -63,7 +63,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
 
   // Inicializa o estado do jogo
   @override
-  void initState() {
+    void initState() {
     super.initState();
   }
 
@@ -397,12 +397,10 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
       introImagePath: 'assets/images/games/identify_words.webp',
       introAudioPath: 'sounds/games/identify_words.ogg',
       onIntroFinished: () async {
-        _gamesSuperKey.currentState?.resetLevelIfNewLetter(
-          widget.user,
-          isLetterDependent: true,
-        ); // Reinicia o nível caso haja novas letras aprendidas
+        final box = await Hive.openBox<UserModel>('users');
         await _loadWords();
         await _applyLevelSettings();
+        if (!mounted || _isDisposed) return;
         setState(() => hasChallengeStarted = true);
         _generateNewChallenge();
       },
