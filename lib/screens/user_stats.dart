@@ -22,7 +22,7 @@ class UserStats extends StatelessWidget {
               'Contar sílabas',
               'Ouvir e Procurar Imagem',
               'Ouvir e Procurar Palavra',
-              'Sílabas perdidas',
+              'Sílaba perdida',
             ]
             : [
               'Identificar letras e números',
@@ -37,7 +37,7 @@ class UserStats extends StatelessWidget {
       'Contar sílabas': Icons.format_list_numbered,
       'Ouvir e Procurar Imagem': Icons.hearing,
       'Ouvir e Procurar Palavra': Icons.find_in_page,
-      'Sílabas perdidas': Icons.extension,
+      'Sílaba perdida': Icons.extension,
     };
 
     Widget buildCustomRadarChart(int levelIndex, double size) {

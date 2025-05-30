@@ -11,6 +11,7 @@ import '../games/writing_game.dart';
 import '../games/count_syllables.dart';
 import '../games/listen_look.dart';
 import '../games/identify_words.dart';
+import '../games/lost_syllable.dart';
 import '../widgets/conquest_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
@@ -267,12 +268,16 @@ void handleLetterDependentGame({
     showNewFlag: true,
   ),
   GameCardData(
-  title: "Sílabas perdidas",
-  icon: Icons.extension,
-  onTap: () => _navigateToGame("Sílabas perdidas"),
-  backgroundColor: AppColors.yellow,
-  showNewFlag: true,
-),
+    title: "Sílaba perdida",
+    icon: Icons.find_in_page,
+    onTap: () => handleLetterDependentGame(
+      context: context,
+      user: widget.user,
+      gameBuilder: () => LostSyllableGame(user: widget.user),
+    ),
+    backgroundColor: AppColors.orange,
+    showNewFlag: true,
+  ),
 ];
     final jogosDisponiveis =
         widget.user.schoolLevel == "1º Ciclo"
@@ -466,18 +471,4 @@ void handleLetterDependentGame({
     );
   }
 
-
-  void _navigateToGame(String gameName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "Jogo '$gameName' em desenvolvimento!",
-          style: TextStyle(fontSize: 14.sp, color: AppColors.white),
-        ),
-        backgroundColor: AppColors.green,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
 }
