@@ -56,6 +56,9 @@ class UserModel extends HiveObject {
   @HiveField(16)
   String? lastLettersHash;
 
+  @HiveField(17)
+  Map<String, double> gamesAverageTime;
+
   final Logger logger = Logger();
 
   UserModel({
@@ -75,12 +78,12 @@ class UserModel extends HiveObject {
     Map<String, int>? totalCorrectPerGame,
     Map<String, int>? totalAttemptsPerGame,
     this.lastLettersHash,
-    this.lastSeenConquests = 0, // valor inicial
+    this.lastSeenConquests = 0,
+    this.gamesAverageTime = const {},
   }) : knownLetters = knownLetters ?? [],
        totalCorrectPerGame = Map.from(totalCorrectPerGame ?? {}),
        totalAttemptsPerGame = Map.from(totalAttemptsPerGame ?? {});
 
-  
   void updateAccuracy({required int level, required double accuracy}) {
     accuracyByLevel = {...accuracyByLevel, level: accuracy};
     if (accuracyByLevel.isNotEmpty) {
@@ -126,8 +129,9 @@ class UserModel extends HiveObject {
     Map<String, List<int>>? gamesAccuracy,
     Map<String, int>? totalCorrectPerGame,
     Map<String, int>? totalAttemptsPerGame,
-    int? lastSeenConquests, 
+    int? lastSeenConquests,
     String? lastLettersHash,
+    Map<String, double>? gamesAverageTime, // <-- Adicione isto
   }) {
     return UserModel(
       name: name ?? this.name,
@@ -148,7 +152,8 @@ class UserModel extends HiveObject {
       totalCorrectPerGame: totalCorrectPerGame ?? this.totalCorrectPerGame,
       totalAttemptsPerGame: totalAttemptsPerGame ?? this.totalAttemptsPerGame,
       lastSeenConquests: lastSeenConquests ?? this.lastSeenConquests,
-      lastLettersHash: lastLettersHash ?? this.lastLettersHash, 
+      lastLettersHash: lastLettersHash ?? this.lastLettersHash,
+      gamesAverageTime: gamesAverageTime ?? this.gamesAverageTime, // <-- E isto
     );
   }
 

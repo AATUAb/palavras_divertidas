@@ -35,13 +35,14 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       totalAttemptsPerGame: (fields[14] as Map?)?.cast<String, int>(),
       lastLettersHash: fields[16] as String?,
       lastSeenConquests: fields[15] as int,
+      gamesAverageTime: (fields[17] as Map).cast<String, double>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(17)
+      ..writeByte(18)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -75,7 +76,9 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(15)
       ..write(obj.lastSeenConquests)
       ..writeByte(16)
-      ..write(obj.lastLettersHash);
+      ..write(obj.lastLettersHash)
+      ..writeByte(17)
+      ..write(obj.gamesAverageTime);
   }
 
   @override

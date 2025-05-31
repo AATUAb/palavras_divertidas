@@ -11,6 +11,7 @@ class GameDesign extends StatefulWidget {
   final Widget? topTextWidget;
   final double? progressValue;
   final int level;
+  final double? timeProgress;
 
   const GameDesign({
     super.key,
@@ -19,6 +20,7 @@ class GameDesign extends StatefulWidget {
     this.topTextWidget,
     this.progressValue,
     required this.level,
+    this.timeProgress,
   });
 
   @override
@@ -32,17 +34,16 @@ class _GameDesignState extends State<GameDesign> {
     pauseMenuMusic();
   }
 
-
   @override
-void dispose() {
-  // A música só  retomar se não for uma um diálogo de conquistas
-  Future.delayed(const Duration(seconds: 1), () {
-    if (mounted && ModalRoute.of(context)?.isCurrent == true) {
-      resumeMenuMusic();
-    }
-  });
-  super.dispose();
-}
+  void dispose() {
+    // A música só  retomar se não for uma um diálogo de conquistas
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+        resumeMenuMusic();
+      }
+    });
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

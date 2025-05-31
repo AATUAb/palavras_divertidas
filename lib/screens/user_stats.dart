@@ -117,6 +117,7 @@ class UserStats extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Legenda com percentagens reais
+                // Legenda com percentagens reais e tempo médio por jogo
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children:
@@ -129,6 +130,8 @@ class UserStats extends StatelessWidget {
                           raw.length > 1 ? raw[1] : 0,
                           raw.length > 2 ? raw[2] : 0,
                         ];
+                        // Tempo médio (null-safe)
+                        final avgTime = user.gamesAverageTime[game];
                         return Padding(
                           padding: EdgeInsets.symmetric(vertical: 3.h),
                           child: Column(
@@ -155,15 +158,32 @@ class UserStats extends StatelessWidget {
                               SizedBox(height: 3.h),
                               Padding(
                                 padding: EdgeInsets.only(left: 25.w),
-                                child: Text(
-                                  'Nível 1: ${ints[0]}%; '
-                                  'Nível 2: ${ints[1]}%; '
-                                  'Nível 3: ${ints[2]}%',
-                                  style: TextStyle(
-                                    fontSize: 6.sp,
-                                    color: Colors.grey[500],
-                                    decoration: TextDecoration.none,
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Nível 1: ${ints[0]}%; '
+                                      'Nível 2: ${ints[1]}%; '
+                                      'Nível 3: ${ints[2]}%',
+                                      style: TextStyle(
+                                        fontSize: 6.sp,
+                                        color: Colors.grey[500],
+                                        decoration: TextDecoration.none,
+                                      ),
+                                    ),
+                                    SizedBox(height: 2.h),
+                                    Text(
+                                      avgTime != null && avgTime > 0
+                                          ? 'Tempo médio: ${avgTime.toStringAsFixed(1)} s'
+                                          : 'Tempo médio: sem dados',
+                                      style: TextStyle(
+                                        fontSize: 6.sp,
+                                        color: Colors.grey[600],
+                                        fontStyle: FontStyle.italic,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],

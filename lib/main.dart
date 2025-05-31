@@ -29,7 +29,7 @@ Future<void> main() async {
   Hive.registerAdapter(CharacterModelAdapter());
   Hive.registerAdapter(WordModelAdapter());
 
-  //await Hive.deleteBoxFromDisk('users'); //#### APAGAR APENAS NA VERSÃO FINAL ####//
+  //await Hive.deleteBoxFromDisk('users',); //#### APAGAR APENAS NA VERSÃO FINAL ####//
 
   // Inicializa com adapters e seed
   await HiveService.init();
