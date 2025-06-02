@@ -69,13 +69,13 @@ class _WriteGameState extends State<WriteGame> {
     final box = await Hive.openBox<CharacterModel>('characters');
     final allChars = box.values.where((c) => c.character.trim().isNotEmpty).toList();
 
-    const vowels = ['A','E','I','O','U'];
-    const consonants = ['B','C','D','F','G','H','J','L','M','N','P','Q','R','S','T','V','X','Z'];
+    const vowels = ['a','e','i','o','u'];
+    const consonants = ['b','c','d','f','g','h','j','l','m','n','p','q','r','s','t','v','x','z'];
     const numbers = ['0','1','2','3','4','5','6','7','8','9'];
 
     if (isPreschool) {
-      _characters = allChars.where((c) {
-        final char = c.character.trim().toUpperCase();
+      final filteredChars = allChars.where((c) {
+        final char = c.character.trim().toLowerCase();
         return switch (lvl) {
           1 => numbers.contains(char),
           2 => vowels.contains(char),
@@ -83,11 +83,26 @@ class _WriteGameState extends State<WriteGame> {
           _ => false,
         };
       }).toList();
+
+      final expandedChars = filteredChars.expand((c) {
+        final baseChar = c.character.trim().toLowerCase();
+
+        return [
+          CharacterModel(
+            character: baseChar.toUpperCase(),
+            soundPath: 'assets/sounds/characters/${baseChar.toUpperCase()}.ogg',
+          ),
+          CharacterModel(
+            character: baseChar.toLowerCase(),
+            soundPath: 'assets/sounds/characters/${baseChar.toLowerCase()}.ogg',
+          ),
+        ];
+      }).toList();
+
+      _characters = expandedChars;
     } else {
       _characters = allChars;
     }
-
-    debugPrint("🧪 Nível $lvl (${isPreschool ? 'Pré' : '1.º Ciclo'}): ${_characters.map((c) => c.character).toList()}");
 
     if (!mounted || _isDisposed) return;
     setState(() {});
@@ -104,94 +119,87 @@ class _WriteGameState extends State<WriteGame> {
   }
 
   Future<void> _generateNewChallenge() async {
-  _gamesSuperKey.currentState?.playChallengeHighlight();
-  if (!mounted || _isDisposed) return;
-
-  final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
-  final allChars = _characters.map((e) => e.character).toList();
-
-  final availableItems = allChars.where(
-    (c) => !_usedCharacters.map((uc) => uc.toLowerCase()).contains(c.toLowerCase()),
-  ).toList();
-
-  // Verifica se terminou
-  if (availableItems.isEmpty && retryId == null) {
-    _gamesSuperKey.currentState?.showEndOfGameDialog(
-      onRestart: () async {
-        await _gamesSuperKey.currentState?.restartGame();
-        await _applyLevelSettingsAndCharacters();
-        if (mounted) _generateNewChallenge();
-      },
-    );
-    return;
-  }
-
- // Seleção segura (retry ou nova)
-  targetCharacter = retryId != null
-      ? _gamesSuperKey.currentState!.safeRetry<String>(
-          list: allChars,
-          retryId: retryId,
-          matcher: (c) => c.toLowerCase() == retryId.toLowerCase(),
-          fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
-            availableItems: availableItems,
-          ),
-        )
-      : _gamesSuperKey.currentState!.safeSelectItem(
-          availableItems: availableItems,
-        );
-
-  // 👇 Garante letra traçada estável
-  tracedCharacter = _randomCase(targetCharacter);
-
-
-  // Adiciona como usada (apenas se não estiver já, ignorando case)
-  if (!_usedCharacters.map((c) => c.toLowerCase()).contains(targetCharacter.toLowerCase())) {
-    _usedCharacters.add(targetCharacter);
-  }
-
-  referenceItem = GameItem(
-    id: targetCharacter,
-    type: GameItemType.character,
-    content: targetCharacter,
-    dx: 0,
-    dy: 0,
-    backgroundColor: Colors.transparent,
-    isCorrect: true,
-  );
-
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await Future.delayed(const Duration(milliseconds: 50));
+    _gamesSuperKey.currentState?.playChallengeHighlight();
     if (!mounted || _isDisposed) return;
-    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
-  });
 
-  _cancelTimers();
+    final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
+
+    final availableItems = _characters.where(
+      (c) => !_usedCharacters.contains(c.character),
+    ).toList();
+
+    if (availableItems.isEmpty && retryId == null) {
+      _gamesSuperKey.currentState?.showEndOfGameDialog(
+        onRestart: () async {
+          _usedCharacters.clear();
+          await _applyLevelSettingsAndCharacters();
+          if (mounted) await _generateNewChallenge();
+        },
+      );
+      return;
+    }
+
+    final selected = retryId != null
+        ? _gamesSuperKey.currentState!.safeRetry<CharacterModel>(
+            list: availableItems,
+            retryId: retryId,
+            matcher: (c) => c.character == retryId,
+            fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
+              availableItems: availableItems,
+            ),
+          )
+        : _gamesSuperKey.currentState!.safeSelectItem(
+            availableItems: availableItems,
+          );
+
+    targetCharacter = selected.character;
+    tracedCharacter = targetCharacter;
+
+    if (!_usedCharacters.contains(targetCharacter)) {
+      _usedCharacters.add(targetCharacter);
+    }
+
+    referenceItem = GameItem(
+      id: targetCharacter,
+      type: GameItemType.character,
+      content: targetCharacter,
+      dx: 0,
+      dy: 0,
+      backgroundColor: Colors.transparent,
+      isCorrect: true,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (!mounted || _isDisposed) return;
+      await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+    });
+
+    _cancelTimers();
     setState(() {
       isRoundActive = true;
-      tracedCharacter = _randomCase(targetCharacter);
     });
     _startTime = DateTime.now();
 
-  progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
-    if (!mounted || _isDisposed) return t.cancel();
-    final elapsed = DateTime.now().difference(_startTime!);
-    setState(() {
-      progressValue = (1.0 - elapsed.inMilliseconds / levelTime.inMilliseconds).clamp(0.0, 1.0);
+    progressTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
+      if (!mounted || _isDisposed) return t.cancel();
+      final elapsed = DateTime.now().difference(_startTime);
+      setState(() {
+        progressValue = (1.0 - elapsed.inMilliseconds / levelTime.inMilliseconds).clamp(0.0, 1.0);
+      });
     });
-  });
 
-  roundTimer = Timer(levelTime, () {
-    if (!mounted || _isDisposed) return;
-    setState(() => isRoundActive = false);
-    _cancelTimers();
-    _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
-    _gamesSuperKey.currentState?.showTimeout(
-      applySettings: _applyLevelSettingsAndCharacters,
-      generateNewChallenge: _generateNewChallenge,
-    );
-  });
-}
-
+    roundTimer = Timer(levelTime, () {
+      if (!mounted || _isDisposed) return;
+      setState(() => isRoundActive = false);
+      _cancelTimers();
+      _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
+      _gamesSuperKey.currentState?.showTimeout(
+        applySettings: _applyLevelSettingsAndCharacters,
+        generateNewChallenge: _generateNewChallenge,
+      );
+    });
+  }
 
   String _randomCase(String char) {
     if (!RegExp(r'[a-zA-Z]').hasMatch(char)) return char;
@@ -214,6 +222,7 @@ class _WriteGameState extends State<WriteGame> {
       introImagePath: 'assets/images/games/write_game.webp',
       introAudioPath: 'sounds/games/write_game.ogg',
       onIntroFinished: () async {
+        _usedCharacters.clear();
         await _applyLevelSettingsAndCharacters();
         if (!mounted) return;
         setState(() => hasChallengeStarted = true);
@@ -270,7 +279,7 @@ class _WriteGameState extends State<WriteGame> {
                   ]),
                 ],
                 onGameFinished: (isSuccessful) async {
-                   if (!isRoundActive || tracedCharacter.isEmpty) return;
+                  if (!isRoundActive || tracedCharacter.isEmpty) return;
                   final s = _gamesSuperKey.currentState;
                   if (s == null || !isRoundActive) return;
 
@@ -295,16 +304,12 @@ class _WriteGameState extends State<WriteGame> {
                     currentTry: currentTry,
                     applySettings: _applyLevelSettingsAndCharacters,
                     generateNewChallenge: () async {
-                      // Apaga o carácter atual
                       setState(() {
                         tracedCharacter = '';
                         targetCharacter = '';
                       });
 
-                      // Aguarda um frame para o widget desmontar
                       await Future.delayed(Duration(milliseconds: 50));
-
-                      // Gera novo desafio
                       await _generateNewChallenge();
                     },
                     cancelTimers: _cancelTimers,
@@ -312,15 +317,9 @@ class _WriteGameState extends State<WriteGame> {
                       await Future.delayed(const Duration(seconds: 1));
                     },
                   );
-
                   setState(() => currentTry++);
                 },
               ),
-              if (isCorrect == true)
-  Align(
-    alignment: Alignment.center,
-    child: _gamesSuperKey.currentState?.correctIcon ?? const Icon(Icons.check),
-  ),
             ],
           ),
         ),
