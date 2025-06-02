@@ -71,11 +71,16 @@ class UserStats extends StatelessWidget {
                 radius: radius,
                 segments: 4,
                 sides: n,
-                color: AppColors.orange,
+                color: AppColors.green.withOpacity(0.1),
               ),
             ),
-            for (var i = 0; i < n; i++)
-              Positioned(
+            // Substitua o for tradicional por este bloco:
+            ...List.generate(n, (i) {
+              final gameName = allGames[i];
+              final raw = user.gamesAccuracy[gameName] ?? <int>[];
+              final acc = levelIndex <= raw.length ? raw[levelIndex - 1] : 0;
+
+              return Positioned(
                 left:
                     center.dx +
                     (radius + 12) * cos(2 * pi * i / n - pi / 2) -
@@ -84,12 +89,57 @@ class UserStats extends StatelessWidget {
                     center.dy +
                     (radius + 12) * sin(2 * pi * i / n - pi / 2) -
                     10,
-                child: Icon(
-                  gameIcons[allGames[i]]!,
-                  color: AppColors.orange,
-                  size: 20.sp,
+                child: GestureDetector(
+                  onTap: () {
+                    final overlay = Overlay.of(context);
+                    final overlayEntry = OverlayEntry(
+                      builder:
+                          (context) => Positioned(
+                            // Ajuste para aparecer mesmo ao lado do ícone
+                            left:
+                                center.dx +
+                                (radius) * cos(2 * pi * i / n - pi / 2) +
+                                250,
+                            top:
+                                center.dy +
+                                (radius) * sin(2 * pi * i / n - pi / 2) +
+                                180,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '$acc%',
+                                  style: const TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                    );
+                    overlay.insert(overlayEntry);
+                    Future.delayed(
+                      const Duration(seconds: 1),
+                      overlayEntry.remove,
+                    );
+                  },
+                  child: Icon(
+                    gameIcons[allGames[i]]!,
+                    color: AppColors.orange,
+                    size: 20.sp,
+                  ),
                 ),
-              ),
+              );
+            }),
           ],
         ),
       );
@@ -112,17 +162,15 @@ class UserStats extends StatelessWidget {
           final radarSize = availableWidth / 2.5;
 
           return Padding(
-            padding: EdgeInsets.only(left: 10.w, top: 60.h),
+            padding: EdgeInsets.only(left: 15.w, top: 60.h),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Legenda com percentagens reais
                 // Legenda com percentagens reais e tempo médio por jogo
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children:
                       allGames.map((game) {
-                        // lista real ou vazia
                         final raw = user.gamesAccuracy[game] ?? <int>[];
                         // garante sempre 3 valores
                         final ints = <int>[
@@ -133,7 +181,7 @@ class UserStats extends StatelessWidget {
                         // Tempo médio (null-safe)
                         final avgTime = user.gamesAverageTime[game];
                         return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 3.h),
+                          padding: EdgeInsets.symmetric(horizontal: 10.w),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -142,9 +190,9 @@ class UserStats extends StatelessWidget {
                                   Icon(
                                     gameIcons[game]!,
                                     color: AppColors.orange,
-                                    size: 15.sp,
+                                    size: 20.sp,
                                   ),
-                                  SizedBox(width: 10.w),
+                                  SizedBox(width: 5.w),
                                   Text(
                                     game,
                                     style: TextStyle(
@@ -155,31 +203,32 @@ class UserStats extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 3.h),
+                              SizedBox(height: 1.h),
                               Padding(
-                                padding: EdgeInsets.only(left: 25.w),
+                                padding: EdgeInsets.only(left: 30.w),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
+                                      // mostra as percentagens de cada nível
                                       'Nível 1: ${ints[0]}%; '
                                       'Nível 2: ${ints[1]}%; '
                                       'Nível 3: ${ints[2]}%',
                                       style: TextStyle(
                                         fontSize: 6.sp,
-                                        color: Colors.grey[500],
+                                        color: AppColors.green.withOpacity(0.5),
                                         decoration: TextDecoration.none,
                                       ),
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
+                                      // mostra o tempo médio se existir
                                       avgTime != null && avgTime > 0
                                           ? 'Tempo médio: ${avgTime.toStringAsFixed(1)} s'
                                           : 'Tempo médio: sem dados',
                                       style: TextStyle(
                                         fontSize: 6.sp,
-                                        color: const Color(0xFF68B73A),
-                                        fontStyle: FontStyle.italic,
+                                        color: AppColors.green.withOpacity(0.5),
                                         decoration: TextDecoration.none,
                                       ),
                                     ),
