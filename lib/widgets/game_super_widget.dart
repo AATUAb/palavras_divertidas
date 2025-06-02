@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:math';
-import 'dart:async';
 import '../models/user_model.dart';
 import '../models/character_model.dart';
 import '../models/word_model.dart';
@@ -34,9 +33,6 @@ class GamesSuperWidget extends StatefulWidget {
   final String? introImagePath;
   final String? introAudioPath;
   final VoidCallback? onIntroFinished;
-  // variáveis para começar a registar os tempos das jogadas
-  final int? countdownSeconds;
-  final VoidCallback? onTimeout;
 
   const GamesSuperWidget({
     super.key,
@@ -53,9 +49,6 @@ class GamesSuperWidget extends StatefulWidget {
     this.introImagePath,
     this.introAudioPath,
     this.onIntroFinished,
-    // variáveis para começar a registar os tempos das jogadas
-    this.countdownSeconds,
-    this.onTimeout,
   });
 
   @override
@@ -71,9 +64,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   int _roundCounter = 0;
   final int retryDelay = 3;
   bool introCompleted = false;
-
-  final List<int> _answerTimes = [];
-
   late AnimationController _fadeController;
   late Animation<double> _rotationAnimation;
   bool get isFirstCycle => widget.isFirstCycle;
@@ -86,9 +76,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   late AnimationController _highlightController;
   late Animation<double> _highlightOpacity;
   late Animation<double> _highlightScale;
-
-  Timer? _timer; // Guarda referência ao temporizador
-  int? _remainingSeconds; // Guarda o tempo restante
 
   @override
   void initState() {
@@ -122,20 +109,21 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       CurvedAnimation(parent: _highlightController, curve: Curves.easeOut),
     );
 
+
     // Carrega o nível de cada jogo
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeLevelAndIntro();
     });
   }
 
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    _highlightController.dispose();
-    _timer?.cancel();
-    super.dispose();
-  }
+   @override
+    void dispose() {
+      _fadeController.dispose();
+      _highlightController.dispose();
+      super.dispose();
+    }
 
+  // Inicializa o nível e a introdução do jogo
   Future<void> _initializeLevelAndIntro() async {
     await levelManager.loadLevel();
     setState(() {
@@ -149,9 +137,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       if (mounted) {
         setState(() {});
         widget.onIntroFinished?.call();
-        if (widget.countdownSeconds != null) {
-          startCountdown();
-        }
       }
     }
   }
@@ -178,11 +163,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       introCompleted = true;
     });
     widget.onIntroFinished?.call();
-
-    // Aqui arranca o timer SE countdownSeconds tiver sido definido
-    if (widget.countdownSeconds != null) {
-      startCountdown();
-    }
   }
 
   Future<void> playNewChallengeSound(GameItem item) async {
@@ -244,47 +224,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     }
   }
 
-  /// Inicia o countdown (temporizador)
-  void startCountdown() {
-    // Se countdownSeconds não foi definido, não faz nada
-    if (widget.countdownSeconds == null) return;
-    // Inicializa o tempo restante
-    _remainingSeconds = widget.countdownSeconds;
-    // Cancela temporizadores antigos (se houver)
-    _timer?.cancel();
-    // Cria novo temporizador
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_remainingSeconds! > 0) {
-        setState(() {
-          _remainingSeconds = _remainingSeconds! - 1;
-        });
-      } else {
-        timer.cancel();
-        // Executa a função de timeout, se foi fornecida
-        if (widget.onTimeout != null) {
-          widget.onTimeout!();
-        }
-      }
-    });
-  }
-
-  double? get timeProgress {
-    if (_remainingSeconds != null && widget.countdownSeconds != null) {
-      return _remainingSeconds! / widget.countdownSeconds!;
-    }
-    return null;
-  }
-
-  double get averageAnswerTime {
-    if (_answerTimes.isEmpty) return 0;
-    return _answerTimes.reduce((a, b) => a + b) / _answerTimes.length;
-  }
-
-  /// Para o temporizador (pode ser usado ao terminar/destruir o widget)
-  void stopCountdown() {
-    _timer?.cancel();
-  }
-
   // Reincia o jogo e o seu progresso
   Future<void> restartGame() async {
     await levelManager.resetLevelToOne();
@@ -318,7 +257,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
         textAlign: TextAlign.center,
         child: widget.topTextContent(),
       ),
-      timeProgress: timeProgress,
       child: Stack(
         children: [
           if (!introCompleted && widget.introImagePath != null)
@@ -477,10 +415,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     updateFoundCorrect(newFoundCorrect);
 
     if (newFoundCorrect >= correctCount) {
-      if (_remainingSeconds != null && widget.countdownSeconds != null) {
-        int timeSpent = widget.countdownSeconds! - _remainingSeconds!;
-        _answerTimes.add(timeSpent);
-      }
       cancelTimers();
 
       await showSuccessFeedback();
@@ -629,7 +563,8 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     required Future<void> Function() showExtraFeedback,
   }) async {
     // 1) Determina se acertou
-    final isCorrect = selectedItem.content == target;
+   final isCorrect =selectedItem.content.toLowerCase() == target.toLowerCase();
+  
 
     // 2) Atualiza estado visual
     setState(() {
@@ -854,38 +789,5 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
             ),
           ),
     );
-  }
-
-  Future<void> resetLevelIfNewLetter(
-    UserModel user, {
-    required bool isLetterDependent,
-  }) async {
-    debugPrint("📚 Letras conhecidas no início: ${user.knownLetters}");
-    if (!isLetterDependent) return;
-
-    final currentLetters = List.from(user.knownLetters)..sort();
-    final currentHash = currentLetters.join(',').toLowerCase();
-    final previousHash = user.lastLettersHash ?? '';
-
-    if (currentHash != previousHash) {
-      user
-        ..gameLevel = 1
-        ..lastLettersHash = currentHash;
-      await user.save();
-
-      if (user.key != null) {
-        await HiveService.saveGameLevel(
-          userKey: user.key.toString(),
-          gameName: widget.gameName,
-          level: 1,
-        );
-      }
-
-      debugPrint(
-        "🟢 Reinício de nível: letras aprendidas foram alteradas. Novo nível -> 1",
-      );
-    } else {
-      debugPrint("🟡 Letras mantiveram-se. Nível inalterado.");
-    }
   }
 }
