@@ -236,10 +236,15 @@ class _WriteGameState extends State<WriteGame> {
     final font = getFontFamily(
       isFirstCycle ? FontStrategy.slabo : FontStrategy.none,
     );
+
+    const numbers = ['0','1','2','3','4','5','6','7','8','9'];
+    final isNumber = numbers.contains(targetCharacter);
+    final label = isNumber ? 'o número' : 'a letra';
+
     return Padding(
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
       child: Text(
-        hasChallengeStarted ? 'Escreve a letra $targetCharacter' : 'Vamos praticar a escrita!',
+        hasChallengeStarted ? 'Escreve $label $targetCharacter' : 'Vamos praticar a escrita!',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: font,
@@ -250,6 +255,7 @@ class _WriteGameState extends State<WriteGame> {
       ),
     );
   }
+
 
   Widget _buildBoard(BuildContext context, _, __) {
     if (!hasChallengeStarted || targetCharacter.isEmpty) {
