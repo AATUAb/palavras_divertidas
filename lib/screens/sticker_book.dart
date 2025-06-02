@@ -38,11 +38,11 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
     },
     {
       'asset': 'assets/images/words/macaco.webp',
-      'alignment': const Alignment(-0.50, 0.30),
+      'alignment': const Alignment(-0.43, 0.30),
     },
     {
       'asset': 'assets/images/words/tucano.webp',
-      'alignment': const Alignment(-0.45, 0.55),
+      'alignment': const Alignment(-0.50, 0.55),
     },
     {
       'asset': 'assets/images/words/golfinho.webp',

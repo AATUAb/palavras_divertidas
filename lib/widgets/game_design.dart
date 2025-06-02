@@ -139,7 +139,7 @@ class _GameDesignState extends State<GameDesign> {
                       "Tutorial em breve",
                       style: TextStyle(fontSize: 14.sp, color: AppColors.white),
                     ),
-                    backgroundColor: AppColors.green,
+                    backgroundColor: const Color(0xFF68B73A),
                     duration: const Duration(seconds: 2),
                     behavior: SnackBarBehavior.floating,
                   ),

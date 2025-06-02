@@ -178,7 +178,7 @@ class UserStats extends StatelessWidget {
                                           : 'Tempo médio: sem dados',
                                       style: TextStyle(
                                         fontSize: 6.sp,
-                                        color: Colors.grey[600],
+                                        color: const Color(0xFF68B73A),
                                         fontStyle: FontStyle.italic,
                                         decoration: TextDecoration.none,
                                       ),
