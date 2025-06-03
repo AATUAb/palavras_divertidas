@@ -63,7 +63,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
 
   // Inicializa o estado do jogo
   @override
-    void initState() {
+  void initState() {
     super.initState();
   }
 
@@ -163,8 +163,12 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
 
     // DEBUG:
     debugPrint('Letras conhecidas: $expandedLetters');
-    debugPrint('Palavras prioritárias: ${priorityWords.map((w) => w.text).toList()}');
-    debugPrint('Palavras filtradas: ${_levelWords.map((w) => w.text).toList()}');
+    debugPrint(
+      'Palavras prioritárias: ${priorityWords.map((w) => w.text).toList()}',
+    );
+    debugPrint(
+      'Palavras filtradas: ${_levelWords.map((w) => w.text).toList()}',
+    );
   }
 
   // Cancela os temporizadores ativos
@@ -239,7 +243,9 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
     if (!_usedWords.contains(targetWord.text)) {
       _usedWords.add(targetWord.text);
     }
-    debugPrint('⚠️ Palavra escolhida: ${targetWord.text} (letra nova: ${targetWord.newLetter})');
+    debugPrint(
+      '⚠️ Palavra escolhida: ${targetWord.text} (letra nova: ${targetWord.newLetter})',
+    );
 
     // Prepara o GameItem que vai tocar o áudio
     referenceItem = GameItem(
@@ -354,6 +360,21 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
     setState(() {
       item.isTapped = true;
     });
+
+    if (item.isCorrect && _startTime != null) {
+      final responseTime =
+          DateTime.now().difference(_startTime).inMilliseconds / 1000.0;
+      final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+
+      // Atualiza a média global e por nível
+      widget.user.updateGameTime('Identificar palavras', responseTime);
+      widget.user.updateGameTimeByLevel(
+        'Identificar palavras',
+        level,
+        responseTime,
+      );
+      await widget.user.save();
+    }
 
     // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(

@@ -59,6 +59,12 @@ class UserModel extends HiveObject {
   @HiveField(17)
   Map<String, double> gamesAverageTime;
 
+  @HiveField(18)
+  Map<String, Map<int, double>> gamesAverageTimeByLevel = {};
+
+  @HiveField(19)
+  Map<String, Map<int, int>> gamesCorrectCountByLevel = {};
+
   final Logger logger = Logger();
 
   UserModel({
@@ -111,6 +117,46 @@ class UserModel extends HiveObject {
     logger.i("Incrementing conquest. Current value: $conquest");
     conquest++;
     logger.i("New conquest value: $conquest");
+  }
+
+  // Atualiza o tempo médio de resposta para o jogo
+  void updateGameTime(String gameName, double responseTime) {
+    if (gamesAverageTime.containsKey(gameName)) {
+      int n = (totalCorrectPerGame[gameName] ?? 0);
+      double oldAvg = gamesAverageTime[gameName] ?? 0;
+      double newAvg = ((oldAvg * n) + responseTime) / (n + 1);
+      gamesAverageTime = {...gamesAverageTime, gameName: newAvg};
+      totalCorrectPerGame[gameName] = n + 1;
+    } else {
+      gamesAverageTime = {...gamesAverageTime, gameName: responseTime};
+      totalCorrectPerGame[gameName] = 1;
+    }
+  }
+
+  // Atualiza o tempo médio de resposta por nível para o jogo
+  void updateGameTimeByLevel(String gameName, int level, double responseTime) {
+    final timeByLevel = Map<int, double>.from(
+      gamesAverageTimeByLevel[gameName] ?? {},
+    );
+    final countByLevel = Map<int, int>.from(
+      gamesCorrectCountByLevel[gameName] ?? {},
+    );
+
+    int n = countByLevel[level] ?? 0;
+    double oldAvg = timeByLevel[level] ?? 0.0;
+    double newAvg = ((oldAvg * n) + responseTime) / (n + 1);
+
+    timeByLevel[level] = newAvg;
+    countByLevel[level] = n + 1;
+
+    gamesAverageTimeByLevel = {
+      ...gamesAverageTimeByLevel,
+      gameName: timeByLevel,
+    };
+    gamesCorrectCountByLevel = {
+      ...gamesCorrectCountByLevel,
+      gameName: countByLevel,
+    };
   }
 
   UserModel copyWith({

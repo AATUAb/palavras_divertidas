@@ -67,7 +67,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
 
   // Inicializa o estado do jogo
   @override
-    void initState() {
+  void initState() {
     super.initState();
   }
 
@@ -121,14 +121,14 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
     final retryIds = _gamesSuperKey.currentState?.retryQueueContents() ?? [];
 
     // Verifica se a palavra é válida para o nível atual e se tem mais de 1 sílaba
-   bool isValidWord(WordModel w) {
-    return w.difficulty.trim().toLowerCase() == levelDifficulty &&
-        !_usedWords.contains(w.text) &&
-        w.audioPath.trim().isNotEmpty &&
-        w.imagePath.trim().isNotEmpty &&
-        expandedLetters.contains(w.newLetter.trim().toLowerCase()) &&
-        w.syllables.length > 1;
-  }
+    bool isValidWord(WordModel w) {
+      return w.difficulty.trim().toLowerCase() == levelDifficulty &&
+          !_usedWords.contains(w.text) &&
+          w.audioPath.trim().isNotEmpty &&
+          w.imagePath.trim().isNotEmpty &&
+          expandedLetters.contains(w.newLetter.trim().toLowerCase()) &&
+          w.syllables.length > 1;
+    }
 
     // Filtra as palavras com base na última letra conhecida e na lista de retry
     final priorityWords =
@@ -168,8 +168,12 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
 
     // DEBUG:
     debugPrint('Letras conhecidas: $expandedLetters');
-    debugPrint('Palavras prioritárias: ${priorityWords.map((w) => w.text).toList()}');
-    debugPrint('Palavras filtradas: ${_levelWords.map((w) => w.text).toList()}');
+    debugPrint(
+      'Palavras prioritárias: ${priorityWords.map((w) => w.text).toList()}',
+    );
+    debugPrint(
+      'Palavras filtradas: ${_levelWords.map((w) => w.text).toList()}',
+    );
   }
 
   // Cancela os temporizadores ativos
@@ -216,75 +220,94 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
     }
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
 
-  // Escolhe o WordModel atual (retry ou novo aleatório, com prioridade para a última letra conhecida)
-  final priorityWords = availableWords
-      .where((w) => w.newLetter.trim().toLowerCase() == ultimaLetra)
-      .toList();
+    // Escolhe o WordModel atual (retry ou novo aleatório, com prioridade para a última letra conhecida)
+    final priorityWords =
+        availableWords
+            .where((w) => w.newLetter.trim().toLowerCase() == ultimaLetra)
+            .toList();
 
-  targetWord = retry != null
-      ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
-          list: _levelWords,
-          retryId: retry,
-          matcher: (w) => w.text == retry,
-          fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
-            availableItems:
-                priorityWords.isNotEmpty ? priorityWords : availableWords,
-          ),
-        )
-      : _gamesSuperKey.currentState!.safeSelectItem<WordModel>(
-          availableItems:
-              priorityWords.isNotEmpty ? priorityWords : availableWords,
-        );
+    targetWord =
+        retry != null
+            ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
+              list: _levelWords,
+              retryId: retry,
+              matcher: (w) => w.text == retry,
+              fallback:
+                  () => _gamesSuperKey.currentState!.safeSelectItem(
+                    availableItems:
+                        priorityWords.isNotEmpty
+                            ? priorityWords
+                            : availableWords,
+                  ),
+            )
+            : _gamesSuperKey.currentState!.safeSelectItem<WordModel>(
+              availableItems:
+                  priorityWords.isNotEmpty ? priorityWords : availableWords,
+            );
 
-  if (!_usedWords.contains(targetWord.text)) {
-    _usedWords.add(targetWord.text);
-  }
+    if (!_usedWords.contains(targetWord.text)) {
+      _usedWords.add(targetWord.text);
+    }
 
-  debugPrint('⚠️ Palavra escolhida: ${targetWord.text} (letra nova: ${targetWord.newLetter})');
+    debugPrint(
+      '⚠️ Palavra escolhida: ${targetWord.text} (letra nova: ${targetWord.newLetter})',
+    );
 
-  // Escolhe índice da sílaba a ocultar
-  if (targetWord.syllables.length > 1) {
-    hiddenIndex = Random().nextInt(targetWord.syllables.length);
-  } else {
-    hiddenIndex = 0;
-  }
+    // Escolhe índice da sílaba a ocultar
+    if (targetWord.syllables.length > 1) {
+      hiddenIndex = Random().nextInt(targetWord.syllables.length);
+    } else {
+      hiddenIndex = 0;
+    }
 
-  // Define a sílaba correta (a ser adivinhada)
-  correctSyllable = targetWord.syllables[hiddenIndex];
+    // Define a sílaba correta (a ser adivinhada)
+    correctSyllable = targetWord.syllables[hiddenIndex];
 
-  // Prepara o GameItem para tocar o áudio
-  referenceItem = GameItem(
-    id: targetWord.text,
-    type: GameItemType.text,
-    content: targetWord.audioPath,
-    dx: 0,
-    dy: 0,
-    backgroundColor: Colors.transparent,
-    isCorrect: true,
-  );
-
-  // Gera duas sílabas distratoras (simples, aleatórias por agora)
-  final sampleDistractors = [
-    'ba', 'bo', 'la', 'tu', 'po', 'me', 'si', 'mo', 'le', 'ra', 'na', 'ca'
-  ]..remove(correctSyllable);
-
-  final distractors = (sampleDistractors..shuffle()).take(2).toList();
-
-  // Junta a correta com as falsas e baralha
-  final answerSyllables = [correctSyllable, ...distractors]..shuffle();
-
-  // Cria os GameItems com base nas sílabas
-  gamesItems = answerSyllables.map((syll) {
-    return GameItem(
-      id: syll,
+    // Prepara o GameItem para tocar o áudio
+    referenceItem = GameItem(
+      id: targetWord.text,
       type: GameItemType.text,
-      content: syll,
+      content: targetWord.audioPath,
       dx: 0,
       dy: 0,
       backgroundColor: Colors.transparent,
-      isCorrect: syll == correctSyllable,
+      isCorrect: true,
     );
-  }).toList();
+
+    // Gera duas sílabas distratoras (simples, aleatórias por agora)
+    final sampleDistractors = [
+      'ba',
+      'bo',
+      'la',
+      'tu',
+      'po',
+      'me',
+      'si',
+      'mo',
+      'le',
+      'ra',
+      'na',
+      'ca',
+    ]..remove(correctSyllable);
+
+    final distractors = (sampleDistractors..shuffle()).take(2).toList();
+
+    // Junta a correta com as falsas e baralha
+    final answerSyllables = [correctSyllable, ...distractors]..shuffle();
+
+    // Cria os GameItems com base nas sílabas
+    gamesItems =
+        answerSyllables.map((syll) {
+          return GameItem(
+            id: syll,
+            type: GameItemType.text,
+            content: syll,
+            dx: 0,
+            dy: 0,
+            backgroundColor: Colors.transparent,
+            isCorrect: syll == correctSyllable,
+          );
+        }).toList();
 
     // Toca o áudio logo após o build
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -333,6 +356,17 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
     setState(() {
       item.isTapped = true;
     });
+
+    if (item.isCorrect && _startTime != null) {
+      final responseTime =
+          DateTime.now().difference(_startTime).inMilliseconds / 1000.0;
+      final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+
+      // Atualiza a média global e por nível
+      widget.user.updateGameTime('Sílaba perdida', responseTime);
+      widget.user.updateGameTimeByLevel('Sílaba perdida', level, responseTime);
+      await widget.user.save();
+    }
 
     // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(
@@ -407,7 +441,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
     );
   }
 
-   // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart
+  // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart
   Widget _buildBoard(BuildContext context, _, __) {
     if (!hasChallengeStarted || _levelWords.isEmpty) {
       return const SizedBox();
@@ -487,45 +521,46 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
 
   // Constrói a caixa de palavra com sílabas, ocultando uma delas
   Widget _buildSyllableWordBox({
-  required List<String> syllables,
-  required int hiddenIndex,
-}) {
-  final isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
-  final font = isFirstCycle ? 'Cursive' : null;
-  final fontSize = isFirstCycle ? 30.sp : 22.sp;
+    required List<String> syllables,
+    required int hiddenIndex,
+  }) {
+    final isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
+    final font = isFirstCycle ? 'Cursive' : null;
+    final fontSize = isFirstCycle ? 30.sp : 22.sp;
 
-  final wordDisplay = syllables
-      .asMap()
-      .entries
-      .map((e) => e.key == hiddenIndex ? '__' : e.value)
-      .join();
+    final wordDisplay =
+        syllables
+            .asMap()
+            .entries
+            .map((e) => e.key == hiddenIndex ? '__' : e.value)
+            .join();
 
-  return IntrinsicWidth(
-    child: Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-      decoration: BoxDecoration(
-        color: Colors.green,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4.r,
-            offset: Offset(2, 2),
+    return IntrinsicWidth(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.green,
+          borderRadius: BorderRadius.circular(20.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4.r,
+              offset: Offset(2, 2),
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          wordDisplay,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontFamily: font,
+            fontSize: fontSize,
           ),
-        ],
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        wordDisplay,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          fontFamily: font,
-          fontSize: fontSize,
         ),
       ),
-    ),
-  );
-} 
+    );
+  }
 }

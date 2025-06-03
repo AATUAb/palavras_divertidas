@@ -254,6 +254,17 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       item.isTapped = true;
     });
 
+    if (item.isCorrect && _startTime != null) {
+      final responseTime =
+          DateTime.now().difference(_startTime).inMilliseconds / 1000.0;
+      final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+
+      // Atualiza a média global e por nível
+      widget.user.updateGameTime('Contar sílabas', responseTime);
+      widget.user.updateGameTimeByLevel('Contar sílabas', level, responseTime);
+      await widget.user.save();
+    }
+
     // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(
       selectedItem: item,

@@ -1,4 +1,3 @@
-
 // Jogo "Identificar letras e números":
 // O jogador ouve uma letra ou número e tem de clicar sobre vários circulos com essa letra ou número.
 // A quantidade de elementos corretos e errados e tempo variam com o nível.
@@ -335,6 +334,21 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       item.isTapped = true;
     });
 
+    if (item.isCorrect && _startTime != null) {
+      final responseTime =
+          DateTime.now().difference(_startTime).inMilliseconds / 1000.0;
+      final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+
+      // Atualiza a média global e por nível
+      widget.user.updateGameTime('Identificar letras e números', responseTime);
+      widget.user.updateGameTimeByLevel(
+        'Identificar letras e números',
+        level,
+        responseTime,
+      );
+      await widget.user.save();
+    }
+
     // Marca uma ronda como terminada e cancela os temporizadores
     void _markRoundAsFinished() {
       setState(() => isRoundActive = false);
@@ -385,7 +399,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
- // Constrói o texto superior que é apresenado quando o jogo arranca
+  // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
     final isPreschool = widget.user.schoolLevel == 'Pré-Escolar';
 
@@ -446,7 +460,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   // Helpers
   Widget _buildSimpleText(String text) => Padding(
-    padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w), 
+    padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w),
     child: Text(
       text,
       textAlign: TextAlign.center,
@@ -458,17 +472,14 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     ),
   );
 
-    Widget _buildRichText(TextSpan textSpan) => Padding(
+  Widget _buildRichText(TextSpan textSpan) => Padding(
     padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w),
-    child: Text.rich(
-      textSpan,
-      textAlign: TextAlign.center,
-    ),
+    child: Text.rich(textSpan, textAlign: TextAlign.center),
   );
 
-
   TextStyle _slaboStyle() => TextStyle(fontFamily: 'Slabo', fontSize: 22.sp);
-  TextStyle _cursiveStyle() =>TextStyle(fontFamily: 'Cursive', fontSize: 25.sp);
+  TextStyle _cursiveStyle() =>
+      TextStyle(fontFamily: 'Cursive', fontSize: 25.sp);
 
   // Constrói o tabuleiro do jogo, com base CharacterCircleBox do game_component.dart
   Widget _buildBoard(BuildContext _, __, ___) {

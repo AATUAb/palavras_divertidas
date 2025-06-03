@@ -36,9 +36,15 @@ class _WritingGameState extends State<WritingGame> {
   String currentLetter = '';
   String targetCharacter = '';
   bool get isFirstCycle {
-    debugPrint('⚙️ isFirstCycle getter called → ${widget.user.schoolLevel == '1º Ciclo'}');
+    debugPrint(
+      '⚙️ isFirstCycle getter called → ${widget.user.schoolLevel == '1º Ciclo'}',
+    );
     return widget.user.schoolLevel == '1º Ciclo';
   }
+
+  Timer? _timeoutTimer;
+  DateTime? _challengeStartTime;
+  bool _challengeCompleted = false;
 
   @override
   void initState() {
@@ -61,6 +67,7 @@ class _WritingGameState extends State<WritingGame> {
   void dispose() {
     debugPrint('🧹 dispose called');
     _audioPlayer.dispose();
+    _timeoutTimer?.cancel();
     super.dispose();
   }
 
@@ -99,12 +106,12 @@ class _WritingGameState extends State<WritingGame> {
   void _generateNextLetter() {
     debugPrint('🔁 _generateNextLetter start (used so far: $_usedCharacters)');
     final allChars = _characters.map((e) => e.character.toUpperCase()).toList();
-    final availableChars = allChars.where((c) => !_usedCharacters.contains(c)).toList();
+    final availableChars =
+        allChars.where((c) => !_usedCharacters.contains(c)).toList();
 
     if (availableChars.isEmpty) {
       debugPrint('   🎉 Nenhum caracter disponível: fim do jogo');
-      _gamesSuperKey.currentState
-          ?.showEndOfGameDialog(onRestart: _restartGame);
+      _gamesSuperKey.currentState?.showEndOfGameDialog(onRestart: _restartGame);
       return;
     }
 
@@ -115,6 +122,38 @@ class _WritingGameState extends State<WritingGame> {
     setState(() {
       currentLetter = next;
       targetCharacter = next;
+    });
+
+    // Inicia temporizador e cronómetro do desafio
+    _challengeStartTime = DateTime.now();
+    _challengeCompleted = false;
+
+    final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    final timeout =
+        level == 1
+            ? 15
+            : level == 2
+            ? 10
+            : 7;
+
+    _timeoutTimer?.cancel();
+    _timeoutTimer = Timer(Duration(seconds: timeout), () {
+      if (!_challengeCompleted) {
+        // Falhou por timeout
+        widget.user.updateGameAccuracy(
+          gameId: 'Escrever',
+          level: level,
+          value: 0,
+        );
+
+        _challengeCompleted = true;
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Tempo esgotado!')));
+          _generateNextLetter();
+        }
+      }
     });
 
     _playInstruction();
@@ -128,26 +167,47 @@ class _WritingGameState extends State<WritingGame> {
       hasChallengeStarted = true;
       progressValue = 1.0;
     });
-    debugPrint('   Estado reiniciado: usedCharacters cleared, hasChallengeStarted=true');
+    debugPrint(
+      '   Estado reiniciado: usedCharacters cleared, hasChallengeStarted=true',
+    );
     await _applyLevelSettings();
     _generateNextLetter();
   }
 
   Future<void> _handleTracingFinished(String char) async {
-    debugPrint('✅ _handleTracingFinished start for char="$char"');
+    if (_challengeCompleted) return; // Ignora se já terminou por timeout
+    _challengeCompleted = true;
+    _timeoutTimer?.cancel();
+
+    final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+
+    // Acerto
+    widget.user.updateGameAccuracy(
+      gameId: 'Escrever',
+      level: level,
+      value: 1, // 1 = acerto
+    );
+
+    // Tempo médio por nível
+    final elapsedSeconds =
+        _challengeStartTime != null
+            ? DateTime.now()
+                .difference(_challengeStartTime!)
+                .inSeconds
+                .toDouble()
+            : 0.0;
+    widget.user.updateGameTimeByLevel('Escrever', level, elapsedSeconds);
+
+    await widget.user.save();
+
     _gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
     final levelChanged = await _gamesSuperKey.currentState?.levelManager
         .registerRoundForLevel(correct: true);
-    debugPrint('   levelChanged? $levelChanged');
     await _applyLevelSettings();
 
-    if (!mounted) {
-      debugPrint('   Widget unmounted antes de continuar');
-      return;
-    }
+    if (!mounted) return;
 
     if (levelChanged == true) {
-      debugPrint('   Nível mudou, mostrando feedback');
       await _gamesSuperKey.currentState?.showLevelChangeFeedback(
         newLevel: _gamesSuperKey.currentState!.levelManager.level,
         increased: _gamesSuperKey.currentState!.levelManager.levelIncreased,
@@ -158,7 +218,9 @@ class _WritingGameState extends State<WritingGame> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('🖼️ build() called: hasChallengeStarted=$hasChallengeStarted, currentLetter=$currentLetter');
+    debugPrint(
+      '🖼️ build() called: hasChallengeStarted=$hasChallengeStarted, currentLetter=$currentLetter',
+    );
     return GamesSuperWidget(
       key: _gamesSuperKey,
       user: widget.user,
@@ -187,7 +249,9 @@ class _WritingGameState extends State<WritingGame> {
   }
 
   Widget _buildTopText() {
-    debugPrint('📝 _buildTopText called (hasChallengeStarted=$hasChallengeStarted)');
+    debugPrint(
+      '📝 _buildTopText called (hasChallengeStarted=$hasChallengeStarted)',
+    );
     return Padding(
       padding: EdgeInsets.only(top: 20.h),
       child: Text(
@@ -205,7 +269,9 @@ class _WritingGameState extends State<WritingGame> {
   }
 
   Widget _buildBoard(BuildContext context, _, __) {
-    debugPrint('🔲 _buildBoard called (hasChallengeStarted=$hasChallengeStarted, currentLetter=$currentLetter)');
+    debugPrint(
+      '🔲 _buildBoard called (hasChallengeStarted=$hasChallengeStarted, currentLetter=$currentLetter)',
+    );
     if (!hasChallengeStarted || currentLetter.isEmpty) {
       debugPrint('   Retornando SizedBox.shrink()');
       return const SizedBox.shrink();
@@ -219,14 +285,16 @@ class _WritingGameState extends State<WritingGame> {
           key: ValueKey(currentLetter),
           showAnchor: true,
           traceShapeModel: [
-            TraceCharsModel(chars: [
-              TraceCharModel(
-                char: currentLetter,
-                traceShapeOptions: const TraceShapeOptions(
-                  innerPaintColor: Colors.orange,
+            TraceCharsModel(
+              chars: [
+                TraceCharModel(
+                  char: currentLetter,
+                  traceShapeOptions: const TraceShapeOptions(
+                    innerPaintColor: Colors.orange,
+                  ),
                 ),
-              ),
-            ]),
+              ],
+            ),
           ],
           onTracingUpdated: (_) async {
             debugPrint('✏️ onTracingUpdated callback');

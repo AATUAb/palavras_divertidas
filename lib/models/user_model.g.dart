@@ -36,13 +36,19 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       lastLettersHash: fields[16] as String?,
       lastSeenConquests: fields[15] as int,
       gamesAverageTime: (fields[17] as Map).cast<String, double>(),
-    );
+    )
+      ..gamesAverageTimeByLevel = (fields[18] as Map).map(
+          (dynamic k, dynamic v) =>
+              MapEntry(k as String, (v as Map).cast<int, double>()))
+      ..gamesCorrectCountByLevel = (fields[19] as Map).map(
+          (dynamic k, dynamic v) =>
+              MapEntry(k as String, (v as Map).cast<int, int>()));
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(18)
+      ..writeByte(20)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -78,7 +84,11 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(16)
       ..write(obj.lastLettersHash)
       ..writeByte(17)
-      ..write(obj.gamesAverageTime);
+      ..write(obj.gamesAverageTime)
+      ..writeByte(18)
+      ..write(obj.gamesAverageTimeByLevel)
+      ..writeByte(19)
+      ..write(obj.gamesCorrectCountByLevel);
   }
 
   @override

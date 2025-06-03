@@ -104,6 +104,7 @@ class UserStats extends StatelessWidget {
                                 center.dy +
                                 (radius) * sin(2 * pi * i / n - pi / 2) +
                                 180,
+                            // popup com a taxa de acerto
                             child: Material(
                               color: Colors.transparent,
                               child: Container(
@@ -112,14 +113,14 @@ class UserStats extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.1),
+                                  color: AppColors.green.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
                                   '$acc%',
                                   style: const TextStyle(
                                     color: Colors.orange,
-                                    fontSize: 11,
+                                    fontSize: 12,
                                   ),
                                 ),
                               ),
@@ -179,7 +180,11 @@ class UserStats extends StatelessWidget {
                           raw.length > 2 ? raw[2] : 0,
                         ];
                         // Tempo médio (null-safe)
-                        final avgTime = user.gamesAverageTime[game];
+                        final avgTimesByLevel =
+                            user.gamesAverageTimeByLevel[game] ?? {};
+                        final avgNivel1 = avgTimesByLevel[1] ?? 0;
+                        final avgNivel2 = avgTimesByLevel[2] ?? 0;
+                        final avgNivel3 = avgTimesByLevel[3] ?? 0;
                         return Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.w),
                           child: Column(
@@ -205,7 +210,7 @@ class UserStats extends StatelessWidget {
                               ),
                               SizedBox(height: 1.h),
                               Padding(
-                                padding: EdgeInsets.only(left: 30.w),
+                                padding: EdgeInsets.only(left: 26.w),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -216,19 +221,18 @@ class UserStats extends StatelessWidget {
                                       'Nível 3: ${ints[2]}%',
                                       style: TextStyle(
                                         fontSize: 6.sp,
-                                        color: AppColors.green.withOpacity(0.5),
+                                        color: AppColors.grey,
                                         decoration: TextDecoration.none,
                                       ),
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
-                                      // mostra o tempo médio se existir
-                                      avgTime != null && avgTime > 0
-                                          ? 'Tempo médio: ${avgTime.toStringAsFixed(1)} s'
-                                          : 'Tempo médio: sem dados',
+                                      'Nível 1: ${avgNivel1 > 0 ? '${avgNivel1.toInt()} s' : '0s'}; '
+                                      'Nível 2: ${avgNivel2 > 0 ? '${avgNivel2.toInt()} s' : '0s'}; '
+                                      'Nível 3: ${avgNivel3 > 0 ? '${avgNivel3.toInt()} s' : '0s'}',
                                       style: TextStyle(
                                         fontSize: 6.sp,
-                                        color: AppColors.green.withOpacity(0.5),
+                                        color: AppColors.grey,
                                         decoration: TextDecoration.none,
                                       ),
                                     ),
@@ -277,7 +281,7 @@ class UserStats extends StatelessWidget {
   }
 }
 
-/// Desenha o radar — ficou igual à tua implementação original
+/// Desenha o radar
 class RadarPainter extends CustomPainter {
   final List<double> scores;
   final Offset center;
