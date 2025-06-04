@@ -55,7 +55,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   // Fecha o player de áudio e cancela os temporizadores
   @override
   void dispose() {
-    _isDisposed = true;
+    //_isDisposed = true;
     _cancelTimers();
     super.dispose();
   }
@@ -254,7 +254,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       item.isTapped = true;
     });
 
-    if (item.isCorrect) {
+    if (item.isCorrect && _startTime != null) {
       final responseTime =
           DateTime.now().difference(_startTime).inMilliseconds / 1000.0;
       final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;

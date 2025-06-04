@@ -181,7 +181,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
             left: 10.w,
             child: IconButton(
               icon: Icon(Icons.home, size: 30.sp),
-              tooltip: 'Voltar ao Menu de Jogos',
+              tooltip: 'Voltar ao Menu anterior',
               onPressed: widget.onHomePressed,
             ),
           ),
@@ -238,7 +238,7 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
                 isMenuMuted ? Icons.volume_off : Icons.volume_up,
                 size: 30.sp,
               ),
-              tooltip: isMenuMuted ? 'Ativar som' : 'Silenciar',
+              tooltip: isMenuMuted ? 'Ativar som' : 'Desativar som',
               onPressed: _toggleMute,
             ),
           ),

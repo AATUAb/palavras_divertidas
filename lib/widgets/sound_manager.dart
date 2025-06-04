@@ -7,9 +7,11 @@ import '../widgets/game_item.dart';
 
 class SoundManager {
   static final AudioPlayer _player = AudioPlayer();
+  static bool _isStopped = false; 
 
   /// Toca o som de um carácter (letra ou número isolado)
   static Future<void> playCharacter(String character) async {
+    if (_isStopped) return;
     final box = await Hive.openBox<CharacterModel>('characters');
     
     final model = box.values.firstWhere(
@@ -36,6 +38,7 @@ class SoundManager {
   static Box<WordModel>? _wordBox;
 
 static Future<void> playWord(String word) async {
+  if (_isStopped) return;
   _wordBox ??= await Hive.openBox<WordModel>('words');
 
   final model = _wordBox!.values.firstWhere(
@@ -64,10 +67,14 @@ static Future<void> playWord(String word) async {
 
   /// Toca som com base no tipo de `GameItem`: carácter ou palavra
  static Future<void> playGameItem(GameItem item) async {
+  _isStopped = false;
+
   final text = item.content.trim();
 
   // Delay necessário no Flutter Web para evitar erro WebAudioError
   await Future.delayed(const Duration(milliseconds: 300));
+  
+  if (_isStopped) return;
 
   if (item.type == GameItemType.character && text.length == 1) {
     await playCharacter(text);
@@ -81,6 +88,7 @@ static Future<void> playWord(String word) async {
 
   /// Para qualquer som a tocar
   static Future<void> stop() async {
-    await _player.stop();
-  }
+  _isStopped = true;
+  await _player.stop();
+}
 }

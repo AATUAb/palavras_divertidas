@@ -47,7 +47,7 @@ class GameCard extends StatelessWidget {
                   child: Icon(
                     icon,
                     size: 36.sp,
-                    color: iconColor ?? AppColors.white,
+                    color: iconColor ?? AppColors.black,
                   ),
                 ),
               ),

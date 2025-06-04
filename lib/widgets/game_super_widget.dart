@@ -56,6 +56,8 @@ class GamesSuperWidget extends StatefulWidget {
 
 class GamesSuperWidgetState extends State<GamesSuperWidget>
     with TickerProviderStateMixin {
+  bool _introStopped = false;
+  late final AudioPlayer _introPlayer = AudioPlayer();
   late LevelManager levelManager;
   int _visibleLevel = 1;
   late ConquestManager conquestManager;
@@ -66,6 +68,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   late AnimationController _fadeController;
   late Animation<double> _rotationAnimation;
   bool get isFirstCycle => widget.isFirstCycle;
+  bool _isDisposed = false;
 
   GameItem? _currentChallengeItem;
 
@@ -116,6 +119,9 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
 
   @override
   void dispose() {
+    _isDisposed = true;
+    _introPlayer.stop();
+    SoundManager.stop();
     _fadeController.dispose();
     _highlightController.dispose();
     super.dispose();
@@ -140,33 +146,34 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   }
 
   Future<void> _playIntroAndStartFade() async {
-    final player = AudioPlayer();
-    try {
-      await player.play(AssetSource(widget.introAudioPath!), volume: 1);
-      await player.onPlayerComplete.first;
-    } catch (e) {
-      // No web user interaction yet – swallow the error and continue
-    }
-
-    if (!mounted) return;
-
-    _fadeController.forward();
-    await Future.delayed(
-      _fadeController.duration ?? const Duration(milliseconds: 500),
-    );
-
-    if (!mounted) return;
-
-    setState(() {
-      introCompleted = true;
-    });
-    widget.onIntroFinished?.call();
+  try {
+    await _introPlayer.play(AssetSource(widget.introAudioPath!), volume: 1);
+    await _introPlayer.onPlayerComplete.first;
+  } catch (e) {
+    debugPrint("🔇 Erro ao tocar som de introdução: $e");
   }
+
+  if (!mounted || _introStopped) return;
+
+  _fadeController.forward();
+  await Future.delayed(
+    _fadeController.duration ?? const Duration(milliseconds: 500),
+  );
+
+  if (!mounted || _introStopped) return;
+
+  setState(() {
+    introCompleted = true;
+  });
+  widget.onIntroFinished?.call();
+}
+
 
   Future<void> playNewChallengeSound(GameItem item) async {
-    _currentChallengeItem = item;
-    await SoundManager.playGameItem(item);
-  }
+    if (_isDisposed) return;
+  _currentChallengeItem = item;
+  await SoundManager.playGameItem(item);
+}
 
   T safeSelectItem<T>({required List<T> availableItems}) {
     if (availableItems.isEmpty) {

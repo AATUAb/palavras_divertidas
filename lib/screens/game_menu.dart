@@ -236,14 +236,14 @@ void handleLetterDependentGame({
       ),
       GameCardData(
         title: "Escrever",
-        icon: Icons.extension,
+        icon: 	Icons.edit,
         onTap: () => _writeGame(),
         backgroundColor: AppColors.orange,
         showNewFlag: widget.user.schoolLevel == '1º Ciclo',
       ),
       GameCardData(
         title: "Contar sílabas",
-        icon: Icons.format_list_numbered,
+        icon: 	Icons.format_list_numbered,
         onTap: _countSyllablesGame,
         backgroundColor: AppColors.yellow,
       ),
@@ -258,7 +258,7 @@ void handleLetterDependentGame({
   final List<GameCardData> jogosExtras = [
   GameCardData(
     title: "Ouvir e procurar palavras",
-    icon: Icons.find_in_page,
+    icon: Icons.edit_note,
     onTap: () => handleLetterDependentGame(
       context: context,
       user: widget.user,
@@ -269,13 +269,13 @@ void handleLetterDependentGame({
   ),
   GameCardData(
     title: "Sílaba perdida",
-    icon: Icons.find_in_page,
+    icon: Icons.more_horiz,
     onTap: () => handleLetterDependentGame(
       context: context,
       user: widget.user,
       gameBuilder: () => LostSyllableGame(user: widget.user),
     ),
-    backgroundColor: AppColors.orange,
+    backgroundColor: AppColors.yellow,
     showNewFlag: true,
   ),
 ];
@@ -368,7 +368,7 @@ void handleLetterDependentGame({
                                       child: Icon(
                                         jogo.icon,
                                         size: 30.sp,
-                                        color: Colors.white,
+                                        color: Colors.black,
                                       ),
                                     ),
                                     if (jogo.showNewFlag)
