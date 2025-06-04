@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -34,7 +33,7 @@ class _WriteGameState extends State<WriteGame> {
   double progressValue = 1.0;
   bool isRoundActive = true;
   bool _isDisposed = false;
-  bool? isCorrect; 
+  bool? isCorrect;
 
   late GameItem referenceItem;
   Timer? roundTimer, progressTimer;
@@ -67,37 +66,61 @@ class _WriteGameState extends State<WriteGame> {
     }
 
     final box = await Hive.openBox<CharacterModel>('characters');
-    final allChars = box.values.where((c) => c.character.trim().isNotEmpty).toList();
+    final allChars =
+        box.values.where((c) => c.character.trim().isNotEmpty).toList();
 
-    const vowels = ['a','e','i','o','u'];
-    const consonants = ['b','c','d','f','g','h','j','l','m','n','p','q','r','s','t','v','x','z'];
-    const numbers = ['0','1','2','3','4','5','6','7','8','9'];
+    const vowels = ['a', 'e', 'i', 'o', 'u'];
+    const consonants = [
+      'b',
+      'c',
+      'd',
+      'f',
+      'g',
+      'h',
+      'j',
+      'l',
+      'm',
+      'n',
+      'p',
+      'q',
+      'r',
+      's',
+      't',
+      'v',
+      'x',
+      'z',
+    ];
+    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
     if (isPreschool) {
-      final filteredChars = allChars.where((c) {
-        final char = c.character.trim().toLowerCase();
-        return switch (lvl) {
-          1 => numbers.contains(char),
-          2 => vowels.contains(char),
-          3 => consonants.contains(char),
-          _ => false,
-        };
-      }).toList();
+      final filteredChars =
+          allChars.where((c) {
+            final char = c.character.trim().toLowerCase();
+            return switch (lvl) {
+              1 => numbers.contains(char),
+              2 => vowels.contains(char),
+              3 => consonants.contains(char),
+              _ => false,
+            };
+          }).toList();
 
-      final expandedChars = filteredChars.expand((c) {
-        final baseChar = c.character.trim().toLowerCase();
+      final expandedChars =
+          filteredChars.expand((c) {
+            final baseChar = c.character.trim().toLowerCase();
 
-        return [
-          CharacterModel(
-            character: baseChar.toUpperCase(),
-            soundPath: 'assets/sounds/characters/${baseChar.toUpperCase()}.ogg',
-          ),
-          CharacterModel(
-            character: baseChar.toLowerCase(),
-            soundPath: 'assets/sounds/characters/${baseChar.toLowerCase()}.ogg',
-          ),
-        ];
-      }).toList();
+            return [
+              CharacterModel(
+                character: baseChar.toUpperCase(),
+                soundPath:
+                    'assets/sounds/characters/${baseChar.toUpperCase()}.ogg',
+              ),
+              CharacterModel(
+                character: baseChar.toLowerCase(),
+                soundPath:
+                    'assets/sounds/characters/${baseChar.toLowerCase()}.ogg',
+              ),
+            ];
+          }).toList();
 
       _characters = expandedChars;
     } else {
@@ -124,9 +147,10 @@ class _WriteGameState extends State<WriteGame> {
 
     final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
 
-    final availableItems = _characters.where(
-      (c) => !_usedCharacters.contains(c.character),
-    ).toList();
+    final availableItems =
+        _characters
+            .where((c) => !_usedCharacters.contains(c.character))
+            .toList();
 
     if (availableItems.isEmpty && retryId == null) {
       _gamesSuperKey.currentState?.showEndOfGameDialog(
@@ -139,18 +163,20 @@ class _WriteGameState extends State<WriteGame> {
       return;
     }
 
-    final selected = retryId != null
-        ? _gamesSuperKey.currentState!.safeRetry<CharacterModel>(
-            list: availableItems,
-            retryId: retryId,
-            matcher: (c) => c.character == retryId,
-            fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
+    final selected =
+        retryId != null
+            ? _gamesSuperKey.currentState!.safeRetry<CharacterModel>(
+              list: availableItems,
+              retryId: retryId,
+              matcher: (c) => c.character == retryId,
+              fallback:
+                  () => _gamesSuperKey.currentState!.safeSelectItem(
+                    availableItems: availableItems,
+                  ),
+            )
+            : _gamesSuperKey.currentState!.safeSelectItem(
               availableItems: availableItems,
-            ),
-          )
-        : _gamesSuperKey.currentState!.safeSelectItem(
-            availableItems: availableItems,
-          );
+            );
 
     targetCharacter = selected.character;
     tracedCharacter = targetCharacter;
@@ -185,7 +211,9 @@ class _WriteGameState extends State<WriteGame> {
       if (!mounted || _isDisposed) return t.cancel();
       final elapsed = DateTime.now().difference(_startTime);
       setState(() {
-        progressValue = (1.0 - elapsed.inMilliseconds / levelTime.inMilliseconds).clamp(0.0, 1.0);
+        progressValue = (1.0 -
+                elapsed.inMilliseconds / levelTime.inMilliseconds)
+            .clamp(0.0, 1.0);
       });
     });
 
@@ -199,11 +227,6 @@ class _WriteGameState extends State<WriteGame> {
         generateNewChallenge: _generateNewChallenge,
       );
     });
-  }
-
-  String _randomCase(String char) {
-    if (!RegExp(r'[a-zA-Z]').hasMatch(char)) return char;
-    return Random().nextBool() ? char.toUpperCase() : char.toLowerCase();
   }
 
   @override
@@ -237,14 +260,16 @@ class _WriteGameState extends State<WriteGame> {
       isFirstCycle ? FontStrategy.slabo : FontStrategy.none,
     );
 
-    const numbers = ['0','1','2','3','4','5','6','7','8','9'];
+    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     final isNumber = numbers.contains(targetCharacter);
     final label = isNumber ? 'o número' : 'a letra';
 
     return Padding(
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
       child: Text(
-        hasChallengeStarted ? 'Escreve $label $targetCharacter' : 'Vamos praticar a escrita!',
+        hasChallengeStarted
+            ? 'Escreve $label $targetCharacter'
+            : 'Vamos praticar a escrita!',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: font,
@@ -255,7 +280,6 @@ class _WriteGameState extends State<WriteGame> {
       ),
     );
   }
-
 
   Widget _buildBoard(BuildContext context, _, __) {
     if (!hasChallengeStarted || targetCharacter.isEmpty) {
@@ -275,14 +299,16 @@ class _WriteGameState extends State<WriteGame> {
                 key: ValueKey(tracedCharacter),
                 showAnchor: true,
                 traceShapeModel: [
-                  TraceCharsModel(chars: [
-                    TraceCharModel(
-                      char: tracedCharacter,
-                      traceShapeOptions: const TraceShapeOptions(
-                        innerPaintColor: Colors.orange,
+                  TraceCharsModel(
+                    chars: [
+                      TraceCharModel(
+                        char: tracedCharacter,
+                        traceShapeOptions: const TraceShapeOptions(
+                          innerPaintColor: Colors.orange,
+                        ),
                       ),
-                    ),
-                  ]),
+                    ],
+                  ),
                 ],
                 onGameFinished: (isSuccessful) async {
                   if (!isRoundActive || tracedCharacter.isEmpty) return;
@@ -330,6 +356,6 @@ class _WriteGameState extends State<WriteGame> {
           ),
         ),
       ),
-    );  
+    );
   }
 }

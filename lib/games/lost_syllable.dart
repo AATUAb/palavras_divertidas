@@ -37,7 +37,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
 
   List<WordModel> _allWords = [];
   List<WordModel> _levelWords = [];
-  List<String> _usedWords = [];
+  final List<String> _usedWords = [];
   late WordModel targetWord;
   bool showWord = false;
   String correctSyllable = '';
@@ -357,7 +357,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
       item.isTapped = true;
     });
 
-    if (item.isCorrect && _startTime != null) {
+    if (item.isCorrect) {
       final responseTime =
           DateTime.now().difference(_startTime).inMilliseconds / 1000.0;
       final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;
@@ -410,7 +410,6 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
       introImagePath: 'assets/images/games/lost_syllable.webp',
       introAudioPath: 'sounds/games/lost_syllable.ogg',
       onIntroFinished: () async {
-        final box = await Hive.openBox<UserModel>('users');
         await _loadWords();
         await _applyLevelSettings();
         if (!mounted || _isDisposed) return;

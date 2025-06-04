@@ -35,7 +35,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   late int foundCorrect;
 
   List<CharacterModel> _characters = [];
-  List<String> _usedCharacters = [];
+  final List<String> _usedCharacters = [];
   String targetCharacter = '';
 
   bool isRoundActive = true;
@@ -334,7 +334,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       item.isTapped = true;
     });
 
-    if (item.isCorrect && _startTime != null) {
+    if (item.isCorrect) {
       final responseTime =
           DateTime.now().difference(_startTime).inMilliseconds / 1000.0;
       final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;
@@ -350,7 +350,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     }
 
     // Marca uma ronda como terminada e cancela os temporizadores
-    void _markRoundAsFinished() {
+    void markRoundAsFinished() {
       setState(() => isRoundActive = false);
       _cancelTimers();
     }
@@ -367,7 +367,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       generateNewChallenge: _generateNewChallenge,
       updateFoundCorrect: (v) => setState(() => foundCorrect = v),
       cancelTimers: _cancelTimers,
-      markRoundFinished: _markRoundAsFinished,
+      markRoundFinished: markRoundAsFinished,
     );
   }
 

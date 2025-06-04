@@ -35,7 +35,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
 
   List<WordModel> _allWords = [];
   List<WordModel> _levelWords = [];
-  List<String> _usedWords = [];
+  final List<String> _usedWords = [];
   late WordModel targetWord;
   bool showWord = false;
 
@@ -361,7 +361,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
       item.isTapped = true;
     });
 
-    if (item.isCorrect && _startTime != null) {
+    if (item.isCorrect) {
       final responseTime =
           DateTime.now().difference(_startTime).inMilliseconds / 1000.0;
       final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;
@@ -418,7 +418,6 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
       introImagePath: 'assets/images/games/identify_words.webp',
       introAudioPath: 'sounds/games/identify_words.ogg',
       onIntroFinished: () async {
-        final box = await Hive.openBox<UserModel>('users');
         await _loadWords();
         await _applyLevelSettings();
         if (!mounted || _isDisposed) return;

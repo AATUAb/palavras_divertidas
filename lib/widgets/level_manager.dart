@@ -89,39 +89,37 @@ class LevelManager {
     levelIncreased = levelUp;
 
     // Inicia gravações em Hive em segundo plano
-    if (userKey != null) {
-      unawaited(
-        HiveService.updateGameAccuracy(
-          userKey: int.parse(userKey),
-          gameName: gameName,
-          accuracyPerLevel: [accuracyPercent],
-          levelOverride: levelAtThisRound,
-        ),
-      );
+    unawaited(
+      HiveService.updateGameAccuracy(
+        userKey: int.parse(userKey),
+        gameName: gameName,
+        accuracyPerLevel: [accuracyPercent],
+        levelOverride: levelAtThisRound,
+      ),
+    );
 
-      if (levelChanged) {
-        recentRounds = 0;
-        recentCorrect = 0;
-      }
-
-      // Só grava o nível novo se houver mudança
-      unawaited(
-        HiveService.saveGameLevel(
-          userKey: userKey,
-          gameName: gameName,
-          level: level,
-        ),
-      );
-
-      user.updateAccuracy(level: levelAtThisRound, accuracy: accuracy);
-      unawaited(HiveService.updateUserByKey(int.parse(userKey), user));
+    if (levelChanged) {
+      recentRounds = 0;
+      recentCorrect = 0;
     }
+
+    // Só grava o nível novo se houver mudança
+    unawaited(
+      HiveService.saveGameLevel(
+        userKey: userKey,
+        gameName: gameName,
+        level: level,
+      ),
+    );
+
+    user.updateAccuracy(level: levelAtThisRound, accuracy: accuracy);
+    unawaited(HiveService.updateUserByKey(int.parse(userKey), user));
 
     return levelChanged;
   }
 
-    // Função para fazer o reset do progreso atual, aplicável quando há letras novas conhecidas
-    Future<void> resetLevelToOne() async {
+  // Função para fazer o reset do progreso atual, aplicável quando há letras novas conhecidas
+  Future<void> resetLevelToOne() async {
     level = 1;
     resetProgress();
     final userKey = user.key?.toString();

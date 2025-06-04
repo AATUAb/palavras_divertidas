@@ -254,7 +254,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       item.isTapped = true;
     });
 
-    if (item.isCorrect && _startTime != null) {
+    if (item.isCorrect) {
       final responseTime =
           DateTime.now().difference(_startTime).inMilliseconds / 1000.0;
       final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;

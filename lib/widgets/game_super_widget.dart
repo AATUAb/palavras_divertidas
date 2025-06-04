@@ -12,7 +12,6 @@ import 'conquest_manager.dart';
 import 'game_animations.dart';
 import 'game_design.dart';
 import 'sound_manager.dart';
-import '../services/hive_service.dart';
 
 class GamesSuperWidget extends StatefulWidget {
   final UserModel user;
@@ -109,19 +108,18 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
       CurvedAnimation(parent: _highlightController, curve: Curves.easeOut),
     );
 
-
     // Carrega o nível de cada jogo
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeLevelAndIntro();
     });
   }
 
-   @override
-    void dispose() {
-      _fadeController.dispose();
-      _highlightController.dispose();
-      super.dispose();
-    }
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _highlightController.dispose();
+    super.dispose();
+  }
 
   // Inicializa o nível e a introdução do jogo
   Future<void> _initializeLevelAndIntro() async {
@@ -563,8 +561,8 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     required Future<void> Function() showExtraFeedback,
   }) async {
     // 1) Determina se acertou
-   final isCorrect =selectedItem.content.toLowerCase() == target.toLowerCase();
-  
+    final isCorrect =
+        selectedItem.content.toLowerCase() == target.toLowerCase();
 
     // 2) Atualiza estado visual
     setState(() {

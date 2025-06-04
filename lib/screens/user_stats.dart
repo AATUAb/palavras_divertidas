@@ -92,24 +92,23 @@ class UserStats extends StatelessWidget {
                     (radius + 12) * sin(2 * pi * i / n - pi / 2) -
                     10,
                 child: GestureDetector(
-                  key: iconKeys[i], // Key aplicada no GestureDetector!
+                  key: iconKeys[i],
                   onTap: () {
                     final RenderBox renderBox =
                         iconKeys[i].currentContext!.findRenderObject()
                             as RenderBox;
                     final position = renderBox.localToGlobal(Offset.zero);
-                    final size = renderBox.size;
                     final overlay = Overlay.of(context);
                     final overlayEntry = OverlayEntry(
                       builder:
                           (context) => Positioned(
-                            left: position.dx + size.width + 6,
-                            top: position.dy,
+                            left: position.dx + 10,
+                            top: position.dy + 15,
                             child: Material(
                               color: Colors.transparent,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
+                                  horizontal: 5,
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(

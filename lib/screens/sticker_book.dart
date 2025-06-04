@@ -240,7 +240,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
                                 ),
                               ),
                             );
-                          }).toList(),
+                          }),
                         ],
                       );
                     },
@@ -271,27 +271,4 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
       ),
     );
   }*/
-
-  Widget _buildSticker(
-    String assetPath, {
-    required bool unlocked,
-    required double maxWidth,
-  }) {
-    final double size = maxWidth * 0.06; // 6% da largura do mapa
-    return Opacity(
-      opacity: unlocked ? 1.0 : 0.5,
-      child: ColorFiltered(
-        colorFilter:
-            unlocked
-                ? const ColorFilter.mode(Colors.transparent, BlendMode.dst)
-                : const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-        child: Image.asset(
-          assetPath,
-          width: size,
-          height: size,
-          fit: BoxFit.contain,
-        ),
-      ),
-    );
-  }
 }

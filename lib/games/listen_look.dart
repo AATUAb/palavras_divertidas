@@ -32,7 +32,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
 
   List<WordModel> _allWords = [];
   List<WordModel> _levelWords = [];
-  List<String> _usedWords = [];
+  final List<String> _usedWords = [];
   late WordModel targetWord;
   bool showWord = false;
 
@@ -297,7 +297,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
       item.isTapped = true;
     });
 
-    if (item.isCorrect && _startTime != null) {
+    if (item.isCorrect) {
       final responseTime =
           DateTime.now().difference(_startTime).inMilliseconds / 1000.0;
       final level = _gamesSuperKey.currentState?.levelManager.level ?? 1;
