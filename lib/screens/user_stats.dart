@@ -57,6 +57,9 @@ class UserStats extends StatelessWidget {
                 : 0.0;
           }).toList();
 
+      // Gera uma key para cada ícone do radar
+      final List<GlobalKey> iconKeys = List.generate(n, (_) => GlobalKey());
+
       return SizedBox(
         width: size,
         height: size,
@@ -74,7 +77,6 @@ class UserStats extends StatelessWidget {
                 color: AppColors.green.withOpacity(0.1),
               ),
             ),
-            // Substitua o for tradicional por este bloco:
             ...List.generate(n, (i) {
               final gameName = allGames[i];
               final raw = user.gamesAccuracy[gameName] ?? <int>[];
@@ -90,21 +92,19 @@ class UserStats extends StatelessWidget {
                     (radius + 12) * sin(2 * pi * i / n - pi / 2) -
                     10,
                 child: GestureDetector(
+                  key: iconKeys[i], // Key aplicada no GestureDetector!
                   onTap: () {
+                    final RenderBox renderBox =
+                        iconKeys[i].currentContext!.findRenderObject()
+                            as RenderBox;
+                    final position = renderBox.localToGlobal(Offset.zero);
+                    final size = renderBox.size;
                     final overlay = Overlay.of(context);
                     final overlayEntry = OverlayEntry(
                       builder:
                           (context) => Positioned(
-                            // Ajuste para aparecer mesmo ao lado do ícone
-                            left:
-                                center.dx +
-                                (radius) * cos(2 * pi * i / n - pi / 2) +
-                                250,
-                            top:
-                                center.dy +
-                                (radius) * sin(2 * pi * i / n - pi / 2) +
-                                180,
-                            // popup com a taxa de acerto
+                            left: position.dx + size.width + 6,
+                            top: position.dy,
                             child: Material(
                               color: Colors.transparent,
                               child: Container(
@@ -215,7 +215,7 @@ class UserStats extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      // mostra as percentagens de cada nível
+                                      // mostra a taxa de acerto de cada nível
                                       'Nível 1: ${ints[0]}%; '
                                       'Nível 2: ${ints[1]}%; '
                                       'Nível 3: ${ints[2]}%',
@@ -227,6 +227,7 @@ class UserStats extends StatelessWidget {
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
+                                      // mostra o tempo médio de cada nível
                                       'Nível 1: ${avgNivel1 > 0 ? '${avgNivel1.toInt()} s' : '0s'}; '
                                       'Nível 2: ${avgNivel2 > 0 ? '${avgNivel2.toInt()} s' : '0s'}; '
                                       'Nível 3: ${avgNivel3 > 0 ? '${avgNivel3.toInt()} s' : '0s'}',
