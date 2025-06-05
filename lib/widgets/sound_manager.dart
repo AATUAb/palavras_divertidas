@@ -116,7 +116,7 @@ static Future<void> playWord(String word) async {
   /// Toca som de incio de jogos
   static Future<void> playIntroGames(String filename) async {
     _isStopped = false;
-    await play('sounds/gemes/$filename');
+    await play('sounds/games/$filename');
   }
 
   /// Para qualquer som a tocar

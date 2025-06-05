@@ -243,7 +243,7 @@ class _WriteGameState extends State<WriteGame> {
       topTextContent: _buildTopText,
       onRepeatInstruction: _playInstruction,
       introImagePath: 'assets/images/games/write_game.webp',
-      introAudioPath: 'sounds/games/write_game.ogg',
+      introAudioPath: 'write_game.ogg',
       onIntroFinished: () async {
         _usedCharacters.clear();
         await _applyLevelSettingsAndCharacters();

@@ -105,7 +105,6 @@ class _GameMenuState extends State<GameMenu> {
             child: TextButton.icon(
               onPressed: () async {
                 await SoundManager.stop();
-                //await pauseMenuMusic();
                 widget.user.lastSeenConquests = widget.user.conquest;
                 await widget.user.save();
                 Navigator.of(context).pop();
@@ -148,6 +147,7 @@ void handleLetterDependentGame({
 
     await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xffe8f4fe),
         title: Text(
@@ -348,7 +348,7 @@ void handleLetterDependentGame({
                       builder: (localContext) {
                         return GestureDetector(
                           onTap: () {
-                            jogo.onTap(); // jogo.onTap já deve capturar o context correto na sua definição
+                            jogo.onTap(); 
                           },
                           child: SizedBox(
                             width: 100.w,

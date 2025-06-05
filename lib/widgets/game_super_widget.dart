@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:collection';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'dart:math';
 import '../models/user_model.dart';
 import '../models/character_model.dart';
@@ -56,8 +55,6 @@ class GamesSuperWidget extends StatefulWidget {
 
 class GamesSuperWidgetState extends State<GamesSuperWidget>
     with TickerProviderStateMixin {
-  bool _introStopped = false;
-  late final AudioPlayer _introPlayer = AudioPlayer();
   late LevelManager levelManager;
   int _visibleLevel = 1;
   late ConquestManager conquestManager;
@@ -69,6 +66,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   late Animation<double> _rotationAnimation;
   bool get isFirstCycle => widget.isFirstCycle;
   bool _isDisposed = false;
+  OverlayEntry? _introOverlay;
 
   GameItem? _currentChallengeItem;
 
@@ -86,7 +84,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
     conquestManager = ConquestManager();
 
-    // animação para a imagem incial de jogo
+   // animação para a imagem incial de jogo
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -121,9 +119,10 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   void dispose() {
     _isDisposed = true;
     SoundManager.stopAll();
-    _introPlayer.stop();
-    _fadeController.dispose();
     _highlightController.dispose();
+    _fadeController.dispose();
+    _introOverlay?.remove();
+    _introOverlay = null;
     super.dispose();
   }
 
@@ -133,40 +132,23 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     setState(() {
       _visibleLevel = levelManager.level;
     });
-
     if (widget.introImagePath != null && widget.introAudioPath != null) {
-      await _playIntroAndStartFade();
-    } else {
-      introCompleted = true;
-      if (mounted) {
-        setState(() {});
-        widget.onIntroFinished?.call();
-      }
+      _introOverlay = await GameAnimations.showIntro(
+        context: context,
+        imagePath: widget.introImagePath!,
+        audioFile: widget.introAudioPath!,
+        onFinished: () {
+          if (!mounted) return;
+          setState(() {
+            introCompleted = true;
+            _introOverlay = null;
+          });
+          widget.onIntroFinished?.call();
+        },
+      );
     }
   }
 
-  Future<void> _playIntroAndStartFade() async {
-  try {
-    await _introPlayer.play(AssetSource(widget.introAudioPath!), volume: 1);
-    await _introPlayer.onPlayerComplete.first;
-  } catch (e) {
-    debugPrint("🔇 Erro ao tocar som de introdução: $e");
-  }
-
-  if (!mounted || _introStopped) return;
-
-  _fadeController.forward();
-  await Future.delayed(
-    _fadeController.duration ?? const Duration(milliseconds: 500),
-  );
-
-  if (!mounted || _introStopped) return;
-
-  setState(() {
-    introCompleted = true;
-  });
-  widget.onIntroFinished?.call();
-}
 
 
   Future<void> playNewChallengeSound(GameItem item) async {
@@ -251,70 +233,57 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     } catch (_) {}
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return GameDesign(
-      user: widget.user,
-      progressValue: widget.progressValue,
-      level: _visibleLevel,
-      topTextWidget: DefaultTextStyle(
-        style: getInstructionFont(isFirstCycle: widget.isFirstCycle),
-        textAlign: TextAlign.center,
-        child: widget.topTextContent(),
-      ),
-      child: Stack(
-        children: [
-          if (!introCompleted && widget.introImagePath != null)
-            FadeTransition(
-              opacity: Tween(begin: 1.0, end: 0.0).animate(_fadeController),
-              child: RotationTransition(
-                turns: _rotationAnimation,
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 80.h),
-                    child: SizedBox(
-                      width: 250.w,
-                      height: 180.h,
-                      child: Image.asset(
-                        widget.introImagePath!,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            )
-          else
-            FadeTransition(
-              opacity: _highlightOpacity,
-              child: ScaleTransition(
-                scale: _highlightScale,
-                child: widget.builder(context, levelManager, widget.user),
-              ),
+
+@override
+Widget build(BuildContext context) {
+  return GameDesign(
+    user: widget.user,
+    progressValue: widget.progressValue,
+    level: _visibleLevel,
+    topTextWidget: DefaultTextStyle(
+      style: getInstructionFont(isFirstCycle: widget.isFirstCycle),
+      textAlign: TextAlign.center,
+      child: widget.topTextContent(),
+    ),
+    child: Stack(
+      children: [       
+        if (introCompleted)
+          FadeTransition(
+            opacity: _highlightOpacity,
+            child: ScaleTransition(
+              scale: _highlightScale,
+              child: widget.builder(context, levelManager, widget.user),
             ),
-          if (introCompleted)
-            Positioned(
-              top: 100,
-              left: 10,
-              child: IconButton(
-                icon: Icon(
-                  Icons.play_circle_fill,
-                  color: Colors.red,
-                  size: 70.sp,
-                ),
-                onPressed:
-                    widget.onRepeatInstruction ??
-                    () async {
-                      if (_currentChallengeItem != null) {
-                        await SoundManager.playGameItem(_currentChallengeItem!);
-                      }
-                    },
+          ),
+
+        if (introCompleted)
+          Positioned(
+            top: 100,
+            left: 10,
+            child: IconButton(
+              icon: Icon(
+                Icons.play_circle_fill,
+                color: Colors.red,
+                size: 70.sp,
               ),
+              onPressed: widget.onRepeatInstruction ?? () async {
+                if (_currentChallengeItem != null) {
+                  await SoundManager.playGameItem(_currentChallengeItem!);
+                }
+              },
             ),
-        ],
-      ),
-    );
-  }
+          ),
+      ],
+    ),
+  );
+}
+
+
+
+
+
+
+
 
   // Mostra o feedback de resposta correta ou errada
   Future<void> playAnswerFeedback({required bool isCorrect}) async {

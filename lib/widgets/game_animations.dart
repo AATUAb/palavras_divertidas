@@ -650,6 +650,33 @@ class GameAnimations {
       ),
     );
   }
+
+  static Future<OverlayEntry?> showIntro({
+    required BuildContext context,
+    required String imagePath,
+    required String audioFile,
+    required VoidCallback onFinished,
+  }) async {
+    await SoundManager.playIntroGames(audioFile);
+
+    // Insere o OverlayEntry que vai exibir a imagem com animação de rotação+fade
+    final overlay = Overlay.of(context);
+    if (overlay == null || !context.mounted) return null;
+
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => _IntroAnimationOverlay(
+        imagePath: imagePath,
+        onFinished: () {
+          if (entry.mounted) entry.remove();
+          onFinished();
+        },
+      ),
+    );
+
+    overlay.insert(entry);
+    return entry;
+  }
 }
 
 class _TimedAnimationWidget extends StatefulWidget {
@@ -693,7 +720,6 @@ class _TimedAnimationWidgetState extends State<_TimedAnimationWidget> {
 
   @override
   void dispose() {
-    // Nada a parar aqui porque a animação é modal, o som está em SoundManager
     super.dispose();
   }
 
@@ -711,5 +737,95 @@ class _TimedAnimationWidgetState extends State<_TimedAnimationWidget> {
   }
 }
 
+class _IntroAnimationOverlay extends StatefulWidget {
+  final String imagePath;
+  final VoidCallback onFinished;
 
+  const _IntroAnimationOverlay({
+    required this.imagePath,
+    required this.onFinished,
+  });
 
+  @override
+  State<_IntroAnimationOverlay> createState() => _IntroAnimationOverlayState();
+}
+
+class _IntroAnimationOverlayState extends State<_IntroAnimationOverlay>
+    with TickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _rotationAnimation;
+  bool _animationStarted = false;
+  bool _finished = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Configura o controller para rotação + fade
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    _rotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    // Após 3 segundos, inicia a animação de fade+rotate e, ao terminar, dispara onFinished
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted || _finished) return;
+      _animationStarted = true;
+      _controller.forward().then((_) {
+        if (mounted && !_finished) {
+          _finished = true;
+          widget.onFinished();
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    // Se o usuário sair antes de completar os 3s + 800ms, garante remoção
+    if (!_finished) {
+      _finished = true;
+      widget.onFinished();
+    }
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      // Ignorar toques para permitir que o usuário clique nos botões imediatamente
+      ignoring: true,
+      child: Center(
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (_, child) {
+            return Opacity(
+              opacity: _animationStarted
+                  ? _fadeAnimation.value
+                  : 1.0, // antes do fade começar, opacidade = 1.0
+              child: RotationTransition(
+                turns: _rotationAnimation,
+                child: child,
+              ),
+            );
+          },
+          child: Image.asset(
+            widget.imagePath,
+            width: 250.w,
+            height: 180.h,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+    );
+  }
+}

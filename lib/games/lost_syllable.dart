@@ -408,7 +408,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
       builder: _buildBoard,
       onRepeatInstruction: _playInstruction,
       introImagePath: 'assets/images/games/lost_syllable.webp',
-      introAudioPath: 'sounds/games/lost_syllable.ogg',
+      introAudioPath: 'lost_syllable.ogg',
       onIntroFinished: () async {
         await _loadWords();
         await _applyLevelSettings();

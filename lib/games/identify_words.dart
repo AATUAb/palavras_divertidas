@@ -416,7 +416,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
       builder: _buildBoard,
       onRepeatInstruction: _playInstruction,
       introImagePath: 'assets/images/games/identify_words.webp',
-      introAudioPath: 'sounds/games/identify_words.ogg',
+      introAudioPath: 'identify_words.ogg',
       onIntroFinished: () async {
         await _loadWords();
         await _applyLevelSettings();

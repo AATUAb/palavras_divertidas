@@ -387,7 +387,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       builder: _buildBoard,
       onRepeatInstruction: _playInstruction,
       introImagePath: 'assets/images/games/identify_letters_numbers.webp',
-      introAudioPath: 'sounds/games/identify_letters_numbers.ogg',
+      introAudioPath: 'identify_letters_numbers.ogg',
       onIntroFinished: () async {
         await _loadCharacters();
         await _applyLevelSettings();

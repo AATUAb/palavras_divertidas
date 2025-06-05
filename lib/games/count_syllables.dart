@@ -52,13 +52,6 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     super.initState();
   }
 
-  // Fecha o player de áudio e cancela os temporizadores
-/*  @override
-  void dispose() {
-    _cancelTimers();
-    super.dispose();
-  }*/
-
   // Carrega as palavras do banco de dados Hive
   Future<void> _loadWords() async {
     final box = await Hive.openBox<WordModel>('words');
@@ -302,7 +295,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       builder: _buildBoard,
       onRepeatInstruction: _playInstruction,
       introImagePath: 'assets/images/games/count_syllables.webp',
-      introAudioPath: 'sounds/games/count_syllables.ogg',
+      introAudioPath: 'count_syllables.ogg',
       onIntroFinished: () async {
         await _loadWords();
         await _applyLevelSettings();
