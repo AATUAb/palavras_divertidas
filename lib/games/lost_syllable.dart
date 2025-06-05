@@ -51,6 +51,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
   bool _isDisposed = false;
   late GameItem referenceItem;
   Map<String, String> pathByText = {};
+  late int numDistractors;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
@@ -88,6 +89,8 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
   // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    numDistractors = lvl == 1 ? 1 : 2;
+
     late String levelDifficulty;
 
     switch (lvl) {
@@ -188,6 +191,68 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
+  List<String> generateDistractorsWithRules(String correctSyllable, {int count = 2}) {
+  final rules = {
+    'a': ['e'],
+    'e': ['i'],
+    'i': ['e'],
+    'o': ['u'],
+    'u': ['o'],
+    'ão': ['ao', 'ã'],
+    'b': ['v', 'p'],
+    'c': ['qu', 'ç'],
+    'ç': ['c', 'ss'],
+    'd': ['t'],
+    'f': ['v'],
+    'g': ['gu', 'j'],
+    'gu': ['g'],
+    'h': [''],
+    'j': ['g'],
+    'm': ['n'],
+    'n': ['m'],
+    'p': ['t', 'b', 'v'],
+    'qu': ['q'],
+    'r': ['rr'],
+    'rr': ['r'],
+    's': ['z', 'ss'],
+    'ss': ['s', 'ç'],
+    't': ['p'],
+    'v': ['f', 'b'],
+    'x': ['ch', 'nh'],
+    'nh': ['lh', 'ch'],
+    'lh': ['ch', 'nh'], 
+    'br': ['dr'],
+    'gr': ['dr'],
+    'pr': ['vr'],
+    'tr': ['pr'],
+  };
+
+  Set<String> alternatives = {};
+
+  // Apply substitution rules
+  rules.forEach((key, substitutes) {
+    if (key == 'h') {
+      if (correctSyllable.startsWith('h')) {
+        for (var sub in substitutes) {
+          final result = correctSyllable.replaceFirst(RegExp('^h'), sub);
+          if (result != correctSyllable) {
+            alternatives.add(result);
+          }
+        }
+      }
+    } else if (correctSyllable.contains(key)) {
+      for (var sub in substitutes) {
+        alternatives.add(correctSyllable.replaceFirst(key, sub));
+      }
+    }
+  });
+
+  // Remove the correct syllable and return limited results
+  alternatives.remove(correctSyllable);
+  return alternatives.take(count).toList();
+}
+
+
   // Gera um novo desafio novo, baseado nas palavras disponíveis e letras conhecidas
   Future<void> _generateNewChallenge() async {
     _gamesSuperKey.currentState?.playChallengeHighlight();
@@ -274,23 +339,17 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
       isCorrect: true,
     );
 
-    // Gera duas sílabas distratoras (simples, aleatórias por agora)
-    final sampleDistractors = [
-      'ba',
-      'bo',
-      'la',
-      'tu',
-      'po',
-      'me',
-      'si',
-      'mo',
-      'le',
-      'ra',
-      'na',
-      'ca',
-    ]..remove(correctSyllable);
+      final fallbackDistractors = [
+        'ba', 'bo', 'la', 'tu', 'po', 'me', 'si', 'mo', 'le', 'ra', 'na', 'ca'
+      ]..remove(correctSyllable);
 
-    final distractors = (sampleDistractors..shuffle()).take(2).toList();
+      final distractors = generateDistractorsWithRules(correctSyllable, count: numDistractors);
+
+      if (distractors.length < numDistractors) {
+        final needed = numDistractors - distractors.length;
+        fallbackDistractors.shuffle();
+        distractors.addAll(fallbackDistractors.take(needed));
+      }
 
     // Junta a correta com as falsas e baralha
     final answerSyllables = [correctSyllable, ...distractors]..shuffle();

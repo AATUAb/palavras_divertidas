@@ -4,6 +4,7 @@
 // A resposta correta mostra o texto da palavra com a divisão silábica correspondente.
 
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -41,8 +42,9 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   Timer? roundTimer, progressTimer;
   late DateTime _startTime;
   double progressValue = 1.0;
-  bool _isDisposed = false;
+  final _isDisposed = false;
   late GameItem referenceItem;
+  late int numDistractors;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
@@ -61,6 +63,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    numDistractors = lvl == 1 ? 1 : 2;
     late String levelDifficulty;
     switch (lvl) {
       case 1:
@@ -147,7 +150,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
             .toList();
 
     // Verifica se o jogo terminou antes de gerar desafio
-    final hasRetry = _gamesSuperKey.currentState?.peekNextRetryTarget() != null;
+    final hasRetry = retry != null;
 
     if (availableWords.isEmpty && !hasRetry) {
       if (!mounted || _isDisposed) return;
@@ -161,8 +164,6 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       return;
     }
 
-    // Se a palavra volta a ser apresentado, remove-a da fila de repetição
-    // e adiciona-o à lista de palavras já utilizados
     _cancelTimers();
     setState(() {
       isRoundActive = true;
@@ -172,19 +173,38 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
       progressValue = 1.0;
     });
 
-    // Gera as opções de resposta multiplas
-    final correct = targetWord.syllableCount;
-    final options =
-        correct == 1
-              ? ['1', '2', '3']
-              : [
-                correct - 1,
-                correct,
-                correct + 1,
-              ].map((e) => e.toString()).toList()
-          ..shuffle();
+    // Gera N distratores com ±1 valor
+    final random = Random();
+    final correctIndex = random.nextInt(numDistractors + 1); // entre 0 e 2
 
-    gamesItems = List.generate(options.length, (i) {
+    final correct = targetWord.syllableCount;
+    final Set<int> optionSet = {};
+
+    int offset = 1;
+
+    // Gera distratores únicos
+    while (optionSet.length < numDistractors) {
+      optionSet.add((correct + offset).clamp(1, 9));
+      optionSet.add((correct - offset).clamp(1, 9));
+      offset++;
+    }
+
+    // Converte para lista e corta ao tamanho necessário
+    final distractors = optionSet.where((v) => v != correct).toList();
+    distractors.shuffle();
+    distractors.length = numDistractors;
+
+    // Insere a correta na posição aleatória
+    final List<String> options = [];
+    for (int i = 0; i <= numDistractors; i++) {
+      if (i == correctIndex) {
+        options.add(correct.toString());
+      } else {
+        options.add(distractors.removeLast().toString());
+      }
+    }
+ 
+     gamesItems = List.generate(options.length, (i) {
       return GameItem(
         id: '$i',
         type: GameItemType.number,

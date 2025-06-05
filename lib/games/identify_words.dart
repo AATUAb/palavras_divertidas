@@ -47,6 +47,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
   bool _isDisposed = false;
   late GameItem referenceItem;
   Map<String, String> pathByText = {};
+  late int numDistractors;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
@@ -84,6 +85,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
   // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    numDistractors = lvl == 1 ? 1 : 2;
     late String levelDifficulty;
 
     switch (lvl) {
@@ -294,7 +296,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
 
       sameLevelDistractors += fallbackDistractors;
     }
-    final distractors = (sameLevelDistractors..shuffle()).take(2).toList();
+    final distractors = (sameLevelDistractors..shuffle()).take(numDistractors).toList();
 
     // monta 3 GameItem de tipo texto, 1 correto e 2 distratores
     gamesItems =

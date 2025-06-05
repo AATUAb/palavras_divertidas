@@ -44,6 +44,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
   bool _isDisposed = false;
   late GameItem referenceItem;
   Map<String, String> pathByText = {};
+  late int numDistractors;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
@@ -70,6 +71,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
   // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    numDistractors = lvl == 1 ? 1 : 2;
     late String levelDifficulty;
     switch (lvl) {
       case 1:
@@ -203,8 +205,8 @@ if (available.isEmpty && !hasRetry) {
 
     // Distratores do mesmo nível e tópico
     List<WordModel> distractors;
-    if (sameTopicDistractors.length >= 2) {
-      distractors = (sameTopicDistractors..shuffle()).take(2).toList();
+    if (sameTopicDistractors.length >= numDistractors) {
+      distractors = (sameTopicDistractors..shuffle()).take(numDistractors).toList();
     } else {
       final fallbackDistractors = _allWords.where((w) =>
         w.text != targetWord.text &&
@@ -213,7 +215,7 @@ if (available.isEmpty && !hasRetry) {
       ).toList();
       distractors = (sameTopicDistractors + (fallbackDistractors..shuffle()))
           .where((w) => w.text != targetWord.text)
-          .take(2)
+          .take(numDistractors)
           .toList();
     }
 
