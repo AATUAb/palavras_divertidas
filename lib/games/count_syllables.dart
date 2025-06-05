@@ -53,12 +53,11 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   }
 
   // Fecha o player de áudio e cancela os temporizadores
-  @override
+/*  @override
   void dispose() {
-    //_isDisposed = true;
     _cancelTimers();
     super.dispose();
-  }
+  }*/
 
   // Carrega as palavras do banco de dados Hive
   Future<void> _loadWords() async {

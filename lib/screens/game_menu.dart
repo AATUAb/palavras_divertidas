@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/menu_design.dart';
@@ -13,6 +12,7 @@ import '../games/listen_look.dart';
 import '../games/identify_words.dart';
 import '../games/lost_syllable.dart';
 import '../widgets/conquest_manager.dart';
+import '../widgets/sound_manager.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
 import 'user_stats.dart';
@@ -45,7 +45,6 @@ class GameMenu extends StatefulWidget {
 
 class _GameMenuState extends State<GameMenu> {
   late ConquestManager conquestManager;
-  final AudioPlayer _conquestPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -62,12 +61,13 @@ class _GameMenuState extends State<GameMenu> {
     await pauseMenuMusic();
 
     final soundFile = newUnlocks == 1
-        ? 'sounds/animations/one_conquest.ogg'
-        : 'sounds/animations/more_conquests.ogg';
-    await _conquestPlayer.play(AssetSource(soundFile), volume: 1.0);
+        ? 'one_conquest.ogg'
+        : 'more_conquests.ogg';
+    await SoundManager.playAnimationSound(soundFile);
 
     await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (_) => AlertDialog(
         title: const Text('Parabéns! 🎉'),
         content: Text(
@@ -84,7 +84,7 @@ class _GameMenuState extends State<GameMenu> {
             ),
             child: TextButton.icon(
               onPressed: () async {
-                // ⚠️ MARCAR AS CONQUISTAS COMO VISTAS
+                await SoundManager.stop();
                 widget.user.lastSeenConquests = widget.user.conquest;
                 widget.user.lastSeenConquests = widget.user.conquest;
                 await widget.user.save();
@@ -104,7 +104,8 @@ class _GameMenuState extends State<GameMenu> {
             ),
             child: TextButton.icon(
               onPressed: () async {
-                await pauseMenuMusic();
+                await SoundManager.stop();
+                //await pauseMenuMusic();
                 widget.user.lastSeenConquests = widget.user.conquest;
                 await widget.user.save();
                 Navigator.of(context).pop();
@@ -140,8 +141,7 @@ void handleLetterDependentGame({
   if (!await hasSufficientLetters(user)) {
     await pauseMenuMusic();
     try {
-      final player = AudioPlayer();
-      await player.play(AssetSource('sounds/update_letters.ogg'));
+      SoundManager.playGeneralSound('update_letters.ogg');
     } catch (e) {
       debugPrint('⚠️ Erro ao tocar som: $e');
     }

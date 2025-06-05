@@ -120,8 +120,8 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   @override
   void dispose() {
     _isDisposed = true;
+    SoundManager.stopAll();
     _introPlayer.stop();
-    SoundManager.stop();
     _fadeController.dispose();
     _highlightController.dispose();
     super.dispose();
@@ -691,108 +691,10 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   }
 
   // Mostra o diálogo de fim de jogo
-  void showEndOfGameDialog({required VoidCallback onRestart}) async {
-    final player = AudioPlayer();
-    await player.play(AssetSource('sounds/animations/end_game_message.ogg'));
-
-    showDialog(
+  void showEndOfGameDialog({required VoidCallback onRestart}) {
+    GameAnimations.showEndOfGameDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            contentPadding: const EdgeInsets.all(20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.r),
-            ),
-            content: SizedBox(
-              width: 400,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Parabéns, chegaste ao fim do jogo!',
-                          style: getInstructionFont(
-                            isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        Text(
-                          'Queres jogar novamente?',
-                          style: getInstructionFont(
-                            isFirstCycle: widget.user.schoolLevel == '1º Ciclo',
-                          ).copyWith(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.normal,
-                            color: Colors.blueAccent,
-                          ),
-                        ),
-                        SizedBox(height: 20.h),
-                        Row(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              child: TextButton.icon(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  onRestart();
-                                },
-                                icon: const Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                ),
-                                label: const Text(
-                                  'Sim',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 12.w),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              child: TextButton.icon(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  Navigator.of(context).maybePop();
-                                },
-                                icon: const Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                ),
-                                label: const Text(
-                                  'Não',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 20.w),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 150,
-                      maxHeight: 150,
-                    ),
-                    child: Image.asset(
-                      'assets/images/games/end_game.webp',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+      onRestart: onRestart,
     );
   }
-}
+  }

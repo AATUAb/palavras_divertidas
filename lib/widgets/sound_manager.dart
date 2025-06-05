@@ -9,6 +9,22 @@ class SoundManager {
   static final AudioPlayer _player = AudioPlayer();
   static bool _isStopped = false; 
 
+  static Future<void> play(String assetPath) async {
+    if (_isStopped) return;
+    try {
+      await _player.play(AssetSource(assetPath));
+    } catch (e) {
+      debugPrint('Erro ao tocar som: \$e');
+    }
+  }
+
+  static Future<void> stopAll() async {
+    _isStopped = true;
+    await _player.stop();
+  }
+
+  static void reset() => _isStopped = false;
+
   /// Toca o som de um carácter (letra ou número isolado)
   static Future<void> playCharacter(String character) async {
     if (_isStopped) return;
@@ -86,9 +102,26 @@ static Future<void> playWord(String word) async {
   }
 }
 
+ /// Toca som de animações (como confetes, conquistas, fim de jogo)
+  static Future<void> playAnimationSound(String filename) async {
+    await play('sounds/animations/$filename');
+  }
+
+  /// Toca som gerais da aplicação (como música e escolha letras)
+  static Future<void> playGeneralSound(String filename) async {
+    _isStopped = false;
+    await play('sounds/$filename');
+  }
+
+  /// Toca som de incio de jogos
+  static Future<void> playIntroGames(String filename) async {
+    _isStopped = false;
+    await play('sounds/gemes/$filename');
+  }
+
   /// Para qualquer som a tocar
   static Future<void> stop() async {
-  _isStopped = true;
-  await _player.stop();
-}
+    _isStopped = true;
+    await _player.stop();
+  }
 }

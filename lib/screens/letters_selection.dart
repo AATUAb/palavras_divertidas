@@ -1,10 +1,10 @@
 // Caixa de seleção de letras para o 1.º ciclo
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../themes/colors.dart';
 import '../models/user_model.dart';
 import '../services/hive_service.dart';
+import '../widgets/sound_manager.dart';
 
 // Expande letras combinadas para uso no jogo (ex: "Vogais" → "a", "e", "i", "o", "u")
 List<String> expandKnownLetters(List<String> knownSelections) {
@@ -54,24 +54,23 @@ Future<void> showLettersDialog({
   bool selectAll = selectedMap.values.every((v) => v);
   bool allSelectedMode = false;
 
-  final player = AudioPlayer();
   final ValueNotifier<bool> introPlayed = ValueNotifier(false);
 
-  void playIntroSoundOnce(AudioPlayer player, bool hasPlayed, void Function() markAsPlayed) {
-    if (!hasPlayed) {
-      markAsPlayed();
-      player.stop().then((_) {
-        player.play(AssetSource('sounds/select_letters.ogg'));
-      });
-    }
+  void playIntroSoundOnce(bool hasPlayed, void Function() markAsPlayed) {
+  if (!hasPlayed) {
+    markAsPlayed();
+    SoundManager.stop().then((_) {
+      SoundManager.playGeneralSound('select_letters.ogg');
+    });
   }
+}
 
   await showDialog(
     context: context,
     builder: (context) => StatefulBuilder(
       builder: (context, setState) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          playIntroSoundOnce(player, introPlayed.value, () => introPlayed.value = true);
+          playIntroSoundOnce(introPlayed.value, () => introPlayed.value = true);
         });
 
         return Scaffold(
@@ -151,8 +150,8 @@ Future<void> showLettersDialog({
                                 onTap: () async {
                                   final currentContext = context;
                                   if (allSelectedMode) {
-                                    await player.stop();
-                                    await player.play(AssetSource('sounds/clean_letters.ogg'));
+                                    SoundManager.playGeneralSound('clean_letters.ogg');
+                                    
 
                                     if (!currentContext.mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -170,8 +169,7 @@ Future<void> showLettersDialog({
                                     selectAll = selectedMap.values.every((v) => v);
                                     setState(() {});
                                   } else {
-                                    await player.stop();
-                                    await player.play(AssetSource('sounds/before_letter.ogg'));
+                                    SoundManager.playGeneralSound('before_letter.ogg');
                                     if (!currentContext.mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
@@ -213,7 +211,10 @@ Future<void> showLettersDialog({
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           TextButton.icon(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () {
+                              SoundManager.stop(); 
+                              Navigator.pop(context);
+                            },
                             icon: Icon(Icons.cancel, size: 20.sp, color: AppColors.grey),
                             label: Text("Cancelar", style: TextStyle(color: AppColors.grey)),
                           ),
@@ -228,6 +229,7 @@ Future<void> showLettersDialog({
 
                               user.knownLetters = selected;
                               await user.save();
+                              SoundManager.stop();                              
 
                               await handleLetterUpdateAndResetLevel(
                                 user: user,
