@@ -146,4 +146,21 @@ class LevelManager {
     recentRounds = 0;
     recentCorrect = 0;
   }
+
+
+
+
+
+  void registerResponseTime({
+  required UserModel user,
+  required String gameName,
+  required double responseTimeInSeconds,
+}) async {
+  final level = this.level; // nível atual
+
+  user.updateGameTime(gameName, responseTimeInSeconds);
+  user.updateGameTimeByLevel(gameName, level, responseTimeInSeconds);
+  await user.save();
+}
+
 }

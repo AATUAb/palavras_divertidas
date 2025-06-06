@@ -225,7 +225,7 @@ class _WritingGameState extends State<WritingGame> {
       key: _gamesSuperKey,
       user: widget.user,
       gameName: 'Jogo da Escrita',
-      progressValue: 1.0,
+      //progressValue: 1.0,
       level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
       currentRound: (_) => _usedCharacters.length + 1,
       totalRounds: (_) => _characters.length,
