@@ -67,7 +67,8 @@ class _MyHomePageState extends State<MyHomePage> {
               accuracyByLevel: user.accuracyByLevel,
               overallAccuracy: user.overallAccuracy,
             );
-            await HiveService.updateUser(index, updatedUser);
+            await HiveService.updateUserByKey(user.key, updatedUser);
+
             _loadUsers();
           },
           onDelete: () async {

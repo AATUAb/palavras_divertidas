@@ -70,12 +70,6 @@ class HiveService {
     logger.i("✅ User ${user.name} added successfully");
   }
 
-  /// Atualiza utilizador por posição
-  static Future<void> updateUser(int index, UserModel updatedUser) async {
-    await _userBox.put(index, updatedUser);
-    logger.i("🔄 User at index $index updated successfully");
-  }
-
   /// Atualiza utilizador por chave
   static Future<void> updateUserByKey(int key, UserModel updatedUser) async {
     await _userBox.put(key, updatedUser);
