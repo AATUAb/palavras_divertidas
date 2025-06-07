@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../services/hive_service.dart';
 import '../models/user_model.dart';
 
-
 class ConquestManager {
   int conquest;
   int totalRounds = 0;
@@ -17,24 +16,20 @@ class ConquestManager {
   int sessionFirstTryCount = 0;
   int sessionOtherTryCount = 0;
 
-
   ConquestManager({this.conquest = 0});
 
   bool hasNewConquest = false;
 
   void reset() {
-    totalRounds            = 0;
-    streakFirstTry         = 0;
-    persistenceCount       = 0;
-    sessionFirstTryCount   = 0;
-    sessionOtherTryCount   = 0;
-    hasNewConquest         = false;
+    totalRounds = 0;
+    streakFirstTry = 0;
+    persistenceCount = 0;
+    sessionFirstTryCount = 0;
+    sessionOtherTryCount = 0;
+    hasNewConquest = false;
   }
-  
-  void registerRound({
-    required bool firstTry,
-    required UserModel user,
-  }) {
+
+  void registerRound({required bool firstTry, required UserModel user}) {
     hasNewConquest = false;
     totalRounds++;
 
@@ -55,29 +50,30 @@ class ConquestManager {
       user.persistenceCountTotal++;
     }
 
-    if (firstTry && streakFirstTry >= 10) {
+    // ALTERAR PARA 10 PARA VERSÃO FINAL
+    if (firstTry && streakFirstTry >= 1) {
       conquest++;
       hasNewConquest = true;
     }
-    if (!firstTry && persistenceCount >= 15) {
+    // ALTERAR PARA 15 PARA VERSÃO FINAL
+    if (!firstTry && persistenceCount >= 2) {
       conquest++;
       hasNewConquest = true;
     }
 
     // 3) Se conquistou, reseta ambos os contadores
     if (hasNewConquest) {
-      streakFirstTry   = 0;
+      streakFirstTry = 0;
       persistenceCount = 0;
       user.incrementConquest();
     }
-
 
     HiveService.logger.i(
       "📊 Sessão: 1ªTentativas=$sessionFirstTryCount; "
       "outrasTentativas=$sessionOtherTryCount | "
       "streakFirstTry=$streakFirstTry; "
-      "persistenceCount=$persistenceCount"
-      );
+      "persistenceCount=$persistenceCount",
+    );
   }
 
   Future<bool> registerRoundForConquest({

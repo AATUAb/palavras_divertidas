@@ -461,32 +461,33 @@ class GameAnimations {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _TimedAnimationWidget(
-              animationPath: animationPath,
-              duration: const Duration(seconds: 4),
-              width: 300.w,
-              height: 100.h,
-              sound: voiceMessage,
-              onFinished: onFinished,
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _TimedAnimationWidget(
+                  animationPath: animationPath,
+                  duration: const Duration(seconds: 4),
+                  width: 300.w,
+                  height: 100.h,
+                  sound: voiceMessage,
+                  onFinished: onFinished,
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 25.sp,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            SizedBox(height: 8.h),
-            Text(
-              message,
-              style: TextStyle(
-                fontSize: 25.sp,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -503,35 +504,36 @@ class GameAnimations {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _TimedAnimationWidget(
-              animationPath: 'assets/animations/conquest.json',
-              duration: const Duration(seconds: 5),
-              width: 200.w,
-              height: 120.h,
-              sound: 'conquest_message.ogg',
-              onFinished: onFinished,
-            ),
-            SizedBox(height: 4.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.w),
-              child: Text(
-                'Espetáculo! Ganhaste uma conquista para a caderneta',
-                style: TextStyle(
-                  fontSize: 25.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _TimedAnimationWidget(
+                  animationPath: 'assets/animations/conquest.json',
+                  duration: const Duration(seconds: 5),
+                  width: 200.w,
+                  height: 120.h,
+                  sound: 'conquest_message.ogg',
+                  onFinished: onFinished,
                 ),
-                textAlign: TextAlign.center,
-              ),
+                SizedBox(height: 4.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w),
+                  child: Text(
+                    'Espetáculo! Ganhaste uma conquista para a caderneta',
+                    style: TextStyle(
+                      fontSize: 25.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -570,84 +572,93 @@ class GameAnimations {
     if (!context.mounted) return;
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        contentPadding: const EdgeInsets.all(20),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        content: SizedBox(
-          width: 400,
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Parabéns, chegaste ao fim do jogo!',
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      'Queres jogar novamente?',
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.blueAccent,
-                      ),
-                    ),
-                    SizedBox(height: 20.h),
-                    Row(
+      builder:
+          (_) => AlertDialog(
+            contentPadding: const EdgeInsets.all(20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.r),
+            ),
+            content: SizedBox(
+              width: 400,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            onRestart();
-                          },
-                          icon: const Icon(Icons.check, color: Colors.white),
-                          label: const Text('Sim'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
+                        Text(
+                          'Parabéns, chegaste ao fim do jogo!',
+                          style: TextStyle(
+                            // color
+                            color: Colors.orange,
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(width: 12.w),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).maybePop();
-                          },
-                          icon: const Icon(Icons.close, color: Colors.white),
-                          label: const Text('Não'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
+                        SizedBox(height: 12),
+                        Text(
+                          'Queres jogar novamente?',
+                          style: TextStyle(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.blueAccent,
                           ),
+                        ),
+                        SizedBox(height: 20.h),
+                        Row(
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                onRestart();
+                              },
+                              icon: const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                              ),
+                              label: const Text('Sim'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).maybePop();
+                              },
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
+                              label: const Text('Não'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(width: 20.w),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 150,
+                      maxHeight: 150,
+                    ),
+                    child: Image.asset(
+                      'assets/images/games/end_game.webp',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: 20.w),
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 150,
-                  maxHeight: 150,
-                ),
-                child: Image.asset(
-                  'assets/images/games/end_game.webp',
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -665,13 +676,14 @@ class GameAnimations {
 
     late OverlayEntry entry;
     entry = OverlayEntry(
-      builder: (_) => _IntroAnimationOverlay(
-        imagePath: imagePath,
-        onFinished: () {
-          if (entry.mounted) entry.remove();
-          onFinished();
-        },
-      ),
+      builder:
+          (_) => _IntroAnimationOverlay(
+            imagePath: imagePath,
+            onFinished: () {
+              if (entry.mounted) entry.remove();
+              onFinished();
+            },
+          ),
     );
 
     overlay.insert(entry);
@@ -727,12 +739,12 @@ class _TimedAnimationWidgetState extends State<_TimedAnimationWidget> {
   Widget build(BuildContext context) {
     return _visible
         ? Lottie.asset(
-            widget.animationPath,
-            width: widget.width,
-            height: widget.height,
-            fit: BoxFit.contain,
-            repeat: false,
-          )
+          widget.animationPath,
+          width: widget.width,
+          height: widget.height,
+          fit: BoxFit.contain,
+          repeat: false,
+        )
         : const SizedBox.shrink();
   }
 }
@@ -768,12 +780,14 @@ class _IntroAnimationOverlayState extends State<_IntroAnimationOverlay>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
-    _rotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     // Após 3 segundos, inicia a animação de fade+rotate e, ao terminar, dispara onFinished
     Future.delayed(const Duration(seconds: 3), () {
@@ -809,9 +823,10 @@ class _IntroAnimationOverlayState extends State<_IntroAnimationOverlay>
           animation: _controller,
           builder: (_, child) {
             return Opacity(
-              opacity: _animationStarted
-                  ? _fadeAnimation.value
-                  : 1.0, // antes do fade começar, opacidade = 1.0
+              opacity:
+                  _animationStarted
+                      ? _fadeAnimation.value
+                      : 1.0, // antes do fade começar, opacidade = 1.0
               child: RotationTransition(
                 turns: _rotationAnimation,
                 child: child,

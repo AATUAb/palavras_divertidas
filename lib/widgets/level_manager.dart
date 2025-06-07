@@ -29,7 +29,7 @@ class LevelManager {
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 4,
+    this.roundsToEvaluate = 1, // ALTERAR PARA 4 PARA VERSÃO FINAL
   }) : level = level ?? user.gameLevel;
 
   int get totalRoundsCount => totalRounds;
@@ -147,20 +147,15 @@ class LevelManager {
     recentCorrect = 0;
   }
 
-
-
-
-
   void registerResponseTime({
-  required UserModel user,
-  required String gameName,
-  required double responseTimeInSeconds,
-}) async {
-  final level = this.level; // nível atual
+    required UserModel user,
+    required String gameName,
+    required double responseTimeInSeconds,
+  }) async {
+    final level = this.level; // nível atual
 
-  user.updateGameTime(gameName, responseTimeInSeconds);
-  user.updateGameTimeByLevel(gameName, level, responseTimeInSeconds);
-  await user.save();
-}
-
+    user.updateGameTime(gameName, responseTimeInSeconds);
+    user.updateGameTimeByLevel(gameName, level, responseTimeInSeconds);
+    await user.save();
+  }
 }
