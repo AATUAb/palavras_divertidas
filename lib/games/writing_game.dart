@@ -623,7 +623,7 @@ class _WriteGameState extends State<WriteGame> {
       child: Text(
         hasChallengeStarted
             ? 'Escreve $label $targetCharacter'
-            : 'Vamos praticar a escrita!',
+            : 'Vamos praticar a escrita',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: font,

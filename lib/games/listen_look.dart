@@ -735,7 +735,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
       child: Text(
         hasChallengeStarted
             ? 'Escolhe a imagem correta para a palavra que ouviste'
-            : 'Vamos ouvir com atenção, para encontrar a imagem correta',
+            : 'Vamos ouvir com atenção para encontrar a imagem correta',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: font,

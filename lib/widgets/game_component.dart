@@ -17,7 +17,6 @@ class WordHighlightBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFirstCycle = user.schoolLevel == '1º Ciclo';
-    //final fontSize = isFirstCycle ? 26.sp : 22.sp;
 
     return IntrinsicWidth(     
       child: Container(
@@ -103,55 +102,6 @@ class WordWithMissingSyllableBox extends StatelessWidget {
     );
   }
 }
-
-
-
-/*/// Mostra as sílabas da palavra em destaque dentro de 1 caixa verde arredondada por sílaba.
-class WordWithMissingSyllableBox extends StatelessWidget {
-  final List<String> syllables;
-  final int hiddenIndex;
-  final UserModel user;
-
-  const WordWithMissingSyllableBox({
-    Key? key,
-    required this.syllables,
-    required this.hiddenIndex,
-    required this.user,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final font = getFontFamily(
-      user.schoolLevel == '1º Ciclo' ? FontStrategy.slabo : FontStrategy.none,
-    );
-
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFB8E6C9),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: List.generate(syllables.length, (index) {
-          final text = index == hiddenIndex ? '__' : syllables[index];
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4.w),
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.bold,
-                fontFamily: font,
-                color: Colors.black87,
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}*/
 
 
 /// Mostra uma imagem dentro de um cartão verde-claro com sombra.

@@ -951,7 +951,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
       child: Text(
         hasChallengeStarted
             ? 'Escolhe a palavra correta para o som que ouvistes'
-            : 'Vamos ouvir com atenção, para encontrar a palavra correta',
+            : 'Vamos ouvir com atenção para encontrar a palavra correta',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: font,

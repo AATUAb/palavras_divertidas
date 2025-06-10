@@ -1095,7 +1095,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
       child: Text(
         hasChallengeStarted
-            ? 'Encontra a sílaba perdida, para completar a palavra'
+            ? 'Encontra a sílaba perdida para completar a palavra'
             : 'Vamos encontrar a sílaba perdida',
         textAlign: TextAlign.center,
         style: TextStyle(
