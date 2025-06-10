@@ -3,6 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:mundodaspalavras/themes/colors.dart';
 
+enum FontType {
+  machine,
+  cursive,
+}
+
+
 /// Modelo principal para armazenar caminhos e configurações de uma letra/palavra
 class TraceModel {
   final bool isSpace;

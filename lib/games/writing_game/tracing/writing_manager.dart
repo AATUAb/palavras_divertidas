@@ -13,15 +13,16 @@ import 'package:svg_path_parser/svg_path_parser.dart';
 import 'package:mundodaspalavras/games/writing_game/tracing/letter_paths_model.dart';
 import 'package:mundodaspalavras/games/writing_game/tracing/writing_models.dart';
 import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
-import 'package:mundodaspalavras/games/writing_game/get_shape_helper/enum_of_numbers_and_letters.dart';
+import 'package:mundodaspalavras/games/writing_game/get_shape_helper/machine_tracing.dart';
+import 'package:mundodaspalavras/games/writing_game/get_shape_helper/cursive_tracing.dart';
+
 
 enum DrawingStates {
   error,
   initial,
   loading,
   loaded,
-    tracing,
-
+  tracing,
   gameFinished,
   finishedCurrentScreen
 }
@@ -108,7 +109,11 @@ class TracingState extends Equatable {
 }
 
 class TracingCubit extends Cubit<TracingState> {
+  final FontType fontType;
+  final dynamic trackingEngine;
   TracingCubit({
+    required this.fontType,
+     this.trackingEngine,
     List<TraceWordModel>? traceWordModels,
     List<TraceCharsModel>? traceShapeModel,
     required StateOfTracing stateOfTracing,
@@ -137,21 +142,42 @@ class TracingCubit extends Cubit<TracingState> {
     }
   }
 
-  updateTheTraceLetter() async {
-    emit(state.clearData());
-    emit(state.copyWith(
-        activeIndex: 0,
-        stateOfTracing: state.stateOfTracing,
-        traceLetter: TypeExtensionTracking().getTracingData(
-            chars: state.stateOfTracing == StateOfTracing.chars &&  state.traceShapeModel!.isNotEmpty
-                ? state.traceShapeModel![state.index].chars
-                : null,
-                word:state.stateOfTracing == StateOfTracing.traceWords &&  state.traceWordModels!.isNotEmpty
-                ? state.traceWordModels![state.index]
-                : null ,
-            currentOfTracking: state.stateOfTracing)));
-    await loadAssets();
-  }
+updateTheTraceLetter() async {
+  emit(state.clearData());
+
+  final traceLetter = fontType == FontType.cursive
+      ? CursiveTracking().getTracingData(
+          chars: state.stateOfTracing == StateOfTracing.chars &&
+                  state.traceShapeModel!.isNotEmpty
+              ? state.traceShapeModel![state.index].chars
+              : null,
+          word: state.stateOfTracing == StateOfTracing.traceWords &&
+                  state.traceWordModels!.isNotEmpty
+              ? state.traceWordModels![state.index]
+              : null,
+          currentOfTracking: state.stateOfTracing,
+        )
+      : TypeExtensionTracking().getTracingData(
+          chars: state.stateOfTracing == StateOfTracing.chars &&
+                  state.traceShapeModel!.isNotEmpty
+              ? state.traceShapeModel![state.index].chars
+              : null,
+          word: state.stateOfTracing == StateOfTracing.traceWords &&
+                  state.traceWordModels!.isNotEmpty
+              ? state.traceWordModels![state.index]
+              : null,
+          currentOfTracking: state.stateOfTracing,
+        );
+
+  emit(state.copyWith(
+    activeIndex: 0,
+    stateOfTracing: state.stateOfTracing,
+    traceLetter: traceLetter,
+  ));
+
+  await loadAssets();
+}
+
 
   final viewSize = const Size(200, 200);
   Future<void> loadAssets() async {

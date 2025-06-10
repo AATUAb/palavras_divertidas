@@ -59,5 +59,56 @@ class ShapePointsManger {
   static const number7 = '$numberBase/7_PointsInfo.json';
   static const number8 = '$numberBase/8_PointsInfo.json';
   static const number9 = '$numberBase/9_PointsInfo.json';
-  static const number10 = '$numberBase/10_PointsInfo.json';
+
+  // ─────────── Cursives Upper ───────────
+  static const cursiveBase = '$base/cursiveUpper';
+  static const aCursiveUpper = '$cursiveBase/A_PointsInfo.json';
+  static const bCursiveUpper = '$cursiveBase/B_PointsInfo.json';
+  static const cCursiveUpper = '$cursiveBase/C_PointsInfo.json';
+  static const dCursiveUpper = '$cursiveBase/D_PointsInfo.json';
+  static const eCursiveUpper = '$cursiveBase/E_PointsInfo.json';
+  static const fCursiveUpper = '$cursiveBase/F_PointsInfo.json';
+  static const gCursiveUpper = '$cursiveBase/G_PointsInfo.json';
+  static const hCursiveUpper = '$cursiveBase/H_PointsInfo.json';
+  static const iCursiveUpper = '$cursiveBase/I_PointsInfo.json';
+  static const jCursiveUpper = '$cursiveBase/J_PointsInfo.json';
+  static const lCursiveUpper = '$cursiveBase/L_PointsInfo.json';
+  static const mCursiveUpper = '$cursiveBase/M_PointsInfo.json';
+  static const nCursiveUpper = '$cursiveBase/N_PointsInfo.json';
+  static const oCursiveUpper = '$cursiveBase/O_PointsInfo.json';
+  static const pCursiveUpper = '$cursiveBase/P_PointsInfo.json';
+  static const qCursiveUpper = '$cursiveBase/Q_PointsInfo.json';
+  static const rCursiveUpper = '$cursiveBase/R_PointsInfo.json';   
+  static const sCursiveUpper = '$cursiveBase/S_PointsInfo.json';
+  static const tCursiveUpper = '$cursiveBase/T_PointsInfo.json';
+  static const uCursiveUpper = '$cursiveBase/U_PointsInfo.json';
+  static const vCursiveUpper = '$cursiveBase/V_PointsInfo.json';
+  static const xCursiveUpper = '$cursiveBase/X_PointsInfo.json';
+  static const zCursiveUpper = '$cursiveBase/Z_PointsInfo.json';
+
+  // ─────────── Cursives Lower ───────────
+  static const cursiveLowerBase = '$base/cursiveLower';
+  static const aCursiveLower = '$cursiveLowerBase/a_PointsInfo.json';
+  static const bCursiveLower = '$cursiveLowerBase/b_PointsInfo.json';
+  static const cCursiveLower = '$cursiveLowerBase/c_PointsInfo.json';   
+  static const dCursiveLower = '$cursiveLowerBase/d_PointsInfo.json';
+  static const eCursiveLower = '$cursiveLowerBase/e_PointsInfo.json';
+  static const fCursiveLower = '$cursiveLowerBase/f_PointsInfo.json';
+  static const gCursiveLower = '$cursiveLowerBase/g_PointsInfo.json';
+  static const hCursiveLower = '$cursiveLowerBase/h_PointsInfo.json';
+  static const iCursiveLower = '$cursiveLowerBase/i_PointsInfo.json'; 
+  static const jCursiveLower = '$cursiveLowerBase/j_PointsInfo.json';
+  static const lCursiveLower = '$cursiveLowerBase/l_PointsInfo.json';
+  static const mCursiveLower = '$cursiveLowerBase/m_PointsInfo.json';
+  static const nCursiveLower = '$cursiveLowerBase/n_PointsInfo.json';
+  static const oCursiveLower = '$cursiveLowerBase/o_PointsInfo.json';
+  static const pCursiveLower = '$cursiveLowerBase/p_PointsInfo.json';
+  static const qCursiveLower = '$cursiveLowerBase/q_PointsInfo.json';
+  static const rCursiveLower = '$cursiveLowerBase/r_PointsInfo.json';
+  static const sCursiveLower = '$cursiveLowerBase/s_PointsInfo.json';
+  static const tCursiveLower = '$cursiveLowerBase/t_PointsInfo.json';
+  static const uCursiveLower = '$cursiveLowerBase/u_PointsInfo.json';
+  static const vCursiveLower = '$cursiveLowerBase/v_PointsInfo.json';
+  static const xCursiveLower = '$cursiveLowerBase/x_PointsInfo.json';
+  static const zCursiveLower = '$cursiveLowerBase/z_PointsInfo.json';
 }
