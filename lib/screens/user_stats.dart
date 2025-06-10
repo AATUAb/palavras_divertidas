@@ -220,7 +220,7 @@ class UserStats extends StatelessWidget {
                                       'Nível 3: ${ints[2]}%',
                                       style: TextStyle(
                                         fontSize: 6.sp,
-                                        color: AppColors.grey,
+                                        color: Colors.blueAccent,
                                         decoration: TextDecoration.none,
                                       ),
                                     ),
@@ -232,7 +232,7 @@ class UserStats extends StatelessWidget {
                                       'Nível 3: ${avgNivel3 > 0 ? '${avgNivel3.toInt()} s' : '0s'}',
                                       style: TextStyle(
                                         fontSize: 6.sp,
-                                        color: AppColors.grey,
+                                        color: Colors.blueAccent,
                                         decoration: TextDecoration.none,
                                       ),
                                     ),
