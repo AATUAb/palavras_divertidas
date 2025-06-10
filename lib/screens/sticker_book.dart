@@ -141,7 +141,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: MenuDesign(
-        titleText: 'Mundo das Palavras',
+        titleText: 'Palavras Divertidas',
         showMuteButton: true,
         showWhiteBackground: true,
         showSun: false,

@@ -25,7 +25,7 @@ Future<void> resumeMenuMusic() async {
 class MenuDesign extends StatefulWidget {
   final Widget child; // Conteúdo principal do ecrã
   final String? headerText; // Texto adicional abaixo do título principal
-  final String? titleText; // Texto principal (ex: Mundo das Palavras)
+  final String? titleText; // Texto principal (ex: Palavras Divertidas)
   final Widget? topLeftWidget; // Widget customizado no topo esquerdo
   final bool showHomeButton; // Mostra botão de voltar ao menu de jogos
   final VoidCallback? onHomePressed; // Callback ao clicar no botão home
@@ -53,7 +53,7 @@ class MenuDesign extends StatefulWidget {
     this.showTutorial = true,
     this.showMuteButton = true,
     this.showWhiteBackground = true,
-      this.pauseIntroMusic = false,
+    this.pauseIntroMusic = false,
   }) : super(key: key);
 
   @override
@@ -83,7 +83,6 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
       globalSoundPaused = false;
     }
   }
-
 
   Future<void> _toggleMute() async {
     setState(() => isMenuMuted = !isMenuMuted);

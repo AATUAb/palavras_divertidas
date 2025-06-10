@@ -307,7 +307,7 @@ class _GameMenuState extends State<GameMenu> {
 
     return Scaffold(
       body: MenuDesign(
-        titleText: "Mundo das Palavras",
+        titleText: "Palavras Divertidas",
         headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
         pauseIntroMusic: true,
         showHomeButton: true,
@@ -315,7 +315,7 @@ class _GameMenuState extends State<GameMenu> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => const MyHomePage(title: 'Mundo das Palavras'),
+              builder: (_) => const MyHomePage(title: 'Palavras Divertidas'),
             ),
           );
         },

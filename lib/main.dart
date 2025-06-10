@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
       splitScreenMode: true,
       builder:
           (_, __) => MaterialApp(
-            title: 'Mundo das Palavras',
+            title: 'Palavras Divertidas',
             theme: AppTheme.lightTheme,
             debugShowCheckedModeBanner: false,
             home: const LoadingScreen(),

@@ -146,7 +146,7 @@ class UserStats extends StatelessWidget {
     }
 
     return MenuDesign(
-      titleText: 'Mundo das Palavras',
+      titleText: 'Palavras Divertidas',
       showHomeButton: true,
       showSun: false,
       onHomePressed:
