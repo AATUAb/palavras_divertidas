@@ -410,6 +410,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
 import 'sound_manager.dart';
+import '../screens/game_menu.dart';
+import '../models/user_model.dart';
 
 class GameAnimations {
   static Future<void> playAnswerFeedback({required bool isCorrect}) async {
@@ -565,6 +567,7 @@ class GameAnimations {
   static Future<void> showEndOfGameDialog({
     required BuildContext context,
     required VoidCallback onRestart,
+    required UserModel user,
   }) async {
     if (!context.mounted) return;
     await SoundManager.playAnimationSound('end_game_message.ogg');
@@ -627,7 +630,10 @@ class GameAnimations {
                             ElevatedButton.icon(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                Navigator.of(context).maybePop();
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => GameMenu(user: user)),
+                                );
                               },
                               icon: const Icon(
                                 Icons.close,

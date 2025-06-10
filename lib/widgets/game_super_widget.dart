@@ -1416,6 +1416,7 @@ void cancelProgressTimer() {
     GameAnimations.showEndOfGameDialog(
       context: context,
       onRestart: onRestart,
+      user: widget.user,
     );
   }
   }
