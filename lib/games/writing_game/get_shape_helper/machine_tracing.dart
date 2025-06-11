@@ -857,8 +857,8 @@ class TypeExtensionTracking {
               letterViewSize: sizeOfLetter,
               dottedPath: PTShapePaths.aShapeBigDotted,
               indexPath: PTShapePaths.aShapeBigShapeIndex,
-              scaleIndexPath: .67,
-              positionIndexPath: const Size(-15, -20),
+              scaleIndexPath: .90,
+              positionIndexPath: const Size(-30,5),
               scaledottedPath: .8,
               letterPath: PTShapePaths.aShapeBigShape,
               pointsJsonFile: ShapePointsManger.aUpperShape
@@ -873,6 +873,7 @@ class TypeExtensionTracking {
               scaleIndexPath: .9,
               scaledottedPath: .9,
               positionIndexPath: const Size(0, 2),
+              positionDottedPath: const Size(10,5),
               letterPath: PTShapePaths.mShapeBigShape,
               pointsJsonFile: ShapePointsManger.mUpperShape
               ),
