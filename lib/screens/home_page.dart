@@ -84,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: MenuDesign(
-        titleText: "Mundo das Palavras",
+        titleText: "Palavras Divertidas",
         showHomeButton: false,
         headerText: "Quem vai jogar hoje?",
         child: Column(

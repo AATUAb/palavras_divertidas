@@ -718,11 +718,12 @@ class GamesSuperWidget extends StatefulWidget {
   final int Function(LevelManager) totalRounds;
   final Widget Function() topTextContent;
   final bool isFirstCycle;
-  final Widget Function(
+  /*final Widget Function(
     BuildContext context,
     LevelManager levelManager,
     UserModel user,
-  )
+  )*/
+  final Widget Function(BuildContext context, int currentRound, int totalRounds)
   builder;
   final VoidCallback? onRepeatInstruction;
   final String? introImagePath;
@@ -954,7 +955,8 @@ Widget build(BuildContext context) {
             opacity: _highlightOpacity,
             child: ScaleTransition(
               scale: _highlightScale,
-              child: widget.builder(context, levelManager, widget.user),
+              //child: widget.builder(context, levelManager, widget.user),
+              child: widget.builder(context, levelManager.level, _roundCounter)
             ),
           ),
 

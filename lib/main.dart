@@ -9,6 +9,8 @@ import 'themes/app_theme.dart';
 
 // 1️⃣ Importa o modelo (que inclui o adapter gerado)
 import 'models/character_model.dart';
+import 'models/user_model.dart';
+import 'models/word_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,8 +29,8 @@ Future<void> main() async {
 
   // ─────────── Registro de Adapters ───────────
   Hive.registerAdapter(CharacterModelAdapter());
-  // Se tiveres outros modelos, regista aqui também:
-  // Hive.registerAdapter(UserModelAdapter());
+  Hive.registerAdapter(UserModelAdapter());
+  Hive.registerAdapter(WordModelAdapter()); 
   // ──────────────────────────────────────────────
 
   // ► Agora inicializa com adapters e seed
