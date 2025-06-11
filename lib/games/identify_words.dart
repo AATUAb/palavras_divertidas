@@ -620,15 +620,15 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
 
     switch (lvl) {
       case 1:
-        levelTime = const Duration(seconds: 15);
+        levelTime = const Duration(seconds: 120);
         levelDifficulty = 'baixa';
         break;
       case 2:
-        levelTime = const Duration(seconds: 20);
+        levelTime = const Duration(seconds: 120);
         levelDifficulty = 'media';
         break;
       default:
-        levelTime = const Duration(seconds: 25);
+        levelTime = const Duration(seconds: 120);
         levelDifficulty = 'dificil';
     }
 

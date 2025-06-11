@@ -19,6 +19,9 @@ Future<void> main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
+    // ► Fullscreen total
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
   // ► Inicialização básica do Hive
   await Hive.initFlutter();
 

@@ -183,10 +183,10 @@ class TypeExtensionTracking {
       case '1':
         listOfTraceModel.add(_buildTraceModel(
             letterViewSize: sizeOfLetter,
-            positionIndexPath: const Size(-12, -85),
-            positionDottedPath: const Size(-31, 10),
+            positionIndexPath: const Size(-34, -60),
+            positionDottedPath: const Size(-28, 6),
             scaledottedPath: .8,
-            scaleIndexPath: .1,
+            scaleIndexPath: .4,
             dottedPath: NumberSvgs.shapeNumber1Dotted,
             indexPath: NumberSvgs.shapeNumber1Index,
             letterPath: NumberSvgs.shapeNumber1,
@@ -235,7 +235,7 @@ class TypeExtensionTracking {
       case '5':
         listOfTraceModel.add(_buildTraceModel(
             letterViewSize: sizeOfLetter,
-            positionIndexPath: const Size(-30, -50),
+            positionIndexPath: const Size(0, -50),
             positionDottedPath: const Size(-5, 0),
             scaleIndexPath: .5,
             scaledottedPath: .95,

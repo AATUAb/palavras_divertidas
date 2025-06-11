@@ -591,17 +591,17 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       case 1:
         correctCount = 4;
         wrongCount = 8;
-        levelTime = const Duration(seconds: 10);
+        levelTime = const Duration(seconds: 120);
         break;
       case 2:
         correctCount = 5;
         wrongCount = 10;
-        levelTime = const Duration(seconds: 15);
+        levelTime = const Duration(seconds: 120);
         break;
       case 3:
         correctCount = 6;
         wrongCount = 12;
-        levelTime = const Duration(seconds: 20);
+        levelTime = const Duration(seconds: 120);
         break;
     }
     if (!mounted || _isDisposed) return;

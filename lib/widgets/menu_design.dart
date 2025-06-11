@@ -8,6 +8,7 @@ final AudioPlayer globalMenuPlayer = AudioPlayer();
 bool globalSoundStarted = false;
 bool globalSoundPaused = false;
 bool isMenuMuted = false;
+bool isMenuMusicAllowed = true;
 
 Future<void> pauseMenuMusic() async {
   await globalMenuPlayer.stop();
@@ -16,9 +17,15 @@ Future<void> pauseMenuMusic() async {
 }
 
 Future<void> resumeMenuMusic() async {
-  if (!isMenuMuted && globalSoundPaused) {
-    await globalMenuPlayer.resume();
-    globalSoundPaused = false;
+  if (!isMenuMuted) {
+    if (!globalSoundStarted) {
+      await globalMenuPlayer.play(AssetSource('sounds/intro_music.ogg'));
+      globalSoundStarted = true;
+      globalSoundPaused = false;
+    } else if (globalSoundPaused) {
+      await globalMenuPlayer.resume();
+      globalSoundPaused = false;
+    }
   }
 }
 
@@ -101,20 +108,11 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  /*@override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      globalMenuPlayer.pause();
-    } else if (state == AppLifecycleState.resumed && !isMenuMuted) {
-      globalMenuPlayer.resume();
-    }
-  }*/
-
   @override
 void didChangeAppLifecycleState(AppLifecycleState state) {
   if (state == AppLifecycleState.paused) {
     globalMenuPlayer.pause();
-  } else if (state == AppLifecycleState.resumed && !isMenuMuted && globalSoundStarted && !globalSoundPaused) {
+  } else if (state == AppLifecycleState.resumed && !isMenuMuted && globalSoundStarted && !globalSoundPaused && isMenuMusicAllowed) {
     globalMenuPlayer.resume();
   }
 }

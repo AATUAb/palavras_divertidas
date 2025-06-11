@@ -45,18 +45,27 @@ class GameMenu extends StatefulWidget {
 class _GameMenuState extends State<GameMenu> {
   late ConquestManager conquestManager;
 
-  @override
-  void initState() {
-    super.initState();
-    conquestManager = ConquestManager();
-    resumeMenuMusic();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkNewConquests());
-  }
+@override
+void initState() {
+  super.initState();
+  conquestManager = ConquestManager();
+  
+  // Não toca música já — só se não houver conquistas.
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await _checkNewConquests();
+    
+    // Só retoma música se não fomos para outro ecrã
+    if (mounted) {
+      await resumeMenuMusic();
+    }
+  });
+}
 
   // Verifica se há conquistas novas. Se sim mostra um diálogo com a conquista
   Future<void> _checkNewConquests() async {
     final newUnlocks = widget.user.conquest - widget.user.lastSeenConquests;
     if (newUnlocks > 0) {
+      isMenuMusicAllowed = false;
       await pauseMenuMusic();
 
       final soundFile =
@@ -137,6 +146,7 @@ class _GameMenuState extends State<GameMenu> {
             ),
       );
     }
+    isMenuMusicAllowed = true;
     await resumeMenuMusic();
   }
 
@@ -153,6 +163,7 @@ class _GameMenuState extends State<GameMenu> {
     }
 
     if (!await hasSufficientLetters(user)) {
+      isMenuMusicAllowed = false;
       await pauseMenuMusic();
       try {
         SoundManager.playGeneralSound('update_letters.ogg');
@@ -200,6 +211,7 @@ class _GameMenuState extends State<GameMenu> {
                     );
 
                     if (!await hasSufficientLetters(user)) {
+                      isMenuMusicAllowed = true;
                       await resumeMenuMusic();
                       return;
                     }
@@ -220,6 +232,7 @@ class _GameMenuState extends State<GameMenu> {
                 TextButton.icon(
                   onPressed: () {
                     Navigator.of(context).pop();
+                    isMenuMusicAllowed = true;
                     resumeMenuMusic();
                   },
                   icon: const Icon(Icons.cancel, size: 20, color: Colors.grey),
@@ -239,6 +252,7 @@ class _GameMenuState extends State<GameMenu> {
         context,
         MaterialPageRoute(builder: (_) => gameBuilder()),
       );
+      isMenuMusicAllowed = true;
       await resumeMenuMusic();
     }
   }
@@ -258,7 +272,6 @@ class _GameMenuState extends State<GameMenu> {
         icon: Icons.edit,
         onTap: () => _writeGame(),
         backgroundColor: AppColors.orange,
-        showNewFlag: widget.user.schoolLevel == '1º Ciclo',
       ),
       GameCardData(
         title: "Contar sílabas",
