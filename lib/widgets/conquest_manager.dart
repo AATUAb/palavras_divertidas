@@ -51,7 +51,7 @@ class ConquestManager {
     }
 
     // ALTERAR PARA 10 PARA VERSÃO FINAL
-    if (firstTry && streakFirstTry >= 10) {
+    if (firstTry && streakFirstTry >= 1) {
       conquest++;
       hasNewConquest = true;
     }

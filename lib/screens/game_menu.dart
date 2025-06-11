@@ -66,7 +66,7 @@ void initState() {
     final newUnlocks = widget.user.conquest - widget.user.lastSeenConquests;
     if (newUnlocks > 0) {
       isMenuMusicAllowed = false;
-      await pauseMenuMusic();
+      await pauseMenuMusicForConquest();
 
       final soundFile =
           newUnlocks == 1 ? 'one_conquest.ogg' : 'more_conquests.ogg';
@@ -410,8 +410,9 @@ void initState() {
                                                 top: -6.h,
                                                 right: -6.w,
                                                 child: GestureDetector(
-                                                  onTap: () {
-                                                    showLettersDialog(
+                                                  onTap: () async {
+                                                    await pauseMenuMusic();
+                                                    await showLettersDialog(
                                                       context: localContext,
                                                       user: widget.user,
                                                       initialSelection:
@@ -426,10 +427,10 @@ void initState() {
                                                                 .user
                                                                 .knownLetters =
                                                             selectedLetters;
-                                                        await widget.user
-                                                            .save();
+                                                        await widget.user.save();
                                                       },
                                                     );
+                                                    await resumeMenuMusic(); 
                                                   },
                                                   child: Container(
                                                     padding:

@@ -29,6 +29,11 @@ Future<void> resumeMenuMusic() async {
   }
 }
 
+Future<void> pauseMenuMusicForConquest() async {
+  await globalMenuPlayer.pause();
+  globalSoundPaused = true;
+}
+
 class MenuDesign extends StatefulWidget {
   final Widget child; // Conteúdo principal do ecrã
   final String? headerText; // Texto adicional abaixo do título principal

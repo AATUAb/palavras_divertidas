@@ -162,40 +162,6 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             SizedBox(
               height: (ScreenUtil().screenHeight * 0.03).clamp(16.h, 40.h),
             ),
-            /* Expanded(
-              child: Center(
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.asset(
-                            'assets/images/world.webp',
-                            fit: BoxFit.contain,
-                          ),
-                          ..._stickers.asMap().entries.map((entry) {
-                            return Align(
-                              alignment: entry.value['alignment'] as Alignment,
-                              child: _buildSticker(
-                                entry.value['asset'] as String,
-                                unlocked: _localConquest >= entry.key + 1,
-                                maxWidth: constraints.maxWidth,
-                              ),
-                            );
-                          }).toList(),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );*/
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10.w),
@@ -253,22 +219,4 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
       ),
     );
   }
-
-  /*Widget _buildSticker(String assetPath, {required bool unlocked}) {
-    return Opacity(
-      opacity: unlocked ? 1.0 : 0.5,
-      child: ColorFiltered(
-        colorFilter:
-            unlocked
-                ? const ColorFilter.mode(Colors.transparent, BlendMode.dst)
-                : const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-        child: Image.asset(
-          assetPath,
-          width: 45.w,
-          height: 45.h,
-          fit: BoxFit.contain,
-        ),
-      ),
-    );
-  }*/
 }

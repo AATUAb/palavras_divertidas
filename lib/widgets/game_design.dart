@@ -36,12 +36,6 @@ class _GameDesignState extends State<GameDesign> {
 
   @override
 void dispose() {
-  // A música só  retomar se não for uma um diálogo de conquistas
- /* Future.delayed(const Duration(seconds: 1), () {
-    if (mounted && ModalRoute.of(context)?.isCurrent == true) {
-      resumeMenuMusic();
-    }
-  });*/
   super.dispose();
 }
 
