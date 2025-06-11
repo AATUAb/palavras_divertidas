@@ -101,14 +101,24 @@ class _MenuDesignState extends State<MenuDesign> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  @override
+  /*@override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
       globalMenuPlayer.pause();
     } else if (state == AppLifecycleState.resumed && !isMenuMuted) {
       globalMenuPlayer.resume();
     }
+  }*/
+
+  @override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  if (state == AppLifecycleState.paused) {
+    globalMenuPlayer.pause();
+  } else if (state == AppLifecycleState.resumed && !isMenuMuted && globalSoundStarted && !globalSoundPaused) {
+    globalMenuPlayer.resume();
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

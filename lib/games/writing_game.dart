@@ -12,7 +12,6 @@ import '../widgets/game_item.dart';
 import '../widgets/game_super_widget.dart';
 import 'package:mundodaspalavras/games/writing_game/tracing/writing_models.dart';
 import 'package:mundodaspalavras/games/writing_game/tracing/writing_page.dart';
-import 'package:mundodaspalavras/screens/letters_selection.dart';
 import 'package:mundodaspalavras/games/writing_game/get_shape_helper/machine_tracing.dart';
 import 'package:mundodaspalavras/games/writing_game/get_shape_helper/cursive_tracing.dart';
 import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
@@ -54,72 +53,74 @@ class _WriteGameState extends State<WriteGame> {
   }
 
   Future<void> _applyLevelSettingsAndCharacters() async {
-    final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+  final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+  final isPreschool = widget.user.schoolLevel == 'Pré-Escolar';
+  final isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
 
-    switch (lvl) {
-      case 1:
-        levelTime = const Duration(seconds: 10);
-        break;
-      case 2:
-        levelTime = const Duration(seconds: 15);
-        break;
-      case 3:
-        levelTime = const Duration(seconds: 20);
-        break;
-    }
-
-    final box = await Hive.openBox<CharacterModel>('characters');
-    final allChars =
-        box.values.where((c) => c.character.trim().isNotEmpty).toList();
-
-    const vowels = ['a', 'e', 'i', 'o', 'u'];
-    const consonants = [
-      'b','c','d','f','g','h','j','l','m','n','p','q','r','s','t','v','x','z',
-    ];
-    const numbers = ['0','1','2','3','4','5','6','7','8','9'];
-
-    if (isPreschool) {
-      final filteredChars = allChars.where((c) {
-        final char = c.character.trim().toLowerCase();
-        return switch (lvl) {
-          1 => numbers.contains(char),
-          2 => vowels.contains(char),
-          3 => consonants.contains(char),
-          _ => false,
-        };
-      }).toList();
-
-      final expandedChars = filteredChars.expand((c) {
-        final baseChar = c.character.trim().toLowerCase();
-        return [
-          CharacterModel(
-            character: baseChar.toUpperCase(),
-            soundPath: 'assets/sounds/characters/${baseChar.toUpperCase()}.ogg',
-          ),
-          CharacterModel(
-            character: baseChar.toLowerCase(),
-            soundPath: 'assets/sounds/characters/${baseChar.toLowerCase()}.ogg',
-          ),
-        ];
-      }).toList();
-
-      _characters = expandedChars;
-
-    } else if (isFirstCycle) {
-      final known = widget.user.knownLetters;
-      final expandedLetters = expandKnownLetters(known);
-
-      _characters = allChars.where((c) {
-        final char = c.character.trim().toLowerCase();
-        return expandedLetters.contains(char);
-      }).toList();
-    } else {
-      _characters = [];
-    }
-
-    if (!mounted || _isDisposed) return;
-    setState(() {});
+  // 1) Ajuste de tempo
+  switch (lvl) {
+    case 1: levelTime = const Duration(seconds: 10); break;
+    case 2: levelTime = const Duration(seconds: 15); break;
+    case 3: levelTime = const Duration(seconds: 20); break;
   }
+
+  const vowels = ['a','e','i','o','u'];
+  const consonants = [
+    'b','c','d','f','g','h','j','l','m','n','p','q','r','s','t','v','x','z',
+  ];
+  // força sempre 10 dígitos
+  const digits = ['0','1','2','3','4','5','6','7','8','9'];
+
+  List<CharacterModel> tempChars = [];
+
+  if (isPreschool || isFirstCycle) {
+    if (lvl == 1) {
+      // ——— nível 1: gera manualmente 0–9 ———
+      for (var d in digits) {
+        tempChars.add(CharacterModel(
+          character: d,
+          soundPath: 'assets/sounds/characters/$d.ogg',
+        ));
+      }
+      debugPrint('🔢 Gerados ${tempChars.length} dígitos: '
+        '${tempChars.map((c) => c.character).join(",")}');
+    } else {
+      // ——— níveis 2 e 3: vogais/consoantes do Hive ———
+      final box = await Hive.openBox<CharacterModel>('characters');
+      final allChars = box.values
+        .where((c) => c.character.trim().isNotEmpty)
+        .toList();
+
+      final rawList = lvl == 2 ? vowels : consonants;
+      final filtered = allChars.where((c) {
+        return rawList.contains(c.character.trim().toLowerCase());
+      });
+
+      for (var c in filtered) {
+        final base = c.character.trim().toLowerCase();
+        tempChars.addAll([
+          CharacterModel(
+            character: base.toUpperCase(),
+            soundPath:
+              'assets/sounds/characters/${base.toUpperCase()}.ogg',
+          ),
+          CharacterModel(
+            character: base.toLowerCase(),
+            soundPath:
+              'assets/sounds/characters/${base.toLowerCase()}.ogg',
+          ),
+        ]);
+      }
+    }
+  } else {
+    tempChars = [];
+  }
+
+  _characters = tempChars;
+  if (!mounted || _isDisposed) return;
+  setState(() {});
+}
+
 
   void _cancelTimers() {
     _gamesSuperKey.currentState?.cancelProgressTimer();
@@ -231,41 +232,52 @@ class _WriteGameState extends State<WriteGame> {
     );
   }
 
-  Widget _buildBoard(BuildContext context, _, __) {
-    if (!hasChallengeStarted || targetCharacter.isEmpty) {
-      return const SizedBox.shrink();
-    }
 
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 28.h),
-        child: SizedBox(
-          width: 200.w,
-          height: 200.h,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              TracingCharsGame(
-                key: ValueKey(tracedCharacter),
-                showAnchor: true,
-                stateOfTracing: StateOfTracing.chars,
-                trackingEngine: isFirstCycle
-                    ? CursiveTracking()
-                    : TypeExtensionTracking(),
-                fontType: isFirstCycle ? FontType.cursive : FontType.machine,
-                traceShapeModel: [
-                  TraceCharsModel(
-                    chars: [
-                      TraceCharModel(
-                        char: tracedCharacter,
-                        traceShapeOptions: TraceShapeOptions(
-                          innerPaintColor: Colors.orange,
-                        ),
+Widget _buildBoard(BuildContext context, _, __) {
+  if (!hasChallengeStarted || targetCharacter.isEmpty) {
+    return const SizedBox.shrink();
+  }
+
+  // 1) Identifica se é número
+  const numbers = ['0','1','2','3','4','5','6','7','8','9'];
+  final isNumber = numbers.contains(targetCharacter);
+
+  // 2) Só cursiva para **letras** em 1.º Ciclo
+  final useCursive = isFirstCycle && !isNumber;
+
+  return Center(
+    child: Padding(
+      padding: EdgeInsets.symmetric(vertical: 28.h),
+      child: SizedBox(
+        width: 200.w,
+        height: 200.h,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            TracingCharsGame(
+              key: ValueKey(tracedCharacter),
+              showAnchor: true,
+              stateOfTracing: StateOfTracing.chars,
+              // 3) Ajusta engine consoante useCursive
+              trackingEngine: useCursive
+                  ? CursiveTracking()
+                  : TypeExtensionTracking(),
+              fontType: useCursive
+                  ? FontType.cursive
+                  : FontType.machine,
+              traceShapeModel: [
+                TraceCharsModel(
+                  chars: [
+                    TraceCharModel(
+                      char: tracedCharacter,
+                      traceShapeOptions: TraceShapeOptions(
+                        innerPaintColor: Colors.orange,
                       ),
-                    ],
-                  ),
-                ],
-                onGameFinished: (isSuccessful) async {
+                    ),
+                  ],
+                ),
+              ],
+              onGameFinished: (isSuccessful) async {
                   if (!isRoundActive || tracedCharacter.isEmpty) return;
                   final s = _gamesSuperKey.currentState;
                   if (s == null || !isRoundActive) return;
