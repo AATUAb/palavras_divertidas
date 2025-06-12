@@ -462,22 +462,13 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
 
   // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
-    final font = getFontFamily(
-      isFirstCycle ? FontStrategy.slabo : FontStrategy.none,
-    );
     return Padding(
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
       child: Text(
         hasChallengeStarted
             ? 'Encontra a sílaba perdida para completar a palavra'
             : 'Vamos encontrar a sílaba perdida',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: font,
-          fontSize: 25.sp,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      )
     );
   }
 

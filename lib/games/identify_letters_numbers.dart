@@ -375,70 +375,11 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
-  // Constrói o texto superior que é apresenado quando o jogo arranca
-  Widget _buildTopText() {
-    final isPreschool = widget.user.schoolLevel == 'Pré-Escolar';
-
-    // Mensagem inicial antes de carregar
-    if (!hasChallengeStarted || targetCharacter.isEmpty) {
-      return _buildSimpleText('Vamos encontrar todas as letras e números');
-    }
-
-    // Pré-escolar: apenas letras simples, sem estilos diferentes
-    if (isPreschool) {
-      final label =
-          _isNumber(targetCharacter)
-              ? 'Encontra os números ${targetCharacter.toUpperCase()}'
-              : 'Encontra as letras ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}';
-      return _buildSimpleText(label);
-    }
-
-    // 1º ciclo com letras → mostra as 4 variações (Slabo e Cursive)
-    if (isFirstCycle && _isLetter(targetCharacter)) {
-      return _buildRichText(
-        TextSpan(
-          children: [
-            const TextSpan(text: 'Encontra as letras '),
-            for (final entry in [
-              TextSpan(
-                text: targetCharacter.toUpperCase(),
-                style: _slaboStyle(),
-              ),
-              const TextSpan(text: ', '),
-              TextSpan(
-                text: targetCharacter.toLowerCase(),
-                style: _slaboStyle(),
-              ),
-              const TextSpan(text: ', '),
-              TextSpan(
-                text: targetCharacter.toUpperCase(),
-                style: _cursiveStyle(),
-              ),
-              const TextSpan(text: ', '),
-              TextSpan(
-                text: targetCharacter.toLowerCase(),
-                style: _cursiveStyle(),
-              ),
-            ])
-              entry,
-          ],
-        ),
-      );
-    }
-
-    // Caso geral
-    final label =
-        _isNumber(targetCharacter)
-            ? 'Encontra os números $targetCharacter'
-            : 'Encontra as letras ${targetCharacter.toUpperCase()}, ${targetCharacter.toLowerCase()}';
-    return _buildSimpleText(label);
-  }
-
-  // Helpers
-  Widget _buildSimpleText(String text) => Padding(
+  // Constrói o texto rico com o conteúdo fornecido
+  Widget _buildRichText(TextSpan textSpan) => Padding(
     padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w),
-    child: Text(
-      text,
+    child: Text.rich(
+      textSpan,
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 22.sp,
@@ -448,14 +389,133 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     ),
   );
 
-  Widget _buildRichText(TextSpan textSpan) => Padding(
-    padding: EdgeInsets.only(top: 20.h, left: 40.w, right: 40.w),
-    child: Text.rich(textSpan, textAlign: TextAlign.center),
+  // Define o estilo de texto para a fonte ComicNeue
+  TextStyle slaboStyle() => TextStyle(
+    fontFamily: 'Slabo',
+    fontSize: 22.sp,
+    fontWeight: FontWeight.bold,
+   );
+
+  // Define o estilo de texto para a fonte Cursive
+  TextStyle cursiveStyle() => TextStyle(
+    fontFamily: 'Cursive',
+    fontSize: 25.sp,
+    fontWeight: FontWeight.bold,
   );
 
-  TextStyle _slaboStyle() => TextStyle(fontFamily: 'Slabo', fontSize: 22.sp);
-  TextStyle _cursiveStyle() =>
-      TextStyle(fontFamily: 'Cursive', fontSize: 25.sp);
+  // Constrói o texto superior do jogo, com base no nível e no caractere alvo
+  Widget _buildTopText() {
+    final isPreschool = widget.user.schoolLevel == 'Pré-Escolar';
+
+    // Mensagem inicial antes de carregar
+    if (!hasChallengeStarted || targetCharacter.isEmpty) {
+      return _buildRichText(
+        TextSpan(
+          text: 'Vamos encontrar todas as letras e números',
+        ),
+      );
+    }
+
+  // Caso 1: Pré-escolar → se for pré, sai já daqui
+    if (isPreschool) {
+      final label = _isNumber(targetCharacter)
+          ? 'Encontra os números '
+          : 'Encontra as letras ';
+      final spans = <TextSpan>[
+        TextSpan(
+          text: targetCharacter.toUpperCase(),
+          style: TextStyle(
+            fontFamily: 'ComicNeue',
+            fontSize: 22.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ];
+
+      if (!_isNumber(targetCharacter)) {
+        spans.add(const TextSpan(text: ', '));
+        spans.add(
+          TextSpan(
+            text: targetCharacter.toLowerCase(),
+            style: TextStyle(
+              fontFamily: 'ComicNeue',
+              fontSize: 22.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      }
+
+      return _buildRichText(
+        TextSpan(
+          children: [
+            TextSpan(text: label),
+            ...spans,
+          ],
+        ),
+      );
+    }
+
+  // Caso 2: 1º ciclo → números → mostrar só uma vez!
+    if (isFirstCycle && _isNumber(targetCharacter)) {
+      return _buildRichText(
+        TextSpan(
+          children: [
+            const TextSpan(text: 'Encontra os números '),
+            TextSpan(
+              text: targetCharacter,
+              style: TextStyle(
+                fontFamily: 'Slabo', // ou a fonte que usas para números
+                fontSize: 22.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Caso 3: 1º ciclo → letras → as 4 variantes
+    if (isFirstCycle && _isLetter(targetCharacter)) {
+    return _buildRichText(
+    TextSpan(
+      children: [
+        const TextSpan(text: 'Encontra as letras '),
+        TextSpan(
+          text: targetCharacter.toUpperCase(),
+          style: slaboStyle(),
+        ),
+        const TextSpan(text: ', '),
+        TextSpan(
+          text: targetCharacter.toLowerCase(),
+          style: slaboStyle(),
+        ),
+        const TextSpan(text: ', '),
+        TextSpan(
+          text: targetCharacter.toUpperCase(),
+          style: cursiveStyle(),
+        ),
+        const TextSpan(text: ', '),
+        TextSpan(
+          text: targetCharacter.toLowerCase(),
+          style: cursiveStyle(),
+        ),
+      ],
+    ),
+  );
+}
+  // Fallback — segurança extra
+  return _buildRichText(
+    TextSpan(
+      text: 'Vamos encontrar todas as letras e números',
+      style: TextStyle(
+        fontFamily: isPreschool ? 'ComicNeue' : 'Slabo',
+        fontSize: 22.sp,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  );
+}
 
   // Constrói o tabuleiro do jogo, com base CharacterCircleBox do game_component.dart
   Widget _buildBoard(BuildContext _, __, ___) {
@@ -487,4 +547,3 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 }
-

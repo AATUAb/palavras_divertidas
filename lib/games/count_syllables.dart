@@ -108,139 +108,151 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
-  // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
-  Future<void> _generateNewChallenge() async {
-    _gamesSuperKey.currentState?.playChallengeHighlight();
+  // Gera uma lista de distratores com base na palavra correta
+  List<int> generateDistractors({
+  required int correct,
+  required int numDistractors,
+}) {
+  // Caso especial: 1 sílaba → força [2], [2,3]
+  if (correct == 1) {
+    return numDistractors == 1 ? [2] : [2, 3];
+  }
 
-    // Verifica se há retry a usar
+  final Set<int> optionSet = {};
+  int offset = 1;
+
+  while (optionSet.length < numDistractors) {
+    if (correct - offset >= 1) optionSet.add(correct - offset);
+    if (correct + offset <= 9) optionSet.add(correct + offset);
+    offset++;
+  }
+
+  final distractors = optionSet.toList();
+  distractors.length = min(numDistractors, distractors.length);
+  return distractors;
+}
+
+
+// Gera um novo desafio
+Future<void> _generateNewChallenge() async {
+  _gamesSuperKey.currentState?.playChallengeHighlight();
+
+  // Verifica se há retry a usar
+  if (!mounted || _isDisposed) return;
+  final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
+
+  targetWord =
+      retry != null
+          ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
+            list: _levelWords,
+            retryId: retry,
+            matcher: (w) => w.text == retry,
+            fallback:
+                () => _gamesSuperKey.currentState!.safeSelectItem(
+                  availableItems:
+                      _levelWords
+                          .where((w) => !usedWords.contains(w.text))
+                          .toList(),
+                ),
+          )
+          : _gamesSuperKey.currentState!.safeSelectItem(
+            availableItems: _levelWords,
+          );
+
+  final wordText = targetWord.text;
+  if (!usedWords.contains(wordText)) {
+    usedWords.add(wordText);
+  }
+
+  final availableWords =
+      _levelWords
+          .where((w) => !usedWords.contains(w.text))
+          .map((w) => w.text)
+          .toList();
+
+  // Verifica se o jogo terminou antes de gerar desafio
+  final hasRetry = retry != null;
+
+  if (availableWords.isEmpty && !hasRetry) {
     if (!mounted || _isDisposed) return;
-    final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
+    _gamesSuperKey.currentState?.showEndOfGameDialog(
+      onRestart: () async {
+        await _gamesSuperKey.currentState?.restartGame();
+        await _applyLevelSettings();
+        if (mounted) _generateNewChallenge();
+      },
+    );
+    return;
+  }
 
-    targetWord =
-        retry != null
-            ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
-              list: _levelWords,
-              retryId: retry,
-              matcher: (w) => w.text == retry,
-              fallback:
-                  () => _gamesSuperKey.currentState!.safeSelectItem(
-                    availableItems:
-                        _levelWords
-                            .where((w) => !usedWords.contains(w.text))
-                            .toList(),
-                  ),
-            )
-            : _gamesSuperKey.currentState!.safeSelectItem(
-              availableItems: _levelWords,
-            );
+  _cancelTimers();
+  setState(() {
+    isRoundActive = true;
+    gamesItems.clear();
+    currentTry = 0;
+    foundCorrect = 0;
+  });
 
-    final wordText = targetWord.text;
-    if (!usedWords.contains(wordText)) {
-      usedWords.add(wordText);
-    }
+  // Gera distratores corretos com a função helper
+  final correct = targetWord.syllableCount;
+  final distractors = generateDistractors(
+    correct: correct,
+    numDistractors: numDistractors,
+  );
 
-    final availableWords =
-        _levelWords
-            .where((w) => !usedWords.contains(w.text))
-            .map((w) => w.text)
-            .toList();
+  // Junta tudo e aplica regra:
+  final List<int> allOptions = [correct, ...distractors];
 
-    // Verifica se o jogo terminou antes de gerar desafio
-    final hasRetry = retry != null;
+  if (numDistractors == 1) {
+    allOptions.sort();
+  } else {
+    allOptions.shuffle();
+  }
 
-    if (availableWords.isEmpty && !hasRetry) {
-      if (!mounted || _isDisposed) return;
-      _gamesSuperKey.currentState?.showEndOfGameDialog(
-        onRestart: () async {
-          await _gamesSuperKey.currentState?.restartGame();
-          await _applyLevelSettings();
-          if (mounted) _generateNewChallenge();
-        },
-      );
-      return;
-    }
+  final List<String> options = allOptions.map((v) => v.toString()).toList();
 
-    _cancelTimers();
-    setState(() {
-      isRoundActive = true;
-      gamesItems.clear();
-      currentTry = 0;
-      foundCorrect = 0;
-    });
-
-    // Gera N distratores com ±1 valor
-    final random = Random();
-    final correctIndex = random.nextInt(numDistractors + 1); // entre 0 e 2
-
-    final correct = targetWord.syllableCount;
-    final Set<int> optionSet = {};
-
-    int offset = 1;
-
-    // Gera distratores únicos
-    while (optionSet.length < numDistractors) {
-      optionSet.add((correct + offset).clamp(1, 9));
-      optionSet.add((correct - offset).clamp(1, 9));
-      offset++;
-    }
-
-    // Converte para lista e corta ao tamanho necessário
-    final distractors = optionSet.where((v) => v != correct).toList();
-    distractors.shuffle();
-    distractors.length = numDistractors;
-
-    // Insere a correta na posição aleatória
-    final List<String> options = [];
-    for (int i = 0; i <= numDistractors; i++) {
-      if (i == correctIndex) {
-        options.add(correct.toString());
-      } else {
-        options.add(distractors.removeLast().toString());
-      }
-    }
- 
-     gamesItems = List.generate(options.length, (i) {
-      return GameItem(
-        id: '$i',
-        type: GameItemType.number,
-        content: options[i],
-        dx: 0,
-        dy: 0,
-        backgroundColor: Colors.transparent,
-        isCorrect: options[i] == correct.toString(),
-      );
-    });
-
-    referenceItem = GameItem(
-      id: 'preview',
-      type: GameItemType.text,
-      content: targetWord.audioFileName ?? targetWord.text,
+  gamesItems = List.generate(options.length, (i) {
+    return GameItem(
+      id: '$i',
+      type: GameItemType.number,
+      content: options[i],
       dx: 0,
       dy: 0,
       backgroundColor: Colors.transparent,
+      isCorrect: options[i] == correct.toString(),
     );
+  });
 
-    // Reproduz o som da palavra alvo
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 50));
+  referenceItem = GameItem(
+    id: 'preview',
+    type: GameItemType.text,
+    content: targetWord.audioFileName ?? targetWord.text,
+    dx: 0,
+    dy: 0,
+    backgroundColor: Colors.transparent,
+  );
+
+  // Reproduz o som da palavra alvo
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await Future.delayed(const Duration(milliseconds: 50));
+    if (!mounted || _isDisposed) return;
+    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+  });
+
+  // Sincroniza temporizadores com o tempo de nível
+  _gamesSuperKey.currentState?.startProgressTimer(
+    levelTime: levelTime,
+    onTimeout: () {
       if (!mounted || _isDisposed) return;
-      await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
-    });
-
-    // Sincroniza temporizadores com o tempo de nível
-    _gamesSuperKey.currentState?.startProgressTimer(
-      levelTime: levelTime,
-      onTimeout: () {
-        if (!mounted || _isDisposed) return;
-        setState(() => isRoundActive = false);
-        _gamesSuperKey.currentState?.registerFailedRound(targetWord.text);
-        _gamesSuperKey.currentState?.showTimeout(
-          applySettings: _applyLevelSettings,
-          generateNewChallenge: _generateNewChallenge,
-        );
-      },
-    );
-  }
+      setState(() => isRoundActive = false);
+      _gamesSuperKey.currentState?.registerFailedRound(targetWord.text);
+      _gamesSuperKey.currentState?.showTimeout(
+        applySettings: _applyLevelSettings,
+        generateNewChallenge: _generateNewChallenge,
+      );
+    },
+  );
+}
 
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
@@ -310,22 +322,12 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
   // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
-    final font = getFontFamily(
-      isFirstCycle ? FontStrategy.slabo : FontStrategy.none,
-    );
     return Padding(
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
       child: Text(
         hasChallengeStarted
             ? 'Quantas sílabas tem a palavra ${targetWord.text}?'
             : 'Vamos contar as sílabas das palavras',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: font,
-          fontSize: 25.sp,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
       ),
     );
   }

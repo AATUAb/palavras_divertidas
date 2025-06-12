@@ -704,7 +704,7 @@ final List<WordModel> words = [
     newLetter: 'r',
     topic: 'animais',
     difficulty: 'media',
-    syllables: ['bur', 'ro'],
+    syllables: ['bu', 'rro'],
     syllableCount: 2,
   ),
   WordModel(
@@ -778,8 +778,8 @@ final List<WordModel> words = [
     newLetter: 'f',
     topic: 'animais',
     difficulty: 'media',
-    syllables: ['ele', 'fan', 'te'],
-    syllableCount: 3,
+    syllables: ['e', 'le', 'fan', 'te'],
+    syllableCount: 4,
   ),
   WordModel(
     text: 'esquilo',
@@ -810,7 +810,7 @@ final List<WordModel> words = [
     newLetter: 's',
     topic: 'animais',
     difficulty: 'media',
-    syllables: ['di', 'nos', 'sau', 'ro'],
+    syllables: ['di', 'no', 'ssau', 'ro'],
     syllableCount: 4,
   ),
   WordModel(
@@ -994,7 +994,7 @@ final List<WordModel> words = [
     newLetter: 's',
     topic: 'numeros',
     difficulty: 'media',
-    syllables: ['de', 'zas', 'seis'],
+    syllables: ['de', 'za', 'sseis'],
     syllableCount: 3,
   ),
   WordModel(
@@ -1002,7 +1002,7 @@ final List<WordModel> words = [
     newLetter: 's',
     topic: 'numeros',
     difficulty: 'media',
-    syllables: ['de', 'zas', 'se', 'te'],
+    syllables: ['de', 'za', 'sse', 'te'],
     syllableCount: 4,
   ),
   WordModel(
@@ -1034,7 +1034,7 @@ final List<WordModel> words = [
     syllableCount: 2,
   ),
   WordModel(
-    text: 'poltro',
+    text: 'potro',
     newLetter: 'r',
     topic: 'animais',
     difficulty: 'dificil',

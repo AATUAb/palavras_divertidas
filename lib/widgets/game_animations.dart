@@ -673,6 +673,7 @@ class GameAnimations {
     required String imagePath,
     required String audioFile,
     required VoidCallback onFinished,
+    required TextStyle introTextStyle,
   }) async {
     await SoundManager.playIntroGames(audioFile);
 
@@ -685,6 +686,7 @@ class GameAnimations {
       builder:
           (_) => _IntroAnimationOverlay(
             imagePath: imagePath,
+            introTextStyle: introTextStyle,
             onFinished: () {
               if (entry.mounted) entry.remove();
               onFinished();
@@ -758,9 +760,11 @@ class _TimedAnimationWidgetState extends State<_TimedAnimationWidget> {
 class _IntroAnimationOverlay extends StatefulWidget {
   final String imagePath;
   final VoidCallback onFinished;
+  final TextStyle introTextStyle;
 
   const _IntroAnimationOverlay({
     required this.imagePath,
+    required this.introTextStyle,
     required this.onFinished,
   });
 

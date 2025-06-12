@@ -301,25 +301,16 @@ class _ListenLookGameState extends State<ListenLookGame> {
   }
 
   // Constrói o texto superior que é apresenado quando o jogo arranca
-  Widget _buildTopText() {
-    final font = getFontFamily(
-      isFirstCycle ? FontStrategy.slabo : FontStrategy.none,
-    );
-    return Padding(
-      padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
-      child: Text(
-        hasChallengeStarted
+    Widget _buildTopText() {
+      return Padding(
+        padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
+        child: Text(
+          hasChallengeStarted
             ? 'Escolhe a imagem correta para a palavra que ouviste'
             : 'Vamos ouvir com atenção para encontrar a imagem correta',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: font,
-          fontSize: 25.sp,
-          fontWeight: FontWeight.bold,
         ),
-      ),
-    );
-  }
+      );
+    }
 
     // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart
   Widget _buildBoard(BuildContext context, _, __) {

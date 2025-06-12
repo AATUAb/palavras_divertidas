@@ -839,6 +839,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
         context: context,
         imagePath: widget.introImagePath!,
         audioFile: widget.introAudioPath!,
+        introTextStyle: getInstructionFont(isFirstCycle: widget.isFirstCycle), 
         onFinished: () {
           if (!mounted) return;
           setState(() {
@@ -940,7 +941,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
 Widget build(BuildContext context) {
   return GameDesign(
     user: widget.user,
-    //progressValue: widget.progressValue,
     progressValue: _progressValue,
     level: _visibleLevel,
     topTextWidget: DefaultTextStyle(

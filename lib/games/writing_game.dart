@@ -82,8 +82,6 @@ class _WriteGameState extends State<WriteGame> {
           soundPath: 'assets/sounds/characters/$d.ogg',
         ));
       }
-      debugPrint('🔢 Gerados ${tempChars.length} dígitos: '
-        '${tempChars.map((c) => c.character).join(",")}');
     } else {
       // ——— níveis 2 e 3: vogais/consoantes do Hive ———
       final box = await Hive.openBox<CharacterModel>('characters');
@@ -207,30 +205,18 @@ class _WriteGameState extends State<WriteGame> {
   }
 
   Widget _buildTopText() {
-    final font = getFontFamily(
-      isFirstCycle ? FontStrategy.cursive : FontStrategy.none,
-    );
+  final isNumber = RegExp(r'^[0-9]$').hasMatch(targetCharacter);
+  final label = isNumber ? 'o número' : 'a letra';
 
-    const numbers = ['0','1','2','3','4','5','6','7','8','9'];
-    final isNumber = numbers.contains(targetCharacter);
-    final label = isNumber ? 'o número' : 'a letra';
-
-    return Padding(
-      padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
-      child: Text(
-        hasChallengeStarted
-            ? 'Escreve $label $targetCharacter'
-            : 'Vamos praticar a escrita!',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: font,
-          fontSize: 25.sp,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-      ),
-    );
-  }
+  return Padding(
+    padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
+    child: Text(
+      hasChallengeStarted
+          ? 'Escreve $label $targetCharacter'
+          : 'Vamos praticar a escrita!',
+    ),
+  );
+}
 
 
 Widget _buildBoard(BuildContext context, _, __) {
