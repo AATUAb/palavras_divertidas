@@ -21,7 +21,7 @@ import '../screens/letters_selection.dart';
 // Classe principal do jogo, que recebe o utilizador como argumento
 class LostSyllableGame extends StatefulWidget {
   final UserModel user;
-  const LostSyllableGame({Key? key, required this.user});
+  const LostSyllableGame({super.key, required this.user});
 
   @override
   State<LostSyllableGame> createState() => _LostSyllableGameState();

@@ -1,8 +1,8 @@
 //cursive_tracing.dart
 import 'package:flutter/material.dart';
 import 'package:mundodaspalavras/themes/colors.dart';
-import 'package:mundodaspalavras/games/writing_game/phonetics_constants/cursiveLower.dart';
-import 'package:mundodaspalavras/games/writing_game/phonetics_constants/cursiveUpper.dart';
+import 'package:mundodaspalavras/games/writing_game/phonetics_constants/cursive_lower.dart';
+import 'package:mundodaspalavras/games/writing_game/phonetics_constants/cursive_upper.dart';
 import 'package:mundodaspalavras/games/writing_game/points_manager/shape_points_manager.dart';
 import 'package:mundodaspalavras/games/writing_game/tracing/writing_models.dart';
 import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
@@ -579,9 +579,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths específicos para a letra a:
-            letterPath: CursiveLowerSvgs.shapeLettera,
-            indexPath: CursiveLowerSvgs.indexLettera,
-            dottedPath: CursiveLowerSvgs.dottedLettera,
+            letterPath: cursiveLowerSvgs.shapeLettera,
+            indexPath: cursiveLowerSvgs.indexLettera,
+            dottedPath: cursiveLowerSvgs.dottedLettera,
             pointsJsonFile: ShapePointsManger.aCursiveLower,
             scaleIndexPath: 0.15,
             scaledottedPath: 0.95,
@@ -594,9 +594,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths específicos para a letra b:
-            letterPath: CursiveLowerSvgs.shapeLetterb,
-            indexPath: CursiveLowerSvgs.indexLetterb,
-            dottedPath: CursiveLowerSvgs.dottedLetterb,
+            letterPath: cursiveLowerSvgs.shapeLetterb,
+            indexPath: cursiveLowerSvgs.indexLetterb,
+            dottedPath: cursiveLowerSvgs.dottedLetterb,
             pointsJsonFile: ShapePointsManger.bCursiveLower,
             scaleIndexPath: 0.08,
             scaledottedPath: 0.95,
@@ -609,9 +609,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths específicos para a letra c:
-            letterPath: CursiveLowerSvgs.shapeLetterc,
-            indexPath: CursiveLowerSvgs.indexLetterc,
-            dottedPath: CursiveLowerSvgs.dottedLetterc,
+            letterPath: cursiveLowerSvgs.shapeLetterc,
+            indexPath: cursiveLowerSvgs.indexLetterc,
+            dottedPath: cursiveLowerSvgs.dottedLetterc,
             pointsJsonFile: ShapePointsManger.cCursiveLower,
             scaleIndexPath: 0.1,
             scaledottedPath: 0.95,
@@ -624,9 +624,9 @@ class CursiveTracking {
           TraceModel(
             letterViewSize: sizeOfLetter,
             // Paths específicos para a letra d:
-            letterPath: CursiveLowerSvgs.shapeLetterd,
-            indexPath: CursiveLowerSvgs.indexLetterd,
-            dottedPath: CursiveLowerSvgs.dottedLetterd,
+            letterPath: cursiveLowerSvgs.shapeLetterd,
+            indexPath: cursiveLowerSvgs.indexLetterd,
+            dottedPath: cursiveLowerSvgs.dottedLetterd,
             pointsJsonFile: ShapePointsManger.dCursiveLower,
             scaleIndexPath: 0.6,
             scaledottedPath: 0.95,
@@ -639,9 +639,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths específicos para a letra e:
-            letterPath: CursiveLowerSvgs.shapeLettere,
-            indexPath: CursiveLowerSvgs.indexLettere,
-            dottedPath: CursiveLowerSvgs.dottedLettere,
+            letterPath: cursiveLowerSvgs.shapeLettere,
+            indexPath: cursiveLowerSvgs.indexLettere,
+            dottedPath: cursiveLowerSvgs.dottedLettere,
             pointsJsonFile: ShapePointsManger.eCursiveLower,
             scaleIndexPath: 0.1,
             scaledottedPath: 0.95,
@@ -654,9 +654,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths específicos para a letra f:
-            letterPath: CursiveLowerSvgs.shapeLetterf,
-            indexPath: CursiveLowerSvgs.indexLetterf,
-            dottedPath: CursiveLowerSvgs.dottedLetterf,
+            letterPath: cursiveLowerSvgs.shapeLetterf,
+            indexPath: cursiveLowerSvgs.indexLetterf,
+            dottedPath: cursiveLowerSvgs.dottedLetterf,
             pointsJsonFile: ShapePointsManger.fCursiveLower,
             scaleIndexPath: 0.08,
             scaledottedPath: 0.97,
@@ -669,9 +669,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths específicos para a letra g:
-            letterPath: CursiveLowerSvgs.shapeLetterg,
-            indexPath: CursiveLowerSvgs.indexLetterg,
-            dottedPath: CursiveLowerSvgs.dottedLetterg,
+            letterPath: cursiveLowerSvgs.shapeLetterg,
+            indexPath: cursiveLowerSvgs.indexLetterg,
+            dottedPath: cursiveLowerSvgs.dottedLetterg,
             pointsJsonFile: ShapePointsManger.gCursiveLower,
             scaleIndexPath: 0.1,
             scaledottedPath: 0.95,
@@ -684,9 +684,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths específicos para a letra h:
-            letterPath: CursiveLowerSvgs.shapeLetterh,
-            indexPath: CursiveLowerSvgs.indexLetterh,
-            dottedPath: CursiveLowerSvgs.dottedLetterh,
+            letterPath: cursiveLowerSvgs.shapeLetterh,
+            indexPath: cursiveLowerSvgs.indexLetterh,
+            dottedPath: cursiveLowerSvgs.dottedLetterh,
             pointsJsonFile: ShapePointsManger.hCursiveLower,
             scaleIndexPath: 0.1,
             scaledottedPath: 0.95,
@@ -699,9 +699,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths específicos para a letra i:
-            letterPath: CursiveLowerSvgs.shapeLetteri,
-            indexPath: CursiveLowerSvgs.indexLetteri,
-            dottedPath: CursiveLowerSvgs.dottedLetteri,
+            letterPath: cursiveLowerSvgs.shapeLetteri,
+            indexPath: cursiveLowerSvgs.indexLetteri,
+            dottedPath: cursiveLowerSvgs.dottedLetteri,
             pointsJsonFile: ShapePointsManger.iCursiveLower,
             scaleIndexPath: 0.8,
             scaledottedPath: 0.70,
@@ -714,9 +714,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths específicos para a letra j:
-            letterPath: CursiveLowerSvgs.shapeLetterj,
-            indexPath: CursiveLowerSvgs.indexLetterj,
-            dottedPath: CursiveLowerSvgs.dottedLetterj,
+            letterPath: cursiveLowerSvgs.shapeLetterj,
+            indexPath: cursiveLowerSvgs.indexLetterj,
+            dottedPath: cursiveLowerSvgs.dottedLetterj,
             pointsJsonFile: ShapePointsManger.jCursiveLower,
             scaleIndexPath: 0.6,
             scaledottedPath: 0.95,
@@ -729,9 +729,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra l:
-            letterPath: CursiveLowerSvgs.shapeLetterl,
-            indexPath: CursiveLowerSvgs.indexLetterl,
-            dottedPath: CursiveLowerSvgs.dottedLetterl,
+            letterPath: cursiveLowerSvgs.shapeLetterl,
+            indexPath: cursiveLowerSvgs.indexLetterl,
+            dottedPath: cursiveLowerSvgs.dottedLetterl,
             pointsJsonFile: ShapePointsManger.lCursiveLower,
             scaleIndexPath: 0.08,
             scaledottedPath: 0.95,
@@ -744,9 +744,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra m:
-            letterPath: CursiveLowerSvgs.shapeLetterm,
-            indexPath: CursiveLowerSvgs.indexLetterm,
-            dottedPath: CursiveLowerSvgs.dottedLetterm,
+            letterPath: cursiveLowerSvgs.shapeLetterm,
+            indexPath: cursiveLowerSvgs.indexLetterm,
+            dottedPath: cursiveLowerSvgs.dottedLetterm,
             pointsJsonFile: ShapePointsManger.mCursiveLower,
             scaleIndexPath: 0.7,
             scaledottedPath: 0.95,
@@ -759,9 +759,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra n:
-            letterPath: CursiveLowerSvgs.shapeLettern,
-            indexPath: CursiveLowerSvgs.indexLettern,
-            dottedPath: CursiveLowerSvgs.dottedLettern,
+            letterPath: cursiveLowerSvgs.shapeLettern,
+            indexPath: cursiveLowerSvgs.indexLettern,
+            dottedPath: cursiveLowerSvgs.dottedLettern,
             pointsJsonFile: ShapePointsManger.nCursiveLower,
             scaleIndexPath: 0.6,
             scaledottedPath: 0.95,
@@ -774,9 +774,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra o:
-            letterPath: CursiveLowerSvgs.shapeLettero,
-            indexPath: CursiveLowerSvgs.indexLettero,
-            dottedPath: CursiveLowerSvgs.dottedLettero,
+            letterPath: cursiveLowerSvgs.shapeLettero,
+            indexPath: cursiveLowerSvgs.indexLettero,
+            dottedPath: cursiveLowerSvgs.dottedLettero,
             pointsJsonFile: ShapePointsManger.oCursiveLower,
             scaleIndexPath: 0.10,
             scaledottedPath: 0.95,
@@ -789,9 +789,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra p:
-            letterPath: CursiveLowerSvgs.shapeLetterp,
-            indexPath: CursiveLowerSvgs.indexLetterp,
-            dottedPath: CursiveLowerSvgs.dottedLetterp,
+            letterPath: cursiveLowerSvgs.shapeLetterp,
+            indexPath: cursiveLowerSvgs.indexLetterp,
+            dottedPath: cursiveLowerSvgs.dottedLetterp,
             pointsJsonFile: ShapePointsManger.pCursiveLower,
             scaleIndexPath: 0.35,
             scaledottedPath: 0.95,
@@ -804,9 +804,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra q:
-            letterPath: CursiveLowerSvgs.shapeLetterq,
-            indexPath: CursiveLowerSvgs.indexLetterq,
-            dottedPath: CursiveLowerSvgs.dottedLetterq,
+            letterPath: cursiveLowerSvgs.shapeLetterq,
+            indexPath: cursiveLowerSvgs.indexLetterq,
+            dottedPath: cursiveLowerSvgs.dottedLetterq,
             pointsJsonFile: ShapePointsManger.qCursiveLower,
             scaleIndexPath: 0.20,
             scaledottedPath: 0.95,
@@ -819,9 +819,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra r:
-            letterPath: CursiveLowerSvgs.shapeLetterr,
-            indexPath: CursiveLowerSvgs.indexLetterr,
-            dottedPath: CursiveLowerSvgs.dottedLetterr,
+            letterPath: cursiveLowerSvgs.shapeLetterr,
+            indexPath: cursiveLowerSvgs.indexLetterr,
+            dottedPath: cursiveLowerSvgs.dottedLetterr,
             pointsJsonFile: ShapePointsManger.rCursiveLower,
             scaleIndexPath: 0.12,
             scaledottedPath: 0.95,
@@ -834,9 +834,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra s:
-            letterPath: CursiveLowerSvgs.shapeLetters,
-            indexPath: CursiveLowerSvgs.indexLetters,
-            dottedPath: CursiveLowerSvgs.dottedLetters,
+            letterPath: cursiveLowerSvgs.shapeLetters,
+            indexPath: cursiveLowerSvgs.indexLetters,
+            dottedPath: cursiveLowerSvgs.dottedLetters,
             pointsJsonFile: ShapePointsManger.sCursiveLower,
             scaleIndexPath: 0.12,
             scaledottedPath: 0.95,
@@ -849,9 +849,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra t:
-            letterPath: CursiveLowerSvgs.shapeLettert,
-            indexPath: CursiveLowerSvgs.indexLettert,
-            dottedPath: CursiveLowerSvgs.dottedLettert,
+            letterPath: cursiveLowerSvgs.shapeLettert,
+            indexPath: cursiveLowerSvgs.indexLettert,
+            dottedPath: cursiveLowerSvgs.dottedLettert,
             pointsJsonFile: ShapePointsManger.tCursiveLower,
             scaleIndexPath: 0.7,
             scaledottedPath: 0.95,
@@ -864,9 +864,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra u:
-            letterPath: CursiveLowerSvgs.shapeLetteru,
-            indexPath: CursiveLowerSvgs.indexLetteru,
-            dottedPath: CursiveLowerSvgs.dottedLetteru,
+            letterPath: cursiveLowerSvgs.shapeLetteru,
+            indexPath: cursiveLowerSvgs.indexLetteru,
+            dottedPath: cursiveLowerSvgs.dottedLetteru,
             pointsJsonFile: ShapePointsManger.uCursiveLower,
             scaleIndexPath: 0.9,
             scaledottedPath: 0.95,
@@ -879,9 +879,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra v:
-            letterPath: CursiveLowerSvgs.shapeLetterv,
-            indexPath: CursiveLowerSvgs.indexLetterv,
-            dottedPath: CursiveLowerSvgs.dottedLetterv,
+            letterPath: cursiveLowerSvgs.shapeLetterv,
+            indexPath: cursiveLowerSvgs.indexLetterv,
+            dottedPath: cursiveLowerSvgs.dottedLetterv,
             pointsJsonFile: ShapePointsManger.vCursiveLower,
             scaleIndexPath: 0.1,
             scaledottedPath: 0.95,
@@ -894,9 +894,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra x:
-            letterPath: CursiveLowerSvgs.shapeLetterx,
-            indexPath: CursiveLowerSvgs.indexLetterx,
-            dottedPath: CursiveLowerSvgs.dottedLetterx,
+            letterPath: cursiveLowerSvgs.shapeLetterx,
+            indexPath: cursiveLowerSvgs.indexLetterx,
+            dottedPath: cursiveLowerSvgs.dottedLetterx,
             pointsJsonFile: ShapePointsManger.xCursiveLower,
             scaleIndexPath: 1,
             scaledottedPath: 0.95,
@@ -909,9 +909,9 @@ class CursiveTracking {
           _buildCursiveTraceModel(
             letterViewSize: sizeOfLetter,
             // Paths para a letra z:
-            letterPath: CursiveLowerSvgs.shapeLetterz,
-            indexPath: CursiveLowerSvgs.indexLetterz,
-            dottedPath: CursiveLowerSvgs.dottedLetterz,
+            letterPath: cursiveLowerSvgs.shapeLetterz,
+            indexPath: cursiveLowerSvgs.indexLetterz,
+            dottedPath: cursiveLowerSvgs.dottedLetterz,
             pointsJsonFile: ShapePointsManger.zCursiveLower,
             scaleIndexPath: 0.1,
             scaledottedPath: 0.95,

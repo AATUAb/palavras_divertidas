@@ -77,7 +77,7 @@ void initState() {
         barrierDismissible: false,
         builder:
             (_) => AlertDialog(
-              // centrar o diálogo horizontal
+              backgroundColor: const Color(0xffe8f4fe),
               title: Text(
                 'Parabéns! 🎉',
                 textAlign: TextAlign.center,
@@ -91,64 +91,70 @@ void initState() {
                 'Tens $newUnlocks conquista${newUnlocks > 1 ? 's' : ''} nova${newUnlocks > 1 ? 's' : ''}!\n'
                 'Entra na caderneta para a${newUnlocks > 1 ? 's' : ''} encontrar${newUnlocks > 1 ? 'es' : ''}.',
               ),
+              actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               actions: [
-                // Botão Cancelar → volta ao menu de jogos
-                Container(
-                  margin: const EdgeInsets.only(right: 8, bottom: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: TextButton.icon(
-                    onPressed: () async {
-                      await SoundManager.stop();
-                      widget.user.lastSeenConquests = widget.user.conquest;
-                      widget.user.lastSeenConquests = widget.user.conquest;
-                      await widget.user.save();
-
-                      Navigator.of(context).pop();
-                    },
-                    icon: const Icon(Icons.cancel, color: Colors.white),
-                    label: const Text(
-                      'Cancelar',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-                // Botão OK → vai para a caderneta
-                Container(
-                  margin: const EdgeInsets.only(right: 12, bottom: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: TextButton.icon(
-                    onPressed: () async {
-                      await SoundManager.stop();
-                      widget.user.lastSeenConquests = widget.user.conquest;
-                      await widget.user.save();
-                      Navigator.of(context).pop();
-                      await Future.delayed(const Duration(milliseconds: 100));
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => StickerBookScreen(user: widget.user),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // para que os botões fiquem centrados e com espaço correto
+                  children: [
+                    // Botão Cancelar
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          await SoundManager.stop();
+                          widget.user.lastSeenConquests = widget.user.conquest;
+                          await widget.user.save();
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(Icons.cancel, color: Colors.white),
+                        label: const Text(
+                          'Cancelar',
+                          style: TextStyle(color: Colors.white),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.check, color: Colors.white),
-                    label: const Text(
-                      'Ver Caderneta',
-                      style: TextStyle(color: Colors.white),
+                      ),
                     ),
-                  ),
+
+                    // Espaço entre os botões
+                    const SizedBox(width: 15),
+
+                    // Botão Ver Caderneta
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          await SoundManager.stop();
+                          widget.user.lastSeenConquests = widget.user.conquest;
+                          await widget.user.save();
+                          Navigator.of(context).pop();
+                          await Future.delayed(const Duration(milliseconds: 100));
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => StickerBookScreen(user: widget.user),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.check, color: Colors.white),
+                        label: const Text(
+                          'Ver Caderneta',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-      );
-    }
-    isMenuMusicAllowed = true;
-    await resumeMenuMusic();
-  }
+          );
+        } 
+        isMenuMusicAllowed = true;
+        await resumeMenuMusic();
+      }
 
   void handleLetterDependentGame({
     required BuildContext context,
@@ -189,73 +195,88 @@ void initState() {
                 'Atualiza as letras aprendidas para poderes jogar.',
                 style: TextStyle(color: Colors.blue.shade700),
               ),
-              actions: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.green,
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                    await showLettersDialog(
-                      context: context,
-                      user: user,
-                      initialSelection: user.knownLetters,
-                      onSaved: (selected) async {
-                        user.knownLetters = selected;
-                        await user.save();
-                      },
-                    );
+                actionsPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                actions: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Botão "Cancelar" à ESQUERDA
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.grey,
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          isMenuMusicAllowed = true;
+                          resumeMenuMusic();
+                        },
+                        icon: Icon(Icons.cancel, size: 20, color: Colors.white),
+                        label: Text(
+                          "Cancelar",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
 
-                    if (!await hasSufficientLetters(user)) {
-                      isMenuMusicAllowed = true;
-                      await resumeMenuMusic();
-                      return;
-                    }
+                      // Botão "Letras Novas?" à DIREITA
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.green,
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                          await showLettersDialog(
+                            context: context,
+                            user: user,
+                            initialSelection: user.knownLetters,
+                            onSaved: (selected) async {
+                              user.knownLetters = selected;
+                              await user.save();
+                            },
+                          );
 
-                    await Future.delayed(const Duration(milliseconds: 100));
-                    if (context.mounted) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => gameBuilder()),
-                      );
-                    }
-                  },
-                  child: Text(
-                    "Letras Novas?",
-                    style: TextStyle(fontSize: 15.sp),
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    isMenuMusicAllowed = true;
-                    resumeMenuMusic();
-                  },
-                  icon: const Icon(Icons.cancel, size: 20, color: Colors.grey),
-                  label: const Text(
-                    "Voltar",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-              ],
-            ),
-      );
+                          if (!await hasSufficientLetters(user)) {
+                            isMenuMusicAllowed = true;
+                            await resumeMenuMusic();
+                            return;
+                          }
 
-      return;
-    }
-    if (context.mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => gameBuilder()),
-      );
-      isMenuMusicAllowed = true;
-      await resumeMenuMusic();
-    }
-  }
+                          await Future.delayed(const Duration(milliseconds: 100));
+                          if (context.mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => gameBuilder()),
+                            );
+                          }
+                        },
+                        child: Text(
+                          "Letras Novas?",
+                          style: TextStyle(fontSize: 15.sp),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+              return;
+            }
+            if (context.mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => gameBuilder()),
+              );
+              isMenuMusicAllowed = true;
+              await resumeMenuMusic();
+            }
+          }
 
   // Jogos principais disponíveis para todos os ciclos
   @override

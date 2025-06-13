@@ -10,9 +10,13 @@ class CharacterModel extends HiveObject {
   @HiveField(1) // ◉ índice 1
   final String soundPath;
 
+  @HiveField(2)
+  final String type; // 'vowel', 'consonant', 'number'
+
   CharacterModel({
     required this.character,
     required this.soundPath,
+    required this.type,
   });
 }
 
@@ -29,12 +33,23 @@ Future<void> populateCharactersIfNeeded() async {
       final fileName = '$char.ogg';
       final soundPath = 'assets/sounds/characters/$fileName';
 
-      final model = CharacterModel(
-        character: char,
-        soundPath: soundPath,
-      );
-
-      await box.add(model);
+    // Determina tipo
+    late String type;
+    if ('aeiou'.contains(char.toLowerCase())) {
+      type = 'vowel';
+    } else if ('bcdfghjlmnpqrstvxz'.contains(char.toLowerCase())) {
+      type = 'consonant';
+    } else if ('0123456789'.contains(char)) {
+      type = 'number';
     }
+
+    final model = CharacterModel(
+      character: char,
+      soundPath: soundPath,
+      type: type,
+    );
+
+    await box.add(model);
   }
+}
 }

@@ -7,6 +7,7 @@ import '../widgets/game_item.dart';
 
 class SoundManager {
   static final AudioPlayer _player = AudioPlayer();
+  static final AudioPlayer _playerCase = AudioPlayer();
   static bool _isStopped = false; 
 
   static Future<void> play(String assetPath) async {
@@ -21,12 +22,13 @@ class SoundManager {
   static Future<void> stopAll() async {
     _isStopped = true;
     await _player.stop();
+    await _playerCase.stop();
   }
 
   static void reset() => _isStopped = false;
 
   /// Toca o som de um carácter (letra ou número isolado)
-  static Future<void> playCharacter(String character) async {
+  static Future<void> playCharacter(String character, {bool playCaseSuffix = false}) async {
     if (_isStopped) return;
     final box = await Hive.openBox<CharacterModel>('characters');
     
@@ -34,7 +36,8 @@ class SoundManager {
       (m) => m.character.toLowerCase() == character.toLowerCase(),
       orElse: () => CharacterModel(
         character: character, 
-        soundPath: ''
+        soundPath: '',
+        type: '', 
         ),
     );
 
@@ -42,6 +45,18 @@ class SoundManager {
       final assetPath = model.soundPath.replaceFirst(RegExp(r'^assets/'), '');
       try {
         await _player.play(AssetSource(assetPath));
+
+      // Se pediram o sufixo, toca a seguir
+      if (playCaseSuffix && (model.type == 'vowel' || model.type == 'consonant')) {
+        final caseSuffix = character == character.toUpperCase()
+            ? 'uppercase.ogg'
+            : 'lowercase.ogg';
+
+      await Future.delayed(const Duration(milliseconds: 1500));
+      if (_isStopped) return;
+      await _playerCase.play(AssetSource('sounds/characters/$caseSuffix'));
+    }
+
       } catch (e) {
         debugPrint("🔇 Erro ao tocar som do carácter '$character': $e");
       }
@@ -49,6 +64,7 @@ class SoundManager {
         debugPrint("🔇 Som não encontrado para o carácter '$character'");
       }
     }
+
 
   /// Toca o som de uma palavra, procurando pelo texto ou pelo audioFileName
   static Box<WordModel>? _wordBox;
@@ -93,7 +109,7 @@ static Future<void> playWord(String word) async {
   if (_isStopped) return;
 
   if (item.type == GameItemType.character && text.length == 1) {
-    await playCharacter(text);
+    await playCharacter(text, playCaseSuffix: item.playCaseSuffix);
   } else if ((item.type == GameItemType.character && text.length > 1) ||
              item.type == GameItemType.text) {
     await playWord(text);
@@ -123,5 +139,6 @@ static Future<void> playWord(String word) async {
   static Future<void> stop() async {
     _isStopped = true;
     await _player.stop();
+    await _playerCase.stop();
   }
 }

@@ -18,7 +18,7 @@ import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
 
 class WriteGame extends StatefulWidget {
   final UserModel user;
-  const WriteGame({Key? key, required this.user}) : super(key: key);
+  const WriteGame({super.key, required this.user});
 
   @override
   State<WriteGame> createState() => _WriteGameState();
@@ -43,7 +43,6 @@ class _WriteGameState extends State<WriteGame> {
   String tracedCharacter = '';
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
-  bool get isPreschool => widget.user.schoolLevel == 'Pré-Escolar';
 
   @override
   void dispose() {
@@ -59,53 +58,58 @@ class _WriteGameState extends State<WriteGame> {
 
   // 1) Ajuste de tempo
   switch (lvl) {
-    case 1: levelTime = const Duration(seconds: 120); break;
-    case 2: levelTime = const Duration(seconds: 120); break;
-    case 3: levelTime = const Duration(seconds: 120); break;
-  }
-
-  const vowels = ['a','e','i','o','u'];
-  const consonants = [
-    'b','c','d','f','g','h','j','l','m','n','p','q','r','s','t','v','x','z',
-  ];
-  // força sempre 10 dígitos
-  const digits = ['0','1','2','3','4','5','6','7','8','9'];
+      case 1:
+        levelTime = const Duration(seconds: 120);
+        break;
+      case 2:
+        levelTime = const Duration(seconds: 120);
+        break;
+      default:
+        levelTime = const Duration(seconds: 120);
+    }
 
   List<CharacterModel> tempChars = [];
 
   if (isPreschool || isFirstCycle) {
-    if (lvl == 1) {
-      // ——— nível 1: gera manualmente 0–9 ———
-      for (var d in digits) {
-        tempChars.add(CharacterModel(
-          character: d,
-          soundPath: 'assets/sounds/characters/$d.ogg',
-        ));
-      }
-    } else {
-      // ——— níveis 2 e 3: vogais/consoantes do Hive ———
-      final box = await Hive.openBox<CharacterModel>('characters');
-      final allChars = box.values
+    // Abre sempre o box de characters
+    final box = await Hive.openBox<CharacterModel>('characters');
+    final allChars = box.values
         .where((c) => c.character.trim().isNotEmpty)
         .toList();
 
-      final rawList = lvl == 2 ? vowels : consonants;
-      final filtered = allChars.where((c) {
-        return rawList.contains(c.character.trim().toLowerCase());
-      });
+    // Filtra por tipo consoante nível:
+    String targetType;
+    if (lvl == 1) {
+      targetType = 'number';
+    } else if (lvl == 2) {
+      targetType = 'vowel';
+    } else {
+      targetType = 'consonant';
+    }
 
-      for (var c in filtered) {
-        final base = c.character.trim().toLowerCase();
+    final filtered = allChars.where((c) => c.type == targetType);
+
+    // Para letras → duplicamos upper/lower; para números basta 1x
+    for (var c in filtered) {
+      final base = c.character.trim().toLowerCase();
+
+      if (targetType == 'number') {
+        tempChars.add(CharacterModel(
+          character: base,
+          soundPath: c.soundPath,
+          type: c.type,
+        ));
+      } else {
         tempChars.addAll([
           CharacterModel(
             character: base.toUpperCase(),
-            soundPath:
-              'assets/sounds/characters/${base.toUpperCase()}.ogg',
+            soundPath: 'assets/sounds/characters/${base.toUpperCase()}.ogg',
+            type: c.type,
           ),
           CharacterModel(
             character: base.toLowerCase(),
-            soundPath:
-              'assets/sounds/characters/${base.toLowerCase()}.ogg',
+            soundPath: 'assets/sounds/characters/${base.toLowerCase()}.ogg',
+            type: c.type,
           ),
         ]);
       }
@@ -120,6 +124,7 @@ class _WriteGameState extends State<WriteGame> {
 }
 
 
+
   void _cancelTimers() {
     _gamesSuperKey.currentState?.cancelProgressTimer();
   }
@@ -130,79 +135,96 @@ class _WriteGameState extends State<WriteGame> {
   }
 
   Future<void> _generateNewChallenge() async {
-    _gamesSuperKey.currentState?.playChallengeHighlight();
+  _gamesSuperKey.currentState?.playChallengeHighlight();
 
-    if (!mounted || _isDisposed) return;
+  if (!mounted || _isDisposed) return;
 
-    final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
-    final availableItems =
-        _characters.where((c) => !_usedCharacters.contains(c.character)).toList();
+  final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
+  final availableItems = _characters
+      .where((c) => !_usedCharacters.contains(c.character))
+      .toList();
+  final hasRetry = retryId != null;
 
-    if (availableItems.isEmpty && retryId == null) {
-      _gamesSuperKey.currentState?.showEndOfGameDialog(
-        onRestart: () async {
-          _usedCharacters.clear();
-          await _applyLevelSettingsAndCharacters();
-          if (mounted) await _generateNewChallenge();
-        },
-      );
-      return;
-    }
-
-    final selected = retryId != null
-        ? _gamesSuperKey.currentState!.safeRetry<CharacterModel>(
-            list: availableItems,
-            retryId: retryId,
-            matcher: (c) => c.character == retryId,
-            fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
-              availableItems: availableItems,
-            ),
-          )
-        : _gamesSuperKey.currentState!.safeSelectItem(
-            availableItems: availableItems,
-          );
-
-    targetCharacter = selected.character;
-    tracedCharacter = targetCharacter;
-
-    if (!_usedCharacters.contains(targetCharacter)) {
-      _usedCharacters.add(targetCharacter);
-    }
-
-    referenceItem = GameItem(
-      id: targetCharacter,
-      type: GameItemType.character,
-      content: targetCharacter,
-      dx: 0,
-      dy: 0,
-      backgroundColor: Colors.transparent,
-      isCorrect: true,
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 50));
-      if (!mounted || _isDisposed) return;
-      await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
-    });
-
-    _cancelTimers();
-    setState(() {
-      isRoundActive = true;
-    });
-
-    _gamesSuperKey.currentState?.startProgressTimer(
-      levelTime: levelTime,
-      onTimeout: () {
-        if (!mounted || _isDisposed) return;
-        setState(() => isRoundActive = false);
-        _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
-        _gamesSuperKey.currentState?.showTimeout(
-          applySettings: _applyLevelSettingsAndCharacters,
-          generateNewChallenge: _generateNewChallenge,
-        );
+  // Caso de fim de jogo
+  if (availableItems.isEmpty && !hasRetry) {
+    _gamesSuperKey.currentState?.showEndOfGameDialog(
+      onRestart: () async {
+        _usedCharacters.clear();
+        await _applyLevelSettingsAndCharacters();
+        if (mounted) await _generateNewChallenge();
       },
     );
+    return;
   }
+
+  // Seleciona o desafio: retry ou novo
+  final selected = retryId != null
+      ? _gamesSuperKey.currentState!.safeRetry<CharacterModel>(
+          list: _characters,
+          retryId: retryId,
+          matcher: (c) => c.character == retryId,
+          fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
+            availableItems: availableItems,
+          ),
+        )
+      : _gamesSuperKey.currentState!.safeSelectItem(
+          availableItems: availableItems,
+        );
+
+  // Proteção — caso venha um CharacterModel vazio
+  targetCharacter = selected.character;
+  tracedCharacter = targetCharacter;
+
+  if (targetCharacter.trim().isEmpty) {
+    debugPrint('⚠️ TargetCharacter vazio! Skip challenge.');
+    return;
+  }
+
+  // Regista como já usado
+  if (!_usedCharacters.contains(targetCharacter)) {
+    _usedCharacters.add(targetCharacter);
+  }
+
+  // Prepara referenceItem para som
+  referenceItem = GameItem(
+    id: targetCharacter,
+    type: GameItemType.character,
+    content: targetCharacter,
+    dx: 0,
+    dy: 0,
+    backgroundColor: Colors.transparent,
+    isCorrect: true,
+    playCaseSuffix: true, 
+  );
+
+  // Toca som após 50 ms
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await Future.delayed(const Duration(milliseconds: 50));
+    if (!mounted || _isDisposed) return;
+    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+  });
+
+  // Reinicia timers
+  _cancelTimers();
+  setState(() {
+    isRoundActive = true;
+  });
+
+  // Inicia progress timer
+  _gamesSuperKey.currentState?.startProgressTimer(
+    levelTime: levelTime,
+    onTimeout: () {
+      if (!mounted || _isDisposed) return;
+      setState(() => isRoundActive = false);
+      _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
+      _gamesSuperKey.currentState?.showTimeout(
+        applySettings: _applyLevelSettingsAndCharacters,
+        generateNewChallenge: _generateNewChallenge,
+      );
+    },
+  );
+}
+
 
   Widget _buildTopText() {
   final isNumber = RegExp(r'^[0-9]$').hasMatch(targetCharacter);

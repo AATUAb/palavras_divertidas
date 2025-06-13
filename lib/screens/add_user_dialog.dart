@@ -104,7 +104,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           ),
                           SizedBox(width: 10.w),
                           _buildLevelOption(
-                            "1º Ciclo",
+                            "1.º Ciclo",
                             Icons.school,
                             AppColors.orange,
                           ),
@@ -120,40 +120,51 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       if (widget.onDelete != null)
-                        TextButton.icon(
-                          onPressed: () {
-                            widget.onDelete!();
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(Icons.delete, size: 16.sp),
-                          label: Text("Eliminar", style: TextStyle(fontSize: 16.sp)),
-                          style: TextButton.styleFrom(
-                            foregroundColor: AppColors.red,
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.red,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: TextButton.icon(
+                            onPressed: () {
+                              widget.onDelete!();
+                              Navigator.pop(context);
+                            },
+                            icon: Icon(Icons.delete, size: 16.sp, color: Colors.white),
+                            label: Text("Eliminar", style: TextStyle(fontSize: 16.sp, color: Colors.white)),
                           ),
                         ),
-                      TextButton.icon(
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.cancel, size: 16.sp),
-                        label: Text("Cancelar", style: TextStyle(fontSize: 16.sp)),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.grey,
+
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade400,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: TextButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.cancel, size: 16.sp, color: Colors.white),
+                          label: Text("Cancelar", style: TextStyle(fontSize: 16.sp, color: Colors.white)),
                         ),
                       ),
-                      TextButton.icon(
-                        onPressed: () {
-                          if (_nameController.text.isNotEmpty) {
-                            widget.onUserAdded(
-                              _nameController.text.trim(),
-                              _selectedSchoolLevel,
-                              [], // Letras vazias por agora
-                            );
-                            Navigator.pop(context);
-                          }
-                        },
-                        icon: Icon(Icons.save, size: 16.sp),
-                        label: Text("Salvar", style: TextStyle(fontSize: 16.sp)),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.green,
+
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.green,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: TextButton.icon(
+                          onPressed: () {
+                            if (_nameController.text.isNotEmpty) {
+                              widget.onUserAdded(
+                                _nameController.text.trim(),
+                                _selectedSchoolLevel,
+                                [], // Letras vazias por agora
+                              );
+                              Navigator.pop(context);
+                            }
+                          },
+                          icon: Icon(Icons.save, size: 16.sp, color: Colors.white),
+                          label: Text("Salvar", style: TextStyle(fontSize: 16.sp, color: Colors.white)),
                         ),
                       ),
                     ],

@@ -44,7 +44,7 @@ class GameItem {
   final String? fontFamily;
   final double? fontSize;
   final Color backgroundColor;
-
+  final bool playCaseSuffix;
   bool isCorrect;
   bool isTapped;
   bool showCheck = false;
@@ -56,9 +56,10 @@ class GameItem {
     required this.content,
     required this.dx,
     required this.dy,
-    required this.backgroundColor,
     this.fontFamily,
     this.fontSize,
+    required this.backgroundColor,
+    this.playCaseSuffix = false,
     this.isCorrect = false,
     this.isTapped = false,
   });

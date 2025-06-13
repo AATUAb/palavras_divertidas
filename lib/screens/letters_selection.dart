@@ -40,7 +40,7 @@ Future<void> showLettersDialog({
   required void Function(List<String> selectedLetters) onSaved,
 }) async {
   final List<String> letters = [
-    "Vogais: A,E, I, O, U", "P", "T", "L", "D", "M", "V",
+    "Vogais: A, E, I, O, U", "P", "T", "L", "D", "M", "V",
     "C", "Q", "N", "R", "B", "G", "J", "F", "S", "Z", "H", "X",
     "CH", "LH", "NH",
     "BR, CR, DR, FR, GR, PR, TR, VR",
@@ -79,7 +79,7 @@ Future<void> showLettersDialog({
             child: Dialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: 500.h),
+                constraints: BoxConstraints(maxHeight: 250.h),
                 child: Padding(
                   padding: EdgeInsets.all(20.w),
                   child: Column(
@@ -99,7 +99,20 @@ Future<void> showLettersDialog({
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            TextButton.icon(
+                            TextButton.icon( // Limpar → agora primeiro (esquerda)
+                              onPressed: () {
+                                selectedMap.updateAll((key, _) => false);
+                                selectAll = false;
+                                allSelectedMode = false;
+                                setState(() {});
+                              },
+                              icon: Icon(Icons.clear, size: 20.sp, color: AppColors.red),
+                              label: Text(
+                                "Limpar",
+                                style: TextStyle(fontSize: 20.sp, color: AppColors.red),
+                              ),
+                            ),
+                            TextButton.icon( // Todas → agora segundo (direita)
                               onPressed: () {
                                 selectAll = !selectAll;
                                 allSelectedMode = selectAll;
@@ -114,19 +127,6 @@ Future<void> showLettersDialog({
                               label: Text(
                                 "Todas",
                                 style: TextStyle(fontSize: 20.sp, color: AppColors.green),
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: () {
-                                selectedMap.updateAll((key, _) => false);
-                                selectAll = false;
-                                allSelectedMode = false;
-                                setState(() {});
-                              },
-                              icon: Icon(Icons.clear, size: 20.sp, color: AppColors.red),
-                              label: Text(
-                                "Limpar",
-                                style: TextStyle(fontSize: 20.sp, color: AppColors.red),
                               ),
                             ),
                           ],
@@ -207,26 +207,41 @@ Future<void> showLettersDialog({
                         ),
                       ),
                       SizedBox(height: 16.h),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TextButton.icon(
-                            onPressed: () {
-                              SoundManager.stop(); 
-                              Navigator.pop(context);
-                            },
-                            icon: Icon(Icons.cancel, size: 20.sp, color: AppColors.grey),
-                            label: Text("Cancelar", style: TextStyle(color: AppColors.grey)),
+                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ElevatedButton.icon(
+                          icon: Icon(Icons.cancel, size: 20.sp),
+                          label: Text("Cancelar"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.grey,
+                            foregroundColor: Colors.white, // texto e ícone a branco
+                            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
                           ),
-                          ElevatedButton.icon(
-                            icon: Icon(Icons.check, size: 20.sp),
-                            label: Text("Ok"),
-                            onPressed: () async {
-                              final selected = selectedMap.entries
-                                  .where((e) => e.value)
-                                  .map((e) => e.key)
-                                  .toList();
-
+                          onPressed: () {
+                            SoundManager.stop();
+                            Navigator.pop(context);
+                          },
+                        ),
+                        ElevatedButton.icon(
+                          icon: Icon(Icons.check, size: 20.sp),
+                          label: Text("Ok"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.green,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                          ),
+                          onPressed: () async {
+                            final selected = selectedMap.entries
+                                .where((e) => e.value)
+                                .map((e) => e.key)
+                                .toList();
                               user.knownLetters = selected;
                               await user.save();
                               SoundManager.stop();                              
@@ -247,9 +262,6 @@ Future<void> showLettersDialog({
                                 Navigator.pop(context);
                               }
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.green,
-                            ),
                           ),
                         ],
                       ),

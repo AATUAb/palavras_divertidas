@@ -19,7 +19,7 @@ import '../screens/letters_selection.dart';
 // Classe principal do jogo, que recebe o utilizador como argumento
 class IdentifyWordGame extends StatefulWidget {
   final UserModel user;
-  const IdentifyWordGame({Key? key, required this.user});
+  const IdentifyWordGame({super.key, required this.user});
 
   @override
   State<IdentifyWordGame> createState() => _IdentifyWordGameState();

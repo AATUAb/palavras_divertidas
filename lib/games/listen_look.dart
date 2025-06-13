@@ -16,7 +16,7 @@ import '../widgets/game_component.dart';
 // Classe principal do jogo, que recebe o utilizador como argumento
 class ListenLookGame extends StatefulWidget {
   final UserModel user;
-  const ListenLookGame({Key? key, required this.user});
+  const ListenLookGame({super.key, required this.user});
 
   @override
   State<ListenLookGame> createState() => _ListenLookGameState();
@@ -32,7 +32,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
 
   List<WordModel> _allWords = [];
   List<WordModel> _levelWords = [];
-  List<String> _usedWords = [];
+  final List<String> _usedWords = [];
   late WordModel targetWord;
   bool showWord = false;
 
