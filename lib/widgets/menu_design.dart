@@ -161,7 +161,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
                     color: AppColors.orange,
                     fontWeight: FontWeight.bold,
                     shadows: const [
-                      Shadow(offset: Offset(1, 1), blurRadius: 1),
+                      Shadow(offset: Offset(5, 5), blurRadius: 5),
                     ],
                   ),
                 ),
@@ -225,7 +225,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
             bottom: 10.h,
             left: 10.w,
             child: IconButton(
-              icon: Icon(Icons.info_outline, size: 25.sp),
+              icon: Icon(Icons.question_mark_outlined, size: 25.sp),
               tooltip: 'Tutorial',
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(

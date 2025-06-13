@@ -94,7 +94,7 @@ void initState() {
               actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               actions: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // para que os botões fiquem centrados e com espaço correto
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Botão Cancelar
                     Container(

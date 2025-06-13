@@ -614,22 +614,6 @@ class GameAnimations {
                             ElevatedButton.icon(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                onRestart();
-                              },
-                              icon: const Icon(
-                                Icons.check,
-                                color: Colors.white,
-                              ),
-                              label: const Text('Sim'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
-                              ),
-                            ),
-                            SizedBox(width: 12.w),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.of(context).pop();
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(builder: (_) => GameMenu(user: user)),
@@ -645,6 +629,23 @@ class GameAnimations {
                                 foregroundColor: Colors.white,
                               ),
                             ),
+                            SizedBox(width: 12.w),
+                             ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                onRestart();
+                              },
+                              icon: const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                              ),
+                              label: const Text('Sim'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                            //SizedBox(width: 12.w),
                           ],
                         ),
                       ],

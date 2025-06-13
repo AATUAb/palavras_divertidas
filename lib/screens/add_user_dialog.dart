@@ -104,7 +104,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           ),
                           SizedBox(width: 10.w),
                           _buildLevelOption(
-                            "1.º Ciclo",
+                            "1º Ciclo",
                             Icons.school,
                             AppColors.orange,
                           ),

@@ -120,8 +120,7 @@ void dispose() {
             bottom: 10.h,
             left: 10.w,
             child: IconButton(
-              icon: Icon(
-                Icons.info_outline,
+              icon: Icon(Icons.question_mark_outlined,
                 color: AppColors.orange,
                 size: 30.sp,
               ),
