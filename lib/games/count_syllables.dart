@@ -34,7 +34,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   List<WordModel> _allWords = [];
   List<WordModel> _levelWords = [];
   List<String> usedWords = [];
-  late WordModel targetWord;
+  WordModel? targetWord;
   bool showSyllables = false;
 
   bool isRoundActive = true;
@@ -42,6 +42,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   final _isDisposed = false;
   late GameItem referenceItem;
   late int numDistractors;
+  bool isTutorialVisible = false;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
@@ -135,6 +136,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
 // Gera um novo desafio
 Future<void> _generateNewChallenge() async {
+  if (_gamesSuperKey.currentState?.isTutorialVisible ?? false) return;
   _gamesSuperKey.currentState?.playChallengeHighlight();
 
   // Verifica se há retry a usar
@@ -159,7 +161,7 @@ Future<void> _generateNewChallenge() async {
             availableItems: _levelWords,
           );
 
-  final wordText = targetWord.text;
+  final wordText = targetWord!.text;
   if (!usedWords.contains(wordText)) {
     usedWords.add(wordText);
   }
@@ -194,7 +196,7 @@ Future<void> _generateNewChallenge() async {
   });
 
   // Gera distratores corretos com a função helper
-  final correct = targetWord.syllableCount;
+  final correct = targetWord!.syllableCount;
   final distractors = generateDistractors(
     correct: correct,
     numDistractors: numDistractors,
@@ -226,7 +228,7 @@ Future<void> _generateNewChallenge() async {
   referenceItem = GameItem(
     id: 'preview',
     type: GameItemType.text,
-    content: targetWord.audioFileName ?? targetWord.text,
+    content: targetWord!.audioFileName ?? targetWord!.text,
     dx: 0,
     dy: 0,
     backgroundColor: Colors.transparent,
@@ -245,7 +247,7 @@ Future<void> _generateNewChallenge() async {
     onTimeout: () {
       if (!mounted || _isDisposed) return;
       setState(() => isRoundActive = false);
-      _gamesSuperKey.currentState?.registerFailedRound(targetWord.text);
+      _gamesSuperKey.currentState?.registerFailedRound(targetWord!.text);
       _gamesSuperKey.currentState?.showTimeout(
         applySettings: _applyLevelSettings,
         generateNewChallenge: _generateNewChallenge,
@@ -274,8 +276,8 @@ Future<void> _generateNewChallenge() async {
     // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(
       selectedItem: item,
-      target: targetWord.syllableCount.toString(),
-      retryId: targetWord.text,
+      target: targetWord!.syllableCount.toString(),
+      retryId: targetWord!.text,
       currentTry: currentTry,
       applySettings: _applyLevelSettings,
       generateNewChallenge: _generateNewChallenge,
@@ -296,7 +298,7 @@ Future<void> _generateNewChallenge() async {
 void _showTutorial() {
   final state = _gamesSuperKey.currentState;
 
-  final safeRetryId = hasChallengeStarted ? targetWord.text : null;
+  final safeRetryId = hasChallengeStarted ? targetWord!.text : null;
 
   state?.showTutorialDialog(
     retryId: safeRetryId,
@@ -336,22 +338,19 @@ Widget build(BuildContext context) {
   );
 }
 
-
   // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
-    return Padding(
-      padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
-      child: Text(
-        hasChallengeStarted
-            ? 'Quantas sílabas tem a palavra ${targetWord.text}?'
-            : 'Vamos contar as sílabas das palavras',
-      ),
-    );
+    if (!hasChallengeStarted || _levelWords.isEmpty || usedWords.isEmpty) {
+      return const Text('Vamos contar as sílabas das palavras');
+    }
+    return Text('Quantas sílabas tem a palavra ${targetWord!.text}?');
   }
+
+
 
   // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart
   Widget _buildBoard(BuildContext context, _, __) {
-    if (!hasChallengeStarted || _levelWords.isEmpty) {
+    if (!hasChallengeStarted || _levelWords.isEmpty || targetWord == null) {
       return const SizedBox();
     }
     return Padding(
@@ -373,19 +372,19 @@ Widget build(BuildContext context) {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         WordHighlightBox(
-                          word: targetWord.text,
+                          word: targetWord!.text,
                           user: widget.user,
                         ),
                         SizedBox(width: 50.w),
-                        if (targetWord.imagePath.trim().isNotEmpty)
-                          ImageCardBox(imagePath: targetWord.imagePath),
+                        if (targetWord!.imagePath.trim().isNotEmpty)
+                          ImageCardBox(imagePath: targetWord!.imagePath),
                       ],
                     ),
                     if (showSyllables)
                       Positioned(
                         top: 0,
                         child: WordHighlightBox(
-                          word: targetWord.syllables.join(' - '),
+                          word: targetWord!.syllables.join(' - '),
                           user: widget.user,
                         ),
                       ),

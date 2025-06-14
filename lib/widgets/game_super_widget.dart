@@ -64,7 +64,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   bool get isFirstCycle => widget.isFirstCycle;
   bool _isDisposed = false;
   OverlayEntry? _introOverlay;
-  bool get canShowTutorial => mounted;
 
   GameItem? _currentChallengeItem;
 
@@ -78,6 +77,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   double _progressValue = 1.0;
   DateTime? _startTime;
   Timer? _progressTimer;
+  bool isTutorialVisible = false;
 
   @override
   void initState() {
@@ -152,7 +152,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     }
   }
 
-  void showTutorialDialog({
+  /*void showTutorialDialog({
     VoidCallback? onTutorialClosed,
       String? retryId,
   }) {
@@ -167,7 +167,29 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
           onTutorialClosed?.call();
         },
       );
-    }
+    }*/
+
+    void showTutorialDialog({
+  VoidCallback? onTutorialClosed,
+  String? retryId,
+}) {
+  if (retryId != null) {
+    registerFailedRound(retryId);
+  }
+
+  isTutorialVisible = true; // <-- Define como ativo
+  cancelProgressTimer();
+  GameAnimations.showTutorialVideo(
+    context: context,
+    gameName: widget.gameName,
+    onFinished: () {
+      isTutorialVisible = false; // <-- Ao terminar o tutorial
+      onTutorialClosed?.call();
+    },
+  );
+}
+
+
 
 
   Future<void> playNewChallengeSound(GameItem item) async {

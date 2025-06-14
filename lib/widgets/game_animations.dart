@@ -217,12 +217,12 @@ class GameAnimations {
                                 );
                               },
                               icon: const Icon(
-                                Icons.close,
+                                Icons.check,
                                 color: Colors.white,
                               ),
-                              label: const Text('Sim'),
+                              label: const Text('Não'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
+                                backgroundColor: AppColors.red,
                                 foregroundColor: Colors.white,
                               ),
                             ),
@@ -233,12 +233,12 @@ class GameAnimations {
                                 onRestart();
                               },
                               icon: const Icon(
-                                Icons.check,
+                                Icons.close,
                                 color: Colors.white,
                               ),
-                              label: const Text('Não'),
+                              label: const Text('Sim'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
+                                backgroundColor: AppColors.green,
                                 foregroundColor: Colors.white,
                               ),
                             ),
