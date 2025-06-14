@@ -295,7 +295,7 @@ class GameAnimations {
     return entry;
   }
 
-  static Future<OverlayEntry> showTutorialVideo({
+  /*static Future<OverlayEntry> showTutorialVideo({
   required BuildContext context,
   required String gameName,
   required VoidCallback onFinished,
@@ -317,6 +317,50 @@ class GameAnimations {
   Overlay.of(context).insert(overlay);
   return overlay;
 }
+}*/
+
+  static String getVideoFileName(String gameName) {
+    switch (gameName) {
+      case 'Contar sílabas':
+        return 'count_syllables';
+      case 'Identificar letras e números':
+        return 'identify_letters_numbers';
+      case 'Ouvir e procurar imagem':
+        return 'listen_look';
+      case 'Identificar palavras':
+        return 'identify_words';
+      case 'Sílabas em falta':
+        return 'lost_syllable';
+      case 'Escrever letras':
+        return 'writing_game';
+      default:
+        return 'user_stats';
+    }
+  }
+
+  static Future<OverlayEntry> showTutorialVideo({
+    required BuildContext context,
+    required String gameName,
+    required VoidCallback onFinished,
+  }) async {
+    SoundManager.stopAll();
+
+    final filename = getVideoFileName(gameName); 
+
+    late OverlayEntry overlay;
+    overlay = OverlayEntry(
+      builder: (_) => _TutorialVideoScreen(
+        videoPath: 'assets/tutorials/$filename.mp4',
+        onFinished: () {
+          overlay.remove();
+          onFinished();
+        },
+      ),
+    );
+
+    Overlay.of(context).insert(overlay);
+    return overlay;
+  }
 }
 
 class _TimedAnimationWidget extends StatefulWidget {
@@ -475,7 +519,7 @@ class _IntroAnimationOverlayState extends State<_IntroAnimationOverlay>
   }
 }
 
-class _TutorialVideoScreen extends StatefulWidget {
+/*class _TutorialVideoScreen extends StatefulWidget {
   final String videoPath;
   final VoidCallback onFinished;
 
@@ -490,17 +534,33 @@ class _TutorialVideoScreen extends StatefulWidget {
 
 class _TutorialVideoScreenState extends State<_TutorialVideoScreen> {
   late VideoPlayerController _controller;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset(widget.videoPath)
+   /* _controller = VideoPlayerController.asset(widget.videoPath)
       ..initialize().then((_) {
+        if (!mounted) return;
         setState(() {});
         _controller.play();
       });
     _controller.setLooping(false);
+  }*/
+
+  _controller = VideoPlayerController.asset('assets/tutorials/count_syllables.mp4')
+  ..initialize().then((_) {
+    setState(() {
+      _isInitialized = true;
+    });
+
+    // Aguarda um frame para garantir que o player está montado
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.play();
+    });
+  });
   }
+
 
   @override
   void dispose() {
@@ -543,5 +603,81 @@ class _TutorialVideoScreenState extends State<_TutorialVideoScreen> {
       ),
     );
   }
+}*/
+
+class _TutorialVideoScreen extends StatefulWidget {
+  final String videoPath;
+  final VoidCallback onFinished;
+
+  const _TutorialVideoScreen({
+    super.key,
+    required this.videoPath,
+    required this.onFinished,
+  });
+
+  @override
+  State<_TutorialVideoScreen> createState() => _TutorialVideoScreenState();
 }
+
+class _TutorialVideoScreenState extends State<_TutorialVideoScreen> {
+  late VideoPlayerController _controller;
+  late Future<void> _initializeVideoPlayerFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset(widget.videoPath);
+    _initializeVideoPlayerFuture = _controller.initialize().then((_) {
+      _controller.play();
+    });
+    _controller.setLooping(false);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withOpacity(0.9),
+      child: Stack(
+        children: [
+          Positioned.fill(
+  child: FutureBuilder(
+              future: _initializeVideoPlayerFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: VideoPlayer(_controller),
+                  );
+                } else {
+                  return const CircularProgressIndicator();
+                }
+              },
+            ),
+          ),
+          Positioned(
+            bottom: 30,
+            right: 30,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green, // ou AppColors.green
+              ),
+              onPressed: () {
+                _controller.pause();
+                widget.onFinished();
+              },
+              child: const Text('Ok'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 

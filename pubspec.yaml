@@ -69,8 +69,9 @@ flutter:
     - assets/images/words/
     - assets/images/games/
 
-    # Tuturiais
+    # Tutoriais
     - assets/tutorials/
+    - assets/tutorials/count_syllables_fixed.mp4
 
     # Imagens dos pontos de controle de letras e números
     - assets/phontics_assets_points/
