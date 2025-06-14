@@ -1,7 +1,6 @@
 //ficheiro main do jogo de escrita
 //writing_game.dart
 
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -52,12 +51,12 @@ class _WriteGameState extends State<WriteGame> {
   }
 
   Future<void> _applyLevelSettingsAndCharacters() async {
-  final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
-  final isPreschool = widget.user.schoolLevel == 'Pré-Escolar';
-  final isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
+    final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    final isPreschool = widget.user.schoolLevel == 'Pré-Escolar';
+    final isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
 
-  // 1) Ajuste de tempo
-  switch (lvl) {
+    // 1) Ajuste de tempo
+    switch (lvl) {
       case 1:
         levelTime = const Duration(seconds: 120);
         break;
@@ -68,62 +67,61 @@ class _WriteGameState extends State<WriteGame> {
         levelTime = const Duration(seconds: 120);
     }
 
-  List<CharacterModel> tempChars = [];
+    List<CharacterModel> tempChars = [];
 
-  if (isPreschool || isFirstCycle) {
-    // Abre sempre o box de characters
-    final box = await Hive.openBox<CharacterModel>('characters');
-    final allChars = box.values
-        .where((c) => c.character.trim().isNotEmpty)
-        .toList();
+    if (isPreschool || isFirstCycle) {
+      // Abre sempre o box de characters
+      final box = await Hive.openBox<CharacterModel>('characters');
+      final allChars =
+          box.values.where((c) => c.character.trim().isNotEmpty).toList();
 
-    // Filtra por tipo consoante nível:
-    String targetType;
-    if (lvl == 1) {
-      targetType = 'number';
-    } else if (lvl == 2) {
-      targetType = 'vowel';
-    } else {
-      targetType = 'consonant';
-    }
-
-    final filtered = allChars.where((c) => c.type == targetType);
-
-    // Para letras → duplicamos upper/lower; para números basta 1x
-    for (var c in filtered) {
-      final base = c.character.trim().toLowerCase();
-
-      if (targetType == 'number') {
-        tempChars.add(CharacterModel(
-          character: base,
-          soundPath: c.soundPath,
-          type: c.type,
-        ));
+      // Filtra por tipo consoante nível:
+      String targetType;
+      if (lvl == 1) {
+        targetType = 'number';
+      } else if (lvl == 2) {
+        targetType = 'vowel';
       } else {
-        tempChars.addAll([
-          CharacterModel(
-            character: base.toUpperCase(),
-            soundPath: 'assets/sounds/characters/${base.toUpperCase()}.ogg',
-            type: c.type,
-          ),
-          CharacterModel(
-            character: base.toLowerCase(),
-            soundPath: 'assets/sounds/characters/${base.toLowerCase()}.ogg',
-            type: c.type,
-          ),
-        ]);
+        targetType = 'consonant';
       }
+
+      final filtered = allChars.where((c) => c.type == targetType);
+
+      // Para letras → duplicamos upper/lower; para números basta 1x
+      for (var c in filtered) {
+        final base = c.character.trim().toLowerCase();
+
+        if (targetType == 'number') {
+          tempChars.add(
+            CharacterModel(
+              character: base,
+              soundPath: c.soundPath,
+              type: c.type,
+            ),
+          );
+        } else {
+          tempChars.addAll([
+            CharacterModel(
+              character: base.toUpperCase(),
+              soundPath: 'assets/sounds/characters/${base.toUpperCase()}.ogg',
+              type: c.type,
+            ),
+            CharacterModel(
+              character: base.toLowerCase(),
+              soundPath: 'assets/sounds/characters/${base.toLowerCase()}.ogg',
+              type: c.type,
+            ),
+          ]);
+        }
+      }
+    } else {
+      tempChars = [];
     }
-  } else {
-    tempChars = [];
+
+    _characters = tempChars;
+    if (!mounted || _isDisposed) return;
+    setState(() {});
   }
-
-  _characters = tempChars;
-  if (!mounted || _isDisposed) return;
-  setState(() {});
-}
-
-
 
   void _cancelTimers() {
     _gamesSuperKey.currentState?.cancelProgressTimer();
@@ -135,157 +133,155 @@ class _WriteGameState extends State<WriteGame> {
   }
 
   Future<void> _generateNewChallenge() async {
-  _gamesSuperKey.currentState?.playChallengeHighlight();
+    _gamesSuperKey.currentState?.playChallengeHighlight();
 
-  if (!mounted || _isDisposed) return;
+    if (!mounted || _isDisposed) return;
 
-  final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
-  final availableItems = _characters
-      .where((c) => !_usedCharacters.contains(c.character))
-      .toList();
-  final hasRetry = retryId != null;
+    final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
+    final availableItems =
+        _characters
+            .where((c) => !_usedCharacters.contains(c.character))
+            .toList();
+    final hasRetry = retryId != null;
 
-  // Caso de fim de jogo
-  if (availableItems.isEmpty && !hasRetry) {
-    _gamesSuperKey.currentState?.showEndOfGameDialog(
-      onRestart: () async {
-        _usedCharacters.clear();
-        await _applyLevelSettingsAndCharacters();
-        if (mounted) await _generateNewChallenge();
+    // Caso de fim de jogo
+    if (availableItems.isEmpty && !hasRetry) {
+      _gamesSuperKey.currentState?.showEndOfGameDialog(
+        onRestart: () async {
+          _usedCharacters.clear();
+          await _applyLevelSettingsAndCharacters();
+          if (mounted) await _generateNewChallenge();
+        },
+      );
+      return;
+    }
+
+    // Seleciona o desafio: retry ou novo
+    final selected =
+        retryId != null
+            ? _gamesSuperKey.currentState!.safeRetry<CharacterModel>(
+              list: _characters,
+              retryId: retryId,
+              matcher: (c) => c.character == retryId,
+              fallback:
+                  () => _gamesSuperKey.currentState!.safeSelectItem(
+                    availableItems: availableItems,
+                  ),
+            )
+            : _gamesSuperKey.currentState!.safeSelectItem(
+              availableItems: availableItems,
+            );
+
+    // Proteção — caso venha um CharacterModel vazio
+    targetCharacter = selected.character;
+    tracedCharacter = targetCharacter;
+
+    if (targetCharacter.trim().isEmpty) {
+      debugPrint('⚠️ TargetCharacter vazio! Skip challenge.');
+      return;
+    }
+
+    // Regista como já usado
+    if (!_usedCharacters.contains(targetCharacter)) {
+      _usedCharacters.add(targetCharacter);
+    }
+
+    // Prepara referenceItem para som
+    referenceItem = GameItem(
+      id: targetCharacter,
+      type: GameItemType.character,
+      content: targetCharacter,
+      dx: 0,
+      dy: 0,
+      backgroundColor: Colors.transparent,
+      isCorrect: true,
+      playCaseSuffix: true,
+    );
+
+    // Toca som após 50 ms
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (!mounted || _isDisposed) return;
+      await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+    });
+
+    // Reinicia timers
+    _cancelTimers();
+    setState(() {
+      isRoundActive = true;
+    });
+
+    // Inicia progress timer
+    _gamesSuperKey.currentState?.startProgressTimer(
+      levelTime: levelTime,
+      onTimeout: () {
+        if (!mounted || _isDisposed) return;
+        setState(() => isRoundActive = false);
+        _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
+        _gamesSuperKey.currentState?.showTimeout(
+          applySettings: _applyLevelSettingsAndCharacters,
+          generateNewChallenge: _generateNewChallenge,
+        );
       },
     );
-    return;
   }
-
-  // Seleciona o desafio: retry ou novo
-  final selected = retryId != null
-      ? _gamesSuperKey.currentState!.safeRetry<CharacterModel>(
-          list: _characters,
-          retryId: retryId,
-          matcher: (c) => c.character == retryId,
-          fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
-            availableItems: availableItems,
-          ),
-        )
-      : _gamesSuperKey.currentState!.safeSelectItem(
-          availableItems: availableItems,
-        );
-
-  // Proteção — caso venha um CharacterModel vazio
-  targetCharacter = selected.character;
-  tracedCharacter = targetCharacter;
-
-  if (targetCharacter.trim().isEmpty) {
-    debugPrint('⚠️ TargetCharacter vazio! Skip challenge.');
-    return;
-  }
-
-  // Regista como já usado
-  if (!_usedCharacters.contains(targetCharacter)) {
-    _usedCharacters.add(targetCharacter);
-  }
-
-  // Prepara referenceItem para som
-  referenceItem = GameItem(
-    id: targetCharacter,
-    type: GameItemType.character,
-    content: targetCharacter,
-    dx: 0,
-    dy: 0,
-    backgroundColor: Colors.transparent,
-    isCorrect: true,
-    playCaseSuffix: true, 
-  );
-
-  // Toca som após 50 ms
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await Future.delayed(const Duration(milliseconds: 50));
-    if (!mounted || _isDisposed) return;
-    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
-  });
-
-  // Reinicia timers
-  _cancelTimers();
-  setState(() {
-    isRoundActive = true;
-  });
-
-  // Inicia progress timer
-  _gamesSuperKey.currentState?.startProgressTimer(
-    levelTime: levelTime,
-    onTimeout: () {
-      if (!mounted || _isDisposed) return;
-      setState(() => isRoundActive = false);
-      _gamesSuperKey.currentState?.registerFailedRound(targetCharacter);
-      _gamesSuperKey.currentState?.showTimeout(
-        applySettings: _applyLevelSettingsAndCharacters,
-        generateNewChallenge: _generateNewChallenge,
-      );
-    },
-  );
-}
-
 
   Widget _buildTopText() {
-  final isNumber = RegExp(r'^[0-9]$').hasMatch(targetCharacter);
-  final label = isNumber ? 'o número' : 'a letra';
+    final isNumber = RegExp(r'^[0-9]$').hasMatch(targetCharacter);
+    final label = isNumber ? 'o número' : 'a letra';
 
-  return Padding(
-    padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
-    child: Text(
-      hasChallengeStarted
-          ? 'Escreve $label $targetCharacter'
-          : 'Vamos praticar a escrita!',
-    ),
-  );
-}
-
-
-Widget _buildBoard(BuildContext context, _, __) {
-  if (!hasChallengeStarted || targetCharacter.isEmpty) {
-    return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
+      child: Text(
+        hasChallengeStarted
+            ? 'Escreve $label $targetCharacter'
+            : 'Vamos praticar a escrita!',
+      ),
+    );
   }
 
-  // 1) Identifica se é número
-  const numbers = ['0','1','2','3','4','5','6','7','8','9'];
-  final isNumber = numbers.contains(targetCharacter);
+  Widget _buildBoard(BuildContext context, _, __) {
+    if (!hasChallengeStarted || targetCharacter.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-  // 2) Só cursiva para **letras** em 1.º Ciclo
-  final useCursive = isFirstCycle && !isNumber;
+    // 1) Identifica se é número
+    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    final isNumber = numbers.contains(targetCharacter);
 
-  return Center(
-    child: Padding(
-      padding: EdgeInsets.symmetric(vertical: 28.h),
-      child: SizedBox(
-        width: 200.w,
-        height: 200.h,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            TracingCharsGame(
-              key: ValueKey(tracedCharacter),
-              showAnchor: true,
-              stateOfTracing: StateOfTracing.chars,
-              // 3) Ajusta engine consoante useCursive
-              trackingEngine: useCursive
-                  ? CursiveTracking()
-                  : TypeExtensionTracking(),
-              fontType: useCursive
-                  ? FontType.cursive
-                  : FontType.machine,
-              traceShapeModel: [
-                TraceCharsModel(
-                  chars: [
-                    TraceCharModel(
-                      char: tracedCharacter,
-                      traceShapeOptions: TraceShapeOptions(
-                        innerPaintColor: Colors.orange,
+    // 2) Só cursiva para **letras** em 1.º Ciclo
+    final useCursive = isFirstCycle && !isNumber;
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 28.h),
+        child: SizedBox(
+          width: 200.w,
+          height: 200.h,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              TracingCharsGame(
+                key: ValueKey(tracedCharacter),
+                showAnchor: true,
+                stateOfTracing: StateOfTracing.chars,
+                // 3) Ajusta engine consoante useCursive
+                trackingEngine:
+                    useCursive ? CursiveTracking() : TypeExtensionTracking(),
+                fontType: useCursive ? FontType.cursive : FontType.machine,
+                traceShapeModel: [
+                  TraceCharsModel(
+                    chars: [
+                      TraceCharModel(
+                        char: tracedCharacter,
+                        traceShapeOptions: TraceShapeOptions(
+                          innerPaintColor: Colors.orange,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-              onGameFinished: (isSuccessful) async {
+                    ],
+                  ),
+                ],
+                onGameFinished: (isSuccessful) async {
                   if (!isRoundActive || tracedCharacter.isEmpty) return;
                   final s = _gamesSuperKey.currentState;
                   if (s == null || !isRoundActive) return;
@@ -306,10 +302,11 @@ Widget _buildBoard(BuildContext context, _, __) {
 
                   final wasSuccessful = isSuccessful == 1;
                   if (wasSuccessful) {
-                    _gamesSuperKey.currentState?.registerResponseTimeForCurrentRound(
-                      user: widget.user,
-                      gameName: 'Escrever',
-                    );
+                    _gamesSuperKey.currentState
+                        ?.registerResponseTimeForCurrentRound(
+                          user: widget.user,
+                          gameName: 'Escrever',
+                        );
                   }
 
                   await s.checkAnswerSingle(
