@@ -11,7 +11,7 @@ class HiveService {
   static late Box<UserModel> _userBox;
   static late Box<CharacterModel> _characterBox;
   static late Box<WordModel> _wordBox;
-  static late Box<dynamic> _progressBox; 
+  static late Box<dynamic> _progressBox;
 
   static final Logger logger = Logger();
 

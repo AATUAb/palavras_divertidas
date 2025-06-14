@@ -33,6 +33,8 @@ Future<void> main() async {
   Hive.registerAdapter(WordModelAdapter());
   // ──────────────────────────────────────────────
 
+  await Hive.deleteBoxFromDisk('users');
+
   // ► Agora inicializa com adapters e seed
   await HiveService.init();
 
