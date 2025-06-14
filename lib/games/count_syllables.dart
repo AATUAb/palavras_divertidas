@@ -64,7 +64,7 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     late String levelDifficulty;
     switch (lvl) {
       case 1:
-        levelTime = const Duration(seconds: 120);
+        levelTime = const Duration(seconds: 20);
         levelDifficulty = 'baixa';
         break;
       case 2:
@@ -293,32 +293,49 @@ Future<void> _generateNewChallenge() async {
     setState(() => currentTry++);
   }
 
+void _showTutorial() {
+  final state = _gamesSuperKey.currentState;
+
+  final safeRetryId = hasChallengeStarted ? targetWord.text : null;
+
+  state?.showTutorialDialog(
+    retryId: safeRetryId,
+    onTutorialClosed: () {
+      _generateNewChallenge();
+    },
+  );
+}
+
   // Constrói o widget principal do jogo
   @override
-  Widget build(BuildContext context) {
-    return GamesSuperWidget(
-      key: _gamesSuperKey,
-      user: widget.user,
-      gameName: 'Contar sílabas',
-      level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
-      currentRound: (_) => 1,
-      totalRounds: (_) => 3,
-      isFirstCycle: isFirstCycle,
-      topTextContent: _buildTopText,
-      builder: _buildBoard,
-      onRepeatInstruction: _playInstruction,
-      introImagePath: 'assets/images/games/count_syllables.webp',
-      introAudioPath: 'count_syllables.ogg',
-      onIntroFinished: () async {
-        await _loadWords();
-        await _applyLevelSettings();
-        if (mounted) {
-          setState(() => hasChallengeStarted = true);
-          _generateNewChallenge();
-        }
-      },
-    );
+Widget build(BuildContext context) {
+  return GamesSuperWidget(
+    key: _gamesSuperKey,
+    user: widget.user,
+    gameName: 'Contar sílabas',
+    level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
+    currentRound: (_) => 1,
+    totalRounds: (_) => 3,
+    isFirstCycle: isFirstCycle,
+    topTextContent: _buildTopText,
+    builder: _buildBoard,
+    onRepeatInstruction: _playInstruction,
+    introImagePath: 'assets/images/games/count_syllables.webp',
+    introAudioPath: 'count_syllables.ogg',
+    onIntroFinished: () async {
+      await _loadWords();
+      await _applyLevelSettings();
+      if (mounted) {
+        setState(() => hasChallengeStarted = true);
+        _generateNewChallenge();
+      }
+    },
+    onShowTutorial: () {
+      _showTutorial();
   }
+  );
+}
+
 
   // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {

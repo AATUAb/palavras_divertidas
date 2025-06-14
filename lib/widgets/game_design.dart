@@ -12,6 +12,7 @@ class GameDesign extends StatefulWidget {
   final double? progressValue;
   final int level;
   final bool allowImmediateExit;
+  final VoidCallback? onShowTutorial;
 
   const GameDesign({
     super.key,
@@ -21,6 +22,7 @@ class GameDesign extends StatefulWidget {
     this.progressValue,
     required this.level,
     this.allowImmediateExit = false,
+    this.onShowTutorial,
   });
 
   @override
@@ -116,30 +118,34 @@ void dispose() {
           ),
 
           // ℹ️ Botão de tutorial
-          Positioned(
-            bottom: 10.h,
-            left: 10.w,
-            child: IconButton(
-              icon: Icon(Icons.question_mark_outlined,
-                color: AppColors.orange,
-                size: 30.sp,
-              ),
-              tooltip: 'Tutorial',
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      "Tutorial em breve",
-                      style: TextStyle(fontSize: 14.sp, color: AppColors.white),
-                    ),
-                    backgroundColor: AppColors.green,
-                    duration: const Duration(seconds: 2),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
+Positioned(
+  bottom: 10.h,
+  left: 10.w,
+  child: IconButton(
+    icon: Icon(Icons.question_mark_outlined,
+      color: AppColors.orange,
+      size: 30.sp,
+    ),
+    tooltip: 'Tutorial',
+    onPressed: () {
+      if (widget.onShowTutorial != null) {
+        widget.onShowTutorial!();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Tutorial em breve",
+              style: TextStyle(fontSize: 14.sp, color: AppColors.white),
             ),
+            backgroundColor: AppColors.green,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
           ),
+        );
+      }
+    },
+  ),
+),
 
           // ⏳ Barra de tempo (se fornecida)
           if (widget.progressValue != null)
