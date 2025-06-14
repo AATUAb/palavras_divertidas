@@ -277,7 +277,7 @@ class GameAnimations {
 
     // Insere o OverlayEntry que vai exibir a imagem com animação de rotação+fade
     final overlay = Overlay.of(context);
-    if (overlay == null || !context.mounted) return null;
+    if (!context.mounted) return null;
 
     late OverlayEntry entry;
     entry = OverlayEntry(
@@ -295,30 +295,6 @@ class GameAnimations {
     overlay.insert(entry);
     return entry;
   }
-
-  /*static Future<OverlayEntry> showTutorialVideo({
-  required BuildContext context,
-  required String gameName,
-  required VoidCallback onFinished,
-}) async {
-  SoundManager.stopAll();
-
-  // Criar o overlay
-  late OverlayEntry overlay;
-  overlay = OverlayEntry(
-    builder: (_) => _TutorialVideoScreen(
-      videoPath: 'assets/tutorials/$gameName.mp4',
-      onFinished: () {
-        overlay.remove();
-        onFinished();
-      },
-    ),
-  );
-
-  Overlay.of(context).insert(overlay);
-  return overlay;
-}
-}*/
 
   static String getVideoFileName(String gameName) {
     switch (gameName) {
@@ -502,7 +478,7 @@ class _IntroAnimationOverlayState extends State<_IntroAnimationOverlay>
               opacity:
                   _animationStarted
                       ? _fadeAnimation.value
-                      : 1.0, // antes do fade começar, opacidade = 1.0
+                      : 1.0, 
               child: RotationTransition(
                 turns: _rotationAnimation,
                 child: child,
@@ -521,91 +497,6 @@ class _IntroAnimationOverlayState extends State<_IntroAnimationOverlay>
   }
 }
 
-/*class _TutorialVideoScreen extends StatefulWidget {
-  final String videoPath;
-  final VoidCallback onFinished;
-
-  const _TutorialVideoScreen({
-    required this.videoPath,
-    required this.onFinished,
-  });
-
-  @override
-  State<_TutorialVideoScreen> createState() => _TutorialVideoScreenState();
-}
-
-class _TutorialVideoScreenState extends State<_TutorialVideoScreen> {
-  late VideoPlayerController _controller;
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-   /* _controller = VideoPlayerController.asset(widget.videoPath)
-      ..initialize().then((_) {
-        if (!mounted) return;
-        setState(() {});
-        _controller.play();
-      });
-    _controller.setLooping(false);
-  }*/
-
-  _controller = VideoPlayerController.asset('assets/tutorials/count_syllables.mp4')
-  ..initialize().then((_) {
-    setState(() {
-      _isInitialized = true;
-    });
-
-    // Aguarda um frame para garantir que o player está montado
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller.play();
-    });
-  });
-  }
-
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      child: Stack(
-        children: [
-          Center(
-            child: _controller.value.isInitialized
-                ? AspectRatio(
-                    aspectRatio: _controller.value.aspectRatio,
-                    child: VideoPlayer(_controller),
-                  )
-                : const CircularProgressIndicator(),
-          ),
-          Positioned(
-            bottom: 30,
-            right: 30,
-            child: ElevatedButton(
-              onPressed: () {
-                _controller.pause();
-                widget.onFinished();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.green, 
-                foregroundColor: Colors.white,    
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              child: const Text('Ok'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}*/
 
 class _TutorialVideoScreen extends StatefulWidget {
   final String videoPath;
@@ -620,19 +511,63 @@ class _TutorialVideoScreen extends StatefulWidget {
   State<_TutorialVideoScreen> createState() => _TutorialVideoScreenState();
 }
 
-class _TutorialVideoScreenState extends State<_TutorialVideoScreen> {
-  late VideoPlayerController _controller;
-  late Future<void> _initializeVideoPlayerFuture;
+class _TutorialVideoScreenState extends State<_TutorialVideoScreen>
+    with SingleTickerProviderStateMixin {
+  late VideoPlayerController _videoController;
+  bool _isInitialized = false;
+  bool _finished = false;
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _scaleAnimation;
 
   @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.asset(widget.videoPath);
-    _initializeVideoPlayerFuture = _controller.initialize().then((_) {
-      _controller.play();
+void initState() {
+  super.initState();
+
+  _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 500),
+  );
+
+  _fadeAnimation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInOut,
+  );
+
+  _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
+    CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+  );
+
+  _controller.forward();
+
+  _videoController = VideoPlayerController.asset(widget.videoPath)
+    ..initialize().then((_) {
+      if (!mounted) return;
+      setState(() => _isInitialized = true);
+      _videoController.play();
     });
-    _controller.setLooping(false);
-  }
+
+  // 🔁 Detecta fim do vídeo e chama _finishTutorial()
+  _videoController.addListener(() {
+    final position = _videoController.value.position;
+    final duration = _videoController.value.duration;
+    final isEnded = position >= duration &&
+                    !_videoController.value.isPlaying;
+
+    if (isEnded && !_finished) {
+      _finishTutorial();
+    }
+  });
+}
+
+  void _finishTutorial() async {
+  if (_finished) return;
+  _finished = true;
+
+  await _controller.reverse(); 
+  widget.onFinished();
+}
+
 
   @override
   void dispose() {
@@ -642,41 +577,48 @@ class _TutorialVideoScreenState extends State<_TutorialVideoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black.withOpacity(0.9),
+  return Material(
+    color: Colors.black.withOpacity(0.85),
+    child: FadeTransition(
+  opacity: _fadeAnimation,
+  child: ScaleTransition(
+    scale: _scaleAnimation,
+    child: SizedBox.expand( 
       child: Stack(
+        alignment: Alignment.center,
         children: [
-          Positioned.fill(
-            child: FutureBuilder(
-              future: _initializeVideoPlayerFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return AspectRatio(
-                    aspectRatio: _controller.value.aspectRatio,
-                    child: VideoPlayer(_controller),
-                  );
-                } else {
-                  return const CircularProgressIndicator();
-                }
-              },
+          // vídeo centralizado
+          Center(
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: _isInitialized
+                  ? VideoPlayer(_videoController)
+                  : const Center(child: CircularProgressIndicator()),
             ),
           ),
-          Positioned(
-            bottom: 30,
-            right: 30,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.green,
+            // botão OK visível no canto
+              Positioned(
+                bottom: 30,
+                right: 30,
+                child: ElevatedButton(
+                  onPressed: () {
+                  _videoController.pause();
+                    widget.onFinished();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.green, 
+                    foregroundColor: Colors.white,    
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  child: const Text('Ok'),
+                ),
               ),
-              onPressed: () {
-                _controller.pause();
-                widget.onFinished();
-              },
-              child: const Text('Ok'),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
-    );
-  }
+    ),
+  );  
+}     
 }

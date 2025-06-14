@@ -190,31 +190,22 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
 }
 
 
-
-
   Future<void> playNewChallengeSound(GameItem item) async {
     if (_isDisposed) return;
   _currentChallengeItem = item;
   await SoundManager.playGameItem(item);
 }
 
+  // segura – retorna null se estiver vazio
+  T? safeSelectItemOrNull<T>(List<T> availableItems) {
+    if (availableItems.isEmpty) return null;
+    return availableItems[Random().nextInt(availableItems.length)];
+  }
+
+  // exigente – lança exceção se estiver vazio
   T safeSelectItem<T>({required List<T> availableItems}) {
-    if (availableItems.isEmpty) {
-      throw Exception('No items available');
-    }
-
-    final rand = Random();
-    final item = availableItems[rand.nextInt(availableItems.length)];
-
-    if (item is String) {
-      registerCompletedRound(item);
-    } else if (item is WordModel) {
-      registerCompletedRound(item.text);
-    } else if (item is CharacterModel) {
-      registerCompletedRound(item.character);
-    }
-
-    return item;
+    if (availableItems.isEmpty) throw Exception('No items available');
+    return availableItems[Random().nextInt(availableItems.length)];
   }
 
   T safeRetry<T>({
