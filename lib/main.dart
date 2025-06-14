@@ -21,17 +21,20 @@ Future<void> main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
-    // ► Fullscreen total
+  // ► Fullscreen total
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   // ► Inicialização básica do Hive
   await Hive.initFlutter();
 
-  // ─────────── Registro de Adapters ───────────
+  // ─────────── Registo de Adapters ───────────
   Hive.registerAdapter(CharacterModelAdapter());
   Hive.registerAdapter(UserModelAdapter());
-  Hive.registerAdapter(WordModelAdapter()); 
+  Hive.registerAdapter(WordModelAdapter());
   // ──────────────────────────────────────────────
+
+  // ► Limpa as boxes antigas (se existirem) NÃO APAGAR JÁ!!! SÓ PARA A VERSÃO FINAL É QUE SE APAGA
+  // await Hive.deleteBoxFromDisk('users');
 
   // ► Agora inicializa com adapters e seed
   await HiveService.init();
@@ -172,4 +175,3 @@ class _VideoTestScreenState extends State<VideoTestScreen> {
     );
   }
 }*/
-
