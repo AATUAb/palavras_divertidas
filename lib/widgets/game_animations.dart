@@ -8,7 +8,6 @@ import '../themes/colors.dart';
 import '../screens/game_menu.dart';
 import '../models/user_model.dart';
 
-
 class GameAnimations {
   static Future<void> playAnswerFeedback({required bool isCorrect}) async {
     final sound = isCorrect ? 'correct.ogg' : 'wrong.ogg';
@@ -212,21 +211,23 @@ class GameAnimations {
                                 Navigator.of(context).pop();
                                 Navigator.pushReplacement(
                                   context,
-                                  MaterialPageRoute(builder: (_) => GameMenu(user: user)),
+                                  MaterialPageRoute(
+                                    builder: (_) => GameMenu(user: user),
+                                  ),
                                 );
                               },
                               icon: const Icon(
                                 Icons.close,
                                 color: Colors.white,
                               ),
-                              label: const Text('Não'),
+                              label: const Text('Sim'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
+                                backgroundColor: Colors.green,
                                 foregroundColor: Colors.white,
                               ),
                             ),
                             SizedBox(width: 12.w),
-                             ElevatedButton.icon(
+                            ElevatedButton.icon(
                               onPressed: () {
                                 Navigator.of(context).pop();
                                 onRestart();
@@ -235,9 +236,9 @@ class GameAnimations {
                                 Icons.check,
                                 color: Colors.white,
                               ),
-                              label: const Text('Sim'),
+                              label: const Text('Não'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
+                                backgroundColor: Colors.red,
                                 foregroundColor: Colors.white,
                               ),
                             ),
@@ -345,17 +346,18 @@ class GameAnimations {
   }) async {
     SoundManager.stopAll();
 
-    final filename = getVideoFileName(gameName); 
+    final filename = getVideoFileName(gameName);
 
     late OverlayEntry overlay;
     overlay = OverlayEntry(
-      builder: (_) => _TutorialVideoScreen(
-        videoPath: 'assets/tutorials/$filename.mp4',
-        onFinished: () {
-          overlay.remove();
-          onFinished();
-        },
-      ),
+      builder:
+          (_) => _TutorialVideoScreen(
+            videoPath: 'assets/tutorials/$filename.mp4',
+            onFinished: () {
+              overlay.remove();
+              onFinished();
+            },
+          ),
     );
 
     Overlay.of(context).insert(overlay);
@@ -646,7 +648,7 @@ class _TutorialVideoScreenState extends State<_TutorialVideoScreen> {
       child: Stack(
         children: [
           Positioned.fill(
-  child: FutureBuilder(
+            child: FutureBuilder(
               future: _initializeVideoPlayerFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
@@ -679,5 +681,3 @@ class _TutorialVideoScreenState extends State<_TutorialVideoScreen> {
     );
   }
 }
-
-
