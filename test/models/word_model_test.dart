@@ -1,0 +1,67 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mundodaspalavras/models/word_model.dart';
+
+/// Teste unitário para o modelo WordModel.
+/// Objetivo: Validar a criação do objeto e a atribuição correta dos campos obrigatórios e opcionais.
+///
+/// Para executar: flutter test test/models/word_model_test.dart
+void main() {
+  group('WordModel', () {
+    test(
+      'Deve criar uma palavra com todos os campos obrigatorios e opcionais',
+      () {
+        // Arrange: Instanciação do modelo com todos os campos.
+        final word = WordModel(
+          text: 'pavão',
+          newLetter: 'v',
+          topic: 'animais',
+          difficulty: 'baixa',
+          syllables: ['pa', 'vão'],
+          syllableCount: 2,
+          audioFileName: 'pavao',
+          imageFileName: 'pavao',
+        );
+
+        // Assert: Verificação dos campos obrigatórios.
+        expect(word.text, equals('pavão'));
+        expect(word.newLetter, equals('v'));
+        expect(word.topic, equals('animais'));
+        expect(word.difficulty, equals('baixa'));
+        expect(word.syllables, equals(['pa', 'vão']));
+        expect(word.syllableCount, equals(2));
+        expect(word.audioFileName, equals('pavao'));
+        expect(word.imageFileName, equals('pavao'));
+
+        // Assert: Testar os getters personalizados.
+        expect(word.audioPath, equals('pavao'));
+        expect(word.imagePath, equals('assets/images/words/pavao.webp'));
+      },
+    );
+
+    test('Deve criar uma palavra sem campos opcionais', () {
+      // Arrange: Instanciação do modelo apenas com os obrigatórios.
+      final word = WordModel(
+        text: 'pia',
+        newLetter: 'p',
+        topic: 'animais',
+        difficulty: 'baixa',
+        syllables: ['pia'],
+        syllableCount: 1,
+      );
+
+      // Assert: Verificação dos campos obrigatórios.
+      expect(word.text, equals('pia'));
+      expect(word.newLetter, equals('p'));
+      expect(word.topic, equals('animais'));
+      expect(word.difficulty, equals('baixa'));
+      expect(word.syllables, equals(['pia']));
+      expect(word.syllableCount, equals(1));
+      expect(word.audioFileName, isNull);
+      expect(word.imageFileName, isNull);
+
+      // Assert: Getters usam valor por omissão.
+      expect(word.audioPath, equals('pia'));
+      expect(word.imagePath, equals('assets/images/words/pia.webp'));
+    });
+  });
+}
