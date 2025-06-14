@@ -610,7 +610,6 @@ class _TutorialVideoScreen extends StatefulWidget {
   final VoidCallback onFinished;
 
   const _TutorialVideoScreen({
-    super.key,
     required this.videoPath,
     required this.onFinished,
   });
@@ -665,7 +664,7 @@ class _TutorialVideoScreenState extends State<_TutorialVideoScreen> {
             right: 30,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green, // ou AppColors.green
+                backgroundColor: AppColors.green,
               ),
               onPressed: () {
                 _controller.pause();
