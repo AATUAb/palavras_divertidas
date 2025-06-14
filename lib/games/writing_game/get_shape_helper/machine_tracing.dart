@@ -613,9 +613,9 @@ class TypeExtensionTracking {
           _buildTraceModel(
               letterViewSize: sizeOfLetter,
               dottedPath: ShapePaths.zShapeDotted,
-              positionIndexPath: const Size(0, 0),
+              positionIndexPath: const Size(-80, -70),
               indexPath: ShapePaths.zShapeIndex,
-              scaleIndexPath: .7,
+              scaleIndexPath: .1,
               scaledottedPath: .8,
               letterPath: ShapePaths.zShape,
               pointsJsonFile: ShapePointsManger.zShape
@@ -857,8 +857,8 @@ class TypeExtensionTracking {
               letterViewSize: sizeOfLetter,
               dottedPath: PTShapePaths.aShapeBigDotted,
               indexPath: PTShapePaths.aShapeBigShapeIndex,
-              scaleIndexPath: .90,
-              positionIndexPath: const Size(-30,5),
+              scaleIndexPath: .3,
+              positionIndexPath: const Size(-50,70),
               scaledottedPath: .8,
               letterPath: PTShapePaths.aShapeBigShape,
               pointsJsonFile: ShapePointsManger.aUpperShape

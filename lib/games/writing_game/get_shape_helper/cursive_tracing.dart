@@ -319,8 +319,8 @@ class CursiveTracking {
             pointsJsonFile: ShapePointsManger.gCursiveUpper,
             scaleIndexPath: 0.1,
             scaledottedPath: 0.95,
-            positionIndexPath: const Size(250,200),
-            positionDottedPath: const Size(1720, 1810),
+            positionIndexPath: const Size(250,300),
+            positionDottedPath: const Size(1720, 1910),
           ),
         ];
       case CursiveUpperLetters.H:
@@ -439,7 +439,7 @@ class CursiveTracking {
             pointsJsonFile: ShapePointsManger.pCursiveUpper,
             scaleIndexPath: 0.2,
             scaledottedPath: 0.95,
-            positionIndexPath: const Size(4250,0),
+            positionIndexPath: const Size(250,0),
             positionDottedPath: const Size(1670, 1520),
           ),
         ];
@@ -630,7 +630,7 @@ class CursiveTracking {
             pointsJsonFile: ShapePointsManger.dCursiveLower,
             scaleIndexPath: 0.6,
             scaledottedPath: 0.95,
-            positionIndexPath: const Size(280,-70),
+            positionIndexPath: const Size(500,-100),
             positionDottedPath: const Size(1600, 1360),
           ),
         ];
@@ -660,8 +660,8 @@ class CursiveTracking {
             pointsJsonFile: ShapePointsManger.fCursiveLower,
             scaleIndexPath: 0.08,
             scaledottedPath: 0.97,
-            positionIndexPath: const Size(850,600),
-            positionDottedPath: const Size(2605, 2040),
+            positionIndexPath: const Size(850,580),
+            positionDottedPath: const Size(2605, 1980),
           ),
         ];
       case CursiveLowerLetters.g:
@@ -748,10 +748,10 @@ class CursiveTracking {
             indexPath: cursiveLowerSvgs.indexLetterm,
             dottedPath: cursiveLowerSvgs.dottedLetterm,
             pointsJsonFile: ShapePointsManger.mCursiveLower,
-            scaleIndexPath: 0.7,
+            scaleIndexPath: 0.1,
             scaledottedPath: 0.95,
-            positionIndexPath: const Size(-120,250),
-            positionDottedPath: const Size(1180,1350),
+            positionIndexPath: const Size(-200,400),
+            positionDottedPath: const Size(1210,1425),
           ),
         ];
       case CursiveLowerLetters.n:
@@ -763,10 +763,10 @@ class CursiveTracking {
             indexPath: cursiveLowerSvgs.indexLettern,
             dottedPath: cursiveLowerSvgs.dottedLettern,
             pointsJsonFile: ShapePointsManger.nCursiveLower,
-            scaleIndexPath: 0.6,
+            scaleIndexPath: 0.1,
             scaledottedPath: 0.95,
-            positionIndexPath: const Size(-120,80),
-            positionDottedPath: const Size(800,850),
+            positionIndexPath: const Size(-120,120),
+            positionDottedPath: const Size(840,890),
           ),
         ];
       case CursiveLowerLetters.o:
@@ -808,10 +808,10 @@ class CursiveTracking {
             indexPath: cursiveLowerSvgs.indexLetterq,
             dottedPath: cursiveLowerSvgs.dottedLetterq,
             pointsJsonFile: ShapePointsManger.qCursiveLower,
-            scaleIndexPath: 0.20,
+            scaleIndexPath: 0.10,
             scaledottedPath: 0.95,
-            positionIndexPath: const Size(290,0),
-            positionDottedPath: const Size(1420,1320),
+            positionIndexPath: const Size(450,500),
+            positionDottedPath: const Size(1500,1820),
           ),
         ];
       case CursiveLowerLetters.r:
@@ -868,9 +868,9 @@ class CursiveTracking {
             indexPath: cursiveLowerSvgs.indexLetteru,
             dottedPath: cursiveLowerSvgs.dottedLetteru,
             pointsJsonFile: ShapePointsManger.uCursiveLower,
-            scaleIndexPath: 0.9,
+            scaleIndexPath: 0.1,
             scaledottedPath: 0.95,
-            positionIndexPath: const Size(-50,-50),
+            positionIndexPath: const Size(-100,150),
             positionDottedPath: const Size(660,650),
           ),
         ];
