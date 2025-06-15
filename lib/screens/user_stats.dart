@@ -161,7 +161,7 @@ class UserStats extends StatelessWidget {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               GameAnimations.showTutorialVideo(
                 context: context,
-                gameName: 'user_stats',
+                fileName: 'user_stats',
                 onFinished: () {
                 },
               );

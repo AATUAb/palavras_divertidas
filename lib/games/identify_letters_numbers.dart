@@ -77,7 +77,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       case 1:
         correctCount = 4;
         wrongCount = 8;
-        levelTime = const Duration(seconds: 8);
+        levelTime = const Duration(seconds: 120);
         break;
       case 2:
         correctCount = 5;
@@ -183,7 +183,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
-     if (_gamesSuperKey.currentState?.isTutorialVisible ?? false) return;
     _gamesSuperKey.currentState?.playChallengeHighlight();
 
     if (!mounted || _isDisposed) return;
@@ -386,14 +385,15 @@ void _showTutorial() {
         await _applyLevelSettings();
         if (!mounted || _isDisposed) return;
         setState(() => hasChallengeStarted = true);
-        if (!mounted || _isDisposed) return;
+      if (!_gamesSuperKey.currentState!.isTutorialVisible) {
         _generateNewChallenge();
-      },
-        onShowTutorial: () {
-        _showTutorial();
-   }
-    );
-  }
+      }
+    },
+    onShowTutorial: () {
+      _showTutorial();
+    },
+  );
+}
 
   // Constrói o texto rico com o conteúdo fornecido
   Widget _buildRichText(TextSpan textSpan) => Padding(

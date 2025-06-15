@@ -79,7 +79,8 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   DateTime? _startTime;
   Timer? _progressTimer;
 
-  get isTutorialVisible => null;
+  //get isTutorialVisible => null;
+  bool isTutorialVisible = false;
 
   @override
   void initState() {
@@ -155,13 +156,14 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   }
 
   void showTutorialDialog({VoidCallback? onTutorialClosed, String? retryId}) {
+    isTutorialVisible = true;
     if (retryId != null) {
       registerFailedRound(retryId);
     }
     cancelProgressTimer();
     GameAnimations.showTutorialVideo(
       context: context,
-      gameName: widget.gameName,
+      fileName: widget.gameName,
       onFinished: () {
         onTutorialClosed?.call();
       },

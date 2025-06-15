@@ -296,8 +296,8 @@ class GameAnimations {
     return entry;
   }
 
-  static String getVideoFileName(String gameName) {
-    switch (gameName) {
+  static String getVideoFileName(String fileName) {
+    switch (fileName) {
       case 'Contar sílabas':
         return 'count_syllables';
       case 'Identificar letras e números':
@@ -327,18 +327,18 @@ class GameAnimations {
 
   static Future<OverlayEntry> showTutorialVideo({
     required BuildContext context,
-    required String gameName,
+    required String fileName,
     required VoidCallback onFinished,
   }) async {
     SoundManager.stopAll();
 
-    final filename = getVideoFileName(gameName);
+    final videoFileName = getVideoFileName(fileName);
 
     late OverlayEntry overlay;
     overlay = OverlayEntry(
       builder:
           (_) => _TutorialVideoScreen(
-            videoPath: 'assets/tutorials/$filename.mp4',
+            videoPath: 'assets/tutorials/$videoFileName.mp4',
             onFinished: () {
               overlay.remove();
               onFinished();

@@ -162,7 +162,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               GameAnimations.showTutorialVideo(
                 context: context,
-                gameName: 'sticker_book',
+                fileName: 'sticker_book',
                 onFinished: () {
                 },
               );

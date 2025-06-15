@@ -97,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     GameAnimations.showTutorialVideo(
       context: context,
-      gameName: 'home_page',
+      fileName: 'home_page',
       onFinished: () {
       },
     );

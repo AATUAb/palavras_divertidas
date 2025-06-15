@@ -135,7 +135,6 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
 // Gera um novo desafio
 Future<void> _generateNewChallenge() async {
-  if (_gamesSuperKey.currentState?.isTutorialVisible ?? false) return;
   _gamesSuperKey.currentState?.playChallengeHighlight();
 
   // Verifica se há retry a usar
@@ -314,31 +313,33 @@ void _showTutorial() {
 
   // Constrói o widget principal do jogo
   @override
-Widget build(BuildContext context) {
-  return GamesSuperWidget(
-    key: _gamesSuperKey,
-    user: widget.user,
-    gameName: 'Contar sílabas',
-    level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
-    currentRound: (_) => 1,
-    totalRounds: (_) => 3,
-    isFirstCycle: isFirstCycle,
-    topTextContent: _buildTopText,
-    builder: _buildBoard,
-    onRepeatInstruction: _playInstruction,
-    introImagePath: 'assets/images/games/count_syllables.webp',
-    introAudioPath: 'count_syllables.ogg',
-    onIntroFinished: () async {
-      await _loadWords();
-      await _applyLevelSettings();
-      if (mounted) {
-        setState(() => hasChallengeStarted = true);
-        _generateNewChallenge();
-      }
-    },
-    onShowTutorial: () {
-      _showTutorial();
-  }
+  Widget build(BuildContext context) {
+    return GamesSuperWidget(
+      key: _gamesSuperKey,
+      user: widget.user,
+      gameName: 'Contar sílabas',
+      level: (_) => _gamesSuperKey.currentState?.levelManager.level ?? 1,
+      currentRound: (_) => 1,
+      totalRounds: (_) => 3,
+      isFirstCycle: isFirstCycle,
+      topTextContent: _buildTopText,
+      builder: _buildBoard,
+      onRepeatInstruction: _playInstruction,
+      introImagePath: 'assets/images/games/count_syllables.webp',
+      introAudioPath: 'count_syllables.ogg',
+      onIntroFinished: () async {
+        await _loadWords();
+        await _applyLevelSettings();
+        if (mounted) {
+          setState(() => hasChallengeStarted = true);
+           if (!_gamesSuperKey.currentState!.isTutorialVisible) {
+            _generateNewChallenge();
+          }
+        }
+      },
+      onShowTutorial: () {
+        _showTutorial();
+    }
   );
 }
 

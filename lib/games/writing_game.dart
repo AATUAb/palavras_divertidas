@@ -58,7 +58,7 @@ class _WriteGameState extends State<WriteGame> {
     // 1) Ajuste de tempo
     switch (lvl) {
       case 1:
-        levelTime = const Duration(seconds: 5);
+        levelTime = const Duration(seconds: 120);
         break;
       case 2:
         levelTime = const Duration(seconds: 120);
@@ -133,7 +133,6 @@ class _WriteGameState extends State<WriteGame> {
   }
 
   Future<void> _generateNewChallenge() async {
-    if (_gamesSuperKey.currentState?.isTutorialVisible ?? false) return;
     _gamesSuperKey.currentState?.playChallengeHighlight();
 
     if (!mounted || _isDisposed) return;
@@ -378,12 +377,14 @@ class _WriteGameState extends State<WriteGame> {
         await _applyLevelSettingsAndCharacters();
         if (!mounted) return;
         setState(() => hasChallengeStarted = true);
-        await _generateNewChallenge();
+        if (!_gamesSuperKey.currentState!.isTutorialVisible) {
+          _generateNewChallenge();
+        }
       },
-  onShowTutorial: () {
-    _showTutorial();
-  },
-  builder: _buildBoard,
+      onShowTutorial: () {
+        _showTutorial();
+      },
+      builder: _buildBoard,
     );
   }
 }

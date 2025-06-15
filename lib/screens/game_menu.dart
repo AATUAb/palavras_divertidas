@@ -357,7 +357,7 @@ void initState() {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           GameAnimations.showTutorialVideo(
             context: context,
-            gameName: videoName,
+            fileName: videoName,
             onFinished: () async {
               debugPrint("🎬 Tutorial $videoName terminado.");
               isMenuMusicAllowed = true;
