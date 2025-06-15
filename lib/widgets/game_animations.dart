@@ -302,13 +302,13 @@ class GameAnimations {
         return 'count_syllables';
       case 'Identificar letras e números':
         return 'identify_letters_numbers';
-      case 'Ouvir e procurar imagem':
+      case 'Ouvir e Procurar Imagem':
         return 'listen_look';
-      case 'Identificar palavras':
+      case 'Ouvir e Procurar Palavra':
         return 'identify_words';
-      case 'Sílabas em falta':
+      case 'Sílaba perdida':
         return 'lost_syllable';
-      case 'Escrever letras':
+      case 'Escrever':
         return 'writing_game';
       default:
         return 'user_stats';

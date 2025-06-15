@@ -115,6 +115,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
 
   // Gera um novo desafio com 3 imagens, baseando-se no áudio do item correto
   Future<void> _generateNewChallenge() async {
+    if (_gamesSuperKey.currentState?.isTutorialVisible ?? false) return;
     _gamesSuperKey.currentState?.playChallengeHighlight();
 
   // Verifica se há retry a usar
@@ -274,6 +275,19 @@ class _ListenLookGameState extends State<ListenLookGame> {
     setState(() => currentTry++);    // Incrementa o número de tentativas feitas nesta ronda
   }
 
+  void _showTutorial() {
+    final state = _gamesSuperKey.currentState;
+
+    final safeRetryId = hasChallengeStarted ? targetWord.text : null;
+
+    state?.showTutorialDialog(
+      retryId: safeRetryId,
+      onTutorialClosed: () {
+        _generateNewChallenge();
+      },
+    );
+  }
+
   // Constrói o widget principal do jogo
   @override
   Widget build(BuildContext context) {
@@ -296,6 +310,9 @@ class _ListenLookGameState extends State<ListenLookGame> {
         if (!mounted || _isDisposed) return;
         _generateNewChallenge();
         setState(() => hasChallengeStarted = true);
+      },
+      onShowTutorial: () {
+      _showTutorial();
       },
     );
   }

@@ -42,6 +42,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   bool isRoundFinished = false;
   List<GameItem> gamesItems = [];
   bool _isDisposed = false;
+  bool _isTutorialActive = false;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
   bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);
@@ -182,6 +183,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
   // Gera um novo desafio, com base nas definições de nível e no estado atual do jogo
   Future<void> _generateNewChallenge() async {
+     if (_gamesSuperKey.currentState?.isTutorialVisible ?? false) return;
     _gamesSuperKey.currentState?.playChallengeHighlight();
 
     if (!mounted || _isDisposed) return;
@@ -214,6 +216,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     if (!_usedCharacters.contains(targetCharacter)) {
       _usedCharacters.add(targetCharacter);
     }
+
 
     final available =
         _characters
@@ -348,6 +351,19 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
+void _showTutorial() {
+  final state = _gamesSuperKey.currentState;
+
+  final safeRetryId = hasChallengeStarted ? targetCharacter : null;
+
+  state?.showTutorialDialog(
+    retryId: safeRetryId,
+    onTutorialClosed: () {
+      _generateNewChallenge();
+    },
+  );
+}
+
   // Constrói o widget principal do jogo
   @override
   Widget build(BuildContext context) {
@@ -372,6 +388,9 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
         if (!mounted || _isDisposed) return;
         _generateNewChallenge();
       },
+        onShowTutorial: () {
+        _showTutorial();
+   }
     );
   }
 

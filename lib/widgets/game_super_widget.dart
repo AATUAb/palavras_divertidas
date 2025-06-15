@@ -152,23 +152,6 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     }
   }
 
-  /*void showTutorialDialog({
-    VoidCallback? onTutorialClosed,
-      String? retryId,
-  }) {
-      if (retryId != null) {
-      registerFailedRound(retryId);
-    }
-      cancelProgressTimer();
-      GameAnimations.showTutorialVideo(
-        context: context,
-        gameName: widget.gameName,
-        onFinished: () {
-          onTutorialClosed?.call();
-        },
-      );
-    }*/
-
     void showTutorialDialog({
   VoidCallback? onTutorialClosed,
   String? retryId,
@@ -208,7 +191,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     return availableItems[Random().nextInt(availableItems.length)];
   }
 
-  T safeRetry<T>({
+  /*T safeRetry<T>({
     required List<T> list,
     required String retryId,
     required bool Function(T) matcher,
@@ -241,7 +224,40 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
 
       return fallbackItem;
     }
+  }*/
+
+  /*T safeRetry<T>({
+  required List<T> list,
+  required String retryId,
+  required bool Function(T) matcher,
+  required T Function() fallback,
+}) {
+  try {
+    final item = list.firstWhere(matcher);
+    return item;
+  } catch (_) {
+    return fallback();
   }
+}*/
+
+T safeRetry<T>({
+  required List<T> list,
+  required String retryId,
+  required bool Function(T) matcher,
+  required T Function() fallback,
+}) {
+  try {
+    final item = list.firstWhere(matcher);
+    removeFromRetryQueue(retryId);
+    return item;
+  } catch (_) {
+    removeFromRetryQueue(retryId);
+    return fallback();
+  }
+}
+
+
+
 
   // Reincia o jogo e o seu progresso
   Future<void> restartGame() async {

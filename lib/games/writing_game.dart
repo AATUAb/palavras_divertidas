@@ -133,6 +133,7 @@ class _WriteGameState extends State<WriteGame> {
   }
 
   Future<void> _generateNewChallenge() async {
+    if (_gamesSuperKey.currentState?.isTutorialVisible ?? false) return;
     _gamesSuperKey.currentState?.playChallengeHighlight();
 
     if (!mounted || _isDisposed) return;
@@ -225,6 +226,19 @@ class _WriteGameState extends State<WriteGame> {
       },
     );
   }
+
+  void _showTutorial() {
+  final state = _gamesSuperKey.currentState;
+
+  final safeRetryId = hasChallengeStarted ? targetCharacter : null;
+
+  state?.showTutorialDialog(
+    retryId: safeRetryId,
+    onTutorialClosed: () {
+      _generateNewChallenge();
+    },
+  );
+}
 
   Widget _buildTopText() {
     final isNumber = RegExp(r'^[0-9]$').hasMatch(targetCharacter);
@@ -359,7 +373,10 @@ class _WriteGameState extends State<WriteGame> {
         setState(() => hasChallengeStarted = true);
         await _generateNewChallenge();
       },
-      builder: _buildBoard,
+  onShowTutorial: () {
+    _showTutorial();
+  },
+  builder: _buildBoard,
     );
   }
 }

@@ -182,6 +182,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
 
   // Gera um novo desafio novo, baseado nas palavras disponíveis e letras conhecidas
   Future<void> _generateNewChallenge() async {
+    if (_gamesSuperKey.currentState?.isTutorialVisible ?? false) return;
     _gamesSuperKey.currentState?.playChallengeHighlight();
 
     // Verifica se há retry a usar e as plavras prioritárias
@@ -381,6 +382,19 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
     ); // Incrementa o número de tentativas feitas nesta ronda
   }
 
+  void _showTutorial() {
+  final state = _gamesSuperKey.currentState;
+
+  final safeRetryId = hasChallengeStarted ? targetWord.text : null;
+
+  state?.showTutorialDialog(
+    retryId: safeRetryId,
+    onTutorialClosed: () {
+      _generateNewChallenge();
+    },
+  );
+}
+
   // Constrói o widget principal do jogo
   @override
   Widget build(BuildContext context) {
@@ -398,14 +412,18 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
       introImagePath: 'assets/images/games/identify_words.webp',
       introAudioPath: 'identify_words.ogg',
       onIntroFinished: () async {
-        await _loadWords();
-        await _applyLevelSettings();
-        if (!mounted || _isDisposed) return;
+      await _loadWords();
+      await _applyLevelSettings();
+      if (mounted) {
         setState(() => hasChallengeStarted = true);
         _generateNewChallenge();
-      },
-    );
+      }
+    },
+    onShowTutorial: () {
+      _showTutorial();
   }
+  );
+}
 
   // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {

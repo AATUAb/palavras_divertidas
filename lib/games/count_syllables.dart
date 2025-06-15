@@ -42,7 +42,6 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   final _isDisposed = false;
   late GameItem referenceItem;
   late int numDistractors;
-  bool isTutorialVisible = false;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
@@ -271,7 +270,12 @@ Future<void> _generateNewChallenge() async {
         user: widget.user,
         gameName: 'Contar sílabas',
       );
-    }
+        // 🔁 Se a palavra estava na retry list, remove-a
+  final retryQueue = _gamesSuperKey.currentState?.retryQueueContents() ?? [];
+  if (retryQueue.contains(targetWord!.text)) {
+    _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord!.text);
+  }
+}
 
     // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(
