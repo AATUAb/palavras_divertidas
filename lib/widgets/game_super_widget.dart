@@ -57,13 +57,14 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   late ConquestManager conquestManager;
   final Queue<MapEntry<String, int>> _retryQueue = Queue();
   int _roundCounter = 0;
-  final int retryDelay = 3;
+  final int retryDelay = 4;
   bool introCompleted = false;
   late AnimationController _fadeController;
   late Animation<double> _rotationAnimation;
   bool get isFirstCycle => widget.isFirstCycle;
   bool _isDisposed = false;
   OverlayEntry? _introOverlay;
+  bool get canShowTutorial => mounted;
 
   GameItem? _currentChallengeItem;
 
@@ -77,7 +78,8 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
   double _progressValue = 1.0;
   DateTime? _startTime;
   Timer? _progressTimer;
-  bool isTutorialVisible = false;
+
+  get isTutorialVisible => null;
 
   @override
   void initState() {
@@ -86,7 +88,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     levelManager = LevelManager(user: widget.user, gameName: widget.gameName);
     conquestManager = ConquestManager();
 
-   // animação para a imagem incial de jogo
+    // animação para a imagem incial de jogo
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -139,7 +141,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
         context: context,
         imagePath: widget.introImagePath!,
         audioFile: widget.introAudioPath!,
-        introTextStyle: getInstructionFont(isFirstCycle: widget.isFirstCycle), 
+        introTextStyle: getInstructionFont(isFirstCycle: widget.isFirstCycle),
         onFinished: () {
           if (!mounted) return;
           setState(() {
@@ -152,46 +154,46 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
     }
   }
 
-    void showTutorialDialog({
-  VoidCallback? onTutorialClosed,
-  String? retryId,
-}) {
-  if (retryId != null) {
-    registerFailedRound(retryId);
+  void showTutorialDialog({VoidCallback? onTutorialClosed, String? retryId}) {
+    if (retryId != null) {
+      registerFailedRound(retryId);
+    }
+    cancelProgressTimer();
+    GameAnimations.showTutorialVideo(
+      context: context,
+      gameName: widget.gameName,
+      onFinished: () {
+        onTutorialClosed?.call();
+      },
+    );
   }
-
-  isTutorialVisible = true; // <-- Define como ativo
-  cancelProgressTimer();
-  GameAnimations.showTutorialVideo(
-    context: context,
-    gameName: widget.gameName,
-    onFinished: () {
-      isTutorialVisible = false; // <-- Ao terminar o tutorial
-      onTutorialClosed?.call();
-    },
-  );
-}
-
 
   Future<void> playNewChallengeSound(GameItem item) async {
     if (_isDisposed) return;
-  _currentChallengeItem = item;
-  await SoundManager.playGameItem(item);
-}
-
-  // segura – retorna null se estiver vazio
-  T? safeSelectItemOrNull<T>(List<T> availableItems) {
-    if (availableItems.isEmpty) return null;
-    return availableItems[Random().nextInt(availableItems.length)];
+    _currentChallengeItem = item;
+    await SoundManager.playGameItem(item);
   }
 
-  // exigente – lança exceção se estiver vazio
   T safeSelectItem<T>({required List<T> availableItems}) {
-    if (availableItems.isEmpty) throw Exception('No items available');
-    return availableItems[Random().nextInt(availableItems.length)];
+    if (availableItems.isEmpty) {
+      throw Exception('No items available');
+    }
+
+    final rand = Random();
+    final item = availableItems[rand.nextInt(availableItems.length)];
+
+    if (item is String) {
+      registerCompletedRound(item);
+    } else if (item is WordModel) {
+      registerCompletedRound(item.text);
+    } else if (item is CharacterModel) {
+      registerCompletedRound(item.character);
+    }
+
+    return item;
   }
 
-  /*T safeRetry<T>({
+  T safeRetry<T>({
     required List<T> list,
     required String retryId,
     required bool Function(T) matcher,
@@ -224,40 +226,7 @@ class GamesSuperWidgetState extends State<GamesSuperWidget>
 
       return fallbackItem;
     }
-  }*/
-
-  /*T safeRetry<T>({
-  required List<T> list,
-  required String retryId,
-  required bool Function(T) matcher,
-  required T Function() fallback,
-}) {
-  try {
-    final item = list.firstWhere(matcher);
-    return item;
-  } catch (_) {
-    return fallback();
   }
-}*/
-
-T safeRetry<T>({
-  required List<T> list,
-  required String retryId,
-  required bool Function(T) matcher,
-  required T Function() fallback,
-}) {
-  try {
-    final item = list.firstWhere(matcher);
-    removeFromRetryQueue(retryId);
-    return item;
-  } catch (_) {
-    removeFromRetryQueue(retryId);
-    return fallback();
-  }
-}
-
-
-
 
   // Reincia o jogo e o seu progresso
   Future<void> restartGame() async {
@@ -281,52 +250,56 @@ T safeRetry<T>({
     } catch (_) {}
   }
 
-
-@override
-Widget build(BuildContext context) {
-  return GameDesign(
-    user: widget.user,
-    progressValue: _progressValue,
-    level: _visibleLevel,
-    topTextWidget: DefaultTextStyle(
-      style: getInstructionFont(isFirstCycle: widget.isFirstCycle),
-      textAlign: TextAlign.center,
-      child: widget.topTextContent(),
-    ),
-    onShowTutorial: widget.onShowTutorial,
-    child: Stack(
-      children: [       
-        if (introCompleted)
-          FadeTransition(
-            opacity: _highlightOpacity,
-            child: ScaleTransition(
-              scale: _highlightScale,
-              child: widget.builder(context, levelManager.level, _roundCounter)
-            ),
-          ),
-
-        if (introCompleted)
-          Positioned(
-            top: 100,
-            left: 10,
-            child: IconButton(
-              icon: Icon(
-                Icons.play_circle_fill,
-                color: Colors.red,
-                size: 70.sp,
+  @override
+  Widget build(BuildContext context) {
+    return GameDesign(
+      user: widget.user,
+      progressValue: _progressValue,
+      level: _visibleLevel,
+      topTextWidget: DefaultTextStyle(
+        style: getInstructionFont(isFirstCycle: widget.isFirstCycle),
+        textAlign: TextAlign.center,
+        child: widget.topTextContent(),
+      ),
+      onShowTutorial: widget.onShowTutorial,
+      child: Stack(
+        children: [
+          if (introCompleted)
+            FadeTransition(
+              opacity: _highlightOpacity,
+              child: ScaleTransition(
+                scale: _highlightScale,
+                child: widget.builder(
+                  context,
+                  levelManager.level,
+                  _roundCounter,
+                ),
               ),
-              onPressed: widget.onRepeatInstruction ?? () async {
-                if (_currentChallengeItem != null) {
-                  await SoundManager.playGameItem(_currentChallengeItem!);
-                }
-              },
             ),
-          ),
-      ],
-    ),
-  );
-}
 
+          if (introCompleted)
+            Positioned(
+              top: 100,
+              left: 10,
+              child: IconButton(
+                icon: Icon(
+                  Icons.play_circle_fill,
+                  color: Colors.red,
+                  size: 70.sp,
+                ),
+                onPressed:
+                    widget.onRepeatInstruction ??
+                    () async {
+                      if (_currentChallengeItem != null) {
+                        await SoundManager.playGameItem(_currentChallengeItem!);
+                      }
+                    },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
   // Mostra o feedback de resposta correta ou errada
   Future<void> playAnswerFeedback({required bool isCorrect}) async {
@@ -522,6 +495,9 @@ Widget build(BuildContext context) {
     cancelTimers();
     markRoundFinished();
 
+    // retira o item da fila de retry se acertou as vezes necessárias
+    removeFromRetryQueue(retryId);
+
     await showSuccessFeedback();
     if (!mounted) return;
 
@@ -674,7 +650,7 @@ Widget build(BuildContext context) {
     if (_retryQueue.isNotEmpty) {
       final oldest = _retryQueue.first;
       final roundsSinceFail = _roundCounter - oldest.value;
-      if (roundsSinceFail >= retryDelay) {
+      if (roundsSinceFail > retryDelay) {
         return oldest.key;
       }
     }
@@ -706,7 +682,7 @@ Widget build(BuildContext context) {
   void registerRoundStartTime() {
     _startTime = DateTime.now();
   }
-  
+
   // Inicia o progress timer da ronda actual.
   void startProgressTimer({
     required Duration levelTime,
@@ -732,31 +708,30 @@ Widget build(BuildContext context) {
     });
   }
 
-
   double getCurrentResponseTimeInSeconds() {
-  if (_startTime == null) return 0.0;
-  final elapsed = DateTime.now().difference(_startTime!);
-  return elapsed.inMilliseconds / 1000.0;
-}
+    if (_startTime == null) return 0.0;
+    final elapsed = DateTime.now().difference(_startTime!);
+    return elapsed.inMilliseconds / 1000.0;
+  }
 
-void registerResponseTimeForCurrentRound({
-  required UserModel user,
-  required String gameName,
-}) {
-  if (_startTime == null) return;
-  final elapsed = DateTime.now().difference(_startTime!);
-  final responseTimeInSeconds = elapsed.inMilliseconds / 1000.0;
+  void registerResponseTimeForCurrentRound({
+    required UserModel user,
+    required String gameName,
+  }) {
+    if (_startTime == null) return;
+    final elapsed = DateTime.now().difference(_startTime!);
+    final responseTimeInSeconds = elapsed.inMilliseconds / 1000.0;
 
-  levelManager.registerResponseTime(
-    user: user,
-    gameName: gameName,
-    responseTimeInSeconds: responseTimeInSeconds,
-  );
-}
+    levelManager.registerResponseTime(
+      user: user,
+      gameName: gameName,
+      responseTimeInSeconds: responseTimeInSeconds,
+    );
+  }
 
-void cancelProgressTimer() {
-  _progressTimer?.cancel();
-}
+  void cancelProgressTimer() {
+    _progressTimer?.cancel();
+  }
 
   // Mostra o diálogo de fim de jogo
   void showEndOfGameDialog({required VoidCallback onRestart}) {
@@ -766,4 +741,4 @@ void cancelProgressTimer() {
       user: widget.user,
     );
   }
-  }
+}
