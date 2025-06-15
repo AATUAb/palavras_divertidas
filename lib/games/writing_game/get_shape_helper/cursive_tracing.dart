@@ -7,12 +7,14 @@ import 'package:mundodaspalavras/games/writing_game/points_manager/shape_points_
 import 'package:mundodaspalavras/games/writing_game/tracing/writing_models.dart';
 import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
 
-/// Responsável pelo tracing de letras cursivas maiúsculas.
+/// Responsável pelo tracing de letras cursivas 
 class CursiveTracking {
   /// Converte uma letra maiúscula em seu enum correspondente.
   CursiveUpperLetters _detectCursiveUpper({
     required String letter,
   }) {
+    // Cada case representa uma letra maiúscula suportada
+    // Se não for reconhecida, lança erro
     switch (letter.toUpperCase()) {
       case 'A':
         return CursiveUpperLetters.A;
@@ -65,7 +67,9 @@ class CursiveTracking {
     }
   }
 
+/// Converte uma letra minúscula em seu respectivo enum.
   CursiveLowerLetters _detectCursiveLower({required String letter,}) {
+    /// Converte uma letra minúscula em seu enum correspondente.
     switch (letter) {
       case 'a':
         return CursiveLowerLetters.a;
@@ -118,12 +122,17 @@ class CursiveTracking {
     }
   }
 
+  /// Verifica se a letra fornecida é uma letra maiúscula (A-Z)
   bool _isUpperCursiveUpper(String letter) =>
   RegExp(r'^[A-Z]$').hasMatch(letter);
 
+  /// Verifica se a letra fornecida é uma letra minúscula (a-z)
   bool _isLowerCursiveLower(String letter) =>
   RegExp(r'^[a-z]$').hasMatch(letter);
 
+  /// Retorna os dados de traçado de acordo com o estado atual:
+  /// - Letras isoladas (chars)
+  /// - Palavras completas (traceWords)
   List<TraceModel> getTracingData({
       List<TraceCharModel>? chars,
       TraceWordModel? word,
@@ -138,6 +147,7 @@ class CursiveTracking {
         for (var char in chars) {
           final letters = char.char;
 
+          // Adiciona modelo de traçado para letra maiúscula
           if (_isUpperCursiveUpper(letters)) {
             tracingDataList.add(
               _getTracingDataCursiveUpper(letter: letters)
@@ -149,6 +159,7 @@ class CursiveTracking {
                   dottedColor:    char.traceShapeOptions.dottedColor,
                 )
             );
+          // Adiciona modelo de traçado para letra minúscula
           } else if (_isLowerCursiveLower(letters)) {
           tracingDataList.add(
             _getTracingDataCursiveLower(letter: letters).first.copyWith(
@@ -171,6 +182,7 @@ class CursiveTracking {
       return tracingDataList;
     }
 
+  /// Constrói e retorna um modelo de traçado com os parâmetros fornecidos
   TraceModel _buildCursiveTraceModel({
     required Size letterViewSize,
     required String letterPath,
@@ -193,7 +205,7 @@ class CursiveTracking {
       positionIndexPath: positionIndexPath,
       positionDottedPath: positionDottedPath,
 
-      // Parâmetros fixos:
+      // Estilos e cores padrão para o traçado
       strokeWidth: 20,
       disableDividedStrokes: true,
       dottedColor: AppColors.white,
@@ -205,6 +217,7 @@ class CursiveTracking {
     );
   }
 
+  /// Retorna o modelo de traçado para letras cursivas MAIÚSCULAS
   List<TraceModel> _getTracingDataCursiveUpper({
     required String letter,
     Size sizeOfLetter = const Size(500, 500),
@@ -566,7 +579,7 @@ class CursiveTracking {
         }
   }
   
-
+  /// Retorna o modelo de traçado para letras cursivas minúsculas
   List<TraceModel> _getTracingDataCursiveLower({
     required String letter,
     Size sizeOfLetter = const Size(400, 400),
@@ -922,7 +935,9 @@ class CursiveTracking {
             }
   }
 
-
+  /// Retorna os dados de traçado para uma palavra completa
+  /// (apenas letras maiúsculas suportadas neste método)
+  /// Melhoria para o futuro
   List<TraceModel> getTraceWords({
     required TraceWordModel wordWithOption,
     Size sizeOfLetter = const Size(500, 500),

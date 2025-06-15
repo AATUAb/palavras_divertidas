@@ -3,35 +3,62 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
+/// Modelo que representa os dados de traçado (tracing) de uma letra.
+/// Inclui caminhos (paths), imagens auxiliares, configurações de pintura,
+/// e o estado atual do progresso do traçado.
 class LetterPathsModel {
+  /// Indica se o caractere atual é um espaço (sem traçado)
   final bool  isSpace;
+  /// Caminho principal da forma da letra (SVG convertido em Path)
   Path? letterImage;
+  /// Caminho do tracejado pontilhado de referência
   Path? dottedIndex;
+  /// Caminho do índice (como números de etapas de traçado)
   Path? letterIndex;
-double strokeWidth;
+  /// Largura do traço usado na pintura
+  double strokeWidth;
+  /// Imagem do tracejado pontilhado 
   ui.Image? dottedImage;
+  /// Imagem da âncora, se usada para ponto de partida visual
   ui.Image? anchorImage;
-final bool? disableDivededStrokes;
+  /// Indica se deve desabilitar traçados divididos (traço contínuo)
+  final bool? disableDivededStrokes;
+  /// Lista de todos os caminhos esperados para a letra (cada traço individual)
   late List<ui.Path> paths;
+  /// Caminho atual que está sendo desenhado pelo usuário
   late ui.Path currentDrawingPath;
+  /// Lista com os pontos de todos os traços realizados
   late List<List<Offset>> allStrokePoints;
-
+  /// Posição de início do traçado (caso tenha uma âncora)
   Offset? anchorPos;
+  /// Tamanho da visualização da letra
   Size viewSize;
+  /// Indica se o traçado completo da letra foi finalizado
   bool letterTracingFinished;
+  /// Indica se pelo menos um traço foi completado
   bool hasFinishedOneStroke;
+  /// Índice do traço atual que está sendo desenhado
   int currentStroke;
+  /// Progresso dentro do traço atual (em pontos)
   int currentStrokeProgress;
-
+  /// Cor do contorno externo
   final Color outerPaintColor;
+  /// Cor do contorno interno (traço desenhado)
   final Color innerPaintColor;
+  /// Cor do tracejado pontilhado de referência
   final Color dottedColor;
+  /// Cor do índice do traçado
   final Color indexColor;
-final PaintingStyle? indexPathPaintStyle;
-final PaintingStyle? dottedPathPaintStyle;
-final double? strokeIndex;
-
-final double? distanceToCheck;
+  /// Estilo de pintura para o índice (fill ou stroke)
+  final PaintingStyle? indexPathPaintStyle;
+  /// Estilo de pintura para o tracejado pontilhado
+  final PaintingStyle? dottedPathPaintStyle;
+  /// Espessura do índice (caso seja diferente do traçado normal)
+  final double? strokeIndex;
+  /// Distância mínima para validação do ponto no traçado
+  final double? distanceToCheck;
+  /// Construtor padrão
+  
   LetterPathsModel({
         this.isSpace=false,
 
@@ -62,6 +89,8 @@ final double? distanceToCheck;
         currentDrawingPath = ui.Path(),
         allStrokePoints = allStrokePoints ?? [];
 
+  /// Cria uma nova instância da classe com alguns valores substituídos.
+  /// Útil para manter imutabilidade em atualizações parciais.
   LetterPathsModel copyWith({
        bool?  isSpace,
 

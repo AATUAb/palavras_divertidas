@@ -1,34 +1,33 @@
 //shape_enums.dart
 
+// Enum que representa as letras regulares
 enum PhonicsLetters {
-  s,
-  a,
-  f,
-  m,
-  t,
-  c,
-  i,
-  r,
-  p,
-  h,
-  j,
-  u,
-  l,
-  b,
-  o,
-  g,
-  d,
-  w,
-  e,
-  n,
-  k,
-  q,
-  v,
-  x,
-  y,
+  a, 
+  b, 
+  c, 
+  d, 
+  e, 
+  f, 
+  g, 
+  h, 
+  i, 
+  j, 
+  l, 
+  m, 
+  n, 
+  o, 
+  p, 
+  q, 
+  r, 
+  s, 
+  t, 
+  u, 
+  v, 
+  x, 
   z,
 }
 
+// Enum que representa letras maiúsculas cursivas
 enum CursiveUpperLetters {
   A,
   B,
@@ -55,6 +54,7 @@ enum CursiveUpperLetters {
   Z,
 }
 
+// Enum que representa letras minúsculas cursivas disponíveis.
 enum CursiveLowerLetters {
   a, 
   b, 
@@ -80,6 +80,9 @@ enum CursiveLowerLetters {
   x, 
   z,
 }
+
+// Enum que representa o estado da atividade de traçado.
+// Pode ser traçado de letras isoladas (chars) ou de palavras completas (traceWords).
 
 enum StateOfTracing {
   chars,

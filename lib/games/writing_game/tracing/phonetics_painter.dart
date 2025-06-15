@@ -2,25 +2,30 @@
 
 import 'package:flutter/material.dart';
 
+/// Pintor personalizado (CustomPainter) responsável por desenhar:
+/// - A forma da letra
+/// - O tracejado pontilhado (guia)
+/// - Os índices de traçado
+/// - Os traços feitos pelo usuário
 class PhoneticsPainter extends CustomPainter {
-  final Path letterImage;
-  final List<Path> paths; // List of paths for strokes
-  final Path currentDrawingPath;
-  final List<Offset> pathPoints;
-  final Color strokeColor;
-  final Size viewSize;
-  final List<Offset> strokePoints;
-  final double? strokeWidth;
-  final Color letterColor;
-  final Shader? letterShader;
-  final Path? dottedPath;
-  final Path? indexPath;
-  final Color dottedColor;
-  final Color indexColor;
+  final Path letterImage;               // Caminho da forma da letra
+  final List<Path> paths;              // Lista de caminhos traçados concluídos
+  final Path currentDrawingPath;       // Caminho que está sendo desenhado no momento
+  final List<Offset> pathPoints;       // Pontos do caminho atual
+  final Color strokeColor;             // Cor dos traços desenhados
+  final Size viewSize;                 // Tamanho da área de visualização
+  final List<Offset> strokePoints;     // Todos os pontos já desenhados
+  final double? strokeWidth;           // Espessura do traço
+  final Color letterColor;             // Cor da letra de fundo
+  final Shader? letterShader;          // Shader (gradiente ou outro efeito visual)
+  final Path? dottedPath;              // Caminho pontilhado (guia de traçado)
+  final Path? indexPath;               // Caminho dos índices de traçado
+  final Color dottedColor;             // Cor do guia pontilhado
+  final Color indexColor;              // Cor dos índices
 
-  final double? strokeIndex;
-  final PaintingStyle? indexPathPaintStyle;
-  final PaintingStyle? dottedPathPaintStyle;
+  final double? strokeIndex;                     // Espessura dos índices
+  final PaintingStyle? indexPathPaintStyle;      // Estilo de pintura dos índices
+  final PaintingStyle? dottedPathPaintStyle;     // Estilo do traço pontilhado
 
   PhoneticsPainter({
     this.strokeIndex,
@@ -44,19 +49,20 @@ class PhoneticsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Paint for the letter path
+        // Pincel para desenhar a letra base (forma de fundo)
     final letterPaint = Paint()
       ..color = letterColor
       ..style = PaintingStyle.fill;
 
-    // Apply the shader if provided
+    // Se houver um shader, aplica (ex: gradiente)
     if (letterShader != null) {
       letterPaint.shader = letterShader;
     }
 
-    // Draw the letter path with color
+    // Desenha a letra de fundo
     canvas.drawPath(letterImage, letterPaint);
  
+    // Desenha o caminho pontilhado (se existir)
     if (dottedPath != null) {
       final debugPaint = Paint()
         ..color = dottedColor
@@ -64,7 +70,7 @@ class PhoneticsPainter extends CustomPainter {
         ..strokeWidth = 2.0;
       canvas.drawPath(dottedPath!, debugPaint);
     }
-
+    // Desenha os índices de traçado (números ou marcações)
     if (indexPath != null) {
       final debugPaint = Paint()
         ..color = indexColor
@@ -72,11 +78,11 @@ class PhoneticsPainter extends CustomPainter {
         ..strokeWidth = strokeIndex ?? 2.0;
       canvas.drawPath(indexPath!, debugPaint);
     }
-    // Clip the canvas to the letter path to prevent drawing outside
+    // Clipa o canvas ao contorno da letra (impede que o traço ultrapasse o limite)
     canvas.save();
     canvas.clipPath(letterImage);
 
-    // Paint for the strokes
+    // Pincel para traços
     final strokePaint = Paint()
       ..color = strokeColor
       ..style = PaintingStyle.stroke
@@ -84,15 +90,15 @@ class PhoneticsPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round
       ..strokeWidth = strokeWidth ?? 55;
 
-    // Draw all paths
+    // Desenha todos os caminhos já feitos
     for (var path in paths) {
       canvas.drawPath(path, strokePaint);
     }
 
-    // Draw the current drawing path (if needed)
+    // Desenha o caminho que está sendo feito no momento
     canvas.drawPath(currentDrawingPath, strokePaint);
 
-    // Restore the canvas state after clipping
+    // Restaura o canvas (tira o clip)
     canvas.restore();
   }
 

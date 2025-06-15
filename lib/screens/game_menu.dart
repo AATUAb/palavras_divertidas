@@ -342,29 +342,31 @@ void initState() {
 
     return Scaffold(
       body: MenuDesign(
-        titleText: "Palavras Divertidas",
-        headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
-        pauseIntroMusic: true,
-        showHomeButton: true,
-        onHelpPressed: () async {
+      titleText: "Palavras Divertidas",
+      headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
+      pauseIntroMusic: true,
+      showHomeButton: true,
+      showTutorial: true, // ← ESSENCIAL
+      onTutorialPressed: () async {
         isMenuMusicAllowed = false;
         await pauseMenuMusic();
 
-      final ciclo = widget.user.schoolLevel;
-      final videoName = (ciclo == '1º Ciclo') ? 'game_menu_first' : 'game_menu_pre';
+        final ciclo = widget.user.schoolLevel;
+        final videoName = (ciclo == '1º Ciclo') ? 'game_menu_first' : 'game_menu_pre';
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-                  GameAnimations.showTutorialVideo(
-                    context: context,
-          gameName: videoName,
-          onFinished: () async {
-            debugPrint("🎬 Tutorial $videoName terminado.");
-            isMenuMusicAllowed = true;
-            await resumeMenuMusic();
-          },
-        );
-      });
-    },
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          GameAnimations.showTutorialVideo(
+            context: context,
+            gameName: videoName,
+            onFinished: () async {
+              debugPrint("🎬 Tutorial $videoName terminado.");
+              isMenuMusicAllowed = true;
+              await resumeMenuMusic();
+            },
+          );
+        });
+      },
+
 
         onHomePressed: () {
           Navigator.pushReplacement(

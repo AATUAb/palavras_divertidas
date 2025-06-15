@@ -1,36 +1,34 @@
-//writing_models.dart
-
 import 'package:flutter/material.dart';
 import 'package:mundodaspalavras/themes/colors.dart';
 
+/// Enumeração que define os tipos de fontes disponíveis
 enum FontType {
-  machine,
-  cursive,
+  machine, // Fonte de máquina (impressa)
+  cursive, // Fonte cursiva (manual)
 }
 
-
-/// Modelo principal para armazenar caminhos e configurações de uma letra/palavra
+/// Modelo principal que armazena todas as configurações de uma letra ou espaço
 class TraceModel {
-  final bool isSpace;
-  final String letterPath;
-  final String pointsJsonFile;
-  final String dottedPath;
-  final String indexPath;
-  final bool? disableDividedStrokes;
-  final Color outerPaintColor;
-  final Color innerPaintColor;
-  final Color dottedColor;
-  final Color indexColor;
-  final double strokeWidth;
-  final PaintingStyle? indexPathPaintStyle;
-  final PaintingStyle? dottedPathPaintStyle;
-  final Size? positionIndexPath;
-  final Size? positionDottedPath;
-  final double? scaleIndexPath;
-  final double? scaledottedPath;
-  final double? distanceToCheck;
-  final Size letterViewSize;
-  final double? strokeIndex;
+  final bool isSpace; // Indica se o caractere é um espaço em branco
+  final String letterPath; // Caminho SVG da letra
+  final String pointsJsonFile; // Caminho do arquivo JSON com os pontos
+  final String dottedPath; // Caminho SVG do traçado pontilhado
+  final String indexPath; // Caminho SVG dos índices (numeração dos traços)
+  final bool? disableDividedStrokes; // Desabilita separação de traços
+  final Color outerPaintColor; // Cor da borda externa
+  final Color innerPaintColor; // Cor do preenchimento interno
+  final Color dottedColor; // Cor do traçado pontilhado
+  final Color indexColor; // Cor dos índices de traçado
+  final double strokeWidth; // Espessura do traçado
+  final PaintingStyle? indexPathPaintStyle; // Estilo do traçado dos índices
+  final PaintingStyle? dottedPathPaintStyle; // Estilo do traçado pontilhado
+  final Size? positionIndexPath; // Posição do path de índice
+  final Size? positionDottedPath; // Posição do path pontilhado
+  final double? scaleIndexPath; // Escala do path de índice
+  final double? scaledottedPath; // Escala do path pontilhado
+  final double? distanceToCheck; // Distância para validar o toque
+  final Size letterViewSize; // Tamanho da visualização da letra
+  final double? strokeIndex; // Espessura do índice (numeração)
 
   TraceModel({
     this.isSpace = false,
@@ -55,6 +53,7 @@ class TraceModel {
     required this.pointsJsonFile,
   });
 
+  /// Retorna uma nova instância com valores atualizados, mantendo os existentes por padrão
   TraceModel copyWith({
     bool? isSpace,
     String? letterPath,
@@ -102,10 +101,10 @@ class TraceModel {
   }
 }
 
-/// Modelo que representa uma palavra inteira para tracing
+/// Modelo que representa uma palavra completa que será traçada
 class TraceWordModel {
-  final String word;
-  final TraceShapeOptions traceShapeOptions;
+  final String word; // Texto da palavra
+  final TraceShapeOptions traceShapeOptions; // Opções de estilo do traçado
 
   TraceWordModel({
     required this.word,
@@ -113,17 +112,17 @@ class TraceWordModel {
   });
 }
 
-/// Modelo que representa um conjunto de caracteres para tracing (ex: número ou grupo de letras)
+/// Modelo que representa um grupo de caracteres para traçado (ex: letras ou números)
 class TraceCharsModel {
-  final List<TraceCharModel> chars;
+  final List<TraceCharModel> chars; // Lista de caracteres com estilos individuais
 
   TraceCharsModel({required this.chars});
 }
 
-/// Modelo individual para cada caracter dentro de um TraceCharsModel
+/// Modelo individual de traçado para um caractere dentro de TraceCharsModel
 class TraceCharModel {
-  final String char;
-  final TraceShapeOptions traceShapeOptions;
+  final String char; // Letra ou número a ser traçado
+  final TraceShapeOptions traceShapeOptions; // Estilo visual do traçado
 
   TraceCharModel({
     required this.char,
@@ -131,12 +130,12 @@ class TraceCharModel {
   });
 }
 
-/// Opções de estilo e cor para cada tipo de traçado
+/// Opções de estilo visual do traçado (cores da linha, contorno, etc.)
 class TraceShapeOptions {
-  final Color outerPaintColor;
-  final Color innerPaintColor;
-  final Color dottedColor;
-  final Color indexColor;
+  final Color outerPaintColor; // Cor da linha externa
+  final Color innerPaintColor; // Cor da linha interna
+  final Color dottedColor; // Cor da linha pontilhada
+  final Color indexColor; // Cor da numeração dos traços
 
   const TraceShapeOptions({
     this.dottedColor = AppColors.grey,
