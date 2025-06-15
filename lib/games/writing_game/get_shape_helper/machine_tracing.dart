@@ -90,7 +90,7 @@ class TypeExtensionTracking {
                   ));
         } else if (_isLowerCharacter(letters)) {
           tracingDataList.add(
-              _getTracingDataPhonics(letter: letters.toLowerCase())
+              _getPhonicsLower(letter: letters.toLowerCase())
                   .first
                   .copyWith(
                     innerPaintColor: char.traceShapeOptions.innerPaintColor,
@@ -100,7 +100,7 @@ class TypeExtensionTracking {
                   ));
         } else if (_isUpperCharacter(letters)) {
           final uppers =
-              _getTracingDataPhonicsUp(letter: letters.toLowerCase());
+              _getPhonicsUpper(letter: letters.toLowerCase());
           final newBigSizedUppers = uppers
               .map((up) => up.copyWith(letterViewSize: const Size(300, 300)))
               .toList();
@@ -343,13 +343,13 @@ class TypeExtensionTracking {
               isSpace: isNextSpace,
             ));
       } else if (_isLowerCharacter(word[i])) {
-        letters.add(_getTracingDataPhonics(letter: word[i].toLowerCase())
+        letters.add(_getPhonicsLower(letter: word[i].toLowerCase())
             .first
             .copyWith(
               isSpace: isNextSpace,
             ));
       } else if (_isUpperCharacter(word[i])) {
-        final uppers = _getTracingDataPhonicsUp(letter: word[i].toLowerCase());
+        final uppers = _getPhonicsUpper(letter: word[i].toLowerCase());
         final newBigSizedUppers = uppers
             .map((up) => up.copyWith(letterViewSize: const Size(300, 300)))
             .first;
@@ -369,7 +369,7 @@ class TypeExtensionTracking {
         .toList();
   }
 
-  List<TraceModel> _getTracingDataPhonics(
+  List<TraceModel> _getPhonicsLower(
       {required String letter, Size sizeOfLetter = const Size(200, 200)}) {
     PhonicsLetters currentLetter =
         _detectTheCurrentEnumFromPhonics(letter: letter);
@@ -481,7 +481,7 @@ class TypeExtensionTracking {
               indexPath: PTShapePaths.lLowerShapeIndex,
               scaleIndexPath: .1,
               scaledottedPath: .93,
-              positionIndexPath: const Size(0, -55),
+              positionIndexPath: const Size(0, -80),
               positionDottedPath: const Size(5, 0),
               letterPath: PTShapePaths.lLowerShape,
               pointsJsonFile: ShapePointsManger.llowerShape)
@@ -538,8 +538,8 @@ class TypeExtensionTracking {
               letterViewSize: sizeOfLetter,
               dottedPath: ShapePaths.sDotted,
               indexPath: ShapePaths.sIndex,
-              scaleIndexPath: .65,
-              positionIndexPath: const Size(-10, 0),
+              scaleIndexPath: .1,
+              positionIndexPath: const Size(50, -60),
               scaledottedPath: .8,
               letterPath: ShapePaths.s3,
               pointsJsonFile: ShapePointsManger.sShape
@@ -654,8 +654,8 @@ class TypeExtensionTracking {
               letterViewSize: sizeOfLetter,
               dottedPath: ShapePaths.rShapeDotted,
               indexPath: ShapePaths.rshapeIndex,
-              scaleIndexPath: .5,
-              positionIndexPath: const Size(-10, -50),
+              scaleIndexPath: .4,
+              positionIndexPath: const Size(-20, -40),
               scaledottedPath: .8,
               letterPath: ShapePaths.rshape,
               pointsJsonFile: ShapePointsManger.rShape
@@ -694,7 +694,7 @@ class TypeExtensionTracking {
     }
   }
 
-  List<TraceModel> _getTracingDataPhonicsUp(
+  List<TraceModel> _getPhonicsUpper(
       {required String letter, Size sizeOfLetter = const Size(200, 200)}) {
     PhonicsLetters currentLetter =
         _detectTheCurrentEnumFromPhonics(letter: letter);
@@ -759,7 +759,7 @@ class TypeExtensionTracking {
 
       case PhonicsLetters.o:
         return [
-          _getTracingDataPhonics(
+          _getPhonicsLower(
                   letter: 'o', sizeOfLetter: const Size(200, 200))
               .first,
         ];
@@ -847,7 +847,7 @@ class TypeExtensionTracking {
       case PhonicsLetters.s:
         // s phone
         return [
-          _getTracingDataPhonics(
+          _getPhonicsLower(
                   letter: 's', sizeOfLetter: const Size(200, 200))
               .first,
         ];
@@ -893,19 +893,19 @@ class TypeExtensionTracking {
         ];
       case PhonicsLetters.v:
         return [
-          _getTracingDataPhonics(
+          _getPhonicsLower(
                   letter: 'v', sizeOfLetter: const Size(200, 200))
               .first,
         ];
       case PhonicsLetters.x:
         return [
-          _getTracingDataPhonics(
+          _getPhonicsLower(
                   letter: 'x', sizeOfLetter: const Size(200, 200))
               .first,
         ];
       case PhonicsLetters.z:
         return [
-          _getTracingDataPhonics(
+          _getPhonicsLower(
                   letter: 'z', sizeOfLetter: const Size(200, 200))
               .first,
         ];
@@ -925,7 +925,7 @@ class TypeExtensionTracking {
         ];
       case PhonicsLetters.c:
         return [
-          _getTracingDataPhonics(letter: 'c').first,
+          _getPhonicsLower(letter: 'c').first,
         ];
       case PhonicsLetters.r:
         return [
