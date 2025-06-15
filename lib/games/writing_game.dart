@@ -139,6 +139,7 @@ class _WriteGameState extends State<WriteGame> {
     if (!mounted || _isDisposed) return;
 
     final retryId = _gamesSuperKey.currentState?.peekNextRetryTarget();
+
     final availableItems =
         _characters
             .where((c) => !_usedCharacters.contains(c.character))
@@ -321,6 +322,11 @@ class _WriteGameState extends State<WriteGame> {
                           user: widget.user,
                           gameName: 'Escrever',
                         );
+
+                  final retryQueue = s.retryQueueContents();
+                    if (retryQueue.contains(targetCharacter)) {
+                      s.removeFromRetryQueue(targetCharacter);
+                    }
                   }
 
                   await s.checkAnswerSingle(
@@ -342,6 +348,7 @@ class _WriteGameState extends State<WriteGame> {
                       await Future.delayed(const Duration(seconds: 1));
                     },
                   );
+                  _gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
                   setState(() => currentTry++);
                 },
               ),
@@ -394,10 +401,10 @@ class _WriteGameState extends State<WriteGame> {
 
 
 
+
 /*
 
-
-Para mostrtar palavras na primária, de acordo com o que sabe
+//Para mostrtar palavras na primária, de acordo com o que sabe
 
 
 
@@ -539,7 +546,7 @@ String removeDiacritics(String str) {
 
   // 1) Ajuste de tempo
   switch (lvl) {
-    case 1: levelTime = const Duration(seconds: 120); break;
+    case 1: levelTime = const Duration(seconds: 4); break;
     case 2: levelTime = const Duration(seconds: 120); break;
     case 3: levelTime = const Duration(seconds: 120); break;
   }
@@ -560,6 +567,7 @@ String removeDiacritics(String str) {
         tempChars.add(CharacterModel(
           character: d,
           soundPath: 'assets/sounds/characters/$d.ogg',
+          type: 'number',
         ));
       }
       debugPrint('🔢 Gerados ${tempChars.length} dígitos: '
@@ -583,11 +591,13 @@ String removeDiacritics(String str) {
             character: base.toUpperCase(),
             soundPath:
               'assets/sounds/characters/${base.toUpperCase()}.ogg',
+            type: c.type,
           ),
           CharacterModel(
             character: base.toLowerCase(),
             soundPath:
               'assets/sounds/characters/${base.toLowerCase()}.ogg',
+            type: c.type,
           ),
         ]);
       }
