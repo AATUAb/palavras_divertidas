@@ -13,6 +13,7 @@ import '../games/identify_words.dart';
 import '../games/lost_syllable.dart';
 import '../widgets/conquest_manager.dart';
 import '../widgets/sound_manager.dart';
+import '../widgets/game_animations.dart';
 import 'home_page.dart';
 import 'sticker_book.dart';
 import 'user_stats.dart';
@@ -345,6 +346,26 @@ void initState() {
         headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
         pauseIntroMusic: true,
         showHomeButton: true,
+        onHelpPressed: () async {
+        isMenuMusicAllowed = false;
+        await pauseMenuMusic();
+
+      final ciclo = widget.user.schoolLevel;
+      final videoName = (ciclo == '1º Ciclo') ? 'game_menu_first' : 'game_menu_pre';
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+                  GameAnimations.showTutorialVideo(
+                    context: context,
+          gameName: videoName,
+          onFinished: () async {
+            debugPrint("🎬 Tutorial $videoName terminado.");
+            isMenuMusicAllowed = true;
+            await resumeMenuMusic();
+          },
+        );
+      });
+    },
+
         onHomePressed: () {
           Navigator.pushReplacement(
             context,

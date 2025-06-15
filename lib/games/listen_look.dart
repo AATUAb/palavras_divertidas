@@ -45,6 +45,8 @@ class _ListenLookGameState extends State<ListenLookGame> {
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
+  int _roundCounter = 0;
+
   // Inicializa o estado do jogo
   @override
   void initState() {
@@ -271,8 +273,8 @@ class _ListenLookGameState extends State<ListenLookGame> {
         setState(() => showWord = false);
       },
     );
-
-    setState(() => currentTry++);    // Incrementa o número de tentativas feitas nesta ronda
+     _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
+    setState(() => currentTry++);   
   }
 
   void _showTutorial() {

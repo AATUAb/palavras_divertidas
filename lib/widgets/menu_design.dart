@@ -34,6 +34,11 @@ Future<void> pauseMenuMusicForConquest() async {
   globalSoundPaused = true;
 }
 
+Future<void> pauseMenuMusicForTutorials() async {
+  await globalMenuPlayer.pause();
+  globalSoundPaused = true;
+}
+
 class MenuDesign extends StatefulWidget {
   final Widget child; // Conteúdo principal do ecrã
   final String? headerText; // Texto adicional abaixo do título principal
@@ -49,6 +54,8 @@ class MenuDesign extends StatefulWidget {
   final bool showMuteButton; // Mostra botão de som
   final bool showWhiteBackground; // Mostra fundo branco por trás de tudo
   final bool pauseIntroMusic;
+  final VoidCallback? onHelpPressed; 
+  final VoidCallback? onTutorialPressed;// Callback para ajuda
 
   const MenuDesign({
     Key? key,
@@ -66,6 +73,8 @@ class MenuDesign extends StatefulWidget {
     this.showMuteButton = true,
     this.showWhiteBackground = true,
     this.pauseIntroMusic = false,
+    this.onHelpPressed,
+    this.onTutorialPressed
   }) : super(key: key);
 
   @override
@@ -225,22 +234,14 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
             bottom: 10.h,
             left: 10.w,
             child: IconButton(
-              icon: Icon(Icons.question_mark_outlined, size: 25.sp),
+              icon: Icon(Icons.question_mark, size: 25.sp),
               tooltip: 'Tutorial',
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      "Tutorial em breve",
-                      style: TextStyle(fontSize: 14.sp, color: AppColors.white),
-                    ),
-                    backgroundColor: AppColors.green,
-                  ),
-                );
-              },
+                  onPressed: widget.onTutorialPressed ??
+            () {
+            },
             ),
           ),
-
+          
         if (widget.showMuteButton)
           Positioned(
             bottom: 10.h,

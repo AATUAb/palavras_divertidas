@@ -6,11 +6,20 @@ import '../themes/colors.dart';
 import 'add_user_dialog.dart';
 import 'game_menu.dart';
 import '../widgets/menu_design.dart';
+import '../widgets/game_animations.dart';
 import 'letters_selection.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
   final String title;
+  final bool showTutorial;
+  final VoidCallback? onTutorialPressed;
+
+const MyHomePage({
+    super.key,
+    required this.title,
+    this.showTutorial = true,
+    this.onTutorialPressed,
+  });
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -18,6 +27,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<UserModel> users = [];
+  bool showTutorial = true;
 
   @override
   void initState() {
@@ -75,29 +85,46 @@ class _MyHomePageState extends State<MyHomePage> {
             await HiveService.deleteUser(index);
             _loadUsers();
           },
+
         );
       },
     );
   }
 
+  void _onTutorialPressed() async {
+  isMenuMusicAllowed = false;
+  await pauseMenuMusicForTutorials();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    GameAnimations.showTutorialVideo(
+      context: context,
+      gameName: 'home_page',
+      onFinished: () {
+      },
+    );
+  });
+}
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: MenuDesign(
-        titleText: "Palavras Divertidas",
-        showHomeButton: false,
-        headerText: "Quem vai jogar hoje?",
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 50.h),
-            SizedBox(height: 50.h),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child:
-                    users.length <= 3
-                        ? Center(
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: MenuDesign(
+      titleText: "Palavras Divertidas",
+      showHomeButton: false,
+      headerText: "Quem vai jogar hoje?",
+       onTutorialPressed: _onTutorialPressed,
+      showTutorial: true,
+      child: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 50.h),
+              SizedBox(height: 50.h),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: users.length <= 3
+                      ? Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -108,42 +135,54 @@ class _MyHomePageState extends State<MyHomePage> {
                               ...List.generate(
                                 users.length,
                                 (i) => Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 8.w,
-                                  ),
+                                  padding: EdgeInsets.symmetric(horizontal: 8.w),
                                   child: _buildUserCard(i),
                                 ),
                               ),
                             ],
                           ),
                         )
-                        : Scrollbar(
+                      : Scrollbar(
                           thumbVisibility: true,
                           thickness: 8,
                           radius: Radius.circular(10),
                           child: GridView.builder(
                             padding: EdgeInsets.only(bottom: 16.h),
                             itemCount: users.length + 1,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  crossAxisSpacing: 15.w,
-                                  mainAxisSpacing: 15.h,
-                                  childAspectRatio: 1.9,
-                                ),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 15.w,
+                              mainAxisSpacing: 15.h,
+                              childAspectRatio: 1.9,
+                            ),
                             itemBuilder: (context, index) {
                               if (index == 0) return _buildAddUserButton();
                               return _buildUserCard(index - 1);
                             },
                           ),
                         ),
+                ),
+              ),
+            ],
+          ),
+
+          // Botão de tutorial no canto inferior esquerdo
+          if (showTutorial)
+            Positioned(
+              bottom: 10.h,
+              left: 10.w,
+              child: IconButton(
+                icon: Icon(Icons.question_mark, size: 25.sp),
+                tooltip: 'Tutorial',
+                onPressed: widget.onTutorialPressed ?? _onTutorialPressed,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
+                  ],
+                ),
+              ),
+            );
+          }
+
 
   Widget _buildUserCard(int index) {
     final user = users[index];

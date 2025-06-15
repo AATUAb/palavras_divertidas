@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
 import '../themes/colors.dart';
 import '../widgets/menu_design.dart';
+import '../widgets/game_animations.dart';
 import 'game_menu.dart';
 
 class UserStats extends StatelessWidget {
@@ -144,7 +145,6 @@ class UserStats extends StatelessWidget {
         ),
       );
     }
-
     return MenuDesign(
       titleText: 'Palavras Divertidas',
       showHomeButton: true,
@@ -154,6 +154,19 @@ class UserStats extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (_) => GameMenu(user: user)),
           ),
+          showTutorial: true,
+          onTutorialPressed: () async {
+            isMenuMusicAllowed = false;
+            await pauseMenuMusicForTutorials(); 
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              GameAnimations.showTutorialVideo(
+                context: context,
+                gameName: 'user_stats',
+                onFinished: () {
+                },
+              );
+            });
+          },
       child: LayoutBuilder(
         builder: (context, constraints) {
           final maxWidth = constraints.maxWidth;

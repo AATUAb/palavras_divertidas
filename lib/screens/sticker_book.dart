@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/menu_design.dart';
+import '../widgets/game_animations.dart';
 import 'game_menu.dart';
 
 class StickerBookScreen extends StatefulWidget {
@@ -153,12 +154,24 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
             MaterialPageRoute(builder: (_) => GameMenu(user: widget.user)),
           );
         },
+
+         showTutorial: true,
+          onTutorialPressed: () async {
+            isMenuMusicAllowed = false;
+            await pauseMenuMusicForTutorials(); 
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              GameAnimations.showTutorialVideo(
+                context: context,
+                gameName: 'sticker_book',
+                onFinished: () {
+                },
+              );
+            });
+          },
+
         child: Column(
           children: [
             // Espaço para evitar sobreposição do título (ajuste se necessário)
-            /*SizedBox(
-              height: 48.h,
-            ),*/
             SizedBox(
               height: (ScreenUtil().screenHeight * 0.03).clamp(16.h, 40.h),
             ),

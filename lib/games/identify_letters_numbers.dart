@@ -42,7 +42,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   bool isRoundFinished = false;
   List<GameItem> gamesItems = [];
   bool _isDisposed = false;
-  bool _isTutorialActive = false;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
   bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);
@@ -318,7 +317,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     if (s == null) return;
 
     setState(() {
-      currentTry++;
       item.isTapped = true;
     });
 
@@ -331,8 +329,9 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
     // Marca uma ronda como terminada e cancela os temporizadores
     void markRoundAsFinished() {
-      setState(() => isRoundActive = false);
+      //_gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
       _cancelTimers();
+      setState(() => currentTry++);   
     }
 
     // Delega validação ao super widget, mas com callback local

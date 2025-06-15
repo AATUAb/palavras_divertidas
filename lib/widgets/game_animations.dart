@@ -310,8 +310,18 @@ class GameAnimations {
         return 'lost_syllable';
       case 'Escrever':
         return 'writing_game';
-      default:
+      case 'home_page':
+        return 'home_page';
+      case 'game_menu_pre':
+        return 'game_menu_pre';
+      case 'game_menu_first':
+        return 'game_menu_first';
+      case 'sticker_book':
+        return 'sticker_book';
+      case 'user_stats':
         return 'user_stats';
+      default:
+        return 'default_video';
     }
   }
 

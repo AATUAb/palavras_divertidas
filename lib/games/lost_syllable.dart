@@ -251,7 +251,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
 
   // Gera um novo desafio novo, baseado nas palavras disponíveis e letras conhecidas
   Future<void> _generateNewChallenge() async {
-    if (_gamesSuperKey.currentState?.isTutorialVisible ?? false) return;
+     if (_gamesSuperKey.currentState?.isTutorialVisible ?? false) return;
     _gamesSuperKey.currentState?.playChallengeHighlight();
 
     // Verifica se há retry a usar e as plavras prioritárias
@@ -429,10 +429,8 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
         setState(() => showWord = false);
       },
     );
-
-    setState(
-      () => currentTry++,
-    ); // Incrementa o número de tentativas feitas nesta ronda
+     _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
+    setState(() => currentTry++);   
   }
 
     void _showTutorial() {

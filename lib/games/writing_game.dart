@@ -58,7 +58,7 @@ class _WriteGameState extends State<WriteGame> {
     // 1) Ajuste de tempo
     switch (lvl) {
       case 1:
-        levelTime = const Duration(seconds: 120);
+        levelTime = const Duration(seconds: 5);
         break;
       case 2:
         levelTime = const Duration(seconds: 120);

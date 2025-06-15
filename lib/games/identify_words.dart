@@ -376,10 +376,8 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
         setState(() => showWord = false);
       },
     );
-
-    setState(
-      () => currentTry++,
-    ); // Incrementa o número de tentativas feitas nesta ronda
+     _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
+    setState(() => currentTry++);  
   }
 
   void _showTutorial() {

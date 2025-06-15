@@ -295,8 +295,8 @@ Future<void> _generateNewChallenge() async {
         setState(() => showSyllables = false);
       },
     );
-
-    setState(() => currentTry++);
+     _gamesSuperKey.currentState?.registerCompletedRound(targetWord!.text);
+    setState(() => currentTry++);  
   }
 
 void _showTutorial() {
