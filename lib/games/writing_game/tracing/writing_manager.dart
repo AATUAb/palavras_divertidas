@@ -16,7 +16,7 @@ import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
 import 'package:mundodaspalavras/games/writing_game/get_shape_helper/machine_tracing.dart';
 import 'package:mundodaspalavras/games/writing_game/get_shape_helper/cursive_tracing.dart';
 
-
+///Estados possíveis durante o processo de traçado
 enum DrawingStates {
   error,
   initial,
@@ -27,7 +27,7 @@ enum DrawingStates {
   finishedCurrentScreen
 }
 
-// ignore: must_be_immutable
+// Estado do Cubit responsável pelo traçado de letras e palavras
 class TracingState extends Equatable {
   final List<TraceCharsModel>? traceShapeModel;
   final List<TraceWordModel>? traceWordModels;
@@ -55,6 +55,7 @@ class TracingState extends Equatable {
     this.activeIndex = 0,
   });
 
+  /// Cria uma nova cópia do estado com dados atualizados
   TracingState copyWith({
     int? numberOfScreens,
     List<TraceWordModel>? traceWordModels,
@@ -62,7 +63,6 @@ class TracingState extends Equatable {
     Size? viewSize,
     DrawingStates? drawingStates,
     int? index,
-    // Updated to ui.Image
     List<LetterPathsModel>? letterPathsModels,
     List<TraceModel>? traceLetter,
     StateOfTracing? stateOfTracing,
@@ -80,7 +80,7 @@ class TracingState extends Equatable {
       drawingStates: drawingStates ?? this.drawingStates,
     );
   }
-
+  /// Limpa os dados atuais e volta para o estado inicial
   TracingState clearData() {
     return TracingState(
       numberOfScreens: numberOfScreens,
@@ -108,6 +108,7 @@ class TracingState extends Equatable {
       ];
 }
 
+/// Gerenciador de traçado (Cubit) responsável por controlar o progresso do traçado
 class TracingCubit extends Cubit<TracingState> {
   final FontType fontType;
   final dynamic trackingEngine;
@@ -133,6 +134,7 @@ class TracingCubit extends Cubit<TracingState> {
     updateTheTraceLetter();
   }
 
+  /// Avança para a próxima tela de traçado
   updateIndex() {
     int index = state.index;
     index++;
@@ -142,6 +144,7 @@ class TracingCubit extends Cubit<TracingState> {
     }
   }
 
+/// Atualiza os dados de traçado da letra ou palavra atual
 updateTheTraceLetter() async {
   emit(state.clearData());
 
@@ -178,7 +181,7 @@ updateTheTraceLetter() async {
   await loadAssets();
 }
 
-
+  /// Carrega os caminhos (paths) e pontos dos arquivos JSON
   final viewSize = const Size(200, 200);
   Future<void> loadAssets() async {
     emit(state.copyWith(drawingStates: DrawingStates.loading));
@@ -240,56 +243,43 @@ updateTheTraceLetter() async {
     ));
   }
 
+  /// Aplica transformação para centralizar e redimensionar o path principal
   Path _applyTransformation(
     Path path,
     Size viewSize,
   ) {
-    // Get the bounds of the original path
     final Rect originalBounds = path.getBounds();
     final Size originalSize = Size(originalBounds.width, originalBounds.height);
-
-    // Calculate the scale factor to fit the SVG within the view size
     final double scaleX = viewSize.width / originalSize.width;
     final double scaleY = viewSize.height / originalSize.height;
     double scale = math.min(scaleX, scaleY);
-    // Calculate the translation needed to center the path within the view size
     final double translateX =
         (viewSize.width - originalSize.width * scale) / 2 -
             originalBounds.left * scale;
     final double translateY =
         (viewSize.height - originalSize.height * scale) / 2 -
             originalBounds.top * scale;
-
-    // Create a matrix for the transformation
     Matrix4 matrix = Matrix4.identity()
       ..scale(scale, scale)
       ..translate(translateX, translateY);
-
-    // Apply the transformation to the path
     return path.transform(matrix.storage);
   }
 
+  /// Aplica transformação para o path dos índices
   Path _applyTransformationForOtherPathsIndex(
       Path path, Size viewSize, Size? size, double? pathscale) {
     final Rect originalBounds = path.getBounds();
     final Size originalSize = Size(originalBounds.width, originalBounds.height);
-
-    // Calculate the scale factor to fit the SVG within the view size
     final double scaleX = viewSize.width / originalSize.width;
     final double scaleY = viewSize.height / originalSize.height;
-
     double scale = math.min(scaleX, scaleY);
     scale = pathscale == null ? scale : scale * pathscale;
-
-    // Calculate the translation needed to center the path within the view size
     final double translateX =
         (viewSize.width - originalSize.width * scale) / 2 -
             originalBounds.left * scale;
     final double translateY =
         (viewSize.height - originalSize.height * scale) / 2 -
             originalBounds.top * scale;
-
-    // Create a matrix for the transformation
     Matrix4 matrix = Matrix4.identity()
       ..scale(scale, scale)
       ..translate(translateX, translateY);
@@ -299,44 +289,36 @@ updateTheTraceLetter() async {
         ..scale(scale, scale)
         ..translate(translateX + size.width, translateY + size.height);
     }
-    // Apply the transformation to the path
     return path.transform(matrix.storage);
   }
 
+ /// Aplica transformação para o path pontilhado (dotted)
   Path _applyTransformationForOtherPathsDotted(
       Path path, Size viewSize, Size? size, double? pathscale) {
-    // Get the bounds of the original path
     final Rect originalBounds = path.getBounds();
     final Size originalSize = Size(originalBounds.width, originalBounds.height);
-
-    // Calculate the scale factor to fit the SVG within the view size
     final double scaleX = viewSize.width / originalSize.width;
     final double scaleY = viewSize.height / originalSize.height;
     double scale = math.min(scaleX, scaleY);
     scale = pathscale == null ? scale : scale * pathscale;
-
-    // Calculate the translation needed to center the path within the view size
     final double translateX =
         (viewSize.width - originalSize.width * scale) / 2 -
             originalBounds.left * scale;
     final double translateY =
         (viewSize.height - originalSize.height * scale) / 2 -
             originalBounds.top * scale;
-
-    // Create a matrix for the transformation
     Matrix4 matrix = Matrix4.identity()
       ..scale(scale, scale)
       ..translate(translateX, translateY);
-
     if (size != null) {
       matrix = Matrix4.identity()
         ..scale(scale, scale)
         ..translate(translateX + size.width, translateY + size.height);
     }
-    // Apply the transformation to the path
     return path.transform(matrix.storage);
   }
 
+  /// Carrega os pontos dos traços a partir do JSON
   Future<List<List<Offset>>> _loadPointsFromJson(String path, Size viewSize) async {
     final jsonString = await rootBundle.loadString(path);
     final jsonData = jsonDecode(jsonString);
@@ -354,16 +336,17 @@ updateTheTraceLetter() async {
     return strokePointsList;
   }
 
-
+  /// Carrega os pontos dos traços a partir do JSON
   void handlePanStart(Offset position) {
+    // Verifica se o ponto inicial é válido para começar
     if (!isTracingStartPoint(position)) {
       return;
     }
-emit(state.copyWith(drawingStates: DrawingStates.tracing));
+    emit(state.copyWith(drawingStates: DrawingStates.tracing));
     final currentStrokePoints =
         state.letterPathsModels[state.activeIndex].allStrokePoints[
             state.letterPathsModels[state.activeIndex].currentStroke];
-
+    // Caso especial: se já existe progresso e o traço só tem 1 ponto
     if (state.letterPathsModels[state.activeIndex].currentStrokeProgress >= 0 &&
         state.letterPathsModels[state.activeIndex].currentStrokeProgress <
             currentStrokePoints.length) {
@@ -384,6 +367,7 @@ emit(state.copyWith(drawingStates: DrawingStates.tracing));
           return;
         }
       }
+    // Caso ainda não tenha começado a desenhar
     } else if (state
             .letterPathsModels[state.activeIndex].currentStrokeProgress ==
         -1) {
@@ -401,6 +385,7 @@ emit(state.copyWith(drawingStates: DrawingStates.tracing));
           state.letterPathsModels[state.activeIndex].currentStrokeProgress = 1;
           completeStroke();
         } else {}
+        // Começa o path a partir da âncora
       } else {
         if (state.letterPathsModels[state.activeIndex].anchorPos != null) {
           final newDrawingPath = Path()
@@ -417,12 +402,12 @@ emit(state.copyWith(drawingStates: DrawingStates.tracing));
       }
     }
   }
-
+  /// Método chamado enquanto o dedo do usuário se move pela tela
   void handlePanUpdate(Offset position) {
     final currentStrokePoints =
         state.letterPathsModels[state.activeIndex].allStrokePoints[
             state.letterPathsModels[state.activeIndex].currentStroke];
-
+    // Valida se o ponto atual do toque é próximo ao próximo ponto esperado
     if (state.letterPathsModels[state.activeIndex].currentStrokeProgress >= 0 &&
         state.letterPathsModels[state.activeIndex].currentStrokeProgress <
             currentStrokePoints.length) {
@@ -468,17 +453,17 @@ emit(state.copyWith(drawingStates: DrawingStates.tracing));
         } else {}
       }
     }
-
+    // Finaliza o traço se todos os pontos foram alcançados
     if (state.letterPathsModels[state.activeIndex].currentStrokeProgress >=
         currentStrokePoints.length) {
       completeStroke();
     }
   }
-
+  /// Conclui o traço atual e prepara o próximo
   void completeStroke() {
     final currentModel = state.letterPathsModels[state.activeIndex];
     final currentStrokeIndex = currentModel.currentStroke;
-
+    // Caso ainda haja traços restantes
     if (currentStrokeIndex < currentModel.allStrokePoints.length - 1) {
       currentModel.paths.add(currentModel.currentDrawingPath);
 
@@ -502,20 +487,24 @@ emit(state.copyWith(drawingStates: DrawingStates.tracing));
       currentModel.anchorPos =
           currentModel.allStrokePoints[currentModel.currentStroke].first;
       emit(state.copyWith(letterPathsModels: state.letterPathsModels));
+      // Todos os traços da letra foram concluídos
     } else if (!currentModel.letterTracingFinished) {
       currentModel.letterTracingFinished = true;
       currentModel.hasFinishedOneStroke = true;
+      // Se ainda houver letras para traçar na tela
       if (state.activeIndex < state.letterPathsModels.length - 1) {
         emit(state.copyWith(
           activeIndex: (state.activeIndex + 1),
           letterPathsModels: state.letterPathsModels,
         ));
+      // Se for a última tela do jogo
       } else if (state.index == state.numberOfScreens-1 ) {
     
         emit(state.copyWith(
             activeIndex: (state.activeIndex),
             letterPathsModels: state.letterPathsModels,
             drawingStates: DrawingStates.gameFinished));
+      // Caso tenha terminado a tela atual
       } else {
         emit(state.copyWith(
             activeIndex: (state.activeIndex),
@@ -524,14 +513,15 @@ emit(state.copyWith(drawingStates: DrawingStates.tracing));
       }
     }
   }
-
+/// Verifica se o toque inicial está dentro da área permitida para começar o traçado
   bool isTracingStartPoint(Offset position) {
     final currentStrokePoints =
         state.letterPathsModels[state.activeIndex].allStrokePoints[
             state.letterPathsModels[state.activeIndex].currentStroke];
-
+// Para traços de um único ponto, sempre permite iniciar
     if (currentStrokePoints.length == 1) {
       return true;
+          // Para traços com âncora, verifica se o toque está próximo da âncora
     } else if (state.letterPathsModels[state.activeIndex].anchorPos != null) {
       final anchorRect = Rect.fromCenter(
           center: state.letterPathsModels[state.activeIndex].anchorPos!,
@@ -542,7 +532,7 @@ emit(state.copyWith(drawingStates: DrawingStates.tracing));
     }
     return false;
   }
-
+  /// Verifica se o ponto tocado está próximo do ponto esperado
   bool isValidPoint(Offset point, Offset position, double? distanceToCheck) {
     final validArea = distanceToCheck ?? 30.0;
     bool isValid = (position - point).distance < validArea;

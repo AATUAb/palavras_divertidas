@@ -1,6 +1,7 @@
 //shape_points_manager.dart
 
 class ShapePointsManger {
+  // ─────────── Regulares maiusculas ───────────
   static const base = 'assets/phontics_assets_points';
   static const ptBase = '$base/pt_phonetics';
   static const ptUpperBase = '$base/pt_upper_phonetics';
@@ -24,6 +25,8 @@ class ShapePointsManger {
   static const tUpperShape = '$ptUpperBase/T_PointsInfo.json';
   static const rUpperShape = '$ptUpperBase/R_PointsInfo.json';
   static const iUpperShape = '$ptUpperBase/I_PointsInfo.json';
+
+  // ─────────── Regulares minusculas ───────────
   static const iLowerShape = '$ptUpperBase/i_lowercase_PointsInfo.json';
   static const pLowerShape = '$ptUpperBase/p_lowercase_PointsInfo.json';
   static const dlowerShape = '$ptBase/d_lower_PointsInfo.json';
@@ -47,7 +50,7 @@ class ShapePointsManger {
   static const iShape = '$ptBase/i_PointsInfo.json';
   static const pShape = '$ptBase/p_PointsInfo.json';
 
-// numbers
+// ─────────── Números ───────────
   static const numberBase = '$base/numbers_phontics';
   static const number0 = '$numberBase/0_PointsInfo.json';
   static const number1 = '$numberBase/1_PointsInfo.json';
@@ -60,7 +63,7 @@ class ShapePointsManger {
   static const number8 = '$numberBase/8_PointsInfo.json';
   static const number9 = '$numberBase/9_PointsInfo.json';
 
-  // ─────────── Cursives Upper ───────────
+  // ─────────── Cursivas maiusculas ───────────
   static const cursiveBase = '$base/cursiveUpper';
   static const aCursiveUpper = '$cursiveBase/A_PointsInfo.json';
   static const bCursiveUpper = '$cursiveBase/B_PointsInfo.json';
@@ -86,7 +89,7 @@ class ShapePointsManger {
   static const xCursiveUpper = '$cursiveBase/X_PointsInfo.json';
   static const zCursiveUpper = '$cursiveBase/Z_PointsInfo.json';
 
-  // ─────────── Cursives Lower ───────────
+  // ─────────── Cursivas minusculas ───────────
   static const cursiveLowerBase = '$base/cursiveLower';
   static const aCursiveLower = '$cursiveLowerBase/a_PointsInfo.json';
   static const bCursiveLower = '$cursiveLowerBase/b_PointsInfo.json';

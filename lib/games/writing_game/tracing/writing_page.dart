@@ -1,5 +1,3 @@
-// writing_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mundodaspalavras/games/writing_game/tracing/phonetics_painter.dart';
@@ -7,6 +5,7 @@ import 'package:mundodaspalavras/games/writing_game/tracing/writing_models.dart'
 import 'package:mundodaspalavras/games/writing_game/tracing/writing_manager.dart';
 import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
 
+/// Widget principal para o jogo de traçado de caracteres (letras isoladas)
 class TracingCharsGame extends StatefulWidget {
   const TracingCharsGame({
     super.key,
@@ -21,15 +20,15 @@ class TracingCharsGame extends StatefulWidget {
     this.onCurrentTracingScreenFinished,
   });
 
-  final List<TraceCharsModel> traceShapeModel;
-  final StateOfTracing stateOfTracing;
-  final dynamic trackingEngine;
-  final FontType fontType;
-  final Widget loadingIndictor;
-  final bool showAnchor;
-  final Future<void> Function(int index)? onTracingUpdated;
-  final Future<void> Function(int index)? onGameFinished;
-  final Future<void> Function(int index)? onCurrentTracingScreenFinished;
+  final List<TraceCharsModel> traceShapeModel; // Lista de modelos de caracteres a serem traçados
+  final StateOfTracing stateOfTracing; // Define se o traçado é de letras ou palavras
+  final dynamic trackingEngine; // Mecanismo para validar o traçado
+  final FontType fontType; // Tipo da fonte (ex: cursiva, máquina)
+  final Widget loadingIndictor; // Indicador de carregamento
+  final bool showAnchor; // Mostra ou oculta a imagem de dedo (âncora)
+  final Future<void> Function(int index)? onTracingUpdated; // Callback ao atualizar o traçado
+  final Future<void> Function(int index)? onGameFinished; // Callback ao finalizar o jogo
+  final Future<void> Function(int index)? onCurrentTracingScreenFinished; // Callback ao finalizar uma tela
 
   @override
   State<TracingCharsGame> createState() => _TracingCharsGameState();
@@ -63,6 +62,7 @@ class _TracingCharsGameState extends State<TracingCharsGame> {
   }
 }
 
+/// Widget para o jogo de traçado de palavras completas
 class TracingWordGame extends StatefulWidget {
   const TracingWordGame({
     super.key,
@@ -75,7 +75,7 @@ class TracingWordGame extends StatefulWidget {
     this.onCurrentTracingScreenFinished,
   });
 
-  final List<TraceWordModel> words;
+  final List<TraceWordModel> words; // Lista de palavras a serem traçadas
   final FontType fontType;
   final Future<void> Function(int index)? onTracingUpdated;
   final Future<void> Function(int index)? onGameFinished;
@@ -114,6 +114,8 @@ class _TracingWordGameState extends State<TracingWordGame> {
   }
 }
 
+/// Widget reutilizável que define a interface visual e comportamentos
+/// tanto para letras quanto para palavras no jogo de traçado
 class TracingGameScaffold extends StatelessWidget {
   const TracingGameScaffold({
     super.key,
@@ -140,29 +142,37 @@ class TracingGameScaffold extends StatelessWidget {
       create: (_) => tracingCubit,
       child: BlocConsumer<TracingCubit, TracingState>(
         listener: (context, state) async {
+          // Atualiza ao começar a traçar
           if (state.drawingStates == DrawingStates.tracing) {
             if (onTracingUpdated != null) await onTracingUpdated!(state.activeIndex);
+
+          // Finalizou a tela atual de traçado
           } else if (state.drawingStates == DrawingStates.finishedCurrentScreen) {
             if (onCurrentTracingScreenFinished != null) {
               await onCurrentTracingScreenFinished!(state.index + 1);
             }
             if (context.mounted) tracingCubit.updateIndex();
+
+          // Finalizou todo o jogo de traçado
           } else if (state.drawingStates == DrawingStates.gameFinished) {
             final wasSuccessful = state.letterPathsModels.first.letterTracingFinished ? 1 : 0;
             if (onGameFinished != null) await onGameFinished!(wasSuccessful);
           }
         },
         builder: (context, state) {
+          // Verifica se há dados de traçado
           if ((isWordGame && state.traceWordModels!.isEmpty) ||
               (!isWordGame && state.traceShapeModel!.isEmpty)) {
             return const SizedBox();
           }
 
+          // Exibe indicador de carregamento se necessário
           if (state.drawingStates == DrawingStates.loading ||
               state.drawingStates == DrawingStates.initial) {
             return loadingIndicator;
           }
 
+          // Exibe a interface de traçado
           return Center(
             child: FittedBox(
               child: Row(
@@ -177,11 +187,13 @@ class TracingGameScaffold extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: GestureDetector(
+                        // Inicia o traçado ao pressionar o dedo
                         onPanStart: (details) {
                           if (index == state.activeIndex) {
                             tracingCubit.handlePanStart(details.localPosition);
                           }
                         },
+                        // Atualiza o traçado conforme o dedo se move
                         onPanUpdate: (details) {
                           if (index == state.activeIndex) {
                             tracingCubit.handlePanUpdate(details.localPosition);
@@ -190,6 +202,7 @@ class TracingGameScaffold extends StatelessWidget {
                         child: Stack(
                           clipBehavior: Clip.none,
                           children: [
+                            // Pintura da letra com todos os caminhos
                             CustomPaint(
                               size: tracingCubit.viewSize,
                               painter: PhoneticsPainter(
@@ -211,6 +224,7 @@ class TracingGameScaffold extends StatelessWidget {
                                 dottedPathPaintStyle: model.dottedPathPaintStyle,
                               ),
                             ),
+                            // Exibe âncora visual para indicar onde começar o traçado
                             if (index == state.activeIndex && showAnchor)
                               Positioned(
                                 top: model.anchorPos!.dy,
