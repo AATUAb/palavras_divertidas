@@ -1,10 +1,14 @@
+// Testes unitários ao modelo WordModel
+//
+// Este ficheiro cobre as validações essenciais para o modelo de dados WordModel, nomeadamente:
+// - Criação de instâncias válidas com todos os campos obrigatórios e opcionais.
+// - Verificação do correto mapeamento dos atributos obrigatórios e opcionais.
+// - Validação dos getters personalizados (audioPath, imagePath).
+// - Garantia da integridade da estrutura das palavras no domínio da aplicação.
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mundodaspalavras/models/word_model.dart';
 
-/// Teste unitário para o modelo WordModel.
-/// Objetivo: Validar a criação do objeto e a atribuição correta dos campos obrigatórios e opcionais.
-///
-/// Para executar: flutter test test/models/word_model_test.dart
 void main() {
   group('WordModel', () {
     test(

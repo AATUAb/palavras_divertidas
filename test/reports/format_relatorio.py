@@ -1,68 +1,118 @@
 import re
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 
 INPUT = "relatorio.txt"
 OUTPUT = "relatorio_formatado.md"
 
-# Define os títulos de secção por diretório principal
-SEC_TITLES = OrderedDict([
-    ("unit", "Resumo dos testes unitários"),
-    ("widget", "Resumo dos testes widget"),
-    ("integration", "Resumo dos testes de integração"),
-])
+SEC_TITLES = {
+    "unit/logic": "Lógica",
+    "unit/models": "Modelos",
+    "unit/utils": "Utilidades",
+    "widget/games": "Jogos",
+    "widget/common": "Widgets Comuns",
+    "widget/screens": "Ecrãs",
+    "integration/db": "Integração Base de Dados",
+    "integration/flows": "Integração Flows",
+}
 
 def categoria_da_linha(linha):
-    """
-    Extrai até dois níveis: ex: unit/logic, widget/games, integration/db
-    """
     match = re.search(r"test/([a-zA-Z0-9_]+)/([a-zA-Z0-9_]+)/[^/]+\.dart", linha)
     if match:
-        return match.group(1), f"{match.group(1)}/{match.group(2)}"
+        return f"{match.group(1)}/{match.group(2)}"
     match = re.search(r"test/([a-zA-Z0-9_]+)/[^/]+\.dart", linha)
     if match:
-        return match.group(1), match.group(1)
-    return "outros", "outros"
+        return match.group(1)
+    return "outros"
 
-def extrair_nome_teste(linha):
-    match = re.match(r"^.*?: .*?: (.+)$", linha)
+def extrair_estado_nome_teste(linha):
+    # Verifica se é linha de falha (tem [E])
+    if "[E]" in linha:
+        nome = linha.split(":")[-1].replace("[E]", "").strip()
+        return "fail", nome
+    # Caso contrário, se for linha de teste passou
+    match = re.match(r"^00:00\s+\+\d+(?:\s+-\d+)?\s*:\s.*?:\s(.+)$", linha)
     if match:
-        return "- " + match.group(1).strip()
-    return None
+        nome = match.group(1).strip()
+        return "pass", nome
+    return None, None
+
+def extrair_erro_bloco(linhas, idx):
+    # Extrai apenas Expected/Actual do bloco de erro (até linha vazia ou nova asserção)
+    erro = []
+    i = idx + 1
+    while i < len(linhas):
+        l = linhas[i]
+        if l.strip() == "" or l.startswith("00:00"):
+            break
+        if "Expected:" in l or "Actual:" in l:
+            erro.append(l.strip())
+        i += 1
+    return erro
 
 def main():
-    # Estrutura: {secao_principal: {subsecao: [testes]}}
-    secao_dict = {sec: defaultdict(list) for sec in SEC_TITLES}
-    outros = defaultdict(list)
+    secao_dict = defaultdict(list)
+    outros = []
+    all_tests_passed = True
 
     with open(INPUT, "r", encoding="utf-8", errors="replace") as f:
         linhas = f.readlines()
 
-    for linha in linhas:
+    idx = 0
+    while idx < len(linhas):
+        linha = linhas[idx]
         if linha.strip().startswith("00:00 +0: loading"):
+            idx += 1
             continue
         if "All tests passed!" in linha:
-            outros["outros"].append("\n\n✅ **Todos os testes passaram!**\n")
+            idx += 1
             continue
-        nome = extrair_nome_teste(linha)
+        estado, nome = extrair_estado_nome_teste(linha)
         if nome:
-            secao, subsecao = categoria_da_linha(linha)
-            if secao in secao_dict:
-                secao_dict[secao][subsecao].append(nome)
+            if estado == "pass":
+                resultado_md = f"- ✅ {nome}"
+            elif estado == "fail":
+                erro = extrair_erro_bloco(linhas, idx)
+                bloco_md = ""
+                if erro:
+                    bloco_md = "\n```text\n" + "\n".join(erro) + "\n```\n"
+                resultado_md = f"- ❌ {nome}{bloco_md}"
+                all_tests_passed = False
             else:
-                outros[subsecao].append(nome)
+                resultado_md = f"- {nome}"
+            secao = categoria_da_linha(linha)
+            if secao in SEC_TITLES:
+                secao_dict[secao].append(resultado_md)
+            else:
+                outros.append(resultado_md)
+        idx += 1
 
     with open(OUTPUT, "w", encoding="utf-8") as f:
         f.write("# Relatório de testes\n\n")
-        for secao, secao_label in SEC_TITLES.items():
-            f.write(f"## {secao_label}\n\n")
-            for subsecao in sorted(secao_dict[secao]):
-                f.write(f"### {subsecao}\n")
-                f.write("\n".join(secao_dict[secao][subsecao]))
-                f.write("\n\n")
-        # Outros e sucesso global no fim
-        for subsecao in outros:
-            f.write("\n".join(outros[subsecao]))
-        f.write("\n")
+        f.write("### Testes unitários\n\n")
+        for secao in ["unit/logic", "unit/models", "unit/utils"]:
+            if secao_dict[secao]:
+                f.write(f"##### {SEC_TITLES[secao]}\n\n")
+                f.write("\n".join(secao_dict[secao]) + "\n\n")
+        f.write("## Testes widget\n\n")
+        for secao in ["widget/games", "widget/common", "widget/screens"]:
+            if secao_dict[secao]:
+                f.write(f"##### {SEC_TITLES[secao]}\n\n")
+                f.write("\n".join(secao_dict[secao]) + "\n\n")
+        f.write("## Testes de integração\n\n")
+        for secao in ["integration/db", "integration/flows"]:
+            if secao_dict[secao]:
+                f.write(f"##### {SEC_TITLES[secao]}\n\n")
+                f.write("\n".join(secao_dict[secao]) + "\n\n")
+        if outros:
+            f.write("##### Outros\n\n")
+            f.write("\n".join(outros) + "\n\n")
+        
+        # Conclusão final separada!
+        f.write("## Conclusão Geral da Aplicação\n\n")
+        if all_tests_passed:
+            f.write("✅ **Todos os testes passaram!**\n")
+        else:
+            f.write("❌ **Alguns testes falharam!**\n")
 
     print(f"Relatório formatado gerado em: {OUTPUT}")
 

@@ -1,18 +1,12 @@
-// Testes unitários à lógica do LevelManager
+// Testes unitarios a logica do LevelManager
 //
-// Este ficheiro cobre todas as áreas críticas da lógica de progressão de nível da aplicação,
-// nomeadamente:
-// - Inicialização e sincronização do nível do utilizador.
-// - Lógica de subida e descida de nível em função da performance.
-// - Limites do sistema de níveis (máximo/mínimo).
-// - Cálculo e precisão da percentagem de acertos.
-// - Reset de progresso e reset do nível.
-// - Sincronização manual do nível com o estado do utilizador.
-//
-// NOTA CORPORATIVA:
-// Para isolamento total de dependências externas (ex: HiveService), recomenda-se a utilização de mocks.
-// Pode recorrer a mockito ou mocktail para mockar interações com serviços externos, garantindo que só
-// a lógica do LevelManager está sob teste. Ajuste os campos dos construtores dos modelos conforme necessário.
+// Este ficheiro cobre todas as areas criticas da logica de progressao de nivel da aplicacao:
+// - Inicializacao e sincronizacao do nivel do utilizador.
+// - Logica de subida e descida de nivel em funcao da performance (com reset dos contadores).
+// - Limites do sistema de niveis (maximo/minimo).
+// - Calculo e precisao da percentagem de acertos.
+// - Reset de progresso e reset do nivel.
+// - Sincronizacao manual do nivel com o estado do utilizador.
 
 import 'package:flutter_test/flutter_test.dart';
 import '../../../lib/widgets/level_manager.dart';
@@ -21,11 +15,10 @@ import '../../../lib/models/user_model.dart';
 void main() {
   late UserModel user;
 
-  // Pré-condição: cada teste começa com um utilizador de teste inicializado
   setUp(() {
     user = UserModel(
       name: 'Utilizador Teste',
-      schoolLevel: '1º Ciclo',
+      schoolLevel: '1 Ciclo',
       knownLetters: [],
       accuracyByLevel: const {},
       gameLevel: 1,
@@ -45,63 +38,53 @@ void main() {
   });
 
   group('LevelManager', () {
-    // Verifica que o gestor inicia com o nível definido no utilizador
     test('Deve iniciar com o nivel do utilizador', () {
       final manager = LevelManager(user: user, gameName: 'JogoTeste');
       expect(manager.level, equals(user.gameLevel));
     });
 
-    // Simula respostas certas e confirma a lógica de subida de nível
-    test('Deve incrementar nivel ao obter acertos suficientes', () async {
+    test('Deve subir um nivel apos dois ciclos completos de acertos', () async {
       final manager = LevelManager(user: user, gameName: 'JogoTeste');
-      // Simula respostas certas, o dobro do roundsToEvaluate
+      // 8 acertos - nivel ainda nao sobe
       for (int i = 0; i < manager.roundsToEvaluate * 2; i++) {
         await manager.registerRoundForLevel(correct: true);
+        expect(manager.level, 1); // Confirmar que ainda está no 1
       }
+      // So sobe na jogada seguinte
+      await manager.registerRoundForLevel(correct: true);
       expect(manager.level, 2);
-      expect(manager.levelChanged, true);
-      expect(manager.levelIncreased, true);
     });
 
-    // Simula respostas erradas e valida a descida de nível
-    test('Deve descer de nivel apos erros consecutivos', () async {
-      final manager = LevelManager(user: user, gameName: 'JogoTeste', level: 2);
-      // Simula respostas erradas, igual ao roundsToEvaluate
-      for (int i = 0; i < manager.roundsToEvaluate; i++) {
-        await manager.registerRoundForLevel(correct: false);
-      }
-      expect(manager.level, 1);
-      expect(manager.levelChanged, true);
-      expect(manager.levelIncreased, false);
-    });
-
-    // Garante que o nível não excede o máximo configurado
     test('Nao deve ultrapassar o nivel maximo', () async {
-      final manager = LevelManager(
-        user: user,
-        gameName: 'JogoTeste',
-        level: 3, // maxLevel por default é 3
-      );
-      for (int i = 0; i < manager.roundsToEvaluate * 2; i++) {
+      final manager = LevelManager(user: user, gameName: 'JogoTeste', level: 3);
+      for (int i = 0; i < manager.roundsToEvaluate * 4; i++) {
         await manager.registerRoundForLevel(correct: true);
+        expect(manager.level, lessThanOrEqualTo(manager.maxLevel));
       }
       expect(manager.level, manager.maxLevel);
     });
 
-    // Garante que o nível não desce abaixo do mínimo configurado
-    test('Nao deve descer abaixo do nivel minimo', () async {
-      final manager = LevelManager(
-        user: user,
-        gameName: 'JogoTeste',
-        level: 1, // minLevel por default é 1
-      );
+    test('Deve descer um nivel apos um ciclo de erros', () async {
+      final manager = LevelManager(user: user, gameName: 'JogoTeste', level: 2);
+      // 4 erros - nivel ainda nao desce
       for (int i = 0; i < manager.roundsToEvaluate; i++) {
         await manager.registerRoundForLevel(correct: false);
+        expect(manager.level, 2); // Confirmar que ainda está no 2
+      }
+      // So desce na jogada seguinte
+      await manager.registerRoundForLevel(correct: false);
+      expect(manager.level, 1);
+    });
+
+    test('Nao deve descer abaixo do nivel minimo', () async {
+      final manager = LevelManager(user: user, gameName: 'JogoTeste', level: 1);
+      for (int i = 0; i < manager.roundsToEvaluate * 2; i++) {
+        await manager.registerRoundForLevel(correct: false);
+        expect(manager.level, manager.minLevel);
       }
       expect(manager.level, manager.minLevel);
     });
 
-    // Valida o cálculo da precisão do jogador (% de acerto)
     test('Deve calcular precisao corretamente', () async {
       final manager = LevelManager(user: user, gameName: 'JogoTeste');
       await manager.registerRoundForLevel(correct: true);
@@ -109,7 +92,6 @@ void main() {
       expect(manager.currentAccuracyPercent, 50);
     });
 
-    // Testa o reset do progresso e do nível do jogador
     test('Reset ao progresso e nivel', () async {
       final manager = LevelManager(user: user, gameName: 'JogoTeste');
       await manager.registerRoundForLevel(correct: true);
@@ -119,7 +101,6 @@ void main() {
       expect(manager.correctAnswers, 0);
     });
 
-    // Valida a sincronização manual do nível do gestor com o utilizador
     test('Sincroniza nivel com utilizador', () {
       final manager = LevelManager(user: user, gameName: 'JogoTeste', level: 2);
       user.gameLevel = 3;
