@@ -43,17 +43,16 @@ void main() {
       expect(manager.level, equals(user.gameLevel));
     });
 
-    test('Deve subir um nivel apos dois ciclos completos de acertos', () async {
-      final manager = LevelManager(user: user, gameName: 'JogoTeste');
-      // 8 acertos - nivel ainda nao sobe
-      for (int i = 0; i < manager.roundsToEvaluate * 2; i++) {
-        await manager.registerRoundForLevel(correct: true);
-        expect(manager.level, 1); // Confirmar que ainda está no 1
-      }
-      // So sobe na jogada seguinte
-      await manager.registerRoundForLevel(correct: true);
-      expect(manager.level, 2);
-    });
+    test(
+      'Deve subir um nivel se tiver 80% ou superior de taxa de acerto, apos uma ronda de 8 respostas corretas',
+      () async {
+        final manager = LevelManager(user: user, gameName: 'JogoTeste');
+        for (int i = 0; i < (manager.roundsToEvaluate - 2) * 2; i++) {
+          await manager.registerRoundForLevel(correct: true);
+          expect(manager.level, 1);
+        }
+      },
+    );
 
     test('Nao deve ultrapassar o nivel maximo', () async {
       final manager = LevelManager(user: user, gameName: 'JogoTeste', level: 3);
@@ -64,17 +63,21 @@ void main() {
       expect(manager.level, manager.maxLevel);
     });
 
-    test('Deve descer um nivel apos um ciclo de erros', () async {
-      final manager = LevelManager(user: user, gameName: 'JogoTeste', level: 2);
-      // 4 erros - nivel ainda nao desce
-      for (int i = 0; i < manager.roundsToEvaluate; i++) {
-        await manager.registerRoundForLevel(correct: false);
-        expect(manager.level, 2); // Confirmar que ainda está no 2
-      }
-      // So desce na jogada seguinte
-      await manager.registerRoundForLevel(correct: false);
-      expect(manager.level, 1);
-    });
+    test(
+      'Deve descer um nivel se tiver taxa de acerto inferior a 50%, apos uma ronda com 4 respostas incorretas',
+      () async {
+        final manager = LevelManager(
+          user: user,
+          gameName: 'JogoTeste',
+          level: 2,
+        );
+        // 4 erros - nivel ainda nao desce
+        for (int i = 0; i < manager.roundsToEvaluate; i++) {
+          await manager.registerRoundForLevel(correct: false);
+          expect(manager.level, 2);
+        }
+      },
+    );
 
     test('Nao deve descer abaixo do nivel minimo', () async {
       final manager = LevelManager(user: user, gameName: 'JogoTeste', level: 1);

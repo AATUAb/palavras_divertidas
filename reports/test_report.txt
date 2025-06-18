@@ -1,0 +1,18 @@
+﻿00:00 +0: loading C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart
+00:00 +0: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve iniciar com o nivel do utilizador
+00:00 +1: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve subir um nivel se tiver 80% ou superior de taxa de acerto, apos uma ronda de 8 respostas corretas
+00:00 +2: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Nao deve ultrapassar o nivel maximo
+00:00 +3: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve descer um nivel se tiver taxa de acerto inferior a 50%, apos uma ronda com 4 respostas incorretas
+00:00 +4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Nao deve descer abaixo do nivel minimo
+00:00 +5: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve calcular precisao corretamente
+00:00 +6: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Reset ao progresso e nivel
+00:00 +7: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Sincroniza nivel com utilizador
+00:00 +8: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/models/character_model_test.dart: CharacterModel Deve criar um caracter com os campos obrigatorios
+00:00 +9: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/models/user_model_test.dart: UserModel Deve criar um utilizador com os campos obrigatorios
+00:00 +10: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/models/word_model_test.dart: WordModel Deve criar uma palavra com todos os campos obrigatorios e opcionais
+00:00 +11: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/models/word_model_test.dart: WordModel Deve criar uma palavra sem campos opcionais
+00:00 +12: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/games/identify_letters_numbers_logic_test.dart: Logica do IdentifyLettersNumbers Gera opcoes corretas - deve gerar o numero correto de elementos, todos iguais ao target, podendo variar em maiusculas/minusculas
+00:00 +13: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/games/identify_letters_numbers_logic_test.dart: Logica do IdentifyLettersNumbers Gera opcoes erradas - nunca deve conter o target
+00:00 +14: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/games/identify_letters_numbers_logic_test.dart: Logica do IdentifyLettersNumbers retryIsUsed deve retornar true apenas se o caracter ja estiver utilizado
+00:00 +15: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/games/identify_letters_numbers_logic_test.dart: Logica do IdentifyLettersNumbers Geracao de errados deve suportar mistura de letras e numeros
+00:00 +16: All tests passed!
