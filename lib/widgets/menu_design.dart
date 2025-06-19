@@ -58,7 +58,7 @@ class MenuDesign extends StatefulWidget {
   final VoidCallback? onTutorialPressed;// Callback para ajuda
 
   const MenuDesign({
-    Key? key,
+    super.key,
     required this.child,
     this.headerText,
     this.titleText,
@@ -74,8 +74,8 @@ class MenuDesign extends StatefulWidget {
     this.showWhiteBackground = true,
     this.pauseIntroMusic = false,
     this.onHelpPressed,
-    this.onTutorialPressed
-  }) : super(key: key);
+    this.onTutorialPressed,
+  });
 
   @override
   State<MenuDesign> createState() => _MenuDesignState();
@@ -261,7 +261,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
 }
 
 class TopWave extends StatelessWidget {
-  const TopWave({Key? key}) : super(key: key);
+  const TopWave({super.key});
 
   @override
   Widget build(BuildContext context) {

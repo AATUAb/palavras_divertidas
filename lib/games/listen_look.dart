@@ -45,8 +45,6 @@ class _ListenLookGameState extends State<ListenLookGame> {
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
 
-  int _roundCounter = 0;
-
   // Inicializa o estado do jogo
   @override
   void initState() {

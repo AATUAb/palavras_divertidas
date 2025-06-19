@@ -6,7 +6,7 @@ import 'game_menu.dart';
 
 class StickerBookScreen extends StatefulWidget {
   final dynamic user;
-  const StickerBookScreen({Key? key, required this.user}) : super(key: key);
+  const StickerBookScreen({super.key, required this.user});
 
   @override
   State<StickerBookScreen> createState() => _StickerBookScreenState();
@@ -147,7 +147,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
         showWhiteBackground: true,
         showSun: false,
         showHomeButton: true,
-        showTopWave: false,
+        showTopWave: true,
         onHomePressed: () {
           Navigator.pushReplacement(
             context,
