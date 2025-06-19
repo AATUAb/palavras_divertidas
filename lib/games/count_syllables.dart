@@ -300,9 +300,7 @@ Future<void> _generateNewChallenge() async {
 
 void _showTutorial() {
   final state = _gamesSuperKey.currentState;
-
   final safeRetryId = hasChallengeStarted ? targetWord!.text : null;
-
   state?.showTutorialDialog(
     retryId: safeRetryId,
     onTutorialClosed: () {
@@ -344,12 +342,23 @@ void _showTutorial() {
 }
 
   // Constrói o texto superior que é apresenado quando o jogo arranca
-  Widget _buildTopText() {
+ /* Widget _buildTopText() {
     if (!hasChallengeStarted || _levelWords.isEmpty || usedWords.isEmpty) {
       return const Text('Vamos contar as sílabas das palavras');
     }
     return Text('Quantas sílabas tem a palavra ${targetWord!.text}?');
-  }
+  }*/
+
+      Widget _buildTopText() {
+      return Padding(
+        padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
+        child: Text(
+          hasChallengeStarted
+            ? 'Quantas sílabas tem a palavra ${targetWord!.text}?'
+            : 'Vamos contar as sílabas das palavras',
+        ),
+      );
+    }
 
 
 

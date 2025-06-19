@@ -49,7 +49,7 @@ class _GameDesignState extends State<GameDesign> {
           // Fundo branco
           Container(color: Colors.white),
 
-          // 🌊 Faixa superior com instrução embutida
+          // Faixa superior com instrução embutida
           Positioned(
             top: 0,
             left: 0,
@@ -82,12 +82,12 @@ class _GameDesignState extends State<GameDesign> {
             ),
           ),*/
 
-          // 🏠 Botão voltar ao menu
+          // Botão voltar ao menu
           Positioned(
             top: 10.h,
             left: 10.w,
             child: IconButton(
-              icon: Icon(Icons.home, color: AppColors.orange, size: 30.sp),
+              icon: Icon(Icons.arrow_back, color: AppColors.orange, size: 30.sp),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               tooltip: 'Voltar ao Menu de Jogos',
@@ -102,7 +102,7 @@ class _GameDesignState extends State<GameDesign> {
             ),
           ),
 
-          // ★ Indicador de nível (estrelas)
+          // Indicador de nível (estrelas)
           Positioned(
             top: 70.h,
             right: 10.w, // desloca um pouco à esquerda do botão fechar
@@ -117,16 +117,12 @@ class _GameDesignState extends State<GameDesign> {
             ),
           ),
 
-          // ℹ️ Botão de tutorial
+          // Botão de tutorial
           Positioned(
             bottom: 10.h,
             left: 10.w,
             child: IconButton(
-              icon: Icon(
-                Icons.question_mark_outlined,
-                color: AppColors.orange,
-                size: 30.sp,
-              ),
+              icon: Icon(Icons.question_mark_outlined, color: AppColors.orange, size: 30.sp),
               tooltip: 'Tutorial',
               onPressed: () {
                 if (widget.onShowTutorial != null) {
@@ -151,7 +147,7 @@ class _GameDesignState extends State<GameDesign> {
             ),
           ),
 
-          // ⏳ Barra de tempo (se fornecida)
+          // Barra de tempo 
           if (widget.progressValue != null)
             Positioned(
               bottom: 20.h,

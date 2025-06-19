@@ -7,13 +7,17 @@ import 'services/hive_service.dart';
 import 'screens/loading_screen.dart';
 import 'themes/app_theme.dart';
 
-// 1️⃣ Importa o modelo (que inclui o adapter gerado)
 import 'models/character_model.dart';
 import 'models/user_model.dart';
 import 'models/word_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔒 Bloqueio por validade (expira a 11 de julho de 2025)
+  final now = DateTime.now();
+  final expirationDate = DateTime(2025, 7, 11);
+  if (now.isAfter(expirationDate)) return;
 
   // ► Bloqueio de orientação
   await SystemChrome.setPreferredOrientations([
