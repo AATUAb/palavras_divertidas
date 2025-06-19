@@ -14,6 +14,7 @@ dependencies:
   equatable: ^2.0.7
   svg_path_parser: ^1.1.2
   bloc: ^9.0.0
+  
 
   # Logger
   logger: ^1.2.0
@@ -50,6 +51,7 @@ dev_dependencies:
   hive_generator: ^2.0.1
   build_runner:  ^2.4.7
   flutter_launcher_icons: ^0.13.1
+  hive_test: ^1.0.0
 
 flutter:
   uses-material-design: true

@@ -5,7 +5,7 @@
 // - Logica de subida e descida de nivel em funcao da performance (com reset dos contadores).
 // - Limites do sistema de niveis (maximo/minimo).
 // - Calculo e precisao da percentagem de acertos.
-// - Reset de progresso e reset do nivel.
+// - Reset do nivel, ao adicionar letras novas.
 // - Sincronizacao manual do nivel com o estado do utilizador.
 
 import 'package:flutter_test/flutter_test.dart';
@@ -95,7 +95,7 @@ void main() {
       expect(manager.currentAccuracyPercent, 50);
     });
 
-    test('Reset ao progresso e nivel', () async {
+    test('Reset do nivel, ao adicionar letras novas', () async {
       final manager = LevelManager(user: user, gameName: 'JogoTeste');
       await manager.registerRoundForLevel(correct: true);
       await manager.resetLevelToOne();
