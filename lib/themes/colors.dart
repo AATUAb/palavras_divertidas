@@ -9,10 +9,9 @@ class AppColors {
   static const Color yellow = Color(0xFFFFEB3B);
   
   // Cores secundárias
-  static const Color lightBlue = Color(0xFFE3F2FD); // Cor de fundo (papel pautado)
+  static const Color lightBlue = Color(0xFFE3F2FD); 
   static const Color darkBlue = Color(0xFF1565C0);
   static const Color red = Color(0xFFF44336);
-  static const Color brown = Color(0xFF795548);
   
   // Cores neutras
   static const Color white = Colors.white;
