@@ -1,31 +1,31 @@
-/*
-  Testes de Integracao - HiveService
+/// Testes de integração - HiveService
+///
+/// Valida integração dos métodos principais da camada HiveService:
+///   - CRUD de utilizadores
+///   - Persistência de nível de jogo
+///   - Recuperação de utilizador inexistente
+///
+/// Cada teste corre sobre base de dados limpa (hive_test).
 
-  Este conjunto de testes valida a correta integracao da camada de servico HiveService,
-  garantindo persistencia, atualizacao, leitura e eliminacao de dados em boxes Hive.
-  Foco em robustez, regressao e consistencia dos principais metodos.
-
-  Abrangencia:
-    - CRUD de utilizadores
-    - Persistencia e leitura de niveis de jogo
-    - Consistencia dos dados entre sessoes
-
-  Pre-requisitos:
-    - Execucao isolada via hive_test
-    - Adapters registados/importados
-    - Dependencias: hive_test, flutter_test, hive_flutter
-
-  Notas:
-    - Cada teste comeca com base de dados limpa
-    - Testes orientados para robustez
-*/
-
+import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_test/hive_test.dart';
 import '../../../lib/services/hive_service.dart';
 import '../../../lib/models/user_model.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Mock do path_provider
+  const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
+  pathProviderChannel.setMockMethodCallHandler((call) async {
+    if (call.method == 'getApplicationDocumentsDirectory') {
+      return (await Directory.systemTemp.createTemp()).path;
+    }
+    return null;
+  });
+
   setUp(() async {
     await setUpTestHive();
     await HiveService.init();
@@ -36,7 +36,7 @@ void main() {
   });
 
   group('HiveService Integration', () {
-    test('Adiciona e le utilizadores', () async {
+    test('Adiciona e le utilizador', () async {
       final user = UserModel(
         name: "Alice",
         schoolLevel: "1 ciclo",
@@ -49,7 +49,7 @@ void main() {
       expect(users.first.name, "Alice");
     });
 
-    test('Atualiza utilizador por chave', () async {
+    test('Atualiza utilizador existente por chave', () async {
       final user = UserModel(
         name: "Bob",
         schoolLevel: "1 ciclo",
@@ -70,21 +70,20 @@ void main() {
       expect(users.first.schoolLevel, "2 ciclo");
     });
 
-    test('Elimina utilizador', () async {
+    test('Elimina utilizador existente', () async {
       final user = UserModel(
         name: "ToRemove",
         schoolLevel: "1 ciclo",
         knownLetters: [],
       );
       await HiveService.addUser(user);
-
       await HiveService.deleteUser(0);
 
       final users = HiveService.getUsers();
       expect(users.isEmpty, true);
     });
 
-    test('Persiste e le nivel do jogo', () async {
+    test('Persiste e le nivel de jogo por utilizador', () async {
       await HiveService.saveGameLevel(
         userKey: "user1",
         gameName: "jogoA",
@@ -98,7 +97,7 @@ void main() {
     });
 
     test('Recupera utilizador inexistente devolve null', () {
-      final user = HiveService.getUser(12345); // Key que nao existe
+      final user = HiveService.getUser(12345);
       expect(user, isNull);
     });
   });
