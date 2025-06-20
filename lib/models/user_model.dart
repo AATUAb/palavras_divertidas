@@ -17,8 +17,8 @@ class UserModel extends HiveObject {
   @HiveField(3)
   Map<int, double> accuracyByLevel;
 
-  @HiveField(4)
-  double? overallAccuracy;
+ /* @HiveField(4)
+  double? overallAccuracy;*/
 
   @HiveField(5)
   int gameLevel;
@@ -72,7 +72,7 @@ class UserModel extends HiveObject {
     required this.schoolLevel,
     List<String>? knownLetters,
     this.accuracyByLevel = const {},
-    this.overallAccuracy,
+    //this.overallAccuracy,
     this.gameLevel = 1,
     this.conquest = 0,
     this.firstTrySuccesses = 0,
@@ -90,7 +90,7 @@ class UserModel extends HiveObject {
        totalCorrectPerGame = Map.from(totalCorrectPerGame ?? {}),
        totalAttemptsPerGame = Map.from(totalAttemptsPerGame ?? {});
 
-  void updateAccuracy({required int level, required double accuracy}) {
+  /*void updateAccuracy({required int level, required double accuracy}) {
     accuracyByLevel = {...accuracyByLevel, level: accuracy};
     if (accuracyByLevel.isNotEmpty) {
       overallAccuracy =
@@ -99,7 +99,7 @@ class UserModel extends HiveObject {
     } else {
       overallAccuracy = null;
     }
-  }
+  }*/
 
   void updateGameAccuracy({
     required String gameId,
@@ -165,7 +165,7 @@ class UserModel extends HiveObject {
     List<String>? knownLetters,
     int? gameLevel,
     Map<int, double>? accuracyByLevel,
-    double? overallAccuracy,
+    //double? overallAccuracy,
     int? conquest,
     int? firstTrySuccesses,
     int? otherSuccesses,
@@ -177,14 +177,14 @@ class UserModel extends HiveObject {
     Map<String, int>? totalAttemptsPerGame,
     int? lastSeenConquests,
     String? lastLettersHash,
-    Map<String, double>? gamesAverageTime, // <-- Adicione isto
+    Map<String, double>? gamesAverageTime, 
   }) {
     return UserModel(
       name: name ?? this.name,
       schoolLevel: schoolLevel ?? this.schoolLevel,
       knownLetters: knownLetters ?? this.knownLetters,
       accuracyByLevel: accuracyByLevel ?? this.accuracyByLevel,
-      overallAccuracy: overallAccuracy ?? this.overallAccuracy,
+      //overallAccuracy: overallAccuracy ?? this.overallAccuracy,
       gameLevel: gameLevel ?? this.gameLevel,
       conquest: conquest ?? this.conquest,
       firstTrySuccesses: firstTrySuccesses ?? this.firstTrySuccesses,

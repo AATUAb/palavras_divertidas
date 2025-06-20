@@ -29,7 +29,7 @@ class LevelManager {
     int? level,
     this.maxLevel = 3,
     this.minLevel = 1,
-    this.roundsToEvaluate = 4, // ALTERAR PARA 4 PARA VERSÃO FINAL
+    this.roundsToEvaluate = 4, 
   }) : level = level ?? user.gameLevel;
 
   int get totalRoundsCount => totalRounds;
@@ -112,7 +112,7 @@ class LevelManager {
       ),
     );
 
-    user.updateAccuracy(level: levelAtThisRound, accuracy: accuracy);
+    //user.updateAccuracy(level: levelAtThisRound, accuracy: accuracy);
     unawaited(HiveService.updateUserByKey(int.parse(userKey), user));
 
     return levelChanged;
@@ -129,7 +129,7 @@ class LevelManager {
         gameName: gameName,
         level: level,
       );
-      user.updateAccuracy(level: 1, accuracy: 0);
+      //user.updateAccuracy(level: 1, accuracy: 0);
       await HiveService.updateUserByKey(int.parse(userKey), user);
     }
   }

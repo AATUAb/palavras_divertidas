@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
               knownLetters: letters,
               gameLevel: user.gameLevel,
               accuracyByLevel: user.accuracyByLevel,
-              overallAccuracy: user.overallAccuracy,
+              //overallAccuracy: user.overallAccuracy,
             );
             await HiveService.updateUserByKey(user.key, updatedUser);
 

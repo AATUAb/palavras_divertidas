@@ -21,7 +21,7 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       schoolLevel: fields[1] as String,
       knownLetters: (fields[2] as List?)?.cast<String>(),
       accuracyByLevel: (fields[3] as Map).cast<int, double>(),
-      overallAccuracy: fields[4] as double?,
+      //overallAccuracy: fields[4] as double?,
       gameLevel: fields[5] as int,
       conquest: fields[6] as int,
       firstTrySuccesses: fields[7] as int,
@@ -57,8 +57,8 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..write(obj.knownLetters)
       ..writeByte(3)
       ..write(obj.accuracyByLevel)
-      ..writeByte(4)
-      ..write(obj.overallAccuracy)
+      //..writeByte(4)
+      //..write(obj.overallAccuracy)
       ..writeByte(5)
       ..write(obj.gameLevel)
       ..writeByte(6)
