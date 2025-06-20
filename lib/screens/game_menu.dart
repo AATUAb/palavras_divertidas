@@ -69,15 +69,16 @@ void initState() {
       isMenuMusicAllowed = false;
       await pauseMenuMusicForConquest();
 
-      final soundFile =
-          newUnlocks == 1 ? 'one_conquest.ogg' : 'more_conquests.ogg';
-      await SoundManager.playAnimationSound(soundFile);
-
+      final soundFile = newUnlocks == 1 ? 'one_conquest.ogg' : 'more_conquests.ogg';
       await showDialog(
         context: context,
         barrierDismissible: false,
-        builder:
-            (_) => AlertDialog(
+        builder: (_) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            SoundManager.reset();
+            SoundManager.playAnimationSound(soundFile);
+          });
+          return AlertDialog(
               backgroundColor: const Color(0xffe8f4fe),
               title: Text(
                 'Parabéns! 🎉',
@@ -150,9 +151,10 @@ void initState() {
                   ],
                 ),
               ],
-            ),
+              );
+            }
           );
-        } 
+        }
         isMenuMusicAllowed = true;
         await resumeMenuMusic();
       }

@@ -124,6 +124,7 @@ static Future<void> playWord(String word) async {
  /// Toca som de animações (como confetes, conquistas, fim de jogo)
   static Future<void> playAnimationSound(String filename) async {
     await play('sounds/animations/$filename');
+
   }
 
   /// Toca som gerais da aplicação (como música e escolha letras)
