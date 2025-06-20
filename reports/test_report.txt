@@ -210,7 +210,7 @@
   package:hive/src/box/box_base_impl.dart 112:11          BoxBaseImpl.add
   lib\models\word_model.dart 50:17                        populateWordsIfNeeded
   
-00:00 +1 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
+00:01 +1 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
 [38;5;12mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
 [38;5;12mÔöé #0   HiveService.init (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/lib/services/hive_service.dart:34:14)[0m
 [38;5;12mÔöé #1   <asynchronous suspension>[0m
@@ -233,20 +233,20 @@
 [38;5;12mÔöé #0   HiveService.init (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/lib/services/hive_service.dart:44:14)[0m
 [38;5;12mÔöé #1   <asynchronous suspension>[0m
 [38;5;12mÔö£ÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöä[0m
+00:01 +2 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
 [38;5;12mÔöé ­ƒÆí Ô£à Box 'userBox' opened successfully[0m
 [38;5;12mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
 [38;5;12mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
 [38;5;12mÔöé #0   HiveService.init (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/lib/services/hive_service.dart:46:14)[0m
 [38;5;12mÔöé #1   <asynchronous suspension>[0m
 [38;5;12mÔö£ÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöä[0m
+00:01 +3 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
 [38;5;12mÔöé ­ƒÆí Ô£à Hive inicializado com sucesso.[0m
 [38;5;12mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
-00:00 +2 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
-00:00 +3 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
-00:00 +4 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
-00:00 +5 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
-00:00 +6 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
-00:00 +7 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
+00:01 +4 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
+00:01 +5 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
+00:01 +6 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
+00:01 +7 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/integration/flows/flow_integration_test.dart: Integracao Flow:  Hive (Base de dados) <-> SuperWidget <-> Jogo (CountSyllables)
 [38;5;12mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
 [38;5;12mÔöé #0   HiveService.addUser (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/lib/services/hive_service.dart:70:12)[0m
 [38;5;12mÔöé #1   <asynchronous suspension>[0m
@@ -277,8 +277,8 @@
 [38;5;12mÔö£ÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöä[0m
 [38;5;12mÔöé ­ƒÆí ­ƒÄ» Updated accuracy for CountSyllables, n├¡vel 1: 90%[0m
 [38;5;12mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
-00:00 +8 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart: ConquestManager Inicia com zero conquistas e contadores limpos
-00:00 +9 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart: ConquestManager Regista conquista por acertos consecutivos na primeira tentativa
+00:01 +8 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart: ConquestManager Inicia com zero conquistas e contadores limpos
+00:01 +9 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart: ConquestManager Regista conquista por acertos consecutivos na primeira tentativa
 [38;5;12mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
 [38;5;12mÔöé #0   ConquestManager.registerRound (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/lib/widgets/conquest_manager.dart:71:24)[0m
 [38;5;12mÔöé #1   main.<anonymous closure>.<anonymous closure> (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart:47:19)[0m
@@ -351,7 +351,7 @@
 [38;5;12mÔö£ÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöä[0m
 [38;5;12mÔöé ­ƒÆí ­ƒôè Sess├úo: 1┬¬Tentativas=10; outrasTentativas=0 | streakFirstTry=0; persistenceCount=0[0m
 [38;5;12mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
-00:00 +10 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart: ConquestManager Regista conquista por persistencia (nao-firstTry)
+00:01 +10 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart: ConquestManager Regista conquista por persistencia (nao-firstTry)
 [38;5;12mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
 [38;5;12mÔöé #0   ConquestManager.registerRound (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/lib/widgets/conquest_manager.dart:71:24)[0m
 [38;5;12mÔöé #1   main.<anonymous closure>.<anonymous closure> (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart:58:17)[0m
@@ -454,7 +454,7 @@
 [38;5;12mÔö£ÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöä[0m
 [38;5;12mÔöé ­ƒÆí ­ƒôè Sess├úo: 1┬¬Tentativas=0; outrasTentativas=15 | streakFirstTry=0; persistenceCount=0[0m
 [38;5;12mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
-00:00 +11 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart: ConquestManager Primeira tentativa acumula corretamente o streak
+00:01 +11 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart: ConquestManager Primeira tentativa acumula corretamente o streak
 [38;5;12mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
 [38;5;12mÔöé #0   ConquestManager.registerRound (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/lib/widgets/conquest_manager.dart:71:24)[0m
 [38;5;12mÔöé #1   main.<anonymous closure>.<anonymous closure> (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart:67:15)[0m
@@ -473,7 +473,7 @@
 [38;5;12mÔö£ÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöä[0m
 [38;5;12mÔöé ­ƒÆí ­ƒôè Sess├úo: 1┬¬Tentativas=2; outrasTentativas=1 | streakFirstTry=0; persistenceCount=1[0m
 [38;5;12mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
-00:00 +12 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart: ConquestManager PersistenceCount acumula apenas em tentativas nao-firstTry
+00:01 +12 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart: ConquestManager PersistenceCount acumula apenas em tentativas nao-firstTry
 [38;5;12mÔöîÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
 [38;5;12mÔöé #0   ConquestManager.registerRound (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/lib/widgets/conquest_manager.dart:71:24)[0m
 [38;5;12mÔöé #1   main.<anonymous closure>.<anonymous closure> (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/conquest_manager_test.dart:76:15)[0m
@@ -492,16 +492,294 @@
 [38;5;12mÔö£ÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöäÔöä[0m
 [38;5;12mÔöé ­ƒÆí ­ƒôè Sess├úo: 1┬¬Tentativas=1; outrasTentativas=2 | streakFirstTry=1; persistenceCount=2[0m
 [38;5;12mÔööÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ[0m
-00:00 +13 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve iniciar com o nivel do utilizador
-00:00 +14 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve subir um nivel se tiver 80% ou superior de taxa de acerto, apos uma ronda de 8 respostas corretas
-00:00 +15 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Nao deve ultrapassar o nivel maximo
-00:00 +16 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve descer um nivel se tiver taxa de acerto inferior a 50%, apos uma ronda com 4 respostas incorretas
-00:00 +17 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Nao deve descer abaixo do nivel minimo
-00:00 +18 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve calcular precisao corretamente
-00:00 +19 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Reset do nivel, ao adicionar letras novas
-00:00 +20 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Sincroniza nivel com utilizador
-00:00 +21 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/models/character_model_test.dart: CharacterModel Deve criar um caracter com os campos obrigatorios
+00:01 +13 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve iniciar com o nivel do utilizador
+00:01 +14 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve subir um nivel se tiver 80% ou superior de taxa de acerto, apos uma ronda de 8 respostas corretas
+00:01 +15 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Nao deve ultrapassar o nivel maximo
+00:01 +16 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve descer um nivel se tiver taxa de acerto inferior a 50%, apos uma ronda com 4 respostas incorretas
+00:01 +17 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Nao deve descer abaixo do nivel minimo
+00:01 +18 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Deve calcular precisao corretamente
+00:01 +19 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Reset do nivel, ao adicionar letras novas
+00:01 +20 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/logic/level_manager_test.dart: LevelManager Sincroniza nivel com utilizador
+00:01 +21 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/models/character_model_test.dart: CharacterModel Deve criar um caracter com os campos obrigatorios
 00:01 +22 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/models/user_model_test.dart: UserModel Deve criar um utilizador com os campos obrigatorios
 00:01 +23 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/models/word_model_test.dart: WordModel Deve criar uma palavra com todos os campos obrigatorios e opcionais
 00:01 +24 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/unit/models/word_model_test.dart: WordModel Deve criar uma palavra sem campos opcionais
-00:01 +25 -4: Some tests failed.
+00:01 +25 -4: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart: MenuDesign deve renderizar elementos principais do MenuDesign
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY WIDGETS LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following LateError was thrown building MenuDesign(dirty, state: _MenuDesignState#09872):
+LateInitializationError: Field '_splitScreenMode@380084504' has not been initialized.
+
+The relevant error-causing widget was:
+  MenuDesign
+  MenuDesign:file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart:12:15
+
+When the exception was thrown, this was the stack:
+#0      ScreenUtil._splitScreenMode (package:flutter_screenutil/src/screen_util.dart)
+#1      ScreenUtil.scaleHeight (package:flutter_screenutil/src/screen_util.dart:220:32)
+#2      ScreenUtil.setHeight (package:flutter_screenutil/src/screen_util.dart:241:44)
+#3      SizeExtension.h (package:flutter_screenutil/src/size_extension.dart:12:32)
+#4      _MenuDesignState.build (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/lib/widgets/menu_design.dart:161:20)
+#5      StatefulElement.build (package:flutter/src/widgets/framework.dart:5841:27)
+#6      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5733:15)
+#7      StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#8      Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#9      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:5715:5)
+#10     StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:5883:11)
+#11     ComponentElement.mount (package:flutter/src/widgets/framework.dart:5709:5)
+...     Normal element mounting (228 frames)
+#239    Element.inflateWidget (package:flutter/src/widgets/framework.dart:4555:16)
+#240    MultiChildRenderObjectElement.inflateWidget (package:flutter/src/widgets/framework.dart:7178:36)
+#241    MultiChildRenderObjectElement.mount (package:flutter/src/widgets/framework.dart:7194:32)
+...     Normal element mounting (457 frames)
+#698    Element.inflateWidget (package:flutter/src/widgets/framework.dart:4555:16)
+#699    Element.updateChild (package:flutter/src/widgets/framework.dart:4014:20)
+#700    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#701    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#702    ProxyElement.update (package:flutter/src/widgets/framework.dart:6059:5)
+#703    _InheritedNotifierElement.update (package:flutter/src/widgets/inherited_notifier.dart:108:11)
+#704    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#705    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#706    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#707    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#708    StatefulElement.update (package:flutter/src/widgets/framework.dart:5917:5)
+#709    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#710    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#711    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#712    ProxyElement.update (package:flutter/src/widgets/framework.dart:6059:5)
+#713    _InheritedNotifierElement.update (package:flutter/src/widgets/inherited_notifier.dart:108:11)
+#714    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#715    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#716    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#717    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#718    StatefulElement.update (package:flutter/src/widgets/framework.dart:5917:5)
+#719    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#720    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#721    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#722    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#723    StatefulElement.update (package:flutter/src/widgets/framework.dart:5917:5)
+#724    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#725    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#726    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#727    ProxyElement.update (package:flutter/src/widgets/framework.dart:6059:5)
+#728    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#729    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#730    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#731    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#732    StatefulElement.update (package:flutter/src/widgets/framework.dart:5917:5)
+#733    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#734    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#735    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#736    ProxyElement.update (package:flutter/src/widgets/framework.dart:6059:5)
+#737    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#738    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#739    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#740    ProxyElement.update (package:flutter/src/widgets/framework.dart:6059:5)
+#741    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#742    _RawViewElement._updateChild (package:flutter/src/widgets/view.dart:481:16)
+#743    _RawViewElement.update (package:flutter/src/widgets/view.dart:569:5)
+#744    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#745    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#746    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#747    StatelessElement.update (package:flutter/src/widgets/framework.dart:5805:5)
+#748    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#749    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#750    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#751    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#752    StatefulElement.update (package:flutter/src/widgets/framework.dart:5917:5)
+#753    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#754    RootElement._rebuild (package:flutter/src/widgets/binding.dart:1687:16)
+#755    RootElement.update (package:flutter/src/widgets/binding.dart:1665:5)
+#756    RootElement.performRebuild (package:flutter/src/widgets/binding.dart:1679:7)
+#757    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#758    BuildScope._tryRebuild (package:flutter/src/widgets/framework.dart:2704:15)
+#759    BuildScope._flushDirtyElements (package:flutter/src/widgets/framework.dart:2762:11)
+#760    BuildOwner.buildScope (package:flutter/src/widgets/framework.dart:3066:18)
+#761    AutomatedTestWidgetsFlutterBinding.drawFrame (package:flutter_test/src/binding.dart:1495:19)
+#762    RendererBinding._handlePersistentFrameCallback (package:flutter/src/rendering/binding.dart:482:5)
+#763    SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1442:15)
+#764    SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1355:9)
+#765    AutomatedTestWidgetsFlutterBinding.pump.<anonymous closure> (package:flutter_test/src/binding.dart:1340:9)
+#768    TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
+#769    AutomatedTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:1329:27)
+#770    WidgetTester.pumpWidget.<anonymous closure> (package:flutter_test/src/widget_tester.dart:599:22)
+#773    TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
+#774    WidgetTester.pumpWidget (package:flutter_test/src/widget_tester.dart:596:27)
+#775    main.<anonymous closure> (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart:10:18)
+#776    testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:193:29)
+<asynchronous suspension>
+#777    TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1064:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 5 frames from dart:async and package:stack_trace)
+
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "TituloTeste": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart:21:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:193:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1064:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart line 21
+The test description was:
+  MenuDesign deve renderizar elementos principais do MenuDesign
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following message was thrown:
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+unexpected.
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+00:02 +25 -5: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart: MenuDesign deve renderizar elementos principais do MenuDesign [E]
+  Test failed. See exception logs above.
+  The test description was: MenuDesign deve renderizar elementos principais do MenuDesign
+  
+00:02 +25 -5: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart: MenuDesign deve executar callback de onHomePressed ao clicar no botao home
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY WIDGETS LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following LateError was thrown building MenuDesign(dirty, state: _MenuDesignState#32e68):
+LateInitializationError: Field '_splitScreenMode@380084504' has not been initialized.
+
+The relevant error-causing widget was:
+  MenuDesign
+  MenuDesign:file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart:32:17
+
+When the exception was thrown, this was the stack:
+#0      ScreenUtil._splitScreenMode (package:flutter_screenutil/src/screen_util.dart)
+#1      ScreenUtil.scaleHeight (package:flutter_screenutil/src/screen_util.dart:220:32)
+#2      ScreenUtil.setHeight (package:flutter_screenutil/src/screen_util.dart:241:44)
+#3      SizeExtension.h (package:flutter_screenutil/src/size_extension.dart:12:32)
+#4      _MenuDesignState.build (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/lib/widgets/menu_design.dart:161:20)
+#5      StatefulElement.build (package:flutter/src/widgets/framework.dart:5841:27)
+#6      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5733:15)
+#7      StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#8      Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#9      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:5715:5)
+#10     StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:5883:11)
+#11     ComponentElement.mount (package:flutter/src/widgets/framework.dart:5709:5)
+...     Normal element mounting (228 frames)
+#239    Element.inflateWidget (package:flutter/src/widgets/framework.dart:4555:16)
+#240    MultiChildRenderObjectElement.inflateWidget (package:flutter/src/widgets/framework.dart:7178:36)
+#241    MultiChildRenderObjectElement.mount (package:flutter/src/widgets/framework.dart:7194:32)
+...     Normal element mounting (457 frames)
+#698    Element.inflateWidget (package:flutter/src/widgets/framework.dart:4555:16)
+#699    Element.updateChild (package:flutter/src/widgets/framework.dart:4014:20)
+#700    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#701    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#702    ProxyElement.update (package:flutter/src/widgets/framework.dart:6059:5)
+#703    _InheritedNotifierElement.update (package:flutter/src/widgets/inherited_notifier.dart:108:11)
+#704    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#705    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#706    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#707    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#708    StatefulElement.update (package:flutter/src/widgets/framework.dart:5917:5)
+#709    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#710    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#711    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#712    ProxyElement.update (package:flutter/src/widgets/framework.dart:6059:5)
+#713    _InheritedNotifierElement.update (package:flutter/src/widgets/inherited_notifier.dart:108:11)
+#714    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#715    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#716    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#717    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#718    StatefulElement.update (package:flutter/src/widgets/framework.dart:5917:5)
+#719    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#720    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#721    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#722    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#723    StatefulElement.update (package:flutter/src/widgets/framework.dart:5917:5)
+#724    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#725    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#726    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#727    ProxyElement.update (package:flutter/src/widgets/framework.dart:6059:5)
+#728    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#729    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#730    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#731    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#732    StatefulElement.update (package:flutter/src/widgets/framework.dart:5917:5)
+#733    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#734    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#735    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#736    ProxyElement.update (package:flutter/src/widgets/framework.dart:6059:5)
+#737    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#738    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#739    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#740    ProxyElement.update (package:flutter/src/widgets/framework.dart:6059:5)
+#741    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#742    _RawViewElement._updateChild (package:flutter/src/widgets/view.dart:481:16)
+#743    _RawViewElement.update (package:flutter/src/widgets/view.dart:569:5)
+#744    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#745    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#746    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#747    StatelessElement.update (package:flutter/src/widgets/framework.dart:5805:5)
+#748    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#749    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5756:16)
+#750    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5892:11)
+#751    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#752    StatefulElement.update (package:flutter/src/widgets/framework.dart:5917:5)
+#753    Element.updateChild (package:flutter/src/widgets/framework.dart:3998:15)
+#754    RootElement._rebuild (package:flutter/src/widgets/binding.dart:1687:16)
+#755    RootElement.update (package:flutter/src/widgets/binding.dart:1665:5)
+#756    RootElement.performRebuild (package:flutter/src/widgets/binding.dart:1679:7)
+#757    Element.rebuild (package:flutter/src/widgets/framework.dart:5445:7)
+#758    BuildScope._tryRebuild (package:flutter/src/widgets/framework.dart:2704:15)
+#759    BuildScope._flushDirtyElements (package:flutter/src/widgets/framework.dart:2762:11)
+#760    BuildOwner.buildScope (package:flutter/src/widgets/framework.dart:3066:18)
+#761    AutomatedTestWidgetsFlutterBinding.drawFrame (package:flutter_test/src/binding.dart:1495:19)
+#762    RendererBinding._handlePersistentFrameCallback (package:flutter/src/rendering/binding.dart:482:5)
+#763    SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1442:15)
+#764    SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1355:9)
+#765    AutomatedTestWidgetsFlutterBinding.pump.<anonymous closure> (package:flutter_test/src/binding.dart:1340:9)
+#768    TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
+#769    AutomatedTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:1329:27)
+#770    WidgetTester.pumpWidget.<anonymous closure> (package:flutter_test/src/widget_tester.dart:599:22)
+#773    TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
+#774    WidgetTester.pumpWidget (package:flutter_test/src/widget_tester.dart:596:27)
+#775    main.<anonymous closure> (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart:30:20)
+#776    testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:193:29)
+<asynchronous suspension>
+#777    TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1064:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 5 frames from dart:async and package:stack_trace)
+
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with icon "IconData(U+0E318)": []" (used in a call to "tap()") could not
+find any matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2009:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1861:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1041:7)
+#3      main.<anonymous closure> (file:///C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart:42:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:193:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1064:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  MenuDesign deve executar callback de onHomePressed ao clicar no botao home
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following message was thrown:
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+unexpected.
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+00:02 +25 -6: C:/Users/tiago/Desktop/Mundo-das-Palavras/test/widget/screens/menu_design_test.dart: MenuDesign deve executar callback de onHomePressed ao clicar no botao home [E]
+  Test failed. See exception logs above.
+  The test description was: MenuDesign deve executar callback de onHomePressed ao clicar no botao home
+  
+00:02 +25 -6: Some tests failed.
