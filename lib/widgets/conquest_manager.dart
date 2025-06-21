@@ -50,13 +50,12 @@ class ConquestManager {
       user.persistenceCountTotal++;
     }
 
-    // ALTERAR PARA 10 PARA VERSÃO FINAL
-    if (firstTry && streakFirstTry >= 10) {
+    if (firstTry && streakFirstTry == 10) {
       conquest++;
       hasNewConquest = true;
     }
-    // ALTERAR PARA 15 PARA VERSÃO FINAL
-    if (!firstTry && persistenceCount >= 15) {
+
+    if (!firstTry && persistenceCount == 15) {
       conquest++;
       hasNewConquest = true;
     }
@@ -89,3 +88,73 @@ class ConquestManager {
     return conquest > oldConquest;
   }
 }
+
+
+
+/* codigo para print
+
+import 'package:flutter/material.dart';
+import '../models/user_model.dart';
+
+class ConquestManager {
+  int conquest;
+  int totalRounds = 0;
+  int streakFirstTry = 0;   
+  int persistenceCount = 0;     
+  bool hasNewConquest = false;
+
+  ConquestManager({this.conquest = 0});
+
+  void reset() {
+    totalRounds = 0;
+    streakFirstTry = 0;
+    persistenceCount = 0;
+    hasNewConquest = false;
+  }
+
+  void registerRound({required bool firstTry, required UserModel user}) {
+    hasNewConquest = false;
+    totalRounds++;
+
+    if (firstTry) {
+      streakFirstTry++;
+      user.firstTryCorrectTotal++;
+    } else {
+      streakFirstTry = 0;
+      persistenceCount++;
+      user.persistenceCountTotal++;
+    }
+
+    // Conquista por acertar 10 vezes seguidas na primeiras tentativas
+    if (firstTry && streakFirstTry == 1) {
+      conquest++;
+      hasNewConquest = true;
+    }
+
+    // Conquista por persistência
+    if (!firstTry && persistenceCount == 15) {
+      conquest++;
+      hasNewConquest = true;
+    }
+
+    // Se conquistou, reinicia contadores
+    if (hasNewConquest) {
+      streakFirstTry = 0;
+      persistenceCount = 0;
+      user.incrementConquest();
+    }
+  }
+
+  Future<bool> registerRoundForConquest({
+    required BuildContext context,
+    required bool firstTry,
+    required Future<void> Function() applySettings,
+    required UserModel user,
+  }) async {
+    final oldConquest = conquest;
+    registerRound(firstTry: firstTry, user: user);
+    await applySettings();
+    return conquest > oldConquest;
+  }
+}
+*/

@@ -9,16 +9,13 @@ final logger = Logger();
 class LevelManager {
   final UserModel user;
   final String gameName;
-
   int level;
   int totalRounds = 0;
   int correctAnswers = 0;
   int recentRounds = 0;
   int recentCorrect = 0;
-
   bool levelChanged = false;
   bool levelIncreased = false;
-
   final int maxLevel;
   final int minLevel;
   final int roundsToEvaluate;
@@ -41,7 +38,7 @@ class LevelManager {
     return (accuracy * 100).round();
   }
 
-  // Carrega o nível do jogo especifico em Hive
+  // Carrega o nível atual do jogo a partir da base de dados Hive
   Future<void> loadLevel() async {
     if (user.key == null) return;
     level = await HiveService.getGameLevel(
@@ -51,7 +48,7 @@ class LevelManager {
     logger.i('📥 Nível carregado para ${user.name} no jogo $gameName: $level');
   }
 
-  // Regista uma ronda nova do jogo e atualiza o nível
+  // Regista uma nova ronda e avalia se deve haver subida ou descida de nível
   Future<bool> registerRoundForLevel({required bool correct}) async {
     // Incrementa contadores globais
     totalRounds++;
@@ -118,7 +115,7 @@ class LevelManager {
     return levelChanged;
   }
 
-  // Função para fazer o reset do progreso atual, aplicável quando há letras novas conhecidas
+  // Faz reset ao nível e progresso atual, usado quando são adicionadas novas letras aprendidas
   Future<void> resetLevelToOne() async {
     level = 1;
     resetProgress();
@@ -134,19 +131,12 @@ class LevelManager {
     }
   }
 
-  // Função para sincronizar o nível do utilizador
+  // Atualiza o nível local com o valor guardado no UserModel
   void syncLevelWithUser() {
     level = user.gameLevel;
   }
 
-  // Função para fazer o reset do progreso
-  void resetProgress() {
-    totalRounds = 0;
-    correctAnswers = 0;
-    recentRounds = 0;
-    recentCorrect = 0;
-  }
-
+// Regista o tempo de resposta para o jogo atual e para o nível atual no UserModel
   void registerResponseTime({
     required UserModel user,
     required String gameName,
@@ -157,5 +147,13 @@ class LevelManager {
     user.updateGameTime(gameName, responseTimeInSeconds);
     user.updateGameTimeByLevel(gameName, level, responseTimeInSeconds);
     await user.save();
+  }
+
+  // Recomeça os contadores de progresso e precisão (rondas e acertos)
+  void resetProgress() {
+    totalRounds = 0;
+    correctAnswers = 0;
+    recentRounds = 0;
+    recentCorrect = 0;
   }
 }

@@ -23,10 +23,7 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       accuracyByLevel: (fields[3] as Map).cast<int, double>(),
       gameLevel: fields[5] as int,
       conquest: fields[6] as int,
-      firstTrySuccesses: fields[7] as int,
-      otherSuccesses: fields[8] as int,
       firstTryCorrectTotal: fields[9] as int,
-      correctButNotFirstTryTotal: fields[10] as int,
       persistenceCountTotal: fields[11] as int,
       gamesAccuracy: (fields[12] as Map).map((dynamic k, dynamic v) =>
           MapEntry(k as String, (v as List).cast<int>())),
@@ -47,7 +44,7 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(19)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -60,14 +57,8 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..write(obj.gameLevel)
       ..writeByte(6)
       ..write(obj.conquest)
-      ..writeByte(7)
-      ..write(obj.firstTrySuccesses)
-      ..writeByte(8)
-      ..write(obj.otherSuccesses)
       ..writeByte(9)
       ..write(obj.firstTryCorrectTotal)
-      ..writeByte(10)
-      ..write(obj.correctButNotFirstTryTotal)
       ..writeByte(11)
       ..write(obj.persistenceCountTotal)
       ..writeByte(12)
