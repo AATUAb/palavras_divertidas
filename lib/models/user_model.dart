@@ -26,17 +26,17 @@ class UserModel extends HiveObject {
   @HiveField(6)
   int conquest;
 
- /* @HiveField(7)
-  int firstTrySuccesses;*/
+  @HiveField(7)
+  int firstTrySuccesses;
 
-  /*@HiveField(8)
-  int otherSuccesses;*/
+  @HiveField(8)
+  int otherSuccesses;
 
   @HiveField(9)
   int firstTryCorrectTotal;
 
-  /*@HiveField(10)
-  int correctButNotFirstTryTotal;*/
+  @HiveField(10)
+  int correctButNotFirstTryTotal;
 
   @HiveField(11)
   int persistenceCountTotal;
@@ -75,10 +75,10 @@ class UserModel extends HiveObject {
     //this.overallAccuracy,
     this.gameLevel = 1,
     this.conquest = 0,
-   // this.firstTrySuccesses = 0,
-    //this.otherSuccesses = 0,
+    this.firstTrySuccesses = 0,
+    this.otherSuccesses = 0,
     this.firstTryCorrectTotal = 0,
-    //this.correctButNotFirstTryTotal = 0,
+    this.correctButNotFirstTryTotal = 0,
     this.persistenceCountTotal = 0,
     this.gamesAccuracy = const {},
     Map<String, int>? totalCorrectPerGame,
@@ -189,11 +189,11 @@ class UserModel extends HiveObject {
       //overallAccuracy: overallAccuracy ?? this.overallAccuracy,
       gameLevel: gameLevel ?? this.gameLevel,
       conquest: conquest ?? this.conquest,
-      //firstTrySuccesses: firstTrySuccesses ?? this.firstTrySuccesses,
-      //otherSuccesses: otherSuccesses ?? this.otherSuccesses,
+      firstTrySuccesses: firstTrySuccesses ?? this.firstTrySuccesses,
+      otherSuccesses: otherSuccesses ?? this.otherSuccesses,
       firstTryCorrectTotal: firstTryCorrectTotal ?? this.firstTryCorrectTotal,
-      //correctButNotFirstTryTotal:
-       //   correctButNotFirstTryTotal ?? this.correctButNotFirstTryTotal,
+      correctButNotFirstTryTotal:
+          correctButNotFirstTryTotal ?? this.correctButNotFirstTryTotal,
       persistenceCountTotal:
           persistenceCountTotal ?? this.persistenceCountTotal,
       gamesAccuracy: gamesAccuracy ?? this.gamesAccuracy,
