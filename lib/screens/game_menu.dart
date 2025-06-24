@@ -155,7 +155,8 @@ class _GameMenuState extends State<GameMenu> {
                   ],
                 ),
               ],
-            ),
+            );
+        },
       );
     }
     isMenuMusicAllowed = true;
