@@ -1,4 +1,4 @@
- // Jogo "Ouvir e Procurar Imagem":
+// Jogo "Ouvir e Procurar Imagem":
 // O jogador ouve uma palavra e escolhe entre 3 imagens.
 // A dificuldade e tempo variam com o nível.
 // A resposta correta mostra o texto da palavra correspondente.
@@ -68,37 +68,44 @@ class _ListenLookGameState extends State<ListenLookGame> {
   // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    final schoolLevel = widget.user.schoolLevel;
+
+    const Map<String, List<int>> game4TimesPerLevel = {
+      'Pré-Escolar': [25, 20, 15],
+      '1º Ciclo': [20, 15, 15],
+    };
+
+    // --- Tempo conforme tabela do Jogo 4 ---
+    final times = game4TimesPerLevel[schoolLevel] ?? [15, 15, 15];
+    levelTime = Duration(seconds: times[(lvl - 1).clamp(0, times.length - 1)]);
+
     numDistractors = lvl == 1 ? 1 : 2;
     late String levelDifficulty;
     switch (lvl) {
       case 1:
-        levelTime = const Duration(seconds: 120);
         levelDifficulty = 'baixa';
         break;
       case 2:
-        levelTime = const Duration(seconds: 120);
         levelDifficulty = 'media';
         break;
       default:
-        levelTime = const Duration(seconds: 120);
         levelDifficulty = 'dificil';
     }
 
-    // Garante que palavras da fila de retry continuam acessíveis
-    final filtered = _allWords.where((w) {
+    // Mantém o resto igual
+    final filtered =
+        _allWords.where((w) {
           final diff = (w.difficulty).trim().toLowerCase();
           return diff == levelDifficulty &&
-              ! _usedWords.contains(w.text) && // ← evita repetir palavras já usadas
+              !_usedWords.contains(w.text) &&
               (w.audioPath).trim().isNotEmpty &&
               (w.imagePath).trim().isNotEmpty;
         }).toList();
 
-    // Garante que palavras da fila de retry continuam acessíveis
     final retryIds = _gamesSuperKey.currentState?.retryQueueContents() ?? [];
     final retryWords =
         _allWords.where((w) => retryIds.contains(w.text)).toList();
 
-    // Junta os dois, evitando duplicações
     _levelWords = {...filtered, ...retryWords}.toList();
   }
 
@@ -117,43 +124,45 @@ class _ListenLookGameState extends State<ListenLookGame> {
   Future<void> _generateNewChallenge() async {
     _gamesSuperKey.currentState?.playChallengeHighlight();
 
-  // Verifica se há retry a usar
-  if (!mounted || _isDisposed) return;
+    // Verifica se há retry a usar
+    if (!mounted || _isDisposed) return;
 
-  final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
-  final available = _levelWords.where((w) => !_usedWords.contains(w.text)).toList();
-  final hasRetry = retry != null;
+    final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
+    final available =
+        _levelWords.where((w) => !_usedWords.contains(w.text)).toList();
+    final hasRetry = retry != null;
 
-  if (available.isEmpty && !hasRetry) {
-    _gamesSuperKey.currentState?.showEndOfGameDialog(
-      onRestart: () async {
-        await _gamesSuperKey.currentState?.restartGame();
-        _usedWords.clear();
-        await _applyLevelSettings();
-        if (mounted) _generateNewChallenge();
-      },
-    );
-    return;
-  }
+    if (available.isEmpty && !hasRetry) {
+      _gamesSuperKey.currentState?.showEndOfGameDialog(
+        onRestart: () async {
+          await _gamesSuperKey.currentState?.restartGame();
+          _usedWords.clear();
+          await _applyLevelSettings();
+          if (mounted) _generateNewChallenge();
+        },
+      );
+      return;
+    }
 
-  // Escolhe o WordModel atual (retry ou novo aleatório)
-  targetWord = retry != null
-      ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
-          list: _levelWords,
-          retryId: retry,
-          matcher: (w) => w.text == retry,
-          fallback: () => _gamesSuperKey.currentState!.safeSelectItem(
-            availableItems: available,
-          ),
-        )
-      : _gamesSuperKey.currentState!.safeSelectItem<WordModel>(
-          availableItems: available,
-        );
+    // Escolhe o WordModel atual (retry ou novo aleatório)
+    targetWord =
+        retry != null
+            ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
+              list: _levelWords,
+              retryId: retry,
+              matcher: (w) => w.text == retry,
+              fallback:
+                  () => _gamesSuperKey.currentState!.safeSelectItem(
+                    availableItems: available,
+                  ),
+            )
+            : _gamesSuperKey.currentState!.safeSelectItem<WordModel>(
+              availableItems: available,
+            );
 
-
-      if (!_usedWords.contains(targetWord.text)) {
-        _usedWords.add(targetWord.text);
-      }
+    if (!_usedWords.contains(targetWord.text)) {
+      _usedWords.add(targetWord.text);
+    }
 
     // Prepara o GameItem que vai tocar o áudio
     referenceItem = GameItem(
@@ -169,41 +178,55 @@ class _ListenLookGameState extends State<ListenLookGame> {
     // Escolhe 2 distractors e monta a lista de 3 imagens, do mesmo tópico
     final correctTopic = targetWord.topic.trim().toLowerCase();
 
-    final sameTopicDistractors = _allWords.where((w) =>
-      w.text != targetWord.text &&
-      w.topic.trim().toLowerCase() == correctTopic &&
-      w.imagePath.trim().isNotEmpty &&
-      w.audioPath.trim().isNotEmpty
-    ).toList();
+    final sameTopicDistractors =
+        _allWords
+            .where(
+              (w) =>
+                  w.text != targetWord.text &&
+                  w.topic.trim().toLowerCase() == correctTopic &&
+                  w.imagePath.trim().isNotEmpty &&
+                  w.audioPath.trim().isNotEmpty,
+            )
+            .toList();
 
     // Distratores do mesmo nível e tópico
     List<WordModel> distractors;
     if (sameTopicDistractors.length >= numDistractors) {
-      distractors = (sameTopicDistractors..shuffle()).take(numDistractors).toList();
+      distractors =
+          (sameTopicDistractors..shuffle()).take(numDistractors).toList();
     } else {
-      final fallbackDistractors = _allWords.where((w) =>
-        w.text != targetWord.text &&
-        w.imagePath.trim().isNotEmpty &&
-        w.audioPath.trim().isNotEmpty
-      ).toList();
-      distractors = (sameTopicDistractors + (fallbackDistractors..shuffle()))
-          .where((w) => w.text != targetWord.text)
-          .take(numDistractors)
-          .toList();
+      final fallbackDistractors =
+          _allWords
+              .where(
+                (w) =>
+                    w.text != targetWord.text &&
+                    w.imagePath.trim().isNotEmpty &&
+                    w.audioPath.trim().isNotEmpty,
+              )
+              .toList();
+      distractors =
+          (sameTopicDistractors + (fallbackDistractors..shuffle()))
+              .where((w) => w.text != targetWord.text)
+              .take(numDistractors)
+              .toList();
     }
 
     // Cria 3 GameItem de tipo imagem. 1 correto e 2 distratores
-    gamesItems = [targetWord, ...distractors]
-      .map((w) => GameItem(
-        id: w.text,
-        type: GameItemType.image,
-        content: w.imagePath,       
-        dx: 0, dy: 0,
-        backgroundColor: Colors.transparent,
-        isCorrect: w.text == targetWord.text,
-      ))
-      .toList()
-    ..shuffle();
+    gamesItems =
+        [targetWord, ...distractors]
+            .map(
+              (w) => GameItem(
+                id: w.text,
+                type: GameItemType.image,
+                content: w.imagePath,
+                dx: 0,
+                dy: 0,
+                backgroundColor: Colors.transparent,
+                isCorrect: w.text == targetWord.text,
+              ),
+            )
+            .toList()
+          ..shuffle();
 
     // Toca o áudio logo após o build
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -212,7 +235,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
       await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
     });
 
-    // Reinicia timers e progress bar 
+    // Reinicia timers e progress bar
     _cancelTimers();
     setState(() {
       isRoundActive = true;
@@ -221,7 +244,7 @@ class _ListenLookGameState extends State<ListenLookGame> {
     });
 
     // Sincroniza temporizadores com o tempo de nív
-   _gamesSuperKey.currentState?.startProgressTimer(
+    _gamesSuperKey.currentState?.startProgressTimer(
       levelTime: levelTime,
       onTimeout: () {
         if (!mounted || _isDisposed) return;
@@ -270,8 +293,8 @@ class _ListenLookGameState extends State<ListenLookGame> {
         setState(() => showWord = false);
       },
     );
-     _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
-    setState(() => currentTry++);   
+    _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
+    setState(() => currentTry++);
   }
 
   void _showTutorial() {
@@ -307,32 +330,30 @@ class _ListenLookGameState extends State<ListenLookGame> {
         await _loadWords();
         await _applyLevelSettings();
         if (!mounted || _isDisposed) return;
-      setState(() => hasChallengeStarted = true);
-      if (!_gamesSuperKey.currentState!.isTutorialVisible) {
-        _generateNewChallenge();
-      }
-    },
-    onShowTutorial: () {
-      _showTutorial();
-    },
-  );
-}
-
-  
+        setState(() => hasChallengeStarted = true);
+        if (!_gamesSuperKey.currentState!.isTutorialVisible) {
+          _generateNewChallenge();
+        }
+      },
+      onShowTutorial: () {
+        _showTutorial();
+      },
+    );
+  }
 
   // Constrói o texto superior que é apresenado quando o jogo arranca
-    Widget _buildTopText() {
-      return Padding(
-        padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
-        child: Text(
-          hasChallengeStarted
+  Widget _buildTopText() {
+    return Padding(
+      padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
+      child: Text(
+        hasChallengeStarted
             ? 'Escolhe a imagem correta para a palavra que ouviste'
             : 'Vamos ouvir com atenção para encontrar a imagem correta',
-        ),
-      );
-    }
+      ),
+    );
+  }
 
-    // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart
+  // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart
   Widget _buildBoard(BuildContext context, _, __) {
     if (!hasChallengeStarted || gamesItems.isEmpty) {
       return const SizedBox();
@@ -354,51 +375,60 @@ class _ListenLookGameState extends State<ListenLookGame> {
                   // Linha com 3 imagens
                   Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: gamesItems.map((item) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => _handleTap(item),
-                          // Dentro do seu Row, no lugar daquele child antigo:
-                          child: item.isTapped
-                            ? SizedBox(
-                                width: 160.w,
-                                // Remova o height fixo se quiser crescer para caber o texto
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // ícone de certo ou errado
-                                    Center(
-                                      child: item.isCorrect
-                                          ? _gamesSuperKey.currentState!.correctIcon
-                                          : _gamesSuperKey.currentState!.wrongIcon,
-                                    ),
-                                    // somente se for o correto E showWord estiver true
-                                    if (item.isCorrect && showWord)
-                                      Padding(
-                                        padding: EdgeInsets.only(top: 8.h),
-                                        child: WordHighlightBox(
-                                          word: targetWord.text,
-                                          user: widget.user,
+                    children:
+                        gamesItems.map((item) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10.w),
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _handleTap(item),
+                              // Dentro do seu Row, no lugar daquele child antigo:
+                              child:
+                                  item.isTapped
+                                      ? SizedBox(
+                                        width: 160.w,
+                                        // Remova o height fixo se quiser crescer para caber o texto
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            // ícone de certo ou errado
+                                            Center(
+                                              child:
+                                                  item.isCorrect
+                                                      ? _gamesSuperKey
+                                                          .currentState!
+                                                          .correctIcon
+                                                      : _gamesSuperKey
+                                                          .currentState!
+                                                          .wrongIcon,
+                                            ),
+                                            // somente se for o correto E showWord estiver true
+                                            if (item.isCorrect && showWord)
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                  top: 8.h,
+                                                ),
+                                                child: WordHighlightBox(
+                                                  word: targetWord.text,
+                                                  user: widget.user,
+                                                ),
+                                              ),
+                                          ],
                                         ),
-                                      ),
-                                  ],
-                                ),
-                              )
-                            : ImageCardBox(imagePath: item.content),
-                        ),
-                      );
-                    }).toList(),
+                                      )
+                                      : ImageCardBox(imagePath: item.content),
+                            ),
+                          );
+                        }).toList(),
                   ),
-                  ],
-                ),
+                ],
               ),
             ),
+          ),
 
-            SizedBox(height: 20.h),
-          ],
-        ),
-      );
-    }
+          SizedBox(height: 20.h),
+        ],
+      ),
+    );
   }
+}

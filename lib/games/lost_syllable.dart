@@ -92,15 +92,15 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
 
     switch (lvl) {
       case 1:
-        levelTime = const Duration(seconds: 120);
+        levelTime = const Duration(seconds: 15);
         levelDifficulty = 'baixa';
         break;
       case 2:
-        levelTime = const Duration(seconds: 120);
+        levelTime = const Duration(seconds: 15);
         levelDifficulty = 'media';
         break;
       default:
-        levelTime = const Duration(seconds: 120);
+        levelTime = const Duration(seconds: 15);
         levelDifficulty = 'dificil';
     }
 
@@ -187,67 +187,69 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
     await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
   }
 
-  List<String> generateDistractorsWithRules(String correctSyllable, {int count = 2}) {
-  final rules = {
-    'a': ['e'],
-    'e': ['i'],
-    'i': ['e'],
-    'o': ['u'],
-    'u': ['o'],
-    'ão': ['ao', 'ã'],
-    'b': ['v', 'p'],
-    'c': ['qu', 'ç'],
-    'ç': ['c', 'ss'],
-    'd': ['t'],
-    'f': ['v'],
-    'g': ['gu', 'j'],
-    'gu': ['g'],
-    'h': [''],
-    'j': ['g'],
-    'm': ['n'],
-    'n': ['m'],
-    'p': ['t', 'b', 'v'],
-    'qu': ['q'],
-    'r': ['rr'],
-    'rr': ['r'],
-    's': ['z', 'ss'],
-    'ss': ['s', 'ç'],
-    't': ['p'],
-    'v': ['f', 'b'],
-    'x': ['ch', 'nh'],
-    'nh': ['lh', 'ch'],
-    'lh': ['ch', 'nh'], 
-    'br': ['dr'],
-    'gr': ['dr'],
-    'pr': ['vr'],
-    'tr': ['pr'],
-  };
+  List<String> generateDistractorsWithRules(
+    String correctSyllable, {
+    int count = 2,
+  }) {
+    final rules = {
+      'a': ['e'],
+      'e': ['i'],
+      'i': ['e'],
+      'o': ['u'],
+      'u': ['o'],
+      'ão': ['ao', 'ã'],
+      'b': ['v', 'p'],
+      'c': ['qu', 'ç'],
+      'ç': ['c', 'ss'],
+      'd': ['t'],
+      'f': ['v'],
+      'g': ['gu', 'j'],
+      'gu': ['g'],
+      'h': [''],
+      'j': ['g'],
+      'm': ['n'],
+      'n': ['m'],
+      'p': ['t', 'b', 'v'],
+      'qu': ['q'],
+      'r': ['rr'],
+      'rr': ['r'],
+      's': ['z', 'ss'],
+      'ss': ['s', 'ç'],
+      't': ['p'],
+      'v': ['f', 'b'],
+      'x': ['ch', 'nh'],
+      'nh': ['lh', 'ch'],
+      'lh': ['ch', 'nh'],
+      'br': ['dr'],
+      'gr': ['dr'],
+      'pr': ['vr'],
+      'tr': ['pr'],
+    };
 
-  Set<String> alternatives = {};
+    Set<String> alternatives = {};
 
-  // Apply substitution rules
-  rules.forEach((key, substitutes) {
-    if (key == 'h') {
-      if (correctSyllable.startsWith('h')) {
-        for (var sub in substitutes) {
-          final result = correctSyllable.replaceFirst(RegExp('^h'), sub);
-          if (result != correctSyllable) {
-            alternatives.add(result);
+    // Apply substitution rules
+    rules.forEach((key, substitutes) {
+      if (key == 'h') {
+        if (correctSyllable.startsWith('h')) {
+          for (var sub in substitutes) {
+            final result = correctSyllable.replaceFirst(RegExp('^h'), sub);
+            if (result != correctSyllable) {
+              alternatives.add(result);
+            }
           }
         }
+      } else if (correctSyllable.contains(key)) {
+        for (var sub in substitutes) {
+          alternatives.add(correctSyllable.replaceFirst(key, sub));
+        }
       }
-    } else if (correctSyllable.contains(key)) {
-      for (var sub in substitutes) {
-        alternatives.add(correctSyllable.replaceFirst(key, sub));
-      }
-    }
-  });
+    });
 
-  // Remove the correct syllable and return limited results
-  alternatives.remove(correctSyllable);
-  return alternatives.take(count).toList();
-}
-
+    // Remove the correct syllable and return limited results
+    alternatives.remove(correctSyllable);
+    return alternatives.take(count).toList();
+  }
 
   // Gera um novo desafio novo, baseado nas palavras disponíveis e letras conhecidas
   Future<void> _generateNewChallenge() async {
@@ -266,7 +268,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
     final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
     final hasRetry = retry != null;
     final availableWords =
-    _levelWords.where((w) => !_usedWords.contains(w.text)).toList();
+        _levelWords.where((w) => !_usedWords.contains(w.text)).toList();
 
     // Verifica se o jogo terminou antes de gerar desafio
     if (availableWords.isEmpty && !hasRetry) {
@@ -335,17 +337,31 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
       isCorrect: true,
     );
 
-      final fallbackDistractors = [
-        'ba', 'bo', 'la', 'tu', 'po', 'me', 'si', 'mo', 'le', 'ra', 'na', 'ca'
-      ]..remove(correctSyllable);
+    final fallbackDistractors = [
+      'ba',
+      'bo',
+      'la',
+      'tu',
+      'po',
+      'me',
+      'si',
+      'mo',
+      'le',
+      'ra',
+      'na',
+      'ca',
+    ]..remove(correctSyllable);
 
-      final distractors = generateDistractorsWithRules(correctSyllable, count: numDistractors);
+    final distractors = generateDistractorsWithRules(
+      correctSyllable,
+      count: numDistractors,
+    );
 
-      if (distractors.length < numDistractors) {
-        final needed = numDistractors - distractors.length;
-        fallbackDistractors.shuffle();
-        distractors.addAll(fallbackDistractors.take(needed));
-      }
+    if (distractors.length < numDistractors) {
+      final needed = numDistractors - distractors.length;
+      fallbackDistractors.shuffle();
+      distractors.addAll(fallbackDistractors.take(needed));
+    }
 
     // Junta a correta com as falsas e baralha
     final answerSyllables = [correctSyllable, ...distractors]..shuffle();
@@ -403,7 +419,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
       item.isTapped = true;
     });
 
-   if (item.isCorrect) {
+    if (item.isCorrect) {
       _gamesSuperKey.currentState?.registerResponseTimeForCurrentRound(
         user: widget.user,
         gameName: 'Sílaba perdida',
@@ -428,11 +444,11 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
         setState(() => showWord = false);
       },
     );
-     _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
-    setState(() => currentTry++);   
+    _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
+    setState(() => currentTry++);
   }
 
-    void _showTutorial() {
+  void _showTutorial() {
     final state = _gamesSuperKey.currentState;
 
     final safeRetryId = hasChallengeStarted ? targetWord.text : null;
@@ -465,16 +481,16 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
         await _loadWords();
         await _applyLevelSettings();
         if (!mounted || _isDisposed) return;
-              setState(() => hasChallengeStarted = true);
-           if (!_gamesSuperKey.currentState!.isTutorialVisible) {
-            _generateNewChallenge();
-          }
-        },
+        setState(() => hasChallengeStarted = true);
+        if (!_gamesSuperKey.currentState!.isTutorialVisible) {
+          _generateNewChallenge();
+        }
+      },
       onShowTutorial: () {
         _showTutorial();
       },
-  );
-}
+    );
+  }
 
   // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
@@ -484,7 +500,7 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
         hasChallengeStarted
             ? 'Encontra a sílaba perdida para completar a palavra'
             : 'Vamos encontrar a sílaba perdida',
-      )
+      ),
     );
   }
 
@@ -611,4 +627,3 @@ class _LostSyllableGameState extends State<LostSyllableGame> {
     );
   }
 }
-

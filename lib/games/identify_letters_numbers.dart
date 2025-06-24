@@ -42,7 +42,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   bool isRoundFinished = false;
   List<GameItem> gamesItems = [];
   bool _isDisposed = false;
-  bool _isTutorialActive = false;
 
   bool get isFirstCycle => widget.user.schoolLevel == '1º Ciclo';
   bool _isLetter(String c) => RegExp(r'[a-zA-Z]').hasMatch(c);
@@ -73,21 +72,30 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
   // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    final schoolLevel = widget.user.schoolLevel;
+
+    // Define os tempos por grupo escolar e nível
+    const Map<String, List<int>> game1TimesPerLevel = {
+      'Pré-Escolar': [25, 20, 15], // seconds for Level 1, 2, 3
+      '1º Ciclo': [20, 15, 15],
+    };
+
+    // Aplica o tempo correto conforme grupo escolar e nível
+    final times = game1TimesPerLevel[schoolLevel] ?? [15, 15, 15];
+    levelTime = Duration(seconds: times[lvl - 1]);
+
     switch (lvl) {
       case 1:
         correctCount = 4;
         wrongCount = 8;
-        levelTime = const Duration(seconds: 120);
         break;
       case 2:
         correctCount = 5;
         wrongCount = 10;
-        levelTime = const Duration(seconds: 120);
         break;
       case 3:
         correctCount = 6;
         wrongCount = 12;
-        levelTime = const Duration(seconds: 120);
         break;
     }
     if (!mounted || _isDisposed) return;
@@ -216,7 +224,6 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
       _usedCharacters.add(targetCharacter);
     }
 
-
     final available =
         _characters
             .map((e) => e.character)
@@ -296,7 +303,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     });
 
     // Sincroniza temporizadores com o tempo de nível
-   _gamesSuperKey.currentState?.startProgressTimer(
+    _gamesSuperKey.currentState?.startProgressTimer(
       levelTime: levelTime,
       onTimeout: () {
         if (!mounted || _isDisposed) return;
@@ -351,18 +358,18 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
     );
   }
 
-void _showTutorial() {
-  final state = _gamesSuperKey.currentState;
+  void _showTutorial() {
+    final state = _gamesSuperKey.currentState;
 
-  final safeRetryId = hasChallengeStarted ? targetCharacter : null;
+    final safeRetryId = hasChallengeStarted ? targetCharacter : null;
 
-  state?.showTutorialDialog(
-    retryId: safeRetryId,
-    onTutorialClosed: () {
-      _generateNewChallenge();
-    },
-  );
-}
+    state?.showTutorialDialog(
+      retryId: safeRetryId,
+      onTutorialClosed: () {
+        _generateNewChallenge();
+      },
+    );
+  }
 
   // Constrói o widget principal do jogo
   @override
@@ -385,15 +392,15 @@ void _showTutorial() {
         await _applyLevelSettings();
         if (!mounted || _isDisposed) return;
         setState(() => hasChallengeStarted = true);
-      if (!_gamesSuperKey.currentState!.isTutorialVisible) {
-        _generateNewChallenge();
-      }
-    },
-    onShowTutorial: () {
-      _showTutorial();
-    },
-  );
-}
+        if (!_gamesSuperKey.currentState!.isTutorialVisible) {
+          _generateNewChallenge();
+        }
+      },
+      onShowTutorial: () {
+        _showTutorial();
+      },
+    );
+  }
 
   // Constrói o texto rico com o conteúdo fornecido
   Widget _buildRichText(TextSpan textSpan) => Padding(
@@ -414,7 +421,7 @@ void _showTutorial() {
     fontFamily: 'Slabo',
     fontSize: 22.sp,
     fontWeight: FontWeight.bold,
-   );
+  );
 
   // Define o estilo de texto para a fonte Cursive
   TextStyle cursiveStyle() => TextStyle(
@@ -430,17 +437,16 @@ void _showTutorial() {
     // Mensagem inicial antes de carregar
     if (!hasChallengeStarted || targetCharacter.isEmpty) {
       return _buildRichText(
-        TextSpan(
-          text: 'Vamos encontrar todas as letras e números',
-        ),
+        TextSpan(text: 'Vamos encontrar todas as letras e números'),
       );
     }
 
-  // Caso 1: Pré-escolar → se for pré, sai já daqui
+    // Caso 1: Pré-escolar → se for pré, sai já daqui
     if (isPreschool) {
-      final label = _isNumber(targetCharacter)
-          ? 'Encontra os números '
-          : 'Encontra as letras ';
+      final label =
+          _isNumber(targetCharacter)
+              ? 'Encontra os números '
+              : 'Encontra as letras ';
       final spans = <TextSpan>[
         TextSpan(
           text: targetCharacter.toUpperCase(),
@@ -467,16 +473,11 @@ void _showTutorial() {
       }
 
       return _buildRichText(
-        TextSpan(
-          children: [
-            TextSpan(text: label),
-            ...spans,
-          ],
-        ),
+        TextSpan(children: [TextSpan(text: label), ...spans]),
       );
     }
 
-  // Caso 2: 1º ciclo → números → mostrar só uma vez!
+    // Caso 2: 1º ciclo → números → mostrar só uma vez!
     if (isFirstCycle && _isNumber(targetCharacter)) {
       return _buildRichText(
         TextSpan(
@@ -497,45 +498,39 @@ void _showTutorial() {
 
     // Caso 3: 1º ciclo → letras → as 4 variantes
     if (isFirstCycle && _isLetter(targetCharacter)) {
+      return _buildRichText(
+        TextSpan(
+          children: [
+            const TextSpan(text: 'Encontra as letras '),
+            TextSpan(text: targetCharacter.toUpperCase(), style: slaboStyle()),
+            const TextSpan(text: ', '),
+            TextSpan(text: targetCharacter.toLowerCase(), style: slaboStyle()),
+            const TextSpan(text: ', '),
+            TextSpan(
+              text: targetCharacter.toUpperCase(),
+              style: cursiveStyle(),
+            ),
+            const TextSpan(text: ', '),
+            TextSpan(
+              text: targetCharacter.toLowerCase(),
+              style: cursiveStyle(),
+            ),
+          ],
+        ),
+      );
+    }
+    // Fallback — segurança extra
     return _buildRichText(
-    TextSpan(
-      children: [
-        const TextSpan(text: 'Encontra as letras '),
-        TextSpan(
-          text: targetCharacter.toUpperCase(),
-          style: slaboStyle(),
+      TextSpan(
+        text: 'Vamos encontrar todas as letras e números',
+        style: TextStyle(
+          fontFamily: isPreschool ? 'ComicNeue' : 'Slabo',
+          fontSize: 22.sp,
+          fontWeight: FontWeight.bold,
         ),
-        const TextSpan(text: ', '),
-        TextSpan(
-          text: targetCharacter.toLowerCase(),
-          style: slaboStyle(),
-        ),
-        const TextSpan(text: ', '),
-        TextSpan(
-          text: targetCharacter.toUpperCase(),
-          style: cursiveStyle(),
-        ),
-        const TextSpan(text: ', '),
-        TextSpan(
-          text: targetCharacter.toLowerCase(),
-          style: cursiveStyle(),
-        ),
-      ],
-    ),
-  );
-}
-  // Fallback — segurança extra
-  return _buildRichText(
-    TextSpan(
-      text: 'Vamos encontrar todas as letras e números',
-      style: TextStyle(
-        fontFamily: isPreschool ? 'ComicNeue' : 'Slabo',
-        fontSize: 22.sp,
-        fontWeight: FontWeight.bold,
       ),
-    ),
-  );
-}
+    );
+  }
 
   // Constrói o tabuleiro do jogo, com base CharacterCircleBox do game_component.dart
   Widget _buildBoard(BuildContext _, __, ___) {

@@ -39,7 +39,7 @@ Future<void> main() async {
 
   // ► Limpa as boxes antigas (se existirem) NÃO APAGAR JÁ!!! SÓ PARA A VERSÃO FINAL É QUE SE APAGA
   // Se a box 'users' já estiver aberta, fecha antes de apagar
-//   await Hive.deleteBoxFromDisk('users');
+  // await Hive.deleteBoxFromDisk('users');
 
   // ► Agora inicializa com adapters e seed
   await HiveService.init();

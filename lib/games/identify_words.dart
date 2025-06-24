@@ -86,15 +86,15 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
 
     switch (lvl) {
       case 1:
-        levelTime = const Duration(seconds: 120);
+        levelTime = const Duration(seconds: 15);
         levelDifficulty = 'baixa';
         break;
       case 2:
-        levelTime = const Duration(seconds: 120);
+        levelTime = const Duration(seconds: 15);
         levelDifficulty = 'media';
         break;
       default:
-        levelTime = const Duration(seconds: 120);
+        levelTime = const Duration(seconds: 15);
         levelDifficulty = 'dificil';
     }
 
@@ -291,7 +291,8 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
 
       sameLevelDistractors += fallbackDistractors;
     }
-    final distractors = (sameLevelDistractors..shuffle()).take(numDistractors).toList();
+    final distractors =
+        (sameLevelDistractors..shuffle()).take(numDistractors).toList();
 
     // monta 3 GameItem de tipo texto, 1 correto e 2 distratores
     gamesItems =
@@ -326,7 +327,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
     });
 
     // Sincroniza temporizadores com o tempo de nível
-   _gamesSuperKey.currentState?.startProgressTimer(
+    _gamesSuperKey.currentState?.startProgressTimer(
       levelTime: levelTime,
       onTimeout: () {
         if (!mounted || _isDisposed) return;
@@ -350,12 +351,12 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
       item.isTapped = true;
     });
 
-     if (item.isCorrect) {
+    if (item.isCorrect) {
       _gamesSuperKey.currentState?.registerResponseTimeForCurrentRound(
         user: widget.user,
         gameName: 'Ouvir e Procurar Palavra',
-        );
-      }
+      );
+    }
 
     // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(
@@ -375,22 +376,22 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
         setState(() => showWord = false);
       },
     );
-     _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
-    setState(() => currentTry++);  
+    _gamesSuperKey.currentState?.registerCompletedRound(targetWord.text);
+    setState(() => currentTry++);
   }
 
   void _showTutorial() {
-  final state = _gamesSuperKey.currentState;
+    final state = _gamesSuperKey.currentState;
 
-  final safeRetryId = hasChallengeStarted ? targetWord.text : null;
+    final safeRetryId = hasChallengeStarted ? targetWord.text : null;
 
-  state?.showTutorialDialog(
-    retryId: safeRetryId,
-    onTutorialClosed: () {
-      _generateNewChallenge();
-    },
-  );
-}
+    state?.showTutorialDialog(
+      retryId: safeRetryId,
+      onTutorialClosed: () {
+        _generateNewChallenge();
+      },
+    );
+  }
 
   // Constrói o widget principal do jogo
   @override
@@ -412,19 +413,16 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
         await _loadWords();
         await _applyLevelSettings();
         if (!mounted || _isDisposed) return;
-       setState(() => hasChallengeStarted = true);
-           if (!_gamesSuperKey.currentState!.isTutorialVisible) {
-            _generateNewChallenge();
-          }
-        },
+        setState(() => hasChallengeStarted = true);
+        if (!_gamesSuperKey.currentState!.isTutorialVisible) {
+          _generateNewChallenge();
+        }
+      },
       onShowTutorial: () {
         _showTutorial();
       },
-  );
-}
-
-
-
+    );
+  }
 
   // Constrói o texto superior que é apresenado quando o jogo arranca
   Widget _buildTopText() {
@@ -433,7 +431,7 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
       child: Text(
         hasChallengeStarted
             ? 'Escolhe a palavra correta para o som que ouvistes'
-              : 'Vamos ouvir com atenção para encontrar a palavra correta',
+            : 'Vamos ouvir com atenção para encontrar a palavra correta',
       ),
     );
   }
@@ -519,4 +517,3 @@ class _IdentifyWordGameState extends State<IdentifyWordGame> {
     );
   }
 }
-

@@ -50,7 +50,7 @@ class _WriteGameState extends State<WriteGame> {
     super.dispose();
   }
 
-  Future<void> _applyLevelSettingsAndCharacters() async {
+  /*Future<void> _applyLevelSettingsAndCharacters() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
     final isPreschool = widget.user.schoolLevel == 'Pré-Escolar';
     final isFirstCycle = widget.user.schoolLevel == '1º Ciclo';
@@ -67,7 +67,84 @@ class _WriteGameState extends State<WriteGame> {
         levelTime = const Duration(seconds: 120);
     }
 
+
     List<CharacterModel> tempChars = [];
+
+    if (isPreschool || isFirstCycle) {
+      // Abre sempre o box de characters
+      final box = await Hive.openBox<CharacterModel>('characters');
+      final allChars =
+          box.values.where((c) => c.character.trim().isNotEmpty).toList();
+
+      // Filtra por tipo consoante nível:
+      String targetType;
+      if (lvl == 1) {
+        targetType = 'number';
+      } else if (lvl == 2) {
+        targetType = 'vowel';
+      } else {
+        targetType = 'consonant';
+      }
+
+      final filtered = allChars.where((c) => c.type == targetType);
+
+      // Para letras → duplicamos upper/lower; para números basta 1x
+      for (var c in filtered) {
+        final base = c.character.trim().toLowerCase();
+
+        if (targetType == 'number') {
+          tempChars.add(
+            CharacterModel(
+              character: base,
+              soundPath: c.soundPath,
+              type: c.type,
+            ),
+          );
+        } else {
+          tempChars.addAll([
+            CharacterModel(
+              character: base.toUpperCase(),
+              soundPath: 'assets/sounds/characters/${base.toUpperCase()}.ogg',
+              type: c.type,
+            ),
+            CharacterModel(
+              character: base.toLowerCase(),
+              soundPath: 'assets/sounds/characters/${base.toLowerCase()}.ogg',
+              type: c.type,
+            ),
+          ]);
+        }
+      }
+    } else {
+      tempChars = [];
+    }
+
+    _characters = tempChars;
+    if (!mounted || _isDisposed) return;
+    setState(() {});
+  }
+*/
+
+  // Carrega os caracteres e ajusta o tempo de jogo
+  Future<void> _applyLevelSettingsAndCharacters() async {
+    final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    final schoolLevel = widget.user.schoolLevel; // 'Pré-Escolar' ou '1º Ciclo'
+
+    // 1) Tempo por grupo e nível - Tabela do Jogo 2
+    const Map<String, List<int>> game2TimesPerLevel = {
+      'Pré-Escolar': [15, 10, 10],
+      '1º Ciclo': [15, 15, 15],
+    };
+
+    // Defensive fallback
+    final times = game2TimesPerLevel[schoolLevel] ?? [15, 15, 15];
+    levelTime = Duration(seconds: times[(lvl - 1).clamp(0, times.length - 1)]);
+
+    // 2) Preparação dos caracteres
+    List<CharacterModel> tempChars = [];
+
+    final isPreschool = schoolLevel == 'Pré-Escolar';
+    final isFirstCycle = schoolLevel == '1º Ciclo';
 
     if (isPreschool || isFirstCycle) {
       // Abre sempre o box de characters
@@ -228,17 +305,17 @@ class _WriteGameState extends State<WriteGame> {
   }
 
   void _showTutorial() {
-  final state = _gamesSuperKey.currentState;
+    final state = _gamesSuperKey.currentState;
 
-  final safeRetryId = hasChallengeStarted ? targetCharacter : null;
+    final safeRetryId = hasChallengeStarted ? targetCharacter : null;
 
-  state?.showTutorialDialog(
-    retryId: safeRetryId,
-    onTutorialClosed: () {
-      _generateNewChallenge();
-    },
-  );
-}
+    state?.showTutorialDialog(
+      retryId: safeRetryId,
+      onTutorialClosed: () {
+        _generateNewChallenge();
+      },
+    );
+  }
 
   Widget _buildTopText() {
     final isNumber = RegExp(r'^[0-9]$').hasMatch(targetCharacter);
@@ -322,7 +399,7 @@ class _WriteGameState extends State<WriteGame> {
                           gameName: 'Escrever',
                         );
 
-                  final retryQueue = s.retryQueueContents();
+                    final retryQueue = s.retryQueueContents();
                     if (retryQueue.contains(targetCharacter)) {
                       s.removeFromRetryQueue(targetCharacter);
                     }
@@ -347,7 +424,9 @@ class _WriteGameState extends State<WriteGame> {
                       await Future.delayed(const Duration(seconds: 1));
                     },
                   );
-                  _gamesSuperKey.currentState?.registerCompletedRound(targetCharacter);
+                  _gamesSuperKey.currentState?.registerCompletedRound(
+                    targetCharacter,
+                  );
                   setState(() => currentTry++);
                 },
               ),

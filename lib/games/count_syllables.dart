@@ -60,40 +60,44 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
   // Aplica as definições de nível com base no nível atual do jogador
   Future<void> _applyLevelSettings() async {
     final lvl = _gamesSuperKey.currentState?.levelManager.level ?? 1;
+    final schoolLevel = widget.user.schoolLevel;
+
+    const Map<String, List<int>> game3TimesPerLevel = {
+      'Pré-Escolar': [15, 15, 15],
+      '1º Ciclo': [15, 15, 15],
+    };
+
+    // --- Tempo conforme tabela do Jogo 3 ---
+    final times = game3TimesPerLevel[schoolLevel] ?? [15, 15, 15];
+    levelTime = Duration(seconds: times[(lvl - 1).clamp(0, times.length - 1)]);
+
     numDistractors = lvl == 1 ? 1 : 2;
     late String levelDifficulty;
     switch (lvl) {
       case 1:
-        levelTime = const Duration(seconds: 20);
         levelDifficulty = 'baixa';
         break;
       case 2:
-        levelTime = const Duration(seconds:120);
         levelDifficulty = 'media';
         break;
       default:
-        levelTime = const Duration(seconds: 120);
         levelDifficulty = 'dificil';
     }
 
-    // Garante que palavras da fila de retry continuam acessíveis
+    // Resto da lógica igual...
     final filtered =
         _allWords.where((w) {
           final diff = (w.difficulty).trim().toLowerCase();
           return diff == levelDifficulty &&
-              !usedWords.contains(
-                w.text,
-              ) && // ← evita repetir palavras já usadas
+              !usedWords.contains(w.text) &&
               (w.audioPath).trim().isNotEmpty &&
               (w.imagePath).trim().isNotEmpty;
         }).toList();
 
-    // Garante que palavras da fila de retry continuam acessíveis
     final retryIds = _gamesSuperKey.currentState?.retryQueueContents() ?? [];
     final retryWords =
         _allWords.where((w) => retryIds.contains(w.text)).toList();
 
-    // Junta os dois, evitando duplicações
     _levelWords = {...filtered, ...retryWords}.toList();
   }
 
@@ -110,149 +114,148 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
 
   // Gera uma lista de distratores com base na palavra correta
   List<int> generateDistractors({
-  required int correct,
-  required int numDistractors,
-}) {
-  // Caso especial: 1 sílaba → força [2], [2,3]
-  if (correct == 1) {
-    return numDistractors == 1 ? [2] : [2, 3];
+    required int correct,
+    required int numDistractors,
+  }) {
+    // Caso especial: 1 sílaba → força [2], [2,3]
+    if (correct == 1) {
+      return numDistractors == 1 ? [2] : [2, 3];
+    }
+
+    final Set<int> optionSet = {};
+    int offset = 1;
+
+    while (optionSet.length < numDistractors) {
+      if (correct - offset >= 1) optionSet.add(correct - offset);
+      if (correct + offset <= 9) optionSet.add(correct + offset);
+      offset++;
+    }
+
+    final distractors = optionSet.toList();
+    distractors.length = min(numDistractors, distractors.length);
+    return distractors;
   }
 
-  final Set<int> optionSet = {};
-  int offset = 1;
+  // Gera um novo desafio
+  Future<void> _generateNewChallenge() async {
+    _gamesSuperKey.currentState?.playChallengeHighlight();
 
-  while (optionSet.length < numDistractors) {
-    if (correct - offset >= 1) optionSet.add(correct - offset);
-    if (correct + offset <= 9) optionSet.add(correct + offset);
-    offset++;
-  }
-
-  final distractors = optionSet.toList();
-  distractors.length = min(numDistractors, distractors.length);
-  return distractors;
-}
-
-
-// Gera um novo desafio
-Future<void> _generateNewChallenge() async {
-  _gamesSuperKey.currentState?.playChallengeHighlight();
-
-  // Verifica se há retry a usar
-  if (!mounted || _isDisposed) return;
-  final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
-
-  targetWord =
-      retry != null
-          ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
-            list: _levelWords,
-            retryId: retry,
-            matcher: (w) => w.text == retry,
-            fallback:
-                () => _gamesSuperKey.currentState!.safeSelectItem(
-                  availableItems:
-                      _levelWords
-                          .where((w) => !usedWords.contains(w.text))
-                          .toList(),
-                ),
-          )
-          : _gamesSuperKey.currentState!.safeSelectItem(
-            availableItems: _levelWords,
-          );
-
-  final wordText = targetWord!.text;
-  if (!usedWords.contains(wordText)) {
-    usedWords.add(wordText);
-  }
-
-  final availableWords =
-      _levelWords
-          .where((w) => !usedWords.contains(w.text))
-          .map((w) => w.text)
-          .toList();
-
-  // Verifica se o jogo terminou antes de gerar desafio
-  final hasRetry = retry != null;
-
-  if (availableWords.isEmpty && !hasRetry) {
+    // Verifica se há retry a usar
     if (!mounted || _isDisposed) return;
-    _gamesSuperKey.currentState?.showEndOfGameDialog(
-      onRestart: () async {
-        await _gamesSuperKey.currentState?.restartGame();
-        await _applyLevelSettings();
-        if (mounted) _generateNewChallenge();
-      },
+    final retry = _gamesSuperKey.currentState?.peekNextRetryTarget();
+
+    targetWord =
+        retry != null
+            ? _gamesSuperKey.currentState!.safeRetry<WordModel>(
+              list: _levelWords,
+              retryId: retry,
+              matcher: (w) => w.text == retry,
+              fallback:
+                  () => _gamesSuperKey.currentState!.safeSelectItem(
+                    availableItems:
+                        _levelWords
+                            .where((w) => !usedWords.contains(w.text))
+                            .toList(),
+                  ),
+            )
+            : _gamesSuperKey.currentState!.safeSelectItem(
+              availableItems: _levelWords,
+            );
+
+    final wordText = targetWord!.text;
+    if (!usedWords.contains(wordText)) {
+      usedWords.add(wordText);
+    }
+
+    final availableWords =
+        _levelWords
+            .where((w) => !usedWords.contains(w.text))
+            .map((w) => w.text)
+            .toList();
+
+    // Verifica se o jogo terminou antes de gerar desafio
+    final hasRetry = retry != null;
+
+    if (availableWords.isEmpty && !hasRetry) {
+      if (!mounted || _isDisposed) return;
+      _gamesSuperKey.currentState?.showEndOfGameDialog(
+        onRestart: () async {
+          await _gamesSuperKey.currentState?.restartGame();
+          await _applyLevelSettings();
+          if (mounted) _generateNewChallenge();
+        },
+      );
+      return;
+    }
+
+    _cancelTimers();
+    setState(() {
+      isRoundActive = true;
+      gamesItems.clear();
+      currentTry = 0;
+      foundCorrect = 0;
+    });
+
+    // Gera distratores corretos com a função helper
+    final correct = targetWord!.syllableCount;
+    final distractors = generateDistractors(
+      correct: correct,
+      numDistractors: numDistractors,
     );
-    return;
-  }
 
-  _cancelTimers();
-  setState(() {
-    isRoundActive = true;
-    gamesItems.clear();
-    currentTry = 0;
-    foundCorrect = 0;
-  });
+    // Junta tudo e aplica regra:
+    final List<int> allOptions = [correct, ...distractors];
 
-  // Gera distratores corretos com a função helper
-  final correct = targetWord!.syllableCount;
-  final distractors = generateDistractors(
-    correct: correct,
-    numDistractors: numDistractors,
-  );
+    if (numDistractors == 1) {
+      allOptions.sort();
+    } else {
+      allOptions.shuffle();
+    }
 
-  // Junta tudo e aplica regra:
-  final List<int> allOptions = [correct, ...distractors];
+    final List<String> options = allOptions.map((v) => v.toString()).toList();
 
-  if (numDistractors == 1) {
-    allOptions.sort();
-  } else {
-    allOptions.shuffle();
-  }
+    gamesItems = List.generate(options.length, (i) {
+      return GameItem(
+        id: '$i',
+        type: GameItemType.number,
+        content: options[i],
+        dx: 0,
+        dy: 0,
+        backgroundColor: Colors.transparent,
+        isCorrect: options[i] == correct.toString(),
+      );
+    });
 
-  final List<String> options = allOptions.map((v) => v.toString()).toList();
-
-  gamesItems = List.generate(options.length, (i) {
-    return GameItem(
-      id: '$i',
-      type: GameItemType.number,
-      content: options[i],
+    referenceItem = GameItem(
+      id: 'preview',
+      type: GameItemType.text,
+      content: targetWord!.audioFileName ?? targetWord!.text,
       dx: 0,
       dy: 0,
       backgroundColor: Colors.transparent,
-      isCorrect: options[i] == correct.toString(),
     );
-  });
 
-  referenceItem = GameItem(
-    id: 'preview',
-    type: GameItemType.text,
-    content: targetWord!.audioFileName ?? targetWord!.text,
-    dx: 0,
-    dy: 0,
-    backgroundColor: Colors.transparent,
-  );
-
-  // Reproduz o som da palavra alvo
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await Future.delayed(const Duration(milliseconds: 50));
-    if (!mounted || _isDisposed) return;
-    await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
-  });
-
-  // Sincroniza temporizadores com o tempo de nível
-  _gamesSuperKey.currentState?.startProgressTimer(
-    levelTime: levelTime,
-    onTimeout: () {
+    // Reproduz o som da palavra alvo
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 50));
       if (!mounted || _isDisposed) return;
-      setState(() => isRoundActive = false);
-      _gamesSuperKey.currentState?.registerFailedRound(targetWord!.text);
-      _gamesSuperKey.currentState?.showTimeout(
-        applySettings: _applyLevelSettings,
-        generateNewChallenge: _generateNewChallenge,
-      );
-    },
-  );
-}
+      await _gamesSuperKey.currentState?.playNewChallengeSound(referenceItem);
+    });
+
+    // Sincroniza temporizadores com o tempo de nível
+    _gamesSuperKey.currentState?.startProgressTimer(
+      levelTime: levelTime,
+      onTimeout: () {
+        if (!mounted || _isDisposed) return;
+        setState(() => isRoundActive = false);
+        _gamesSuperKey.currentState?.registerFailedRound(targetWord!.text);
+        _gamesSuperKey.currentState?.showTimeout(
+          applySettings: _applyLevelSettings,
+          generateNewChallenge: _generateNewChallenge,
+        );
+      },
+    );
+  }
 
   // Lida com o toque do jogador num item do jogo
   void _handleTap(GameItem item) async {
@@ -269,12 +272,13 @@ Future<void> _generateNewChallenge() async {
         user: widget.user,
         gameName: 'Contar sílabas',
       );
-        // 🔁 Se a palavra estava na retry list, remove-a
-  final retryQueue = _gamesSuperKey.currentState?.retryQueueContents() ?? [];
-  if (retryQueue.contains(targetWord!.text)) {
-    _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord!.text);
-  }
-}
+      // 🔁 Se a palavra estava na retry list, remove-a
+      final retryQueue =
+          _gamesSuperKey.currentState?.retryQueueContents() ?? [];
+      if (retryQueue.contains(targetWord!.text)) {
+        _gamesSuperKey.currentState?.removeFromRetryQueue(targetWord!.text);
+      }
+    }
 
     // Delega validação ao super widget, mas com callback local
     await s.checkAnswerSingle(
@@ -294,20 +298,20 @@ Future<void> _generateNewChallenge() async {
         setState(() => showSyllables = false);
       },
     );
-     _gamesSuperKey.currentState?.registerCompletedRound(targetWord!.text);
-    setState(() => currentTry++);  
+    _gamesSuperKey.currentState?.registerCompletedRound(targetWord!.text);
+    setState(() => currentTry++);
   }
 
-void _showTutorial() {
-  final state = _gamesSuperKey.currentState;
-  final safeRetryId = hasChallengeStarted ? targetWord!.text : null;
-  state?.showTutorialDialog(
-    retryId: safeRetryId,
-    onTutorialClosed: () {
-      _generateNewChallenge();
-    },
-  );
-}
+  void _showTutorial() {
+    final state = _gamesSuperKey.currentState;
+    final safeRetryId = hasChallengeStarted ? targetWord!.text : null;
+    state?.showTutorialDialog(
+      retryId: safeRetryId,
+      onTutorialClosed: () {
+        _generateNewChallenge();
+      },
+    );
+  }
 
   // Constrói o widget principal do jogo
   @override
@@ -330,30 +334,28 @@ void _showTutorial() {
         await _applyLevelSettings();
         if (mounted) {
           setState(() => hasChallengeStarted = true);
-           if (!_gamesSuperKey.currentState!.isTutorialVisible) {
+          if (!_gamesSuperKey.currentState!.isTutorialVisible) {
             _generateNewChallenge();
           }
         }
       },
       onShowTutorial: () {
         _showTutorial();
-    }
-  );
-}
+      },
+    );
+  }
 
   // Constrói o texto superior que é apresenado quando o jogo arranca
-    Widget _buildTopText() {
+  Widget _buildTopText() {
     return Padding(
       padding: EdgeInsets.only(top: 19.h, left: 16.w, right: 16.w),
       child: Text(
         hasChallengeStarted
-          ? 'Quantas sílabas tem a palavra ${targetWord!.text}?'
-          : 'Vamos contar as sílabas das palavras',
-        ),
-      );
-    }
-
-
+            ? 'Quantas sílabas tem a palavra ${targetWord!.text}?'
+            : 'Vamos contar as sílabas das palavras',
+      ),
+    );
+  }
 
   // Constrói o tabuleiro do jogo, com base WordHighlightBox do game_component.dart
   Widget _buildBoard(BuildContext context, _, __) {
