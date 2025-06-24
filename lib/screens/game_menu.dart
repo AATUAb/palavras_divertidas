@@ -1,5 +1,3 @@
-// lib/screens/game_menu.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/user_model.dart';
@@ -46,21 +44,21 @@ class GameMenu extends StatefulWidget {
 class _GameMenuState extends State<GameMenu> {
   late ConquestManager conquestManager;
 
-@override
-void initState() {
-  super.initState();
-  conquestManager = ConquestManager();
-  
-  // Não toca música já — só se não houver conquistas.
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await _checkNewConquests();
-    
-    // Só retoma música se não fomos para outro ecrã
-    if (mounted) {
-      await resumeMenuMusic();
-    }
-  });
-}
+  @override
+  void initState() {
+    super.initState();
+    conquestManager = ConquestManager();
+
+    // Não toca música já — só se não houver conquistas.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _checkNewConquests();
+
+      // Só retoma música se não fomos para outro ecrã
+      if (mounted) {
+        await resumeMenuMusic();
+      }
+    });
+  }
 
   // Verifica se há conquistas novas. Se sim mostra um diálogo com a conquista
   Future<void> _checkNewConquests() async {
@@ -93,7 +91,10 @@ void initState() {
                 'Tens $newUnlocks conquista${newUnlocks > 1 ? 's' : ''} nova${newUnlocks > 1 ? 's' : ''}!\n'
                 'Entra na caderneta para a${newUnlocks > 1 ? 's' : ''} encontrar${newUnlocks > 1 ? 'es' : ''}.',
               ),
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              actionsPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
               actions: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -134,10 +135,13 @@ void initState() {
                           widget.user.lastSeenConquests = widget.user.conquest;
                           await widget.user.save();
                           Navigator.of(context).pop();
-                          await Future.delayed(const Duration(milliseconds: 100));
+                          await Future.delayed(
+                            const Duration(milliseconds: 100),
+                          );
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) => StickerBookScreen(user: widget.user),
+                              builder:
+                                  (_) => StickerBookScreen(user: widget.user),
                             ),
                           );
                         },
@@ -151,13 +155,12 @@ void initState() {
                   ],
                 ),
               ],
-              );
-            }
-          );
-        }
-        isMenuMusicAllowed = true;
-        await resumeMenuMusic();
-      }
+            ),
+      );
+    }
+    isMenuMusicAllowed = true;
+    await resumeMenuMusic();
+  }
 
   void handleLetterDependentGame({
     required BuildContext context,
@@ -198,88 +201,97 @@ void initState() {
                 'Atualiza as letras aprendidas para poderes jogar.',
                 style: TextStyle(color: Colors.blue.shade700),
               ),
-                actionsPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                actions: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Botão "Cancelar" à ESQUERDA
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.grey,
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          isMenuMusicAllowed = true;
-                          resumeMenuMusic();
-                        },
-                        icon: Icon(Icons.cancel, size: 20, color: Colors.white),
-                        label: Text(
-                          "Cancelar",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-
-                      // Botão "Letras Novas?" à DIREITA
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.green,
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        onPressed: () async {
-                          Navigator.of(context).pop();
-                          await showLettersDialog(
-                            context: context,
-                            user: user,
-                            initialSelection: user.knownLetters,
-                            onSaved: (selected) async {
-                              user.knownLetters = selected;
-                              await user.save();
-                            },
-                          );
-
-                          if (!await hasSufficientLetters(user)) {
-                            isMenuMusicAllowed = true;
-                            await resumeMenuMusic();
-                            return;
-                          }
-
-                          await Future.delayed(const Duration(milliseconds: 100));
-                          if (context.mounted) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => gameBuilder()),
-                            );
-                          }
-                        },
-                        child: Text(
-                          "Letras Novas?",
-                          style: TextStyle(fontSize: 15.sp),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              actionsPadding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
               ),
-            );
-              return;
-            }
-            if (context.mounted) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => gameBuilder()),
-              );
-              isMenuMusicAllowed = true;
-              await resumeMenuMusic();
-            }
-          }
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Botão "Cancelar" à ESQUERDA
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.grey,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        isMenuMusicAllowed = true;
+                        resumeMenuMusic();
+                      },
+                      icon: Icon(Icons.cancel, size: 20, color: Colors.white),
+                      label: Text(
+                        "Cancelar",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+
+                    // Botão "Letras Novas?" à DIREITA
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.green,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        await showLettersDialog(
+                          context: context,
+                          user: user,
+                          initialSelection: user.knownLetters,
+                          onSaved: (selected) async {
+                            user.knownLetters = selected;
+                            await user.save();
+                          },
+                        );
+
+                        if (!await hasSufficientLetters(user)) {
+                          isMenuMusicAllowed = true;
+                          await resumeMenuMusic();
+                          return;
+                        }
+
+                        await Future.delayed(const Duration(milliseconds: 100));
+                        if (context.mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => gameBuilder()),
+                          );
+                        }
+                      },
+                      child: Text(
+                        "Letras Novas?",
+                        style: TextStyle(fontSize: 15.sp),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+      );
+      return;
+    }
+    if (context.mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => gameBuilder()),
+      );
+      isMenuMusicAllowed = true;
+      await resumeMenuMusic();
+    }
+  }
 
   // Jogos principais disponíveis para todos os ciclos
   @override
@@ -344,31 +356,31 @@ void initState() {
 
     return Scaffold(
       body: MenuDesign(
-      titleText: "Palavras Divertidas",
-      headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
-      pauseIntroMusic: true,
-      showHomeButton: true,
-      showTutorial: true, // ← ESSENCIAL
-      onTutorialPressed: () async {
-        isMenuMusicAllowed = false;
-        await pauseMenuMusic();
+        titleText: "Palavras Divertidas",
+        headerText: "Olá ${widget.user.name}, escolhe o teu jogo",
+        pauseIntroMusic: true,
+        showHomeButton: true,
+        showTutorial: true, // ← ESSENCIAL
+        onTutorialPressed: () async {
+          isMenuMusicAllowed = false;
+          await pauseMenuMusic();
 
-        final ciclo = widget.user.schoolLevel;
-        final videoName = (ciclo == '1º Ciclo') ? 'game_menu_first' : 'game_menu_pre';
+          final ciclo = widget.user.schoolLevel;
+          final videoName =
+              (ciclo == '1º Ciclo') ? 'game_menu_first' : 'game_menu_pre';
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          GameAnimations.showTutorialVideo(
-            context: context,
-            fileName: videoName,
-            onFinished: () async {
-              debugPrint("🎬 Tutorial $videoName terminado.");
-              isMenuMusicAllowed = true;
-              await resumeMenuMusic();
-            },
-          );
-        });
-      },
-
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            GameAnimations.showTutorialVideo(
+              context: context,
+              fileName: videoName,
+              onFinished: () async {
+                debugPrint("🎬 Tutorial $videoName terminado.");
+                isMenuMusicAllowed = true;
+                await resumeMenuMusic();
+              },
+            );
+          });
+        },
 
         onHomePressed: () {
           Navigator.pushReplacement(
@@ -473,10 +485,11 @@ void initState() {
                                                                 .user
                                                                 .knownLetters =
                                                             selectedLetters;
-                                                        await widget.user.save();
+                                                        await widget.user
+                                                            .save();
                                                       },
                                                     );
-                                                    await resumeMenuMusic(); 
+                                                    await resumeMenuMusic();
                                                   },
                                                   child: Container(
                                                     padding:

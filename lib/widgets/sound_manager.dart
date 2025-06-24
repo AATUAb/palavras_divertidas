@@ -8,7 +8,7 @@ import '../widgets/game_item.dart';
 class SoundManager {
   static final AudioPlayer _player = AudioPlayer();
   static final AudioPlayer _playerCase = AudioPlayer();
-  static bool _isStopped = false; 
+  static bool _isStopped = false;
 
   static bool _isIntroGamesPlaying = false;
   static String? _lastIntroGamesFilename;
@@ -31,17 +31,17 @@ class SoundManager {
   static void reset() => _isStopped = false;
 
   /// Toca o som de um carácter (letra ou número isolado)
-  static Future<void> playCharacter(String character, {bool playCaseSuffix = false}) async {
+  static Future<void> playCharacter(
+    String character, {
+    bool playCaseSuffix = false,
+  }) async {
     if (_isStopped) return;
     final box = await Hive.openBox<CharacterModel>('characters');
-    
+
     final model = box.values.firstWhere(
       (m) => m.character.toLowerCase() == character.toLowerCase(),
-      orElse: () => CharacterModel(
-        character: character, 
-        soundPath: '',
-        type: '', 
-        ),
+      orElse:
+          () => CharacterModel(character: character, soundPath: '', type: ''),
     );
 
     if (model.soundPath.isNotEmpty) {
@@ -49,79 +49,79 @@ class SoundManager {
       try {
         await _player.play(AssetSource(assetPath));
 
-      // Se pediram o sufixo, toca a seguir
-      if (playCaseSuffix && (model.type == 'vowel' || model.type == 'consonant')) {
-        final caseSuffix = character == character.toUpperCase()
-            ? 'uppercase.ogg'
-            : 'lowercase.ogg';
+        // Se pediram o sufixo, toca a seguir
+        if (playCaseSuffix &&
+            (model.type == 'vowel' || model.type == 'consonant')) {
+          final caseSuffix =
+              character == character.toUpperCase()
+                  ? 'uppercase.ogg'
+                  : 'lowercase.ogg';
 
-      await Future.delayed(const Duration(milliseconds: 1500));
-      if (_isStopped) return;
-      await _playerCase.play(AssetSource('sounds/characters/$caseSuffix'));
-    }
-
+          await Future.delayed(const Duration(milliseconds: 1500));
+          if (_isStopped) return;
+          await _playerCase.play(AssetSource('sounds/characters/$caseSuffix'));
+        }
       } catch (e) {
         debugPrint("🔇 Erro ao tocar som do carácter '$character': $e");
       }
-      } else {
-        debugPrint("🔇 Som não encontrado para o carácter '$character'");
-      }
+    } else {
+      debugPrint("🔇 Som não encontrado para o carácter '$character'");
     }
-
+  }
 
   /// Toca o som de uma palavra, procurando pelo texto ou pelo audioFileName
   static Box<WordModel>? _wordBox;
 
-static Future<void> playWord(String word) async {
-  if (_isStopped) return;
-  _wordBox ??= await Hive.openBox<WordModel>('words');
+  static Future<void> playWord(String word) async {
+    if (_isStopped) return;
+    _wordBox ??= await Hive.openBox<WordModel>('words');
 
-  final model = _wordBox!.values.firstWhere(
-    (m) => m.text.toLowerCase() == word.toLowerCase(),
-    orElse: () => WordModel(
-      text: word,
-      newLetter: '',
-      topic: '',
-      difficulty: '',
-      syllables: [],
-      syllableCount: 0,
-    ),
-  );
+    final model = _wordBox!.values.firstWhere(
+      (m) => m.text.toLowerCase() == word.toLowerCase(),
+      orElse:
+          () => WordModel(
+            text: word,
+            newLetter: '',
+            topic: '',
+            difficulty: '',
+            syllables: [],
+            syllableCount: 0,
+          ),
+    );
 
-  final filename = model.audioFileName ?? model.text;
-  final rawPath = 'assets/sounds/words/$filename.ogg';
-  final assetPath = rawPath.replaceFirst(RegExp(r'^assets/'), '');
+    final filename = model.audioFileName ?? model.text;
+    final rawPath = 'assets/sounds/words/$filename.ogg';
+    final assetPath = rawPath.replaceFirst(RegExp(r'^assets/'), '');
 
-  try {
-    await _player.play(AssetSource(assetPath));
-  } catch (e) {
-    debugPrint("🔇 Erro ao tocar som da palavra '$word': $e");
+    try {
+      await _player.play(AssetSource(assetPath));
+    } catch (e) {
+      debugPrint("🔇 Erro ao tocar som da palavra '$word': $e");
+    }
   }
-}
-
 
   /// Toca som com base no tipo de `GameItem`: carácter ou palavra
- static Future<void> playGameItem(GameItem item) async {
-  _isStopped = false;
+  static Future<void> playGameItem(GameItem item) async {
+    _isStopped = false;
 
-  final text = item.content.trim();
+    final text = item.content.trim();
 
-  // Delay necessário no Flutter Web para evitar erro WebAudioError
-  await Future.delayed(const Duration(milliseconds: 300));
-  
-  if (_isStopped) return;
+    // Delay necessário no Flutter Web para evitar erro WebAudioError
+    await Future.delayed(const Duration(milliseconds: 300));
 
-  if (item.type == GameItemType.character && text.length == 1) {
-    await playCharacter(text, playCaseSuffix: item.playCaseSuffix);
-  } else if ((item.type == GameItemType.character && text.length > 1) ||
-             item.type == GameItemType.text) {
-    await playWord(text);
-  } else {
-    debugPrint("🔇 Tipo de item não suportado: ${item.type} — $text");
+    if (_isStopped) return;
+
+    if (item.type == GameItemType.character && text.length == 1) {
+      await playCharacter(text, playCaseSuffix: item.playCaseSuffix);
+    } else if ((item.type == GameItemType.character && text.length > 1) ||
+        item.type == GameItemType.text) {
+      await playWord(text);
+    } else {
+      debugPrint("🔇 Tipo de item não suportado: ${item.type} — $text");
+    }
   }
-}
 
- /// Toca som de animações (como confetes, conquistas, fim de jogo)
+  /// Toca som de animações (como confetes, conquistas, fim de jogo)
   static Future<void> playAnimationSound(String filename) async {
     await play('sounds/animations/$filename');
 
@@ -135,25 +135,24 @@ static Future<void> playWord(String word) async {
 
   /// Toca som de incio de jogos
   static Future<void> playIntroGames(String filename) async {
-  _isStopped = false;
-  _isIntroGamesPlaying = true;
-  _lastIntroGamesFilename = filename;
-  await play('sounds/games/$filename');
-}
+    _isStopped = false;
+    _isIntroGamesPlaying = true;
+    _lastIntroGamesFilename = filename;
+    await play('sounds/games/$filename');
+  }
 
-static Future<void> stopIntroGames() async {
-  _isIntroGamesPlaying = false;
-  await stop();
-}
+  static Future<void> stopIntroGames() async {
+    _isIntroGamesPlaying = false;
+    await stop();
+  }
 
-static bool isIntroGamesPlaying() {
-  return _isIntroGamesPlaying;
-}
+  static bool isIntroGamesPlaying() {
+    return _isIntroGamesPlaying;
+  }
 
-static String? getLastIntroGamesFilename() {
-  return _lastIntroGamesFilename;
-}
-
+  static String? getLastIntroGamesFilename() {
+    return _lastIntroGamesFilename;
+  }
 
   /// Para qualquer som a tocar
   static Future<void> stop() async {
