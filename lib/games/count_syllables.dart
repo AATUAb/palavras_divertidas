@@ -63,8 +63,8 @@ class _CountSyllablesGame extends State<CountSyllablesGame> {
     final schoolLevel = widget.user.schoolLevel;
 
     const Map<String, List<int>> game3TimesPerLevel = {
-      'Pré-Escolar': [15, 15, 15],
-      '1º Ciclo': [15, 15, 15],
+      'Pré-Escolar': [20, 20, 15],
+      '1º Ciclo': [10, 10, 10],
     };
 
     // --- Tempo conforme tabela do Jogo 3 ---

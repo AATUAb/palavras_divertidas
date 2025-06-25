@@ -71,8 +71,8 @@ class _ListenLookGameState extends State<ListenLookGame> {
     final schoolLevel = widget.user.schoolLevel;
 
     const Map<String, List<int>> game4TimesPerLevel = {
-      'Pré-Escolar': [25, 20, 15],
-      '1º Ciclo': [20, 15, 15],
+      'Pré-Escolar': [25, 15, 15],
+      '1º Ciclo': [10, 10, 10],
     };
 
     // --- Tempo conforme tabela do Jogo 4 ---

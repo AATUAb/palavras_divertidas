@@ -76,7 +76,7 @@ class _IdentifyLettersNumbersState extends State<IdentifyLettersNumbers> {
 
     // Define os tempos por grupo escolar e nível
     const Map<String, List<int>> game1TimesPerLevel = {
-      'Pré-Escolar': [25, 20, 15], // seconds for Level 1, 2, 3
+      'Pré-Escolar': [25, 20, 15],
       '1º Ciclo': [20, 15, 15],
     };
 
