@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:mundodaspalavras/themes/colors.dart';
-import 'package:mundodaspalavras/games/writing_game/phonetics_constants/pt_shape_path.dart';
+import 'package:mundodaspalavras/games/writing_game/phonetics_constants/slabo_upper.dart';
 import 'package:mundodaspalavras/games/writing_game/phonetics_constants/numbers_svg.dart';
-import 'package:mundodaspalavras/games/writing_game/phonetics_constants/shape_paths.dart';
+import 'package:mundodaspalavras/games/writing_game/phonetics_constants/slabo_lower.dart';
 import 'package:mundodaspalavras/games/writing_game/points_manager/shape_points_manager.dart';
 import 'package:mundodaspalavras/games/writing_game/tracing/writing_models.dart';
 import 'package:mundodaspalavras/games/writing_game/enums/shape_enums.dart';
@@ -181,7 +181,7 @@ class TypeExtensionTracking {
 
 /// Retorna os dados de traçado para os números de 0 a 10.
   List<TraceModel> _getTracingDataNumbers({required String number,
-    Size sizeOfLetter = const Size(200, 200)}) {
+    Size sizeOfLetter = const Size(300, 300)}) {
     List<TraceModel> listOfTraceModel = [];
 
     switch (number) {
@@ -201,10 +201,10 @@ class TypeExtensionTracking {
       case '2':
         listOfTraceModel.add(_buildTraceModel(
             letterViewSize: sizeOfLetter,
-            positionIndexPath: const Size(-50, 20),
-            positionDottedPath: const Size(0, -5),
-            scaleIndexPath: .8,
-            scaledottedPath: 1,
+            positionIndexPath: const Size(-60, 40),
+            positionDottedPath: const Size(-3, 2),
+            scaleIndexPath: .7,
+            scaledottedPath: .9,
             dottedPath: NumberSvgs.shapeNumber2Dotted,
             indexPath: NumberSvgs.shapeNumber2Index,
             letterPath: NumberSvgs.shapeNumber2,
@@ -279,10 +279,10 @@ class TypeExtensionTracking {
       case '8':
         listOfTraceModel.add(_buildTraceModel(
             letterViewSize: sizeOfLetter,
-            positionIndexPath: const Size(50, -50),
-            positionDottedPath: const Size(5, 0),
-            scaleIndexPath: .07,
-            scaledottedPath: 1,
+            positionIndexPath: const Size(40, -40),
+            positionDottedPath: const Size(0, -3),
+            scaleIndexPath: .10,
+            scaledottedPath: .95,
             dottedPath: NumberSvgs.shapeNumber8Dotted,
             indexPath: NumberSvgs.shapeNumber8Index,
             letterPath: NumberSvgs.shapeNumber8,
@@ -452,7 +452,7 @@ class TypeExtensionTracking {
       case PhonicsLetters.f:
         return [
           _buildTraceModel(
-              letterViewSize: sizeOfLetter,
+              letterViewSize: const Size(300, 300),
               dottedPath: PTShapePaths.fLowerShapeDotted,
               indexPath: PTShapePaths.fLowerShapeIndex,
               scaleIndexPath: .4,
@@ -581,7 +581,7 @@ class TypeExtensionTracking {
               positionIndexPath: const Size(-46, -70),
               indexPath: ShapePaths.pShapeIndex,
               scaleIndexPath: .2,
-              scaledottedPath: .9,
+              scaledottedPath: .8,
               letterPath: ShapePaths.pShape,
               pointsJsonFile: ShapePointsManger.pShape,
           ),
@@ -631,10 +631,10 @@ class TypeExtensionTracking {
               dottedPath: ShapePaths.tshapeDotted,
               indexPath: ShapePaths.tshapeIndex,
               letterPath: ShapePaths.tShape,
-              scaledottedPath: .8,
-              scaleIndexPath: .33,
+              scaledottedPath: .9,
+              scaleIndexPath: .5,
               positionDottedPath: const Size(2, 10),
-              positionIndexPath: const Size(-30, -60),
+              positionIndexPath: const Size(-30, 0),
               pointsJsonFile: ShapePointsManger.tShape,),
         ];
       case PhonicsLetters.u:
@@ -690,8 +690,6 @@ class TypeExtensionTracking {
               pointsJsonFile: ShapePointsManger.zShape
               ),
         ];
-      default:
-      throw UnimplementedError('Letra não suportada: $currentLetter');
     }
   }
 
@@ -702,98 +700,37 @@ class TypeExtensionTracking {
         _detectTheCurrentEnumFromPhonics(letter: letter);
 
     switch (currentLetter) {
-      case PhonicsLetters.l:
+      case PhonicsLetters.a:
         return [
           _buildTraceModel(
               letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.lBigShapeDotted,
-              indexPath: PTShapePaths.lBigShapeIndex,
-              scaleIndexPath: .85,
+              dottedPath: PTShapePaths.aShapeBigDotted,
+              indexPath: PTShapePaths.aShapeBigShapeIndex,
+              scaleIndexPath: .3,
+              positionIndexPath: const Size(-50,70),
               scaledottedPath: .8,
-              positionIndexPath: const Size(-45, 0),
-              positionDottedPath: const Size(0, 10),
-              letterPath: PTShapePaths.lBigShape,
-              pointsJsonFile: ShapePointsManger.lUpperShape,
-          ),
-        ];
-      case PhonicsLetters.u:
-        return [
-          _buildTraceModel(
-              letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.uBigShapeDotted,
-              indexPath: PTShapePaths.uBigShapeIndex,
-              scaleIndexPath: .15,
-              scaledottedPath: .93,
-              positionIndexPath: const Size(-50, -70),
-              positionDottedPath: const Size(5, 0),
-              letterPath: PTShapePaths.uBigShape,
-              pointsJsonFile: ShapePointsManger.uUpperShape
+              letterPath: PTShapePaths.aShapeBigShape,
+              pointsJsonFile: ShapePointsManger.aUpperShape
               ),
         ];
-      case PhonicsLetters.j:
+      case PhonicsLetters.b:
         return [
           _buildTraceModel(
               letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.jBigShapeDotted,
-              indexPath: PTShapePaths.jBigShapeIndex,
-              scaleIndexPath: .28,
-              scaledottedPath: .93,
-              positionIndexPath: const Size(-22, -70),
-              positionDottedPath: const Size(0, 0),
-              letterPath: PTShapePaths.jBigShape,
-              pointsJsonFile: ShapePointsManger.jUpperShape),
-        ];
-
-      case PhonicsLetters.h:
-        return [
-          _buildTraceModel(
-              letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.hBigShapeDotted,
-              indexPath: PTShapePaths.hBigShapeIndex,
-              scaleIndexPath: .75,
-              scaledottedPath: .8,
-              positionIndexPath: const Size(0, -45),
-              positionDottedPath: const Size(0, 10),
-              letterPath: PTShapePaths.hBigShape,
-              pointsJsonFile: ShapePointsManger.hUpperShape
-              ),
-        ];
-
-      case PhonicsLetters.o:
-        return [
-          _getPhonicsLower(
-                  letter: 'o', sizeOfLetter: const Size(200, 200))
-              .first,
-        ];
-
-      case PhonicsLetters.g:
-        return [
-          _buildTraceModel(
-              letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.gShapeBigShapeDotted,
-              indexPath: PTShapePaths.gShapeBigShapeIndex,
-              scaleIndexPath: .4,
-              positionIndexPath: const Size(40, -30),
+              dottedPath: PTShapePaths.bShapeBigShapeDotted,
+              indexPath: PTShapePaths.bShapeBigShapeIndex,
+              scaleIndexPath: .25,
+              positionIndexPath: const Size(-30, -80),
               scaledottedPath: .85,
-              letterPath: PTShapePaths.gShapeBigShape,
-              pointsJsonFile: ShapePointsManger.gUpperShape
+              letterPath: PTShapePaths.bShapeBigShape,
+              pointsJsonFile: ShapePointsManger.bUpperShape
               ),
         ];
-
-      case PhonicsLetters.f:
+      case PhonicsLetters.c:
         return [
-          _buildTraceModel(
-              letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.fShapeBigShapeDotted,
-              indexPath: PTShapePaths.fShapeBigShapeIndex,
-              scaleIndexPath: .5,
-              positionIndexPath: const Size(-45, -40),
-              scaledottedPath: .85,
-              letterPath: PTShapePaths.fShapeBigShape,
-              pointsJsonFile: ShapePointsManger.fUpperShape,),
+          _getPhonicsLower(letter: 'c').first,
         ];
-
-      case PhonicsLetters.d:
+            case PhonicsLetters.d:
         return [
           _buildTraceModel(
               letterViewSize: sizeOfLetter,
@@ -819,52 +756,84 @@ class TypeExtensionTracking {
               pointsJsonFile: ShapePointsManger.eUpperShape
               ),
         ];
-      case PhonicsLetters.n:
+          case PhonicsLetters.f:
         return [
           _buildTraceModel(
               letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.nBigShapeDotted,
-              indexPath: PTShapePaths.nBigShapeIndex,
-              scaleIndexPath: .94,
-              positionIndexPath: const Size(0, 0),
-              scaledottedPath: .87,
-              letterPath: PTShapePaths.nBigShape,
-              pointsJsonFile: ShapePointsManger.nUpperShape
-              ),
-        ];
-      case PhonicsLetters.b:
-        return [
-          _buildTraceModel(
-              letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.bShapeBigShapeDotted,
-              indexPath: PTShapePaths.bShapeBigShapeIndex,
-              scaleIndexPath: .25,
-              positionIndexPath: const Size(-30, -80),
+              dottedPath: PTShapePaths.fShapeBigShapeDotted,
+              indexPath: PTShapePaths.fShapeBigShapeIndex,
+              scaleIndexPath: .5,
+              positionIndexPath: const Size(-45, -40),
               scaledottedPath: .85,
-              letterPath: PTShapePaths.bShapeBigShape,
-              pointsJsonFile: ShapePointsManger.bUpperShape
-              ),
+              letterPath: PTShapePaths.fShapeBigShape,
+              pointsJsonFile: ShapePointsManger.fUpperShape,),
         ];
-
-      case PhonicsLetters.s:
-        // s phone
-        return [
-          _getPhonicsLower(
-                  letter: 's', sizeOfLetter: const Size(200, 200))
-              .first,
-        ];
-      case PhonicsLetters.a:
+      case PhonicsLetters.g:
         return [
           _buildTraceModel(
               letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.aShapeBigDotted,
-              indexPath: PTShapePaths.aShapeBigShapeIndex,
-              scaleIndexPath: .3,
-              positionIndexPath: const Size(-50,70),
-              scaledottedPath: .8,
-              letterPath: PTShapePaths.aShapeBigShape,
-              pointsJsonFile: ShapePointsManger.aUpperShape
+              dottedPath: PTShapePaths.gShapeBigShapeDotted,
+              indexPath: PTShapePaths.gShapeBigShapeIndex,
+              scaleIndexPath: .4,
+              positionIndexPath: const Size(40, -30),
+              scaledottedPath: .85,
+              letterPath: PTShapePaths.gShapeBigShape,
+              pointsJsonFile: ShapePointsManger.gUpperShape
               ),
+        ];
+      case PhonicsLetters.h:
+        return [
+          _buildTraceModel(
+              letterViewSize: sizeOfLetter,
+              dottedPath: PTShapePaths.hBigShapeDotted,
+              indexPath: PTShapePaths.hBigShapeIndex,
+              scaleIndexPath: .75,
+              scaledottedPath: .8,
+              positionIndexPath: const Size(0, -45),
+              positionDottedPath: const Size(0, 10),
+              letterPath: PTShapePaths.hBigShape,
+              pointsJsonFile: ShapePointsManger.hUpperShape
+              ),
+        ];
+      case PhonicsLetters.i:
+        return [
+          _buildTraceModel(
+              letterViewSize: sizeOfLetter,
+              dottedPath: PTShapePaths.iShapeBigShapeDotted,
+              positionDottedPath: const Size(10, 0),
+              positionIndexPath: const Size(-22, 0),
+              indexPath: PTShapePaths.iShapeBigShapeIndex,
+              scaleIndexPath: .95,
+              scaledottedPath: .9,
+              letterPath: PTShapePaths.iShapeBigShape,
+              pointsJsonFile: ShapePointsManger.iUpperShape),
+        ];
+      case PhonicsLetters.j:
+        return [
+          _buildTraceModel(
+              letterViewSize: sizeOfLetter,
+              dottedPath: PTShapePaths.jBigShapeDotted,
+              indexPath: PTShapePaths.jBigShapeIndex,
+              scaleIndexPath: .28,
+              scaledottedPath: .93,
+              positionIndexPath: const Size(-22, -70),
+              positionDottedPath: const Size(0, 0),
+              letterPath: PTShapePaths.jBigShape,
+              pointsJsonFile: ShapePointsManger.jUpperShape),
+        ];
+      case PhonicsLetters.l:
+        return [
+          _buildTraceModel(
+              letterViewSize: sizeOfLetter,
+              dottedPath: PTShapePaths.lBigShapeDotted,
+              indexPath: PTShapePaths.lBigShapeIndex,
+              scaleIndexPath: .85,
+              scaledottedPath: .8,
+              positionIndexPath: const Size(-45, 0),
+              positionDottedPath: const Size(0, 10),
+              letterPath: PTShapePaths.lBigShape,
+              pointsJsonFile: ShapePointsManger.lUpperShape,
+          ),
         ];
       case PhonicsLetters.m:
         return [
@@ -880,6 +849,39 @@ class TypeExtensionTracking {
               pointsJsonFile: ShapePointsManger.mUpperShape
               ),
         ];
+      case PhonicsLetters.n:
+        return [
+          _buildTraceModel(
+              letterViewSize: sizeOfLetter,
+              dottedPath: PTShapePaths.nBigShapeDotted,
+              indexPath: PTShapePaths.nBigShapeIndex,
+              scaleIndexPath: .94,
+              positionIndexPath: const Size(0, 0),
+              scaledottedPath: .87,
+              letterPath: PTShapePaths.nBigShape,
+              pointsJsonFile: ShapePointsManger.nUpperShape
+              ),
+        ];
+            case PhonicsLetters.o:
+        return [
+          _getPhonicsLower(
+                  letter: 'o', sizeOfLetter: const Size(200, 200))
+              .first,
+        ];
+      case PhonicsLetters.p:
+        return [
+          _buildTraceModel(
+              letterViewSize: sizeOfLetter,
+              dottedPath: PTShapePaths.pBigShapeDotted,
+              positionDottedPath: const Size(-5, 5),
+              positionIndexPath: const Size(-40, -80),
+              indexPath: PTShapePaths.pBigShapeIndex,
+              scaleIndexPath: .25,
+              scaledottedPath: .92,
+              letterPath: PTShapePaths.pBigShape,
+              pointsJsonFile: ShapePointsManger.pUpperShape
+              ),
+        ];
       case PhonicsLetters.q:
         return [
           _buildTraceModel(
@@ -891,6 +893,53 @@ class TypeExtensionTracking {
               scaledottedPath: .9,
               letterPath: PTShapePaths.qBigShapes,
               pointsJsonFile: ShapePointsManger.qUpperShape
+              ),
+        ];
+      case PhonicsLetters.r:
+        return [
+          _buildTraceModel(
+              letterViewSize: sizeOfLetter,
+              dottedPath: PTShapePaths.rShapeBigShapeDotted,
+              indexPath: PTShapePaths.rShapeBigShapeIndex,
+              scaleIndexPath: .5,
+              positionIndexPath: const Size(-20, -40),
+              scaledottedPath: .9,
+              letterPath: PTShapePaths.rShapeBigShape,
+              pointsJsonFile: ShapePointsManger.rUpperShape),
+        ];
+      case PhonicsLetters.s:
+        // s phone
+        return [
+          _getPhonicsLower(
+                  letter: 's', sizeOfLetter: const Size(200, 200))
+              .first,
+        ];
+      case PhonicsLetters.t:
+        return [
+          _buildTraceModel(
+              letterViewSize: sizeOfLetter,
+              dottedPath: PTShapePaths.tShapeBigShapeDotted,
+              indexPath: PTShapePaths.tShapeBigShapeIndex,
+              letterPath: PTShapePaths.tShapeBigShape,
+              scaledottedPath: .8,
+              scaleIndexPath: .35,
+              positionDottedPath: const Size(5, 0),
+              positionIndexPath: const Size(-30, -70),
+              pointsJsonFile: ShapePointsManger.tUpperShape
+              ),
+        ];
+            case PhonicsLetters.u:
+        return [
+          _buildTraceModel(
+              letterViewSize: sizeOfLetter,
+              dottedPath: PTShapePaths.uBigShapeDotted,
+              indexPath: PTShapePaths.uBigShapeIndex,
+              scaleIndexPath: .15,
+              scaledottedPath: .93,
+              positionIndexPath: const Size(-50, -70),
+              positionDottedPath: const Size(5, 0),
+              letterPath: PTShapePaths.uBigShape,
+              pointsJsonFile: ShapePointsManger.uUpperShape
               ),
         ];
       case PhonicsLetters.v:
@@ -911,65 +960,6 @@ class TypeExtensionTracking {
                   letter: 'z', sizeOfLetter: const Size(200, 200))
               .first,
         ];
-      case PhonicsLetters.t:
-        return [
-          _buildTraceModel(
-              letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.tShapeBigShapeDotted,
-              indexPath: PTShapePaths.tShapeBigShapeIndex,
-              letterPath: PTShapePaths.tShapeBigShape,
-              scaledottedPath: .8,
-              scaleIndexPath: .35,
-              positionDottedPath: const Size(5, -5),
-              positionIndexPath: const Size(-30, -70),
-              pointsJsonFile: ShapePointsManger.tUpperShape
-              ),
-        ];
-      case PhonicsLetters.c:
-        return [
-          _getPhonicsLower(letter: 'c').first,
-        ];
-      case PhonicsLetters.r:
-        return [
-          _buildTraceModel(
-              letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.rShapeBigShapeDotted,
-              indexPath: PTShapePaths.rShapeBigShapeIndex,
-              scaleIndexPath: .5,
-              positionIndexPath: const Size(-20, -40),
-              scaledottedPath: .9,
-              letterPath: PTShapePaths.rShapeBigShape,
-              pointsJsonFile: ShapePointsManger.rUpperShape),
-        ];
-      case PhonicsLetters.i:
-        return [
-          _buildTraceModel(
-              letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.iShapeBigShapeDotted,
-              positionDottedPath: const Size(10, 0),
-              positionIndexPath: const Size(-22, 0),
-              indexPath: PTShapePaths.iShapeBigShapeIndex,
-              scaleIndexPath: .95,
-              scaledottedPath: .9,
-              letterPath: PTShapePaths.iShapeBigShape,
-              pointsJsonFile: ShapePointsManger.iUpperShape),
-        ];
-      case PhonicsLetters.p:
-        return [
-          _buildTraceModel(
-              letterViewSize: sizeOfLetter,
-              dottedPath: PTShapePaths.pBigShapeDotted,
-              positionDottedPath: const Size(-5, 5),
-              positionIndexPath: const Size(-40, -80),
-              indexPath: PTShapePaths.pBigShapeIndex,
-              scaleIndexPath: .25,
-              scaledottedPath: .92,
-              letterPath: PTShapePaths.pBigShape,
-              pointsJsonFile: ShapePointsManger.pUpperShape
-              ),
-        ];
-      default:
-      throw UnimplementedError('Letra não suportada: $currentLetter');
     }
   }
 }
