@@ -1,59 +1,142 @@
 
-# Jogo Educativo em Flutter
 
-Esta é uma aplicação de jogos sérios em Flutter para a consolidação da alfabetização infantil, desenvolvida com o objetivo de oferecer jogos educativos para crianças. A app inclui diferentes tipos de jogos focados no desenvolvimento da leitura, escrita e identificação de palavras e sílabas.
-
-
-## 🧩 Funcionalidades
-
-- **Assets**  - Dentro da pasta "assets" - (todos os recursos da app)
-- **Contar Sílabas** - Dentro da pasta "lib" - (`count_syllables`)
-- **Identificar Letras e Números** - Dentro da pasta "lib" - (`identify_letters_numbers`)
-- **Identificar Palavras** - Dentro da pasta "lib" - (`identify_words`)
-- **Ouvir e Observar** - Dentro da pasta "lib" - (`listen_look`)
-- **Sílabas em Falta** - Dentro da pasta "lib" - (`lost_syllable`)
-- **Jogo de Escrita** - Dentro da pasta "lib" - (`writing_game`)
+<p align="center">
+  <img src="assets\images\PD_icon.png" alt="PD" width="96"/><br>
+  <h1 align="center">Palavras Divertidas</h1>
+</p>
+<br>
 
 
-## 🚀 Como Correr o Projeto
+## 📝 Descrição Geral
 
-1. **Instalar as dependências**:
-   ```bash
-   flutter pub get
-   ```
-
-2. **Executar em modo debug**:
-   - Emulador Android (via Android Studio ou outro):
-     ```bash
-     flutter run
-     ```
-   - No navegador (Web):
-     ```bash
-     flutter run -d chrome
-     ```
-
-3. **Correr testes** (caso existam):
-   ```bash
-   flutter test
-   ```
-
-## 📦 Dependências
-
-As dependências estão listadas no ficheiro `pubspec.yaml`. Certifica-te que tens todas as ferramentas do Flutter atualizadas:
-
-```bash
-flutter upgrade
-flutter doctor
-```
-
-## 📌 Notas
-
-- Esta aplicação suporta Android e Web.
-- Pastas como `coverage` e `reports` indicam a preocupação com testes e relatórios de cobertura.
-- Inclui ficheiros de configuração como `analysis_options.yaml` para garantir boas práticas de código.
+O Palavras Divertidas é uma aplicação multiplataforma desenvolvida em Flutter, focada na consolidação da alfabetização de crianças dos 5 aos 8 anos. Recorre a jogos sérios e elementos de gamificação para tornar o processo de aprendizagem da leitura e escrita em português europeu mais divertido, seguro e adaptado ao ritmo de cada criança.
 
 ---
 
-## 📄 Licença
+## 🎯 Objetivos do Projeto
+
+- Promover a aprendizagem da leitura, escrita e consciência fonológica através de jogos interativos.
+- Adaptar os desafios e conteúdos ao nível de escolaridade e desempenho individual de cada criança.
+- Garantir uma experiência segura, sem necessidade de ligação à Internet.
+- Oferecer feedback imediato e recompensas para motivar a progressão no processo de alfabetização.
+
+---
+
+## 🛠️ Funcionalidades
+
+- Seis jogos educativos, cada um com diferentes objetivos pedagógicos.
+- Níveis de dificuldade progressivos e adaptáveis.
+- Feedback visual e sonoro imediato.
+- Sistema de conquistas para recompensar o progresso.
+- Funcionamento totalmente offline.
+- Interface simples, colorida e acessível a crianças pequenas.
+
+---
+
+## 🏗️ Arquitetura da Aplicação
+
+A aplicação segue uma arquitetura modular e organizada, separando a lógica dos jogos, gestão de dados, temas e componentes visuais:
+
+```
+lib/
+├── games/        # Lógica e widgets dos jogos
+├── models/       # Modelos de dados (utilizador, progresso, conquistas, etc.)
+├── screens/      # Ecrãs principais, menus e fluxos de navegação
+├── services/     # Serviços de acesso a dados, gestão de lógica central, APIs locais
+├── themes/       # Definições de cores, fontes e temas visuais
+├── widgets/      # Componentes de UI reutilizáveis
+└── main.dart     # Ponto de entrada da aplicação
+```
+
+---
+
+## 🎮 Jogos Disponíveis
+
+- **Identificação de Letras/Números** – Reconhecer letras e números apresentados de diferentes formas.
+- **Escrever** – Traçar corretamente letras e números, seguindo indicações visuais.
+- **Contar Sílabas** – Contar e identificar o número de sílabas em palavras.
+- **Encontrar Imagens** – Associar sons/áudios a imagens corretas.
+- **Ouvir e Encontrar Palavras** – Escolher a palavra certa após ouvir o áudio correspondente.
+- **Sílabas Perdidas** – Completar palavras com a sílaba correta.
+
+Cada jogo foi desenvolvido em conformidade com as orientações curriculares do pré-escolar e do 1.º ciclo em Portugal.
+
+---
+
+## 🏅 Elementos de Gamificação
+
+- Níveis de dificuldade progressiva
+- Feedback imediato (visual e sonoro)
+- Sistema de recompensas e caderneta de conquistas
+- Temporizador e desafios com tempo limitado
+- Adaptação personalizada do conteúdo e dos jogos
+
+---
+
+## 💻 Tecnologias Utilizadas
+
+- **Flutter (Dart):** Framework principal para desenvolvimento multiplataforma.
+- **Hive:** Base de dados local e rápida, sem necessidade de Internet.
+- **Google Fonts:** Fontes pedagógicas adaptadas a cada nível de escolaridade.
+- **Trello:** Gestão ágil das tarefas do projeto.
+- **GitHub:** Controlo de versões.
+
+---
+
+## 🚀 Instalação e Execução
+
+* **Clonar o repositório:**
+  ```bash
+  git clone https://github.com/teu-username/palavras-divertidas.git
+  ```
+* **Aceder à pasta do projeto:**
+  ```bash
+  cd palavras-divertidas
+  ```
+* **Instalar dependências:**
+  ```bash
+  flutter pub get
+  ```
+* **Executar a aplicação:**
+  ```bash
+  flutter run
+  ```
+
+---
+
+## 👥 Colaboradores
+
+- Alexandre Gomes da Silva Soares – [2101521]
+- Ana Luísa Garcia Nobre Duarte Guerreiro – [2103229]
+- Tiago Filipe Borges Bento – [2000719]
+
+### 🎓 Orientação científica
+
+* Professor Doutor Ricardo José Vieira Baptista (ISEC Lisboa)
+
+### 🧩 Consultoria externa
+
+- Mara Teixeira (Educadora de Infância)
+- Elisabete Lopes (Professora 1.º ciclo)
+- Irina Afonso (Terapeuta da Fala)
+
+---
+
+## 📜 Licença
+
+Este projeto é distribuído para fins académicos e de demonstração. Para mais informações, consultar o relatório técnico do projeto ou contactar os autores.
+
+---
+
+## 📝 Citação
+
+Se pretende referenciar este projeto em contexto académico, utilize:
+
+> Soares, A.G.S., Guerreiro, A.L.G.N.D., & Bento, T.F.B. (2025). *Palavras Divertidas: Aplicação de Jogos Sérios para a Consolidação da Alfabetização Infantil* (Projeto de Engenharia Informática,Universidade Aberta).
+
+---
 
 
+<p align="center">
+  <strong>🎉 <span style="font-size:1.5em">Palavras Divertidas – Porque aprender pode ser divertido!</span> 🎉</strong>
+</p>
