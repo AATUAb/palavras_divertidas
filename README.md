@@ -1,7 +1,7 @@
 
 # Jogo Educativo em Flutter
 
-Esta é uma aplicação Flutter desenvolvida com o objetivo de oferecer jogos educativos para crianças. A app inclui diferentes tipos de jogos focados no desenvolvimento da leitura, escrita e identificação de palavras e sílabas.
+Esta é uma aplicação de jogos sérios em Flutter para a consolidação da alfabetização infantil, desenvolvida com o objetivo de oferecer jogos educativos para crianças. A app inclui diferentes tipos de jogos focados no desenvolvimento da leitura, escrita e identificação de palavras e sílabas.
 
 
 ## 🧩 Funcionalidades
