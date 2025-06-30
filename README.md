@@ -15,7 +15,7 @@ O Palavras Divertidas é uma aplicação multiplataforma desenvolvida em Flutter
 
 ## 🎯 Objetivos do Projeto
 
-- Promover a aprendizagem da leitura, escrita e consciência fonológica através de jogos interativos.
+- Promover a consolidação da leitura, escrita e consciência fonológica através de jogos interativos.
 - Adaptar os desafios e conteúdos ao nível de escolaridade e desempenho individual de cada criança.
 - Garantir uma experiência segura, sem necessidade de ligação à Internet.
 - Oferecer feedback imediato e recompensas para motivar a progressão no processo de alfabetização.
@@ -112,7 +112,7 @@ Cada jogo foi desenvolvido em conformidade com as orientações curriculares do 
 
 ### 🎓 Orientação científica
 
-* Professor Doutor Ricardo José Vieira Baptista (ISEC Lisboa)
+* Professor Doutor Ricardo José Vieira Baptista
 
 ### 🧩 Consultoria externa
 
@@ -124,19 +124,7 @@ Cada jogo foi desenvolvido em conformidade com as orientações curriculares do 
 
 ## 📜 Licença
 
-Este projeto é distribuído para fins académicos e de demonstração. Para mais informações, consultar o relatório técnico do projeto ou contactar os autores.
-
----
-
-## 📝 Citação
-
-Se pretende referenciar este projeto em contexto académico, utilize:
-
-> Soares, A.G.S., Guerreiro, A.L.G.N.D., & Bento, T.F.B. (2025). *Palavras Divertidas: Aplicação de Jogos Sérios para a Consolidação da Alfabetização Infantil* (Projeto de Engenharia Informática,Universidade Aberta).
-
----
+Este projeto é distribuído para fins académicos e de demonstração. Para mais informações, consultar os autores.
 
 
-<p align="center">
-  <strong>🎉 <span style="font-size:1.5em">Palavras Divertidas – Porque aprender pode ser divertido!</span> 🎉</strong>
-</p>
+
