@@ -17,9 +17,6 @@ class UserModel extends HiveObject {
   @HiveField(3)
   Map<int, double> accuracyByLevel;
 
- /* @HiveField(4)
-  double? overallAccuracy;*/
-
   @HiveField(5)
   int gameLevel;
 
@@ -89,19 +86,6 @@ class UserModel extends HiveObject {
   }) : knownLetters = knownLetters ?? [],
        totalCorrectPerGame = Map.from(totalCorrectPerGame ?? {}),
        totalAttemptsPerGame = Map.from(totalAttemptsPerGame ?? {});
-
-  /*void updateAccuracy({required int level, required double accuracy}) {
-    accuracyByLevel = {...accuracyByLevel, level: accuracy};
-    if (accuracyByLevel.isNotEmpty) {
-      //overallAccuracy =
-      accuracyByLevel=
-          accuracyByLevel.values.reduce((a, b) => a + b) /
-          accuracyByLevel.length;
-    } else {
-      //overallAccuracy = null;
-      accuracyByLevel = null;
-    }
-  }*/
 
   void updateGameAccuracy({
     required String gameId,
@@ -179,7 +163,7 @@ class UserModel extends HiveObject {
     Map<String, int>? totalAttemptsPerGame,
     int? lastSeenConquests,
     String? lastLettersHash,
-    Map<String, double>? gamesAverageTime, 
+    Map<String, double>? gamesAverageTime,
   }) {
     return UserModel(
       name: name ?? this.name,
