@@ -1,5 +1,6 @@
 
 
+
 <p align="center">
   <img src="assets\images\PD_icon.png" alt="PD" width="96"/><br>
   <h1 align="center">Palavras Divertidas</h1>
@@ -124,8 +125,4 @@ Cada jogo foi desenvolvido em conformidade com as orientações curriculares do 
 
 ## 📜 Licença
 
-Este projeto é distribuído para fins académicos e de demonstração. Para mais informações, consultar os autores.
-
-
-
-"Teste contribui�ao Ana" 
+Este projeto é distribuído para fins académicos e de demonstração. Para mais informações, consultar os autores do projeto.
